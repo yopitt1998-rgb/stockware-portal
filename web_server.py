@@ -114,19 +114,9 @@ def registrar_bulk():
         return jsonify({"exito": False, "mensaje": str(e)})
 
 def start_server():
-    # Detectar IP local
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    try:
-        s.connect(('8.8.8.8', 1))
-        IP = s.getsockname()[0]
-    except:
-        IP = '127.0.0.1'
-    finally:
-        s.close()
-    
-    # Iniciar Flask en hilo separado
-    port = 5000
-    print(f"🌐 Portal Web iniciado en http://{IP}:{port}")
+    # Detectar puerto (Render asigna uno dinámicamente)
+    port = int(os.environ.get("PORT", 5000))
+    print(f"🚀 Portal Web iniciado en puerto: {port}")
     app.run(host='0.0.0.0', port=port)
 
 if __name__ == "__main__":
