@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockWare - Reporte de Campo</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --bg: #f4f7f6;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg);
+            margin: 0;
+            padding: 10px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .section-title {
+            background: #f8f9fa;
+            padding: 10px;
+            border-left: 5px solid var(--accent);
+            font-weight: bold;
+            margin: 20px 0 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+
+        select,
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        .material-list {
+            margin-top: 10px;
+        }
+
+        .material-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            transition: all 0.2s;
+        }
+
+        .material-item.disabled {
+            opacity: 0.3;
+            background: #fafafa;
+            filter: grayscale(1);
+            pointer-events: none;
+        }
+
+        .material-info {
+            flex: 1;
+            padding-right: 15px;
+        }
+
+        .material-name {
+            font-weight: bold;
+            font-size: 14px;
+            display: block;
+        }
+
+        .material-sku {
+            font-size: 11px;
+            color: #777;
+        }
+
+        .material-qty {
+            width: 80px !important;
+            text-align: center;
+            border-color: #bbb;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 30px;
+            box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .hint {
+            font-size: 11px;
+            color: #666;
+            font-weight: normal;
+            margin-top: 3px;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="logo">🚀 StockWare</div>
+    <div class="container">
+        <h1>Reporte de Consumo</h1>
+
+        <div class="alert {% if db_status == 'OK' %}alert-success{% else %}alert-error{% endif %}"
+            style="display: block; margin-bottom: 20px;">
+            <b>ESTADO:</b> {{ db_status }}<br>
+            <b>DATOS:</b> {{ count_m }} Móviles, {{ count_p }} Productos<br>
+            <small><b>Motor:</b> {{ db_engine }}</small>
+            {% if error_detail %}
+            <br><small><b>Error:</b> {{ error_detail }}</small>
+            {% endif %}
+        </div>
+
+        <div id="alert" class="alert"></div>
+
+        <form id="consumoForm">
+            <div class="section-title">Datos de la Operación</div>
+            <div class="form-group">
+                <label>Fecha:</label>
+                <input type="date" name="fecha" value="{{ hoy }}" required>
+            </div>
+            <div class="form-group">
+                <label>N° Colilla: <span class="hint">(Debe empezar con PAA)</span></label>
+                <input type="text" name="colilla" id="colilla" placeholder="Ej: PAA123" required>
+            </div>
+            <div class="form-group">
+                <label>N° Contrato: <span class="hint">(Debe empezar con P-)</span></label>
+                <input type="text" name="contrato" id="contrato" placeholder="Ej: P-456" required>
+            </div>
+            <div class="form-group">
+                <label>Móvil / Vehículo:</label>
+                <select name="movil" id="movil_select" required>
+                    <option value="">--- Seleccionar ---</option>
+                    {% for movil in moviles %}
+                    <option value="{{ movil }}">{{ movil }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Técnico (Conductor):</label>
+                <input type="text" name="tecnico" id="tecnico" required>
+            </div>
+            <div class="form-group">
+                <label>Ayudante:</label>
+                <input type="text" name="ayudante" id="ayudante">
+            </div>
+
+            <div class="section-title">Materiales Instalados</div>
+            <div class="material-list">
+                {% for p in productos %}
+                <div class="material-item" id="row_{{ p[1] }}">
+                    <div class="material-info">
+                        <span class="material-name">{{ p[0] }}</span>
+                        <span class="material-sku">SKU: {{ p[1] }}</span>
+                    </div>
+                    <input type="number" name="qty_{{ p[1] }}" id="input_{{ p[1] }}" class="material-qty sku-input"
+                        data-sku="{{ p[1] }}" min="0" placeholder="0">
+                </div>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="submit-btn" id="submit_btn">Enviar Reporte Final 📤</button>
+        </form>
+
+        <div
+            style="margin-top: 40px; padding: 10px; border-top: 1px solid #ddd; font-size: 11px; color: #999; text-align: center;">
+            STOCKWARE CLOUD | {{ db_engine }} | MÓVILES: {{ count_m }} | PRODUCTOS: {{ count_p }}
+        </div>
+    </div>
+
+    <script>
+        const DETAILS_MOVILES = {{ details_moviles | safe }};
+        const ONT_GROUP_A = ['U4-4-633', '4-4-644'];
+        const ONT_GROUP_B = ['4-4-654', '4-4-656'];
+        const ALL_ONTS = [...ONT_GROUP_A, ...ONT_GROUP_B];
+        const EXTENDER_A = '4-4-646';
+        const EXTENDER_B = '4-4-647';
+
+        // Auto-completado
+        document.getElementById('movil_select').onchange = function () {
+            const d = DETAILS_MOVILES[this.value];
+            if (d) {
+                document.getElementById('tecnico').value = d.conductor;
+                document.getElementById('ayudante').value = d.ayudante;
+            }
+        };
+
+        // Lógica de Exclusión Mutual (CORREGIDA SEGÚN USUARIO)
+        const inputs = document.querySelectorAll('.sku-input');
+        inputs.forEach(inp => {
+            inp.oninput = function () {
+                const sku = this.dataset.sku;
+                const qty = parseInt(this.value) || 0;
+
+                if (ALL_ONTS.includes(sku) && qty > 0) {
+                    // 1. Bloquear otras ONTs de cualquier grupo
+                    ALL_ONTS.forEach(o => { if (o !== sku) setDisabled('input_' + o, true); });
+
+                    // 2. Bloquear Extensor específico
+                    if (ONT_GROUP_A.includes(sku)) {
+                        setDisabled('input_' + EXTENDER_A, true);
+                    } else if (ONT_GROUP_B.includes(sku)) {
+                        setDisabled('input_' + EXTENDER_B, true);
+                    }
+                } else if ((sku === EXTENDER_A || sku === EXTENDER_B) && qty > 0) {
+                    // 3. Bloquear ONTs si se elige un Extensor
+                    if (sku === EXTENDER_A) {
+                        ONT_GROUP_A.forEach(o => setDisabled('input_' + o, true));
+                    } else {
+                        ONT_GROUP_B.forEach(o => setDisabled('input_' + o, true));
+                    }
+                } else {
+                    // Verificar si debe desbloquearse algo
+                    checkAllLocks();
+                }
+            };
+        });
+
+        function setDisabled(id, state) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.disabled = state;
+                const row = document.getElementById('row_' + el.dataset.sku);
+                if (row) row.classList.toggle('disabled', state);
+            }
+        }
+
+        function checkAllLocks() {
+            // Verificar estado actual de todos los inputs clave
+            const val = (id) => (parseInt(document.getElementById('input_' + id)?.value) || 0);
+
+            const selectedONT = ALL_ONTS.find(o => val(o) > 0);
+            const selectedExtA = val(EXTENDER_A) > 0;
+            const selectedExtB = val(EXTENDER_B) > 0;
+
+            // Primero habilitar todo como base
+            [...ALL_ONTS, EXTENDER_A, EXTENDER_B].forEach(sku => setDisabled('input_' + sku, false));
+
+            if (selectedONT) {
+                // Bloquear otras ONTs
+                ALL_ONTS.forEach(o => { if (o !== selectedONT) setDisabled('input_' + o, true); });
+                // Bloquear extensor correspondiente
+                if (ONT_GROUP_A.includes(selectedONT)) setDisabled('input_' + EXTENDER_A, true);
+                if (ONT_GROUP_B.includes(selectedONT)) setDisabled('input_' + EXTENDER_B, true);
+            }
+
+            if (selectedExtA) {
+                // Bloquear grupo A de ONTs
+                ONT_GROUP_A.forEach(o => setDisabled('input_' + o, true));
+            }
+
+            if (selectedExtB) {
+                // Bloquear grupo B de ONTs
+                ONT_GROUP_B.forEach(o => setDisabled('input_' + o, true));
+            }
+        }
+
+        document.getElementById('consumoForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const alert = document.getElementById('alert');
+            const submitBtn = document.getElementById('submit_btn');
+
+            const colilla = document.getElementById('colilla').value.toUpperCase().trim();
+            const contrato = document.getElementById('contrato').value.toUpperCase().trim();
+
+            if (!colilla.startsWith('PAA')) { alert.style.display = 'block'; alert.className = 'alert alert-error'; alert.innerText = '❌ Colilla debe iniciar con PAA'; return; }
+            if (!contrato.startsWith('P-')) { alert.style.display = 'block'; alert.className = 'alert alert-error'; alert.innerText = '❌ Contrato debe iniciar con P-'; return; }
+
+            const materiales = [];
+            document.querySelectorAll('.sku-input').forEach(i => {
+                const v = parseInt(i.value);
+                if (v > 0) materiales.push({ sku: i.dataset.sku, cantidad: v });
+            });
+
+            if (materiales.length === 0) { alert.style.display = 'block'; alert.className = 'alert alert-error'; alert.innerText = '❌ Ingrese al menos un material.'; return; }
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Enviando...';
+
+            const fd = new FormData(e.target);
+            const payload = {
+                fecha: fd.get('fecha'),
+                colilla: colilla,
+                contrato: contrato,
+                tecnico: fd.get('tecnico'),
+                ayudante: fd.get('ayudante'),
+                movil: fd.get('movil'),
+                materiales: materiales
+            };
+
+            try {
+                const res = await fetch('/registrar_bulk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                alert.style.display = 'block';
+                if (data.exito) {
+                    alert.className = 'alert alert-success'; alert.innerText = '✅ Reporte enviado'; e.target.reset();
+                    document.querySelectorAll('.material-item').forEach(r => r.classList.remove('disabled'));
+                    document.querySelectorAll('input').forEach(i => i.disabled = false);
+                } else {
+                    alert.className = 'alert alert-error'; alert.innerText = '❌ Error: ' + data.mensaje;
+                }
+            } catch { alert.style.display = 'block'; alert.className = 'alert alert-error'; alert.innerText = '❌ Error de red'; }
+            finally { submitBtn.disabled = false; submitBtn.innerText = 'Enviar Reporte Final 📤'; window.scrollTo(0, 0); }
+        };
+    </script>
+</body>
+
+</html>

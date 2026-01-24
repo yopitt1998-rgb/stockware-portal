@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+ENV/
+
+# Database & Environment
+.env
+inventario_sqlite.db
+*.db
+backup_*.db
+
+# Desktop/Build leftovers
+build/
+dist/
+*.spec
+*.ico
+backup_log.txt
+debug_reconciliation.py
+extract_headers.py
+refactor_db.py
+verify_*.py
+check_cloud.py
+cuadre_contable_*.csv
+test_vale.pdf
+
+# OS
+.DS_Store
+Thumbs.db

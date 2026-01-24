@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: stockware-portal
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn wsgi_app:application
+    envVars:
+      - key: DB_TYPE
+        value: MYSQL
+      - key: MYSQL_HOST
+        fromContext: parameter
+      - key: MYSQL_USER
+        fromContext: parameter
+      - key: MYSQL_PASSWORD
+        fromContext: parameter
+      - key: MYSQL_DATABASE
+        fromContext: parameter
+      - key: MYSQL_PORT
+        value: "4000"
