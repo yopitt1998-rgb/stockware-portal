@@ -10,7 +10,7 @@ from datetime import date
 import threading
 import json
 
-app = Flask(__name__, template_folder='.')
+app = Flask(__name__) # Regresamos al estándar (busca en carpeta 'templates')
 
 @app.route('/')
 def index():
@@ -39,16 +39,21 @@ def index():
         productos = []
         details_moviles = {}
 
-    return render_template('index.html', 
-                             hoy=date.today().isoformat(), 
-                             moviles=moviles, 
-                             productos=productos,
-                             details_moviles=json.dumps(details_moviles),
-                             db_status=status,
-                             db_engine=engine,
-                             error_detail=error_detail,
-                             count_m=count_m,
-                             count_p=count_p)
+    try:
+        # Intentar renderizar la plantilla normal
+        return render_template('index.html', 
+                                 hoy=date.today().isoformat(), 
+                                 moviles=moviles, 
+                                 productos=productos,
+                                 details_moviles=json.dumps(details_moviles),
+                                 db_status=status,
+                                 db_engine=engine,
+                                 error_detail=error_detail,
+                                 count_m=count_m,
+                                 count_p=count_p)
+    except Exception as template_err:
+        # Fallback si falla la plantilla (por si no encuentran el archivo index.html)
+        return f"<h1>⚠️ Error de Servidor</h1><p>No se pudo cargar el diseño (index.html). Verifica que el archivo esté dentro de una carpeta llamada 'templates' en GitHub.</p><p>Detalle: {str(template_err)}</p>"
 
 @app.route('/debug')
 def debug():
