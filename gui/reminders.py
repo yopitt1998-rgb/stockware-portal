@@ -1,4 +1,6 @@
 import tkinter as tk
+import threading
+
 from tkinter import ttk
 from datetime import date, timedelta
 from database import (
@@ -111,11 +113,24 @@ class RemindersTab(tk.Frame):
             mostrar_mensaje_emergente(self.master, "Error", "No se pudieron eliminar los recordatorios completados.", "error")
 
     def load_reminders(self):
-        """Cargar recordatorios para la fecha actual desde la base de datos"""
+        """Carga recordatorios para la fecha actual en un hilo separado"""
         self.date_label.config(text=self.current_reminder_date.strftime("%A, %d de %B de %Y"))
+        fecha_iso = self.current_reminder_date.isoformat()
         
-        recordatorios = obtener_recordatorios_todos(self.current_reminder_date.isoformat())
-        
+        def run_load():
+            try:
+                recordatorios = obtener_recordatorios_todos(fecha_iso)
+                self.master.after(0, lambda: self._aplicar_recordatorios_ui(recordatorios))
+            except Exception as e:
+                print(f"⚠️ Error al cargar recordatorios: {e}")
+
+        threading.Thread(target=run_load, daemon=True).start()
+
+    def _aplicar_recordatorios_ui(self, recordatorios):
+        """Aplica los recordatorios a la UI (hilo principal)"""
+        if not self.winfo_exists():
+            return
+
         for widget in self.checklist_inner_frame.winfo_children():
             widget.destroy()
         

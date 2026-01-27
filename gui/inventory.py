@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk, messagebox, Canvas, Scrollbar
 from datetime import date, datetime, timedelta
 import os
+import threading
+
 
 from .styles import Styles
 from .utils import darken_color, mostrar_mensaje_emergente
@@ -184,19 +186,38 @@ class InventoryTab:
             self.abrir_ventana_historial(sku)
             
     def cargar_datos_tabla(self):
-        """Carga datos en la tabla de inventario"""
+        """Carga datos en la tabla de inventario en un hilo separado"""
+        def run_load():
+            try:
+                # Obtener datos de la base de datos (Pesado)
+                datos = obtener_inventario()
+                
+                # Programar actualización de la UI en el hilo principal
+                self.master.after(0, lambda: self._aplicar_datos_tabla_ui(datos))
+            except Exception as e:
+                print(f"❌ Error crítico cargando tabla de inventario: {e}")
+                import traceback
+                traceback.print_exc()
+
+        threading.Thread(target=run_load, daemon=True).start()
+
+    def _aplicar_datos_tabla_ui(self, datos):
+        """Aplica los datos obtenidos a la tabla (Treeview)"""
+        if not self.tabla.winfo_exists():
+            return
+
+        # Guardar para filtros locales
+        self.datos_completos = datos
+        
         # Limpiar tabla actual
         for item in self.tabla.get_children():
             self.tabla.delete(item)
             
-        # Obtener datos de la base de datos
-        self.datos_completos = obtener_inventario()
-        
-        if not self.datos_completos:
+        if not datos:
             self.tabla.insert('', tk.END, values=("", "No hay datos de inventario", "", "", "", "", "", ""))
             return
 
-        # Aplicar filtros si existen
+        # Aplicar filtros si existen (esto inserta en la tabla)
         self.aplicar_filtro_tabla()
         
     def aplicar_filtro_tabla(self):

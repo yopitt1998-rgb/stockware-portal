@@ -9,6 +9,8 @@ import os
 import csv 
 from collections import defaultdict
 from dateutil import parser as dateparser
+import threading
+
 
 # =================================================================
 # 1. CONFIGURACIÓN DE CONEXIÓN Y DATOS INICIALES
@@ -41,7 +43,7 @@ class ModernInventarioApp:
     def __init__(self, master, usuario=None):
         self.master = master
         self.usuario_actual = usuario
-        self.master.title(f"🚀 StockWare - Gestión de Inventario ({usuario.get('username') if usuario else ''})")
+        self.master.title(f"🚀 StockWare - Gestión de Inventario ({usuario.get('usuario') if usuario else ''})")
         self.master.configure(bg='#f8f9fa')
         
         # CONFIGURAR ICONO - NUEVO: Agregar ícono del programa
@@ -59,8 +61,8 @@ class ModernInventarioApp:
         # Crear interfaz moderna
         self.create_modern_gui()
         
-        # Mostrar alerta de recordatorios al iniciar (solo una vez)
-        self.master.after(1000, self.mostrar_alerta_inicial)
+        # Mostrar alerta de recordatorios al iniciar (en segundo plano)
+        self.master.after(1000, lambda: threading.Thread(target=self.mostrar_alerta_inicial, daemon=True).start())
 
     def mostrar_alerta_inicial(self):
         """Muestra una alerta con los recordatorios pendientes para hoy al iniciar la aplicación"""
@@ -432,11 +434,12 @@ class ModernInventarioApp:
 # =================================================================
 
 if __name__ == "__main__":
-    # Inicializar base de datos
-    # Verificar existencia ANTES de inicializar, ya que inicializar crea el archivo
+    # 1. Crear ventana principal de inmediato para evitar sensación de lentitud
+    root = tk.Tk()
+    root.withdraw()
+
+    # 2. Inicializar base de datos (con optimización de cache ya aplicada)
     db_existe = os.path.exists(DATABASE_NAME)
-    
-    # Ejecutar siempre para asegurar esquema y columnas nuevas
     inicializar_bd()
     
     if not db_existe:
@@ -445,20 +448,21 @@ if __name__ == "__main__":
     else:
         print("✅ Base de datos ya existe. Esquema verificado.")
     
-    # EJECUTAR LIMPIEZA SILENCIOSA AL INICIAR (Solo si es necesario)
-    # Movido para que se ejecute mientras el usuario ve el login o justo después.
-    # No bloqueamos el inicio.
+    # 3. EJECUTAR LIMPIEZA EN SEGUNDO PLANO
     def iniciar_tareas_segundo_plano():
-        print("⚡ Ejecutando tareas de optimización en segundo plano...")
-        verificar_y_corregir_duplicados_completo(silent=True)
-        print("✅ Tareas de optimización completadas.")
-    
-    # Crear ventana principal pero ocultarla
-    root = tk.Tk()
-    root.withdraw()
+        def run_optimization():
+            try:
+                print("⚡ Ejecutando tareas de optimización en segundo plano...")
+                verificar_y_corregir_duplicados_completo(silent=True)
+                print("✅ Tareas de optimización completadas.")
+            except Exception as e:
+                print(f"⚠️ Error en tareas de optimización: {e}")
+        
+        thread = threading.Thread(target=run_optimization, daemon=True)
+        thread.start()
     
     def bootstrap_app(usuario):
-        print(f"🔐 Sesión iniciada: {usuario['username']} ({usuario['rol']})")
+        print(f"🔐 Sesión iniciada: {usuario['usuario']} ({usuario['rol']})")
         
         # IMPORTACIÓN DIFERIDA (PUNTO 3 - RENDIMIENTO)
         # Cargamos los módulos pesados SOLO después del login exitoso

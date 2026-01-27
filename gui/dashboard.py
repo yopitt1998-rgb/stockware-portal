@@ -1,4 +1,6 @@
 import tkinter as tk
+import threading
+
 from tkinter import ttk
 from .styles import Styles
 from .styles import Styles
@@ -97,10 +99,10 @@ class DashboardTab:
         # Se asume que main_app tiene estos métodos (o el inventory tab)
         # Nota: Idealmente moveremos estos métodos a gui/inventory.py y accederemos a traves de main_app.inventory_tab
         quick_actions = [
-            ("🚚 Abasto Rápido", lambda: self.main_app.abrir_ventana_abasto(), Styles.SUCCESS_COLOR),
-            ("📤 Salida Móvil", lambda: self.main_app.abrir_ventana_salida_movil(), Styles.SECONDARY_COLOR),
-            ("🔄 Retorno", lambda: self.main_app.abrir_ventana_retorno_movil(), Styles.INFO_COLOR),
-            ("⚖️ Consiliación", lambda: self.main_app.abrir_ventana_consiliacion(), Styles.WARNING_COLOR)
+            ("🚚 Abasto Rápido", lambda: self.main_app.inventory_tab.abrir_ventana_abasto(), Styles.SUCCESS_COLOR),
+            ("📤 Salida Móvil", lambda: self.main_app.inventory_tab.abrir_ventana_salida_movil(), Styles.SECONDARY_COLOR),
+            ("🔄 Retorno", lambda: self.main_app.inventory_tab.abrir_ventana_retorno_movil(), Styles.INFO_COLOR),
+            ("⚖️ Consiliación", lambda: self.main_app.inventory_tab.abrir_ventana_consiliacion(), Styles.WARNING_COLOR)
         ]
         
         actions_frame = ttk.Frame(quick_actions_frame, style='Modern.TFrame')
@@ -155,10 +157,33 @@ class DashboardTab:
         self.cargar_datos_recent()
 
     def actualizar_metricas(self):
-        """Actualiza las métricas y la tabla"""
+        """Actualiza las métricas y la tabla en un hilo separado para no bloquear la UI"""
+        def run_update():
+            try:
+                # 1. Obtener métricas pesadas
+                estadisticas = obtener_estadisticas_reales()
+                
+                # 2. Obtener movimientos recientes
+                movimientos = obtener_ultimos_movimientos(15)
+                
+                # 3. Obtener datos para gráficos
+                datos_charts = obtener_stock_actual_y_moviles()
+                
+                # Programar actualización de la UI en el hilo principal
+                self.main_app.master.after(0, lambda: self._aplicar_actualizacion_ui(estadisticas, movimientos, datos_charts))
+            except Exception as e:
+                print(f"⚠️ Error al actualizar dashboard: {e}")
+                # Mostrar error en la tabla para que el usuario sepa que falló
+                self.main_app.master.after(0, lambda: self.dashboard_table.insert('', tk.END, values=("❌", "Error de Red", "No se pudo conectar", "Reintente en unos momentos", "", "")))
+
+        threading.Thread(target=run_update, daemon=True).start()
+
+    def _aplicar_actualizacion_ui(self, estadisticas, movimientos, datos_charts):
+        """Aplica los datos obtenidos a los widgets de la interfaz"""
+        if not self.notebook.winfo_exists():
+            return
+
         # Actualizar tarjetas
-        estadisticas = obtener_estadisticas_reales()
-        
         if "productos_bodega" in self.metric_labels:
             self.metric_labels["productos_bodega"].config(text=str(estadisticas.get("productos_bodega", 0)))
         if "moviles_activos" in self.metric_labels:
@@ -171,10 +196,60 @@ class DashboardTab:
             self.metric_labels["bajo_stock"].config(text=str(estadisticas.get("bajo_stock", 0)))
 
         # Actualizar tabla
-        self.cargar_datos_recent()
-        
+        for item in self.dashboard_table.get_children():
+            self.dashboard_table.delete(item)
+            
+        if not movimientos:
+            self.dashboard_table.insert('', tk.END, values=("", "", "No hay movimientos recientes", "", "", ""))
+        else:
+            for row in movimientos:
+                self.dashboard_table.insert('', tk.END, values=row)
+
         # Actualizar gráficos
-        self.actualizar_charts()
+        self._actualizar_charts_ui(datos_charts)
+
+    def _actualizar_charts_ui(self, datos):
+        """Aplica los datos a los gráficos (debe llamarse desde el hilo principal)"""
+        if not datos:
+            return
+
+        # --- Gráfico de Barras ---
+        datos_ordenados = sorted(datos, key=lambda x: x[4], reverse=True)[:5]
+        nombres = [d[0][:15] + '...' if len(d[0]) > 15 else d[0] for d in datos_ordenados]
+        totales = [d[4] for d in datos_ordenados]
+        
+        self.ax_bar.clear()
+        colors_bar = ['#3498db', '#2ecc71', '#9b59b6', '#f1c40f', '#e67e22']
+        bars = self.ax_bar.bar(nombres, totales, color=colors_bar[:len(nombres)])
+        
+        self.ax_bar.set_ylabel('Cantidad Total')
+        self.ax_bar.tick_params(axis='x', rotation=45, labelsize=8)
+        self.ax_bar.spines['top'].set_visible(False)
+        self.ax_bar.spines['right'].set_visible(False)
+        
+        for bar in bars:
+            height = bar.get_height()
+            self.ax_bar.text(bar.get_x() + bar.get_width()/2., height, f'{int(height)}', ha='center', va='bottom')
+            
+        self.fig_bar.tight_layout()
+        self.canvas_bar.draw()
+        
+        # --- Gráfico de Torta ---
+        total_bodega = sum(d[2] for d in datos)
+        total_moviles = sum(d[3] for d in datos)
+        
+        self.ax_pie.clear()
+        if total_bodega + total_moviles > 0:
+            labels = ['Bodega', 'Móviles']
+            sizes = [total_bodega, total_moviles]
+            colors_pie = ['#3498db', '#27ae60']
+            self.ax_pie.pie(sizes, explode=(0.05, 0), labels=labels, colors=colors_pie,
+                           autopct='%1.1f%%', shadow=True, startangle=90, textprops={'fontsize': 9})
+            self.ax_pie.axis('equal')
+        else:
+            self.ax_pie.text(0.5, 0.5, "Sin Datos", ha='center', va='center')
+            
+        self.canvas_pie.draw()
 
     def create_charts(self, parent):
         """Crea el área de gráficos"""

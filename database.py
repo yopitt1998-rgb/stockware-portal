@@ -1,11 +1,28 @@
 import sqlite3
 import mysql.connector
+from mysql.connector import pooling
 import os
 import sys
 import csv
 import shutil
 from datetime import datetime, date, timedelta
-from tkinter import messagebox
+try:
+    from tkinter import messagebox
+    HAS_TK = True
+except ImportError:
+    HAS_TK = False
+
+def safe_messagebox(title, message, type="error"):
+    """Muestra un mensaje usando messagebox si está disponible, de lo contrario imprime en consola."""
+    if HAS_TK:
+        if type == "error":
+            messagebox.showerror(title, message)
+        elif type == "info":
+            messagebox.showinfo(title, message)
+        elif type == "warning":
+            messagebox.showwarning(title, message)
+    else:
+        print(f"[{title.upper()}] {message}")
 from config import (
     DATABASE_NAME,
     DB_TYPE,
@@ -23,23 +40,39 @@ from config import (
 # CONFIGURACIÓN DE CONEXIÓN (PUNTO 3)
 # =================================================================
 
+# =================================================================
+# CONFIGURACIÓN DE CONEXIÓN CON POOLING (PUNTO 3)
+# =================================================================
+
+_mysql_pool = None
+
 def get_db_connection():
-    """Retorna una conexión activa (SQLite o MySQL) establecida en config.py."""
+    """Retorna una conexión activa desde el pool (MySQL) o una nueva (SQLite)."""
+    global _mysql_pool
+    
     if DB_TYPE == 'MYSQL':
         try:
-            return mysql.connector.connect(
-                host=MYSQL_HOST,
-                user=MYSQL_USER,
-                password=MYSQL_PASS,
-                database=MYSQL_DB,
-                port=MYSQL_PORT,
-                charset='utf8mb4',
-                collation='utf8mb4_unicode_ci'
-            )
+            if _mysql_pool is None:
+                _mysql_pool = mysql.connector.pooling.MySQLConnectionPool(
+                    pool_name="stockware_pool",
+                    pool_size=10,
+                    pool_reset_session=True,
+                    host=MYSQL_HOST,
+                    user=MYSQL_USER,
+                    password=MYSQL_PASS,
+                    database=MYSQL_DB,
+                    port=MYSQL_PORT,
+                    charset='utf8mb4',
+                    collation='utf8mb4_unicode_ci'
+                )
+            return _mysql_pool.get_connection()
         except Exception as e:
-            # Fallback o error crítico
-            print(f"❌ Error conectando a MySQL: {e}")
-            raise e
+            print(f"❌ Error crítico en Pool MySQL: {e}")
+            # Fallback a conexión directa si el pool falla
+            return mysql.connector.connect(
+                host=MYSQL_HOST, user=MYSQL_USER, password=MYSQL_PASS,
+                database=MYSQL_DB, port=MYSQL_PORT
+            )
     else:
         conn = sqlite3.connect(DATABASE_NAME)
         conn.execute("PRAGMA foreign_keys = ON")
@@ -75,14 +108,29 @@ def inicializar_bd():
         LONGTEXT = "LONGTEXT" if DB_TYPE == 'MYSQL' else "TEXT"
         INT_TYPE = "INT" if DB_TYPE == 'MYSQL' else "INTEGER"
         
-        def check_column_exists(table, column):
+        # Cache de columnas para optimizar velocidad en MySQL (Punto 3 - Latencia)
+        table_columns_cache = {}
+
+        def get_all_columns(table):
+            if table in table_columns_cache:
+                return table_columns_cache[table]
+            
             if DB_TYPE == 'MYSQL':
-                cursor.execute(f"SHOW COLUMNS FROM {table} LIKE '{column}'")
-                return cursor.fetchone() is not None
+                cursor.execute(f"SHOW COLUMNS FROM {table}")
+                cols = [row[0] for row in cursor.fetchall()]
             else:
                 cursor.execute(f"PRAGMA table_info({table})")
-                columns = [row[1] for row in cursor.fetchall()]
+                cols = [row[1] for row in cursor.fetchall()]
+            
+            table_columns_cache[table] = cols
+            return cols
+
+        def check_column_exists(table, column):
+            try:
+                columns = get_all_columns(table)
                 return column in columns
+            except:
+                return False
 
         def add_column_if_missing(table, column, type, default=None):
             if not check_column_exists(table, column):
@@ -91,6 +139,9 @@ def inicializar_bd():
                     alter_query += f" DEFAULT {default}"
                 cursor.execute(alter_query)
                 print(f"🆕 Columna {column} añadida a {table}")
+                # Limpiar cache para forzar recarga si se añade otra
+                if table in table_columns_cache:
+                    del table_columns_cache[table]
 
         # 1. TABLA PRODUCTOS
         q_prod = f"""
@@ -105,7 +156,7 @@ def inicializar_bd():
                 marca VARCHAR(100) DEFAULT 'N/A',
                 fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
                 secuencia_vista VARCHAR(20),
-                UNIQUE INDEX (sku, ubicacion)
+                UNIQUE (sku, ubicacion)
             )
         """
         cursor.execute(q_prod)
@@ -121,7 +172,7 @@ def inicializar_bd():
                 sku_producto VARCHAR(50) NOT NULL,
                 movil VARCHAR(100) NOT NULL,
                 cantidad INTEGER NOT NULL DEFAULT 0,
-                UNIQUE INDEX (sku_producto, movil)
+                UNIQUE (sku_producto, movil)
             )
         """)
         
@@ -184,6 +235,12 @@ def inicializar_bd():
             )
         """)
         
+        # Inicializar configuración si está vacía
+        cursor.execute("SELECT COUNT(*) FROM configuracion")
+        if cursor.fetchone()[0] == 0:
+            cursor.execute("INSERT INTO configuracion (id_config, nombre_empresa) VALUES (1, 'Mi Empresa')")
+            print("⚙️ Configuración inicial creada.")
+        
         # 7. TABLA USUARIOS
         cursor.execute(f"""
             CREATE TABLE IF NOT EXISTS usuarios (
@@ -237,10 +294,29 @@ def inicializar_bd():
         # INDICES
         if DB_TYPE == 'SQLITE':
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_productos_sku ON productos(sku)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_mov_sku_tipo ON movimientos(sku_producto, tipo_movimiento)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_mov_fecha ON movimientos(fecha_evento)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_asig_sku ON asignacion_moviles(sku_producto)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_cons_fecha ON consumos_pendientes(fecha)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_cons_estado ON consumos_pendientes(estado)")
         else:
-            cursor.execute("SHOW INDEX FROM productos WHERE Key_name = 'idx_productos_sku'")
-            if not cursor.fetchone():
-                cursor.execute("CREATE INDEX idx_productos_sku ON productos(sku)")
+            # Helper para añadir índices en MySQL (Defensivo)
+            def add_mysql_index(name, table, cols):
+                try:
+                    cursor.execute(f"CREATE INDEX {name} ON {table}({cols})")
+                except Exception as e:
+                    # Ignorar si ya existe o hay error de duplicado
+                    if "1061" in str(e) or "Duplicate" in str(e): 
+                        pass
+                    else:
+                        print(f"⚠️ No se pudo crear índice {name} en {table}: {e}")
+
+            add_mysql_index('idx_productos_sku', 'productos', 'sku')
+            add_mysql_index('idx_mov_sku_tipo', 'movimientos', 'sku_producto, tipo_movimiento')
+            add_mysql_index('idx_mov_fecha', 'movimientos', 'fecha_evento')
+            add_mysql_index('idx_asig_sku', 'asignacion_moviles', 'sku_producto')
+            add_mysql_index('idx_cons_fecha', 'consumos_pendientes', 'fecha')
+            add_mysql_index('idx_cons_estado', 'consumos_pendientes', 'estado')
 
         # MIGRACIÓN AUTOMÁTICA DE MÓVILES (Si la tabla está vacía)
         cursor.execute("SELECT COUNT(*) FROM moviles")
@@ -255,7 +331,8 @@ def inicializar_bd():
         return True
         
     except Exception as e:
-        messagebox.showerror("Error Crítico", f"❌ Error de SQLite al inicializar la base de datos: {e}")
+        engine = "MySQL" if DB_TYPE == 'MYSQL' else "SQLite"
+        safe_messagebox("Error Crítico", f"❌ Error de {engine} al inicializar la base de datos:\n\n{e}")
         sys.exit(1)
     finally:
         if conn:
@@ -393,9 +470,9 @@ def verificar_y_corregir_duplicados_completo(silent=False):
     
     # 2. Limpiar duplicados en asignacion_moviles
     # Solo limpiamos esto SI detectamos que hay duplicados para evitar re-escritura total lenta
-    conn = sqlite3.connect(DATABASE_NAME)
+    conn = get_db_connection()
     cursor = conn.cursor()
-    run_query(cursor, "SELECT COUNT(*) FROM (SELECT 1 FROM asignacion_moviles GROUP BY movil, sku_producto HAVING COUNT(*) > 1)")
+    run_query(cursor, "SELECT COUNT(*) FROM (SELECT 1 FROM asignacion_moviles GROUP BY movil, sku_producto HAVING COUNT(*) > 1) as sub")
     tiene_duplicados = cursor.fetchone()[0] > 0
     conn.close()
 
@@ -635,9 +712,6 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
     except Exception as e:
         if conn: conn.rollback() 
         return False, f"Ocurrió un error al registrar el movimiento: {e}"
-    except Exception as e:
-         if conn: conn.rollback() 
-         return False, f"Ocurrió un error inesperado: {e}"
     finally:
         if conn:
             conn.close()
@@ -753,7 +827,7 @@ def obtener_prestamos_activos():
             ORDER BY primera_fecha DESC
         """)
         return cursor.fetchall()
-    except sqlite3.Error:
+    except Exception:
         return []
     finally:
         if conn:
@@ -775,7 +849,7 @@ def obtener_historial_prestamos_completo():
             ORDER BY fecha_prestamo DESC, sku ASC
         """)
         return cursor.fetchall()
-    except sqlite3.Error:
+    except Exception:
         return []
     finally:
         if conn:
@@ -981,7 +1055,7 @@ def obtener_inventario():
             secuencia_vista ASC 
         """)
         return cursor.fetchall()
-    except sqlite3.Error:
+    except Exception:
         return []
     finally:
         if conn:
@@ -1000,7 +1074,7 @@ def obtener_inventario_para_exportar():
         """
         run_query(cursor, sql_query) 
         return cursor.fetchall()
-    except sqlite3.Error:
+    except Exception:
         return []
     finally:
         if conn:
@@ -1071,7 +1145,7 @@ def obtener_ultima_salida_movil(movil):
         """
         run_query(cursor, sql_query, (movil, movil))
         return cursor.fetchall()
-    except sqlite3.Error:
+    except Exception:
         return []
     finally:
         if conn:
@@ -1094,7 +1168,7 @@ def obtener_asignacion_movil(movil):
         """
         run_query(cursor, sql_query, (movil,))
         return cursor.fetchall()
-    except sqlite3.Error:
+    except Exception:
         return []
     finally:
         if conn:
@@ -1224,7 +1298,7 @@ def obtener_reporte_asignacion_moviles(movil=None):
             
         run_query(cursor, sql_query, params)
         return cursor.fetchall()
-    except sqlite3.Error:
+    except Exception:
         return []
     finally:
         if conn:
@@ -1290,7 +1364,7 @@ def obtener_historial_producto(sku, fecha_inicio=None, fecha_fin=None):
 
         run_query(cursor, sql_query, params)
         return cursor.fetchall()
-    except sqlite3.Error:
+    except Exception:
         return []
     finally:
         if conn:
@@ -1424,7 +1498,7 @@ def obtener_historial_producto_para_exportar(sku, fecha_inicio=None, fecha_fin=N
 
         run_query(cursor, sql_query, params)
         return cursor.fetchall()
-    except sqlite3.Error:
+    except Exception:
         return []
     finally:
         if conn:
@@ -1566,7 +1640,7 @@ def obtener_stock_actual_y_moviles():
         return resultado
         
     except Exception as e:
-        print(f"Error al obtener stock actual y móviles: {e}")
+        print(f"❌ Error en obtener_stock_actual_y_moviles: {e}")
         return []
     finally:
         if conn:
@@ -1623,9 +1697,12 @@ def obtener_estadisticas_reales():
             "prestamos_activos": prestamos_activos,
             "bajo_stock": bajo_stock
         }
-        
     except Exception as e:
-        print(f"Error al obtener estadísticas reales: {e}")
+        print(f"❌ Error en obtener_estadisticas_reales: {e}")
+        return {
+            "productos_bodega": 0, "moviles_activos": 0, "stock_total": 0,
+            "prestamos_activos": 0, "bajo_stock": 0
+        }
         return {
             "productos_bodega": 0,
             "moviles_activos": 0,
@@ -1716,21 +1793,37 @@ def registrar_consumo_pendiente(movil, sku, cantidad, tecnico, ticket, fecha, co
     finally:
         if conn: conn.close()
 
-def obtener_consumos_pendientes(estado='PENDIENTE'):
-    """Obtiene consumos reportados por móviles incluyendo colilla y contrato."""
+def obtener_consumos_pendientes(fecha_inicio=None, fecha_fin=None, estado='PENDIENTE'):
+    """Obtiene consumos reportados por móviles filtrando opcionalmente por rango de fechas."""
     conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        run_query(cursor, """
+        
+        sql_query = """
             SELECT c.id, c.movil, c.sku, p.nombre, c.cantidad, c.tecnico_nombre, c.ticket, c.fecha, c.colilla, c.num_contrato, c.ayudante_nombre
             FROM consumos_pendientes c
             LEFT JOIN productos p ON c.sku = p.sku AND p.ubicacion = 'BODEGA'
             WHERE c.estado = ?
-            ORDER BY c.fecha_registro DESC
-        """, (estado,))
+        """
+        params = [estado]
+        
+        if fecha_inicio and fecha_fin:
+            sql_query += " AND c.fecha BETWEEN ? AND ?"
+            params.extend([fecha_inicio, fecha_fin])
+        elif fecha_inicio:
+            sql_query += " AND c.fecha >= ?"
+            params.append(fecha_inicio)
+        elif fecha_fin:
+            sql_query += " AND c.fecha <= ?"
+            params.append(fecha_fin)
+            
+        sql_query += " ORDER BY c.fecha_registro DESC"
+        
+        run_query(cursor, sql_query, tuple(params))
         return cursor.fetchall()
-    except Exception:
+    except Exception as e:
+        print(f"Error al obtener consumos pendientes: {e}")
         return []
     finally:
         if conn: conn.close()
@@ -1744,7 +1837,8 @@ def obtener_detalles_moviles():
         run_query(cursor, "SELECT nombre, conductor, ayudante FROM moviles WHERE activo = 1")
         filas = cursor.fetchall()
         return {f[0]: {"conductor": f[1] or "", "ayudante": f[2] or ""} for f in filas}
-    except Exception:
+    except Exception as e:
+        print(f"❌ Error en obtener_detalles_moviles: {e}")
         return {}
     finally:
         if conn: conn.close()
@@ -1771,7 +1865,21 @@ def procesar_auditoria_consumo(id_consumo, sku, cantidad, movil, fecha, ticket, 
             
     return exito, mensaje
 
-
+def eliminar_auditoria_completa():
+    """Elimina todos los consumos pendientes de la tabla de auditoría."""
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        run_query(cursor, "DELETE FROM consumos_pendientes WHERE estado = 'PENDIENTE'")
+        conn.commit()
+        return True, "Auditoría limpiada exitosamente."
+    except Exception as e:
+        if conn: conn.rollback()
+        return False, f"Error al limpiar auditoría: {e}"
+    finally:
+        if conn:
+            conn.close()
 
 def obtener_ultimos_movimientos(limite=15):
     """
@@ -1783,38 +1891,38 @@ def obtener_ultimos_movimientos(limite=15):
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        sql_query = """
-            SELECT 
-                m.id,
-                m.fecha_evento,
-                m.tipo_movimiento,
-                COALESCE(p.nombre, 'Producto Eliminado (' || m.sku_producto || ')') as nombre_prod,
-                m.cantidad_afectada,
-                COALESCE(m.movil_afectado, 'Bodega') as destino
-            FROM movimientos m
-            LEFT JOIN productos p ON m.sku_producto = p.sku AND p.ubicacion = 'BODEGA'
-            ORDER BY m.fecha_creacion DESC, m.id DESC
-            LIMIT ?
-        """
-        # Note: fecha_creacion might not likely exist in legacy movements table, falling back to id which is autoincrement
-        # However, let's check schema. In `inicializar_bd` we saw `fecha_movimiento DEFAULT CURRENT_TIMESTAMP`.
-        # So we should use `fecha_movimiento` for "Last registered".
+        # Obtener movimientos según motor de base de datos (Optimizado para latencia y compatibilidad)
         
-        sql_query = """
-            SELECT 
-                m.id,
-                strftime('%Y-%m-%d', m.fecha_evento) as fecha,
-                m.tipo_movimiento,
-                COALESCE(p.nombre, m.sku_producto) as nombre,
-                m.cantidad_afectada,
-                COALESCE(m.movil_afectado, '-') as detalle
-            FROM movimientos m
-            LEFT JOIN productos p ON m.sku_producto = p.sku AND p.ubicacion = 'BODEGA'
-            ORDER BY m.fecha_movimiento DESC
-            LIMIT ?
-        """
+        if DB_TYPE == 'MYSQL':
+            sql_query = """
+                SELECT 
+                    m.id,
+                    DATE_FORMAT(m.fecha_evento, '%Y-%m-%d') as fecha,
+                    m.tipo_movimiento,
+                    COALESCE(p.nombre, m.sku_producto) as nombre,
+                    m.cantidad_afectada,
+                    COALESCE(m.movil_afectado, '-') as detalle
+                FROM movimientos m
+                LEFT JOIN productos p ON m.sku_producto = p.sku AND p.ubicacion = 'BODEGA'
+                ORDER BY m.fecha_movimiento DESC
+                LIMIT %s
+            """
+        else:
+            sql_query = """
+                SELECT 
+                    m.id,
+                    strftime('%Y-%m-%d', m.fecha_evento) as fecha,
+                    m.tipo_movimiento,
+                    COALESCE(p.nombre, m.sku_producto) as nombre,
+                    m.cantidad_afectada,
+                    COALESCE(m.movil_afectado, '-') as detalle
+                FROM movimientos m
+                LEFT JOIN productos p ON m.sku_producto = p.sku AND p.ubicacion = 'BODEGA'
+                ORDER BY m.fecha_movimiento DESC
+                LIMIT ?
+            """
         
-        run_query(cursor, sql_query, (limite,))
+        cursor.execute(sql_query, (limite,))
         return cursor.fetchall()
         
     except Exception as e:
@@ -1929,16 +2037,19 @@ def obtener_configuracion():
     conn = None
     try:
         conn = get_db_connection()
-        # Usar Row para acceder por nombre de columna
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(dictionary=True)
+        else:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
         
-        run_query(cursor, "SELECT * FROM configuracion WHERE id = 1")
+        run_query(cursor, "SELECT * FROM configuracion WHERE id_config = 1")
         row = cursor.fetchone()
         if row:
             return dict(row)
         return {}
-    except sqlite3.Error:
+    except Exception as e:
+        print(f"Error al obtener configuración: {e}")
         return {}
     finally:
         if conn: conn.close()
@@ -1954,7 +2065,7 @@ def guardar_configuracion(datos):
             UPDATE configuracion SET 
             nombre_empresa = ?, rut = ?, direccion = ?, 
             telefono = ?, email = ?, logo_path = ?
-            WHERE id = 1
+            WHERE id_config = 1
         """
         params = (
             datos.get('nombre_empresa'), datos.get('rut'), 
@@ -1965,7 +2076,7 @@ def guardar_configuracion(datos):
         run_query(cursor, sql, params)
         conn.commit()
         return True, "Configuración guardada exitosamente."
-    except sqlite3.Error as e:
+    except Exception as e:
         return False, f"Error al guardar: {e}"
     finally:
         if conn: conn.close()
@@ -1978,21 +2089,27 @@ def autenticar_usuario(username, password):
     """Verifica credenciales de usuario."""
     conn = None
     try:
-        conn = sqlite3.connect(DATABASE_NAME)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
+        conn = get_db_connection()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(dictionary=True)
+        else:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
         
         run_query(cursor, """
-            SELECT id, username, rol, nombre_completo 
+            SELECT id, usuario, rol 
             FROM usuarios 
-            WHERE username = ? AND password = ? AND activo = 1
+            WHERE usuario = ? AND password = ?
         """, (username, password))
         
         row = cursor.fetchone()
         if row:
-            return dict(row)
+            if DB_TYPE == 'MYSQL':
+                return row
+            else:
+                return dict(row)
         return None
-    except sqlite3.Error as e:
+    except Exception as e:
         print(f"Error en autenticación: {e}")
         return None
     finally:
@@ -2002,44 +2119,44 @@ def crear_usuario(username, password, rol, nombre):
     """Crea un nuevo usuario."""
     conn = None
     try:
-        conn = sqlite3.connect(DATABASE_NAME)
+        conn = get_db_connection()
         cursor = conn.cursor()
         run_query(cursor, """
-            INSERT INTO usuarios (username, password, rol, nombre_completo) 
-            VALUES (?, ?, ?, ?)
-        """, (username, password, rol, nombre))
+            INSERT INTO usuarios (usuario, password, rol) 
+            VALUES (?, ?, ?)
+        """, (username, password, rol))
         conn.commit()
         return True, f"Usuario '{username}' creado."
-    except sqlite3.IntegrityError:
-        return False, f"El nombre de usuario '{username}' ya existe."
-    except sqlite3.Error as e:
+    except Exception as e:
+        if 'unique' in str(e).lower() or 'duplicate' in str(e).lower():
+            return False, f"El nombre de usuario '{username}' ya existe."
         return False, f"Error: {e}"
     finally:
         if conn: conn.close()
 
 def obtener_usuarios():
-    """Obtiene lista de usuarios activos."""
+    """Obtiene lista de usuarios."""
     conn = None
     try:
-        conn = sqlite3.connect(DATABASE_NAME)
+        conn = get_db_connection()
         cursor = conn.cursor()
-        run_query(cursor, "SELECT id, username, rol, nombre_completo FROM usuarios WHERE activo = 1")
+        run_query(cursor, "SELECT id, usuario, rol FROM usuarios")
         return cursor.fetchall()
-    except sqlite3.Error:
+    except Exception:
         return []
     finally:
         if conn: conn.close()
 
 def eliminar_usuario(id_usuario):
-    """Marca un usuario como inactivo."""
+    """Elimina un usuario por su ID."""
     conn = None
     try:
-        conn = sqlite3.connect(DATABASE_NAME)
+        conn = get_db_connection()
         cursor = conn.cursor()
-        run_query(cursor, "UPDATE usuarios SET activo = 0 WHERE id = ?", (id_usuario,))
+        run_query(cursor, "DELETE FROM usuarios WHERE id = ?", (id_usuario,))
         conn.commit()
-        return True, "Usuario desactivado."
-    except sqlite3.Error as e:
+        return True, "Usuario eliminado."
+    except Exception as e:
         return False, f"Error: {e}"
     finally:
         if conn: conn.close()

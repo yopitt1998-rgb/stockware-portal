@@ -12,8 +12,10 @@ else:
 
 # Cargar variables de entorno desde la ruta absoluta del .env
 dotenv_path = os.path.join(application_path, '.env')
+print(f"🔍 Buscando .env en: {dotenv_path}")
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
+    print("✅ .env cargado exitosamente")
 else:
     print(f"⚠️ Archivo .env no encontrado en: {dotenv_path}")
 
@@ -79,14 +81,20 @@ PRODUCTOS_INICIALES = [
     ("CONEC_MECA", "4-3-18", "014"),         # CONECTORES F.O SM SC-APC
     ("TENSOR_FO", "4-3-42", "015"),          # TENSOR P/ FIBRA DROP
     ("HG8247W5", "U4-4-633", "016"),         # ONT HUAWEI ECHOLIFE HG8247W5
-    ("ONT HUAWEI OptiXstar HG8145X6", "U4-4-634", "017"), # Sin mapping
+    ("ONT HUAWEI OptiXstar HG8145X6", "U4-4-634", "017"), 
+    ("O_EG8145X6", "U4-4-634", "017"),       # Alias from image
+    ("HG8245X6", "U4-4-634", "017"),         # Alias from image
     ("O_EG8145V5", "4-4-644", "018"),        # ONT HUAWEI EchoLife EG8145V5
-    ("ONT HUAWEI EchoLife EGX6", "4-4-654", "019"),     # Sin mapping claro en imagen para este SKU exacto (pero hay O_EG8041X6 abajo)
+    ("O_EGR145V5", "4-4-644", "018"),        # Typo from image (R instead of 8)
+    ("ONT HUAWEI EchoLife EGX6", "4-4-654", "019"),
     ("O_EG8041X6", "4-4-656", "020"),        # Huawei OptiXstar EG8041X6-10
+    ("O_EGR8041X6", "4-4-656", "020"),       # Typo from image
     ("R_K562E_10", "4-4-646", "021"),        # Huawei OptiXstar K562e-10
     ("WIFI_NET", "4-4-647", "022"),          # Broadband Network Terminal
-    ("Dongle OTT Retail Z11D", "8-1-904", "023"), # Sin mapping
+    ("CONEC_RJ45", "10-1-04", "003"),        # Alias for connector
+    ("Dongle OTT Retail Z11D", "8-1-904", "023"),
     ("T_PLAYPRO", "8-1-902", "024"),         # STB OTT RETAIL Z11B
+    ("E_T_PLAY", "8-1-903", "025"),          # Alias from image
     ("T_PLAY", "8-1-903", "025"),            # STBs OTT AOSP DUAL BAND Z4
 ]
 

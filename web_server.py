@@ -1,11 +1,13 @@
 from flask import Flask, render_template, request, jsonify
 import socket
+import os
 from database import (
     registrar_consumo_pendiente, 
     obtener_nombres_moviles, 
     obtener_todos_los_skus_para_movimiento,
     obtener_detalles_moviles
 )
+from config import DB_TYPE
 from datetime import date
 import threading
 import json
@@ -89,35 +91,74 @@ def registrar_bulk():
     if not data:
         return jsonify({"exito": False, "mensaje": "Sin datos"})
 
+    from database import get_db_connection, run_query
+    conn = None
     try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
         exitos = 0
-        errores = 0
+        materiales = data.get('materiales', [])
         
-        for item in data.get('materiales', []):
-            ok, msg = registrar_consumo_pendiente(
-                movil=data['movil'],
-                sku=item['sku'],
-                cantidad=item['cantidad'],
-                tecnico=data['tecnico'],
-                ticket=data['contrato'],
-                fecha=data['fecha'],
-                colilla=data['colilla'],
-                contrato=data['contrato'],
-                ayudante=data['ayudante']
-            )
-            if ok: exitos += 1
-            else: errores += 1
+        for item in materiales:
+            # Ejecutamos el insert directamente aquí para usar la misma conexión/transacción
+            run_query(cursor, """
+                INSERT INTO consumos_pendientes 
+                (movil, sku, cantidad, tecnico_nombre, ayudante_nombre, ticket, fecha, colilla, num_contrato)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                data['movil'],
+                item['sku'],
+                item['cantidad'],
+                data['tecnico'],
+                data.get('ayudante', ''),
+                data['contrato'], # ticket
+                data['fecha'],
+                data['colilla'],
+                data['contrato']  # num_contrato
+            ))
+            exitos += 1
         
-        return jsonify({"exito": True, "mensaje": f"Procesados: {exitos} exitos, {errores} errores"})
+        conn.commit()
+        return jsonify({"exito": True, "mensaje": f"Reporte enviado con éxito ({exitos} materiales)"})
 
     except Exception as e:
-        return jsonify({"exito": False, "mensaje": str(e)})
+        if conn: conn.rollback()
+        return jsonify({"exito": False, "mensaje": f"Error de base de datos: {str(e)}"})
+    finally:
+        if conn: conn.close()
 
 def start_server():
     # Detectar puerto (Render asigna uno dinámicamente)
     port = int(os.environ.get("PORT", 5000))
     print(f"🚀 Portal Web iniciado en puerto: {port}")
     app.run(host='0.0.0.0', port=port)
+
+def get_local_ip():
+    """Obtiene la IP local de la máquina"""
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except:
+        return "127.0.0.1"
+
+def start_server_thread():
+    """Inicia el servidor Flask en un thread separado y retorna la IP local"""
+    local_ip = get_local_ip()
+    
+    def run_server():
+        try:
+            app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False)
+        except Exception as e:
+            print(f"Error al iniciar servidor web: {e}")
+    
+    thread = threading.Thread(target=run_server, daemon=True)
+    thread.start()
+    
+    return local_ip
 
 if __name__ == "__main__":
     start_server()
