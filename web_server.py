@@ -22,13 +22,15 @@ def index():
     count_m = 0
     count_p = 0
     
+    from config import MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB
+    
     # Validar si faltan variables críticas en la nube
     missing_vars = []
     if DB_TYPE == 'MYSQL':
-        from config import MYSQL_HOST, MYSQL_USER, MYSQL_PASS
         if not MYSQL_HOST: missing_vars.append("MYSQL_HOST")
         if not MYSQL_USER: missing_vars.append("MYSQL_USER")
         if not MYSQL_PASS: missing_vars.append("MYSQL_PASSWORD")
+        if not MYSQL_DB: missing_vars.append("MYSQL_DATABASE")
     
     if missing_vars:
         status = "CONFIGURACIÓN INCOMPLETA"
@@ -44,7 +46,7 @@ def index():
             
             if count_m == 0 and count_p == 0:
                 status = "BASE DE DATOS VACÍA"
-                error_detail = "Se conectó, pero no encontró datos en las tablas."
+                error_detail = f"Conectado a DB: '{MYSQL_DB or 'test'}' en {MYSQL_HOST}. No se encontraron productos ni móviles."
                 
         except Exception as e:
             status = "ERROR DE CONEXIÓN"
