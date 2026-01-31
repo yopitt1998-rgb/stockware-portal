@@ -245,7 +245,7 @@
     <script>
         const DETAILS_MOVILES = {{ details_moviles | safe }};
         const ONT_GROUP_A = ['U4-4-633', '4-4-644'];
-        const ONT_GROUP_B = ['4-4-654', '4-4-656'];
+        const ONT_GROUP_B = ['4-4-656']; // Eliminado 4-4-654
         const ALL_ONTS = [...ONT_GROUP_A, ...ONT_GROUP_B];
         const EXTENDER_A = '4-4-646';
         const EXTENDER_B = '4-4-647';
@@ -259,12 +259,45 @@
             }
         };
 
-        // Lógica de Exclusión Mutual (CORREGIDA SEGÚN USUARIO)
+        // Lógica de Exclusión Mutual y Límites de Cantidad
         const inputs = document.querySelectorAll('.sku-input');
+        
+        // Configuración de límites por SKU
+        const MAX_LIMITS = {
+            '2-7-11': 1,
+            '4-2-41': 1,
+            '4-3-18': 2,
+            'U4-4-633': 1,
+            '4-4-644': 1,
+            '4-4-656': 1
+        };
+
         inputs.forEach(inp => {
+            // Validar límites al escribir
+            inp.addEventListener('input', function() {
+                const sku = this.dataset.sku;
+                let val = parseInt(this.value);
+                
+                // Aplicar límite máximo si existe
+                if (MAX_LIMITS[sku] !== undefined) {
+                    if (val > MAX_LIMITS[sku]) {
+                        this.value = MAX_LIMITS[sku];
+                        // Opcional: Mostrar feedback visual breve
+                        this.style.borderColor = 'red';
+                        setTimeout(() => this.style.borderColor = '#ddd', 500);
+                    }
+                }
+            });
+
             inp.oninput = function () {
                 const sku = this.dataset.sku;
                 const qty = parseInt(this.value) || 0;
+                
+                // Re-aplicar límite por seguridad
+                if (MAX_LIMITS[sku] !== undefined && qty > MAX_LIMITS[sku]) {
+                    this.value = MAX_LIMITS[sku];
+                    return; 
+                }
 
                 if (ALL_ONTS.includes(sku) && qty > 0) {
                     // 1. Bloquear otras ONTs de cualquier grupo

@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 import socket
 import os
+import sys
 from database import (
     registrar_consumo_pendiente, 
     obtener_nombres_moviles, 
@@ -12,7 +13,14 @@ from datetime import date
 import threading
 import json
 
-app = Flask(__name__) # Regresamos al estándar (busca en carpeta 'templates')
+if getattr(sys, 'frozen', False):
+    # Estamos corriendo en ejecutable (PyInstaller)
+    base_dir = sys._MEIPASS
+    template_folder = os.path.join(base_dir, 'templates')
+    app = Flask(__name__, template_folder=template_folder)
+else:
+    # Estamos corriendo como script normal
+    app = Flask(__name__)
 
 @app.route('/')
 def index():
@@ -39,6 +47,9 @@ def index():
         try:
             moviles = obtener_nombres_moviles()
             productos = obtener_todos_los_skus_para_movimiento()
+            # FILTER: Remove SKU 4-4-654 as requested by user
+            productos = [p for p in productos if p[1] != '4-4-654']
+            
             details_moviles = obtener_detalles_moviles()
             
             count_m = len(moviles)

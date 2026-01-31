@@ -1,11 +1,12 @@
 import sqlite3
 import sys
+import os
+
 import tkinter as tk
-from tkinter import ttk 
+from tkinter import ttk
 from tkinter import messagebox 
 from tkinter import filedialog 
 from datetime import datetime, date, timedelta
-import os 
 import csv 
 from collections import defaultdict
 from dateutil import parser as dateparser
@@ -17,11 +18,15 @@ import threading
 # =================================================================
 
 from config import *
+
 from database import *
 
 # GUI Modules
+# GUI Modules
 from gui.utils import darken_color
 from gui.login import LoginWindow
+from gui.keyboard_shortcuts import setup_keyboard_shortcuts
+from gui.theme_manager import create_theme_manager
 
 
 
@@ -60,6 +65,10 @@ class ModernInventarioApp:
 
         # Crear interfaz moderna
         self.create_modern_gui()
+        
+        # Inicializar mejoras de UX
+        self.theme_manager = create_theme_manager(self.master)
+        self.keyboard_shortcuts = setup_keyboard_shortcuts(self.master, self)
         
         # Mostrar alerta de recordatorios al iniciar (en segundo plano)
         self.master.after(1000, lambda: threading.Thread(target=self.mostrar_alerta_inicial, daemon=True).start())
@@ -340,7 +349,10 @@ class ModernInventarioApp:
         self.audit_tab = AuditTab(self.main_notebook, self)
         self.main_notebook.add(self.audit_tab, text="🔍 Auditoría Terreno")
         
-        # Pestaña 8: Configuración
+        # Pestaña 8: Analítica Avanzada
+        self.analytics_tab = AnalyticsTab(self.main_notebook, self)
+        
+        # Pestaña 9: Configuración
         if self.usuario_actual and self.usuario_actual.get('rol') == 'ADMIN':
             self.settings_tab = SettingsTab(self.main_notebook, self)
             self.main_notebook.add(self.settings_tab, text="⚙️ Configuración")
@@ -444,29 +456,29 @@ if __name__ == "__main__":
     
     if not db_existe:
         poblar_datos_iniciales()
-        print("✅ Base de datos inicializada y poblada con datos iniciales.")
+        print("[OK] Base de datos inicializada y poblada con datos iniciales.")
     else:
-        print("✅ Base de datos ya existe. Esquema verificado.")
+        print("[OK] Base de datos ya existe. Esquema verificado.")
     
     # 3. EJECUTAR LIMPIEZA EN SEGUNDO PLANO
     def iniciar_tareas_segundo_plano():
         def run_optimization():
             try:
-                print("⚡ Ejecutando tareas de optimización en segundo plano...")
+                print("[INFO] Ejecutando tareas de optimización en segundo plano...")
                 verificar_y_corregir_duplicados_completo(silent=True)
-                print("✅ Tareas de optimización completadas.")
+                print("[OK] Tareas de optimización completadas.")
             except Exception as e:
-                print(f"⚠️ Error en tareas de optimización: {e}")
+                print(f"[ERROR] Error en tareas de optimización: {e}")
         
         thread = threading.Thread(target=run_optimization, daemon=True)
         thread.start()
     
     def bootstrap_app(usuario):
-        print(f"🔐 Sesión iniciada: {usuario['usuario']} ({usuario['rol']})")
+        print(f"[LOGIN] Sesión iniciada: {usuario['usuario']} ({usuario['rol']})")
         
         # IMPORTACIÓN DIFERIDA (PUNTO 3 - RENDIMIENTO)
         # Cargamos los módulos pesados SOLO después del login exitoso
-        global DashboardTab, InventoryTab, ReportsTab, RemindersTab, CuadreContableMasivo, SettingsTab, AuditTab
+        global DashboardTab, InventoryTab, ReportsTab, RemindersTab, CuadreContableMasivo, SettingsTab, AuditTab, AnalyticsTab
         from gui.dashboard import DashboardTab
         from gui.inventory import InventoryTab
         from gui.reports import ReportsTab
@@ -474,13 +486,14 @@ if __name__ == "__main__":
         from gui.accounting import CuadreContableMasivo
         from gui.settings import SettingsTab
         from gui.audit import AuditTab
+        from gui.analytics import AnalyticsTab
         
         login_top.destroy()
         
         # INICIAR PORTAL MÓVIL (PUNTO 5)
         import web_server
         portal_ip = web_server.start_server_thread()
-        print(f"📡 PORTAL MÓVIL ACTIVO: http://{portal_ip}:5000")
+        print(f"[WEB] PORTAL MOVIL ACTIVO: http://{portal_ip}:5000")
         
         # Inicializar App principal
         app = ModernInventarioApp(root, usuario)
