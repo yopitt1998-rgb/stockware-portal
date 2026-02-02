@@ -78,7 +78,41 @@ class AuditTab(tk.Frame):
         tk.Button(btn_frame, text="🔍 Filtrar/Cargar", command=self.cargar_datos_pendientes,
                  bg=Styles.SECONDARY_COLOR, fg='white', font=('Segoe UI', 9, 'bold'), relief='flat', padx=15, pady=8).pack(side='left', padx=5)
 
-        # ... (Rest of UI code unchanged) ...
+
+        # --- SECCIÓN INFERIOR: ACCIONES DE CIERRE (Mover antes de la tabla para usar pack side=bottom) ---
+        bottom_frame = tk.Frame(main_container, bg='#f8f9fa', pady=20)
+        bottom_frame.pack(side='bottom', fill='x')
+
+        self.btn_validar = tk.Button(bottom_frame, text="✅ Validar y Descontar del Inventario Real", 
+                                    command=self.validar_seleccion,
+                                    bg=Styles.SUCCESS_COLOR, fg='white', font=('Segoe UI', 11, 'bold'),
+                                    relief='flat', padx=30, pady=12, state='disabled')
+        self.btn_validar.pack(side='right')
+
+        tk.Button(bottom_frame, text="❌ Eliminar Seleccionados", 
+                  command=self.eliminar_seleccion,
+                  bg=Styles.WARNING_COLOR, fg='white', font=('Segoe UI', 10, 'bold'),
+                  relief='flat', padx=15, pady=10).pack(side='right', padx=10)
+
+        tk.Button(bottom_frame, text="🗑️ Limpiar Todo", 
+                  command=self.limpiar_datos_audit,
+                  bg=Styles.ACCENT_COLOR, fg='white', font=('Segoe UI', 10),
+                  relief='flat', padx=15, pady=8).pack(side='right', padx=20)
+
+        tk.Label(bottom_frame, text="* Seleccione los registros que coinciden con el físico y el Excel para procesar.", 
+                font=('Segoe UI', 9, 'italic'), bg='#f8f9fa', fg='#666').pack(side='left')
+
+        # --- SECCIÓN CENTRAL: TABLA DE PENDIENTES ---
+        self.table_frame = tk.Frame(main_container, bg='white', relief='flat')
+        self.table_frame.pack(side='top', fill='both', expand=True)
+
+        # Inicializar con columnas base (se agregarán columnas dinámicas de materiales después)
+        self.columnas_base = ["Fecha", "Móvil", "Técnico", "Ayudante", "Colilla", "Contrato"]
+        self.columnas_materiales = []  # Se llenará dinámicamente
+        self._row_ids = {}  # Diccionario oculto para mapear item_id -> ids_str
+        
+        # Crear tabla inicial vacía (se recreará con columnas dinámicas al cargar datos)
+        self._crear_tabla_con_columnas(self.columnas_base)
 
     def abrir_selector_moviles(self):
         """Abre un diálogo modal para seleccionar múltiples móviles"""
