@@ -4,6 +4,7 @@ import threading
 from tkinter import ttk
 from .styles import Styles
 from .styles import Styles
+from .tooltips import create_tooltip, TOOLTIPS
 from database import obtener_estadisticas_reales, obtener_inventario, obtener_stock_actual_y_moviles, obtener_ultimos_movimientos
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -114,6 +115,11 @@ class DashboardTab:
                           relief='flat', bd=0, padx=20, pady=12, cursor='hand2')
             btn.pack(side='left', padx=5, fill='x', expand=True)
             
+            # Agregar tooltips
+            tooltip_keys = ["nuevo_abasto", "salida_movil", "retorno_movil", "conciliacion_manual"]
+            if i < len(tooltip_keys):
+                create_tooltip(btn, TOOLTIPS.get(tooltip_keys[i], ""))
+            
             # Efectos hover
             def on_enter(e, b=btn): b.configure(bg=self.darken_color(b.cget('bg')))
             def on_leave(e, b=btn, c=color): b.configure(bg=c)
@@ -154,7 +160,7 @@ class DashboardTab:
             self.dashboard_table.yview_scroll(int(-1 * (event.delta / 120)), "units")
         self.dashboard_table.bind("<MouseWheel>", on_mousewheel)
         
-        self.cargar_datos_recent()
+        # self.cargar_datos_recent() # REMOVED: Loaded asynchronously via actualizar_metricas
 
     def actualizar_metricas(self):
         """Actualiza las métricas y la tabla en un hilo separado para no bloquear la UI"""

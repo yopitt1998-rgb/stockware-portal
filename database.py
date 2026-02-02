@@ -46,32 +46,30 @@ from config import (
 
 _mysql_pool = None
 
-def get_db_connection():
+def get_db_connection(target_db=None):
     """Retorna una conexión activa desde el pool (MySQL) o una nueva (SQLite)."""
     global _mysql_pool
     
     if DB_TYPE == 'MYSQL':
         try:
-            if _mysql_pool is None:
-                _mysql_pool = mysql.connector.pooling.MySQLConnectionPool(
-                    pool_name="stockware_pool",
-                    pool_size=10,
-                    pool_reset_session=True,
-                    host=MYSQL_HOST,
-                    user=MYSQL_USER,
-                    password=MYSQL_PASS,
-                    database=MYSQL_DB,
-                    port=MYSQL_PORT,
-                    charset='utf8mb4',
-                    collation='utf8mb4_unicode_ci'
+            # Si se especifica una DB distinta a la del pool, crear conexión directa
+            current_db = target_db if target_db else MYSQL_DB
+            
+            # Solo usar pool si es la DB principal
+            if _mysql_pool and (not target_db or target_db == MYSQL_DB):
+                return _mysql_pool.get_connection()
+            else:
+                # Conexión directa para DBs alternativas (Santiago)
+                return mysql.connector.connect(
+                    host=MYSQL_HOST, user=MYSQL_USER, password=MYSQL_PASS,
+                    database=current_db, port=MYSQL_PORT
                 )
-            return _mysql_pool.get_connection()
         except Exception as e:
-            print(f"❌ Error crítico en Pool MySQL: {e}")
-            # Fallback a conexión directa si el pool falla
+            print(f"❌ Error crítico en Conexión MySQL: {e}")
+            # Fallback
             return mysql.connector.connect(
                 host=MYSQL_HOST, user=MYSQL_USER, password=MYSQL_PASS,
-                database=MYSQL_DB, port=MYSQL_PORT
+                database=target_db if target_db else MYSQL_DB, port=MYSQL_PORT
             )
     else:
         conn = sqlite3.connect(DATABASE_NAME)
@@ -318,14 +316,17 @@ def inicializar_bd():
             add_mysql_index('idx_cons_fecha', 'consumos_pendientes', 'fecha')
             add_mysql_index('idx_cons_estado', 'consumos_pendientes', 'estado')
 
-        # MIGRACIÓN AUTOMÁTICA DE MÓVILES (Si la tabla está vacía)
-        cursor.execute("SELECT COUNT(*) FROM moviles")
-        if cursor.fetchone()[0] == 0:
-            print("⚙️ Migrando lista estática de móviles...")
-            for mv in MOVILES_DISPONIBLES:
-                try:
-                    cursor.execute("INSERT IGNORE INTO moviles (nombre, activo) VALUES (%s, 1)" if DB_TYPE == 'MYSQL' else "INSERT OR IGNORE INTO moviles (nombre, activo) VALUES (?, 1)", (mv,))
-                except: pass
+        # MIGRACIÓN AUTOMÁTICA DE MÓVILES (Asegurar que todos existan)
+        from config import ALL_MOVILES
+        print("⚙️ Verificando lista completa de móviles...")
+        for mv in ALL_MOVILES:
+            try:
+                # INSERT IGNORE (MySQL) o INSERT OR IGNORE (SQLite) para no fallar si ya existe
+                query = "INSERT IGNORE INTO moviles (nombre, activo) VALUES (%s, 1)" if DB_TYPE == 'MYSQL' else "INSERT OR IGNORE INTO moviles (nombre, activo) VALUES (?, 1)"
+                run_query(cursor, query, (mv,))
+            except Exception as e:
+                # Si falla silenciosamente (ej. ya existe y no es ignore), seguimos
+                pass
 
         conn.commit()
         return True
@@ -1744,6 +1745,39 @@ def crear_respaldo_bd(dest_path):
     except Exception as e:
         return False, f"Error al crear el respaldo: {str(e)}"
 
+def limpiar_base_datos():
+    """
+    Limpia todos los movimientos y datos de la base de datos, manteniendo solo la estructura.
+    ADVERTENCIA: Esta operación es irreversible.
+    """
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Limpiar todas las tablas de datos
+        tablas_a_limpiar = [
+            'movimientos',
+            'asignacion_moviles',
+            'consumos_pendientes',
+            'recordatorios_pendientes',
+            'prestamos_activos'
+        ]
+        
+        for tabla in tablas_a_limpiar:
+            run_query(cursor, f"DELETE FROM {tabla}")
+        
+        # Resetear cantidades de productos a 0
+        run_query(cursor, "UPDATE productos SET cantidad = 0")
+        
+        conn.commit()
+        return True, "Base de datos limpiada exitosamente. Todos los movimientos y datos han sido eliminados."
+    except Exception as e:
+        if conn: conn.rollback()
+        return False, f"Error al limpiar la base de datos: {str(e)}"
+    finally:
+        if conn: conn.close()
+
 def obtener_movimientos_por_rango(fecha_inicio, fecha_fin):
     """
     Obtiene todos los movimientos en un rango de fechas.
@@ -1780,7 +1814,15 @@ def registrar_consumo_pendiente(movil, sku, cantidad, tecnico, ticket, fecha, co
     """Guarda un reporte proveniente del portal móvil (Punto 5)."""
     conn = None
     try:
-        conn = get_db_connection()
+        # LÓGICA DE ENRUTAMIENTO (NUEVO): Detectar si es Santiago
+        target_db = None
+        from config import MOVILES_SANTIAGO, MYSQL_DB_SANTIAGO
+        
+        if movil in MOVILES_SANTIAGO and MYSQL_DB_SANTIAGO:
+            target_db = MYSQL_DB_SANTIAGO
+            print(f"[ROUTING] Redirigiendo consumo de {movil} a {target_db}")
+            
+        conn = get_db_connection(target_db=target_db)
         cursor = conn.cursor()
         run_query(cursor, """
             INSERT INTO consumos_pendientes (movil, sku, cantidad, tecnico_nombre, ayudante_nombre, ticket, fecha, colilla, num_contrato)
@@ -1792,6 +1834,21 @@ def registrar_consumo_pendiente(movil, sku, cantidad, tecnico, ticket, fecha, co
         return False, str(e)
     finally:
         if conn: conn.close()
+
+def eliminar_consumo_pendiente(id_consumo):
+    """Elimina un consumo pendiente específico por su ID."""
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        run_query(cursor, "DELETE FROM consumos_pendientes WHERE id = ?", (id_consumo,))
+        conn.commit()
+        return True, "Registro eliminado correctamente."
+    except Exception as e:
+        return False, f"Error al eliminar registro: {e}"
+    finally:
+        if conn:
+            conn.close()
 
 def obtener_consumos_pendientes(fecha_inicio=None, fecha_fin=None, estado='PENDIENTE'):
     """Obtiene consumos reportados por móviles filtrando opcionalmente por rango de fechas."""
@@ -1976,6 +2033,12 @@ def obtener_moviles(solo_activos=True):
 
 def obtener_nombres_moviles(solo_activos=True):
     """Retorna una LISTA de STRINGS con los nombres de los móviles (para compatibilidad con comboboxes)."""
+    # En Desktop: Consultar DB
+    # En Cloud: Usar configuración estática para ver TODOS los móviles (David y Santiago)
+    if not HAS_TK: # Asumimos 'Cloud Mode' si no hay tkinter (o podríamos usar otra bandera)
+        from config import ALL_MOVILES
+        return ALL_MOVILES
+        
     moviles = obtener_moviles(solo_activos)
     return [m[0] for m in moviles]
 

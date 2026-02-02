@@ -1,6 +1,6 @@
 import tkinter as tk
-from tkinter import ttk, filedialog
-from database import obtener_configuracion, guardar_configuracion, crear_respaldo_bd
+from tkinter import ttk, filedialog, messagebox
+from database import obtener_configuracion, guardar_configuracion, crear_respaldo_bd, limpiar_base_datos
 from .styles import Styles
 from .utils import mostrar_mensaje_emergente
 from datetime import datetime
@@ -18,16 +18,62 @@ class SettingsTab(tk.Frame):
         self.cargar_datos()
 
     def create_widgets(self):
-        # Main container with padding
-        container = ttk.Frame(self, style='Modern.TFrame')
-        container.pack(fill='both', expand=True, padx=50, pady=30)
+        # Create a main frame to hold canvas and scrollbar
+        main_frame = tk.Frame(self, bg='#f8f9fa')
+        main_frame.pack(fill='both', expand=True)
+
+        # Create Canvas and Scrollbar
+        canvas = tk.Canvas(main_frame, bg='#f8f9fa', highlightthickness=0)
+        scrollbar = ttk.Scrollbar(main_frame, orient="vertical", command=canvas.yview)
+        
+        # Configure scrollbar
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        # Pack them
+        scrollbar.pack(side="right", fill="y")
+        canvas.pack(side="left", fill="both", expand=True)
+        
+        # Create the scrollable frame
+        # IMPORTANT: Use a separate frame for the content
+        container = ttk.Frame(canvas, style='Modern.TFrame')
+        
+        # Create window in canvas
+        canvas_window = canvas.create_window((0, 0), window=container, anchor="nw")
+        
+        # Configure scrolling
+        def on_frame_configure(event):
+            canvas.configure(scrollregion=canvas.bbox("all"))
+            # Ensure the inner frame is at least as wide as the canvas
+            width = event.width
+            canvas.itemconfig(canvas_window, width=width)
+            
+        def on_canvas_configure(event):
+            # Update the width of the window to match the canvas
+            canvas.itemconfig(canvas_window, width=event.width)
+            
+        container.bind("<Configure>", on_frame_configure)
+        canvas.bind("<Configure>", on_canvas_configure)
+        
+        # Enable MouseWheel scrolling
+        def on_mousewheel(event):
+            canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+            
+        # Bind mousewheel to canvas and all its children recursively if needed, 
+        # but binding to canvas and frame is usually enough if focused or hovered
+        canvas.bind_all("<MouseWheel>", on_mousewheel)
+
+        # --- EXISTING CONTENT NOW PACKED INTO 'container' ---
+        
+        # Add padding to the inner content
+        inner_content = tk.Frame(container, bg='#f8f9fa')
+        inner_content.pack(fill='both', expand=True, padx=50, pady=30)
         
         # Title
-        tk.Label(container, text="⚙️ CONFIGURACIÓN DE LA EMPRESA", 
+        tk.Label(inner_content, text="⚙️ CONFIGURACIÓN DE LA EMPRESA", 
                 font=('Segoe UI', 16, 'bold'), bg='#f8f9fa', fg=Styles.PRIMARY_COLOR).pack(pady=(0, 20), anchor='w')
         
         # Form grid
-        form_frame = tk.Frame(container, bg='#f8f9fa')
+        form_frame = tk.Frame(inner_content, bg='#f8f9fa')
         form_frame.pack(fill='x')
         
         # Labels and Entries
@@ -57,7 +103,7 @@ class SettingsTab(tk.Frame):
                   bg=Styles.SECONDARY_COLOR, fg='white', relief='flat', padx=10).pack(side='left', padx=5)
         
         # Bottom Buttons
-        btn_frame = tk.Frame(container, bg='#f8f9fa')
+        btn_frame = tk.Frame(inner_content, bg='#f8f9fa')
         btn_frame.pack(fill='x', pady=30)
         
         self.btn_guardar = tk.Button(btn_frame, text="💾 Guardar Cambios", command=self.guardar_datos,
@@ -65,8 +111,13 @@ class SettingsTab(tk.Frame):
                                    relief='flat', padx=30, pady=10, cursor='hand2')
         self.btn_guardar.pack(side='left')
         
+        # Botón de cambio de tema
+        if hasattr(self.main_app, 'theme_manager'):
+            theme_btn = self.main_app.theme_manager.create_theme_toggle_button(btn_frame)
+            theme_btn.pack(side='left', padx=20)
+        
         # Preview info
-        info_frame = tk.Frame(container, bg='#E8F5E9', padx=15, pady=15, relief='raised', borderwidth=0, highlightthickness=1, highlightbackground='#C8E6C9')
+        info_frame = tk.Frame(inner_content, bg='#E8F5E9', padx=15, pady=15, relief='raised', borderwidth=0, highlightthickness=1, highlightbackground='#C8E6C9')
         info_frame.pack(fill='x', pady=10)
         
         tk.Label(info_frame, text="ℹ️ Estos datos se utilizarán automáticamente en:", 
@@ -75,10 +126,10 @@ class SettingsTab(tk.Frame):
                 font=('Segoe UI', 9), bg='#E8F5E9', fg='#2E7D32', justify='left').pack(anchor='w', pady=(5, 0))
 
         # --- SECCIÓN DE RESPALDO (NUEVO) ---
-        tk.Label(container, text="📦 RESPALDO DE SEGURIDAD", 
+        tk.Label(inner_content, text="📦 RESPALDO DE SEGURIDAD", 
                 font=('Segoe UI', 13, 'bold'), bg='#f8f9fa', fg='#d35400').pack(pady=(30, 10), anchor='w')
         
-        backup_frame = tk.Frame(container, bg='#FFF3E0', padx=20, pady=20, highlightthickness=1, highlightbackground='#FFE0B2')
+        backup_frame = tk.Frame(inner_content, bg='#FFF3E0', padx=20, pady=20, highlightthickness=1, highlightbackground='#FFE0B2')
         backup_frame.pack(fill='x')
         
         tk.Label(backup_frame, text="Crea una copia exacta de tu base de datos actual para evitar pérdida de información.", 
@@ -87,6 +138,25 @@ class SettingsTab(tk.Frame):
         tk.Button(backup_frame, text="🧱 Crear Copia de Seguridad", command=self.crear_respaldo,
                  bg='#e67e22', fg='white', font=('Segoe UI', 10, 'bold'),
                  relief='flat', padx=20, pady=8, cursor='hand2').pack(side='right')
+
+        # --- SECCIÓN DE LIMPIEZA DE BASE DE DATOS (NUEVO) ---
+        tk.Label(inner_content, text="⚠️ LIMPIEZA DE BASE DE DATOS", 
+                font=('Segoe UI', 13, 'bold'), bg='#f8f9fa', fg='#c0392b').pack(pady=(30, 10), anchor='w')
+        
+        cleanup_frame = tk.Frame(inner_content, bg='#FFEBEE', padx=20, pady=20, highlightthickness=1, highlightbackground='#FFCDD2')
+        cleanup_frame.pack(fill='x')
+        
+        warning_text = tk.Label(cleanup_frame, 
+                               text="⚠️ ADVERTENCIA: Esta acción eliminará TODOS los movimientos y datos del sistema.\n"
+                                    "Solo se mantendrá la estructura de la base de datos. Esta operación es IRREVERSIBLE.\n"
+                                    "Se recomienda crear una copia de seguridad antes de continuar.",
+                               font=('Segoe UI', 9), bg='#FFEBEE', fg='#c0392b', justify='left')
+        warning_text.pack(side='left', fill='x', expand=True)
+        
+        tk.Button(cleanup_frame, text="🗑️ Limpiar Base de Datos", command=self.limpiar_base_datos,
+                 bg='#c0392b', fg='white', font=('Segoe UI', 10, 'bold'),
+                 relief='flat', padx=20, pady=8, cursor='hand2').pack(side='right')
+
 
     def seleccionar_logo(self):
         filename = filedialog.askopenfilename(
@@ -140,4 +210,48 @@ class SettingsTab(tk.Frame):
                 mostrar_mensaje_emergente(self, "Copia Exitosa", mensaje, "success")
             else:
                 mostrar_mensaje_emergente(self, "Error en Respaldo", mensaje, "error")
+
+    def limpiar_base_datos(self):
+        """Maneja la limpieza completa de la base de datos con confirmación doble."""
+        # Primera confirmación
+        respuesta1 = messagebox.askokcancel(
+            "⚠️ ADVERTENCIA - Limpieza de Base de Datos",
+            "Esta acción eliminará TODOS los movimientos y datos del sistema.\n\n"
+            "Se eliminarán:\n"
+            "• Todos los movimientos de inventario\n"
+            "• Asignaciones a móviles\n"
+            "• Consumos pendientes\n"
+            "• Recordatorios\n"
+            "• Préstamos activos\n"
+            "• Cantidades de productos (se resetearán a 0)\n\n"
+            "Esta operación es IRREVERSIBLE.\n\n"
+            "¿Está seguro que desea continuar?",
+            icon='warning'
+        )
+        
+        if not respuesta1:
+            return
+        
+        # Segunda confirmación (doble check)
+        respuesta2 = messagebox.askyesno(
+            "⚠️ CONFIRMACIÓN FINAL",
+            "ÚLTIMA ADVERTENCIA:\n\n"
+            "Está a punto de eliminar TODOS los datos del sistema.\n"
+            "Esta acción NO SE PUEDE DESHACER.\n\n"
+            "¿Realmente desea proceder con la limpieza?",
+            icon='warning'
+        )
+        
+        if not respuesta2:
+            return
+        
+        # Proceder con la limpieza
+        exito, mensaje = limpiar_base_datos()
+        if exito:
+            mostrar_mensaje_emergente(self, "Limpieza Completada", mensaje, "success")
+            # Actualizar dashboard si existe
+            if hasattr(self.main_app, 'dashboard_tab'):
+                self.main_app.dashboard_tab.actualizar_metricas()
+        else:
+            mostrar_mensaje_emergente(self, "Error en Limpieza", mensaje, "error")
 

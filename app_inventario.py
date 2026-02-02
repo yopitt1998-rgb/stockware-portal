@@ -48,7 +48,8 @@ class ModernInventarioApp:
     def __init__(self, master, usuario=None):
         self.master = master
         self.usuario_actual = usuario
-        self.master.title(f"🚀 StockWare - Gestión de Inventario ({usuario.get('usuario') if usuario else ''})")
+        branch_display = f" | 📍 {BRANCH_NAME}" if BRANCH_NAME else ""
+        self.master.title(f"🚀 StockWare - Gestión de Inventario ({usuario.get('usuario') if usuario else ''}){branch_display}")
         self.master.configure(bg='#f8f9fa')
         
         # CONFIGURAR ICONO - NUEVO: Agregar ícono del programa
@@ -445,7 +446,8 @@ class ModernInventarioApp:
 # 6. INICIALIZACIÓN DE LA APLICACIÓN
 # =================================================================
 
-if __name__ == "__main__":
+
+def main():
     # 1. Crear ventana principal de inmediato para evitar sensación de lentitud
     root = tk.Tk()
     root.withdraw()
@@ -511,7 +513,8 @@ if __name__ == "__main__":
 
     # Mostrar ventana de Login
     login_top = tk.Toplevel(root)
-    login_top.protocol("WM_DELETE_WINDOW", root.destroy) # Si cierran login, cierran todo
+    # login_top.protocol("WM_DELETE_WINDOW", root.destroy) # Si cierran login, cierran todo -> CAUSABA DOBLE CIERRE CON ROOT
+    login_top.protocol("WM_DELETE_WINDOW", lambda: sys.exit(0))
     LoginWindow(login_top, bootstrap_app)
     
     # Programar limpieza para 1 segundo después para no bloquear ventana de login
@@ -519,3 +522,6 @@ if __name__ == "__main__":
     
     # Iniciar aplicación
     root.mainloop()
+
+if __name__ == "__main__":
+    main()

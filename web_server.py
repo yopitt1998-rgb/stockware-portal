@@ -117,7 +117,16 @@ def registrar_bulk():
     from database import get_db_connection, run_query
     conn = None
     try:
-        conn = get_db_connection()
+        # LÓGICA DE ENRUTAMIENTO (NUEVO)
+        target_db = None
+        from config import MOVILES_SANTIAGO, MYSQL_DB_SANTIAGO
+        movil = data.get('movil', '')
+        
+        if movil in MOVILES_SANTIAGO and MYSQL_DB_SANTIAGO:
+            target_db = MYSQL_DB_SANTIAGO
+            print(f"[ROUTING] Redirigiendo bulk de {movil} a {target_db}")
+            
+        conn = get_db_connection(target_db=target_db)
         cursor = conn.cursor()
         
         exitos = 0

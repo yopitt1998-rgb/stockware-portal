@@ -12,12 +12,12 @@ else:
 
 # Cargar variables de entorno desde la ruta absoluta del .env
 dotenv_path = os.path.join(application_path, '.env')
-print(f"🔍 Buscando .env en: {dotenv_path}")
+print(f"[SEARCH] Buscando .env en: {dotenv_path}")
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
-    print("✅ .env cargado exitosamente")
+    print("[OK] .env cargado exitosamente")
 else:
-    print(f"⚠️ Archivo .env no encontrado en: {dotenv_path}")
+    print(f"[WARNING] Archivo .env no encontrado en: {dotenv_path}")
 
 DATABASE_NAME = os.path.join(application_path, "inventario_sqlite.db")
 
@@ -28,10 +28,17 @@ DB_TYPE = os.getenv("DB_TYPE", "SQLITE").upper() # 'SQLITE' o 'MYSQL'
 MYSQL_HOST = os.getenv("MYSQL_HOST")
 MYSQL_USER = os.getenv("MYSQL_USER")
 MYSQL_PASS = os.getenv("MYSQL_PASSWORD")
-MYSQL_DB = os.getenv("MYSQL_DATABASE")
+MYSQL_DB = os.getenv("MYSQL_DATABASE_OVERRIDE", os.getenv("MYSQL_DATABASE"))
+MYSQL_DB_SANTIAGO = os.getenv("MYSQL_DATABASE_SANTIAGO") # Nuevo: DB para Santiago
 MYSQL_PORT = int(os.getenv("MYSQL_PORT", 3306))
 
+# Branch Name for UI title
+BRANCH_NAME = os.getenv("CURRENT_BRANCH_NAME", "")
+
+
 MOVILES_DISPONIBLES = ["Movil 200", "Movil 201", "Movil 202", "Movil 203", "Movil 204", "Movil 205"]
+MOVILES_SANTIAGO = ["Movil 206", "Movil 207", "Movil 208", "Movil 209", "Movil 210"]
+ALL_MOVILES = MOVILES_DISPONIBLES + MOVILES_SANTIAGO
 UBICACION_DESCARTE = "DESCARTE"
 TIPO_MOVIMIENTO_DESCARTE = "DESCARTE" 
 TIPOS_CONSUMO = ['SALIDA', 'CONSUMO_MOVIL', 'DESCARTE']
