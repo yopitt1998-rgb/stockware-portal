@@ -313,8 +313,16 @@ class AuditTab(tk.Frame):
                 
                 # Filtrar en memoria por móvil (MULTI-SELECT)
                 if filtro_moviles:
+                    # Normalizar filtro para ser insensible a mayúsculas/espacios
+                    filtro_set = {str(m).strip().upper() for m in filtro_moviles}
+                    
+                    print(f"DEBUG: Filtro activo: {filtro_set}")
+                    
                     # c = (id, movil, sku, nombre, cantidad, tecnico, ticket, fecha, colilla, contrato, ayudante)
-                    consumos = [c for c in consumos if c[1] in filtro_moviles]
+                    # c[1] es el móvil. Verificamos que no sea None y normalizamos.
+                    consumos = [c for c in consumos if c[1] and str(c[1]).strip().upper() in filtro_set]
+                    
+                    print(f"DEBUG: Registros tras filtro: {len(consumos)}")
                 
                 # Programar actualización de la UI en el hilo principal
                 self.after(0, lambda: self._aplicar_pendientes_ui(consumos))
