@@ -12,165 +12,262 @@
             --success: #27ae60;
             --warning: #f39c12;
             --bg: #f4f7f6;
-        }
 
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: var(--bg);
-            margin: 0;
-            padding: 10px;
-            color: #333;
-        }
+            body {
+                font-family: 'Segoe UI', sans-serif;
+                background: var(--bg);
+                margin: 0;
+                padding: 10px;
+                color: #333;
+            }
 
-        .container {
-            max-width: 600px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
+            .container {
+                max-width: 600px;
+                margin: auto;
+                background: white;
+                padding: 20px;
+                border-radius: 12px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            }
 
-        h1 {
-            text-align: center;
-            color: var(--primary);
-            margin-bottom: 20px;
-            font-size: 24px;
-        }
+            h1 {
+                text-align: center;
+                color: var(--primary);
+                margin-bottom: 20px;
+                font-size: 24px;
+            }
 
-        .logo {
-            text-align: center;
-            font-size: 22px;
-            font-weight: 900;
-            color: var(--primary);
-            margin-bottom: 5px;
-        }
+            .logo {
+                text-align: center;
+                font-size: 22px;
+                font-weight: 900;
+                color: var(--primary);
+                margin-bottom: 5px;
+            }
 
-        .section-title {
-            background: #f8f9fa;
-            padding: 10px;
-            border-left: 5px solid var(--accent);
-            font-weight: bold;
-            margin: 20px 0 10px;
-            font-size: 14px;
-            text-transform: uppercase;
-        }
+            .section-title {
+                background: #f8f9fa;
+                padding: 10px;
+                border-left: 5px solid var(--accent);
+                font-weight: bold;
+                margin: 20px 0 10px;
+                font-size: 14px;
+                text-transform: uppercase;
+            }
 
-        .form-group {
-            margin-bottom: 15px;
-        }
+            .form-group {
+                margin-bottom: 15px;
+            }
 
-        label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
-            font-size: 13px;
-        }
+            label {
+                display: block;
+                font-weight: bold;
+                margin-bottom: 5px;
+                font-size: 13px;
+            }
 
-        select,
-        input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
+            select,
+            input {
+                width: 100%;
+                padding: 12px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                box-sizing: border-box;
+                font-size: 16px;
+            }
 
-        .material-list {
-            margin-top: 10px;
-        }
+            .material-list {
+                margin-top: 10px;
+            }
 
-        .material-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            transition: all 0.2s;
-        }
+            .material-item {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 12px;
+                border-bottom: 1px solid #eee;
+                transition: all 0.2s;
+            }
 
-        .material-item.disabled {
-            opacity: 0.3;
-            background: #fafafa;
-            filter: grayscale(1);
-            pointer-events: none;
-        }
+            .material-item.disabled {
+                opacity: 0.3;
+                background: #fafafa;
+                filter: grayscale(1);
+                pointer-events: none;
+            }
 
-        .material-info {
-            flex: 1;
-            padding-right: 15px;
-        }
+            .material-info {
+                flex: 1;
+                padding-right: 15px;
+            }
 
-        .material-name {
-            font-weight: bold;
-            font-size: 14px;
-            display: block;
-        }
+            .material-name {
+                font-weight: bold;
+                font-size: 14px;
+                display: block;
+            }
 
-        .material-sku {
-            font-size: 11px;
-            color: #777;
-        }
+            .material-sku {
+                font-size: 11px;
+                color: #777;
+            }
 
-        .material-qty {
-            width: 80px !important;
-            text-align: center;
-            border-color: #bbb;
-        }
+            .material-qty {
+                width: 80px !important;
+                text-align: center;
+                border-color: #bbb;
+            }
 
-        .submit-btn {
-            width: 100%;
-            padding: 18px;
-            background: var(--success);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 30px;
-            box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
-        }
+            .submit-btn {
+                width: 100%;
+                padding: 18px;
+                background: var(--success);
+                color: white;
+                border: none;
+                border-radius: 10px;
+                font-size: 18px;
+                font-weight: bold;
+                cursor: pointer;
+                margin-top: 30px;
+                box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
+            }
 
-        .submit-btn:disabled {
-            background: #ccc;
-            box-shadow: none;
-            cursor: not-allowed;
-        }
+            .submit-btn:disabled {
+                background: #ccc;
+                box-shadow: none;
+                cursor: not-allowed;
+            }
 
-        .alert {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
-            text-align: center;
-            font-weight: bold;
-        }
+            .alert {
+                padding: 15px;
+                border-radius: 8px;
+                margin-bottom: 20px;
+                display: none;
+                text-align: center;
+                font-weight: bold;
+            }
 
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
+            .alert-success {
+                background: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
 
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
+            .alert-error {
+                background: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+            }
 
-        .hint {
-            font-size: 11px;
-            color: #666;
-            font-weight: normal;
-            margin-top: 3px;
-            display: block;
-        }
+            .hint {
+                font-size: 11px;
+                color: #666;
+                font-weight: normal;
+                margin-top: 3px;
+                display: block;
+            }
+
+            /* Scanner Modal */
+            .scan-modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                z-index: 1000;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+            }
+
+            .scan-modal.active {
+                display: flex;
+            }
+
+            .scan-content {
+                background: white;
+                padding: 30px;
+                border-radius: 12px;
+                text-align: center;
+                max-width: 80%;
+            }
+
+            .scan-icon-btn {
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-size: 20px;
+                margin-left: 10px;
+                padding: 5px;
+                opacity: 0.7;
+                transition: transform 0.2s;
+            }
+
+            .scan-icon-btn:hover {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+
+            .highlight-row {
+                animation: flash 1s;
+            }
+
+            @keyframes flash {
+                0% {
+                    background-color: #d4edda;
+                }
+
+                100% {
+                    background-color: transparent;
+                }
+            }
     </style>
 </head>
 
 <body>
+    <!-- Scan Modal -->
+    <div class="scan-modal" id="scanModal">
+        <div class="scan-content">
+            <div style="font-size: 50px;">📷</div>
+            <h2>Escanee el Código Ahora</h2>
+            <p id="scanTargetName" style="color: var(--accent); font-weight: bold;">...</p>
+            <input type="text" id="modalScanInput" style="opacity: 0; position: absolute; pointer-events: none;">
+            <p style="font-size: 12px; color: #666;">Esperando lectura de código de barras...</p>
+            <button onclick="closeScanner()"
+                style="margin-top:20px; padding:10px 20px; border:none; background:#eee; border-radius:5px;">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- Modal de Selección de Seriales (NUEVO) -->
+    <div class="scan-modal" id="modalSeriales">
+        <div class="scan-content" style="max-width:450px; max-height:90vh; overflow-y:auto;">
+            <h2 id="modalSeriesTitulo" style="margin-top:0; color:var(--primary);"></h2>
+            <p style="color:#666; font-size:13px; margin-bottom:15px;">Seleccione los equipos utilizados:</p>
+
+            <div id="listaSeriales"
+                style="max-height:350px; overflow-y:auto; margin:15px 0; border:1px solid #ddd; border-radius:8px; background:#fafafa;">
+                <!-- Checkboxes dinámicos -->
+            </div>
+
+            <p style="font-weight:bold; font-size:16px; margin-top:15px;">
+                Seleccionados: <span id="countSeleccionados" style="color:var(--success);">0</span>
+            </p>
+
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button onclick="confirmarSeriales()"
+                    style="flex:1; padding:12px 20px; background:var(--success); color:white; border:none; border-radius:8px; font-size:14px; font-weight:bold; cursor:pointer;">
+                    ✅ Confirmar
+                </button>
+                <button onclick="cerrarModalSeriales()"
+                    style="flex:1; padding:12px 20px; background:#95a5a6; color:white; border:none; border-radius:8px; font-size:14px; cursor:pointer;">
+                    ❌ Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="logo">🚀 StockWare</div>
     <div class="container">
         <h1>Reporte de Consumo</h1>
@@ -219,7 +316,6 @@
                 <input type="text" name="ayudante" id="ayudante">
             </div>
 
-            <div class="section-title">Materiales Instalados</div>
             <div class="material-list">
                 {% for p in productos %}
                 <div class="material-item" id="row_{{ p[1] }}">
@@ -227,8 +323,18 @@
                         <span class="material-name">{{ p[0] }}</span>
                         <span class="material-sku">SKU: {{ p[1] }}</span>
                     </div>
-                    <input type="number" name="qty_{{ p[1] }}" id="input_{{ p[1] }}" class="material-qty sku-input"
-                        data-sku="{{ p[1] }}" min="0" placeholder="0">
+
+                    <!-- Container for Input + Scan Icon -->
+                    <div style="display: flex; align-items: center;">
+                        <input type="number" name="qty_{{ p[1] }}" id="input_{{ p[1] }}" class="material-qty sku-input"
+                            data-sku="{{ p[1] }}" data-name="{{ p[0] }}" min="0" placeholder="0">
+
+                        <!-- Icon will be shown via JS for allowed SKUs -->
+                        <button type="button" class="scan-icon-btn" id="btn_scan_{{ p[1] }}"
+                            onclick="openScanner('{{ p[1] }}', '{{ p[0] }}')" style="display:none;">
+                            📷
+                        </button>
+                    </div>
                 </div>
                 {% endfor %}
             </div>
@@ -250,18 +356,91 @@
         const EXTENDER_A = '4-4-646';
         const EXTENDER_B = '4-4-647';
 
-        // Auto-completado
-        document.getElementById('movil_select').onchange = function () {
-            const d = DETAILS_MOVILES[this.value];
+        // Variables globales para inventario y selección
+        window.INVENTARIO_ACTUAL = null;
+        window.SERIALES_SELECCIONADOS = {};  // {sku: [seriales]}
+
+        // Auto-completado + Carga de Inventario
+        document.getElementById('movil_select').onchange = async function () {
+            const movil = this.value;
+
+            // Auto-completar conductor/ayudante
+            const d = DETAILS_MOVILES[movil];
             if (d) {
                 document.getElementById('tecnico').value = d.conductor;
                 document.getElementById('ayudante').value = d.ayudante;
             }
+
+            // Cargar inventario del móvil
+            if (movil && movil !== '--- Seleccionar ---') {
+                try {
+                    const res = await fetch(`/api/inventario/${encodeURIComponent(movil)}`);
+                    const data = await res.json();
+
+                    if (data.inventario) {
+                        window.INVENTARIO_ACTUAL = data.inventario;
+                        window.SERIALES_SELECCIONADOS = {};  // Resetear
+                        actualizarUIConInventario();
+                    }
+                } catch (error) {
+                    console.error('Error cargando inventario:', error);
+                }
+            }
         };
+
+        function actualizarUIConInventario() {
+            if (!window.INVENTARIO_ACTUAL) return;
+
+            window.INVENTARIO_ACTUAL.forEach(item => {
+                const row = document.getElementById(`row_${item.sku}`);
+                if (!row) return;
+
+                const materialInfo = row.querySelector('.material-info');
+                if (!materialInfo) return;
+
+                // Agregar o actualizar badge
+                let badge = row.querySelector('.badge-disponible');
+                if (!badge) {
+                    badge = document.createElement('span');
+                    badge.className = 'badge-disponible';
+                    badge.style.cssText = 'background:#3498db; color:white; padding:3px 8px; border-radius:10px; font-size:11px; margin-left:8px; display:inline-block;';
+                    materialInfo.appendChild(badge);
+                }
+
+                const disponibles = item.tiene_series ? item.seriales.length : item.cantidad_total;
+                badge.textContent = `${disponibles} disponibles`;
+                badge.style.background = disponibles > 0 ? '#3498db' : '#e74c3c';
+
+                // Si tiene series, reemplazar input con botón
+                if (item.tiene_series && item.seriales && item.seriales.length > 0) {
+                    const input = document.getElementById(`input_${item.sku}`);
+                    let btn = row.querySelector('.btn-seleccionar-series');
+
+                    if (!btn) {
+                        input.style.display = 'none';
+
+                        btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'btn-seleccionar-series';
+                        btn.textContent = 'Seleccionar';
+                        btn.onclick = () => abrirModalSeriales(item.sku, item.nombre, item.seriales);
+                        btn.style.cssText = 'padding:10px 20px; background:#27ae60; color:white; border:none; border-radius:6px; font-size:13px; font-weight:bold; cursor:pointer;';
+
+                        input.parentNode.insertBefore(btn, input);
+                        window.SERIALES_SELECCIONADOS[item.sku] = [];
+                    }
+                } else if (item.cantidad_total === 0) {
+                    // Deshabilitar si no hay stock
+                    const input = document.getElementById(`input_${item.sku}`);
+                    if (input) input.disabled = true;
+                    row.classList.add('disabled');
+                }
+            });
+        }
 
         // Lógica de Exclusión Mutual y Límites de Cantidad
         const inputs = document.querySelectorAll('.sku-input');
-        
+
         // Configuración de límites por SKU
         const MAX_LIMITS = {
             '2-7-11': 1,
@@ -274,10 +453,10 @@
 
         inputs.forEach(inp => {
             // Validar límites al escribir
-            inp.addEventListener('input', function() {
+            inp.addEventListener('input', function () {
                 const sku = this.dataset.sku;
                 let val = parseInt(this.value);
-                
+
                 // Aplicar límite máximo si existe
                 if (MAX_LIMITS[sku] !== undefined) {
                     if (val > MAX_LIMITS[sku]) {
@@ -292,11 +471,11 @@
             inp.oninput = function () {
                 const sku = this.dataset.sku;
                 const qty = parseInt(this.value) || 0;
-                
+
                 // Re-aplicar límite por seguridad
                 if (MAX_LIMITS[sku] !== undefined && qty > MAX_LIMITS[sku]) {
                     this.value = MAX_LIMITS[sku];
-                    return; 
+                    return;
                 }
 
                 if (ALL_ONTS.includes(sku) && qty > 0) {
@@ -362,6 +541,101 @@
             }
         }
 
+        // ========== FUNCIONES PARA MODAL DE SELECCIÓN DE SERIALES (NUEVO) ==========
+
+        let currentModalSKU = null;
+        let currentModalSeriales = null;
+
+        function abrirModalSeriales(sku, nombre, seriales) {
+            currentModalSKU = sku;
+            currentModalSeriales = seriales;
+
+            document.getElementById('modalSeriesTitulo').textContent = nombre;
+
+            const lista = document.getElementById('listaSeriales');
+            lista.innerHTML = '';
+
+            // Obtener selección actual
+            const seleccionados = window.SERIALES_SELECCIONADOS[sku] || [];
+
+            // Crear checkboxes para cada serial
+            seriales.forEach((serial, index) => {
+                const label = document.createElement('label');
+                label.style.cssText = 'display:block; padding:12px 15px; border-bottom:1px solid #e0e0e0; cursor:pointer; transition:background 0.2s;';
+                label.onmouseover = () => label.style.background = '#f0f0f0';
+                label.onmouseout = () => label.style.background = 'transparent';
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = serial;
+                checkbox.checked = seleccionados.includes(serial);
+                checkbox.onchange = actualizarContadorSeriales;
+                checkbox.style.marginRight = '10px';
+
+                const serialText = document.createElement('span');
+                serialText.textContent = serial;
+                serialText.style.fontFamily = 'Courier, monospace';
+                serialText.style.fontSize = '13px';
+
+                label.appendChild(checkbox);
+                label.appendChild(serialText);
+                lista.appendChild(label);
+            });
+
+            actualizarContadorSeriales();
+            document.getElementById('modalSeriales').classList.add('active');
+        }
+
+        function actualizarContadorSeriales() {
+            const checked = document.querySelectorAll('#listaSeriales input:checked').length;
+            document.getElementById('countSeleccionados').textContent = checked;
+        }
+
+        function confirmarSeriales() {
+            const checkboxes = document.querySelectorAll('#listaSeriales input:checked');
+            const seleccionados = Array.from(checkboxes).map(cb => cb.value);
+
+            // Guardar selección
+            window.SERIALES_SELECCIONADOS[currentModalSKU] = seleccionados;
+
+            // Actualizar input oculto con cantidad
+            const input = document.getElementById(`input_${currentModalSKU}`);
+            if (input) {
+                input.value = seleccionados.length;
+            }
+
+            // Actualizar badge de disponibilidad
+            const row = document.getElementById(`row_${currentModalSKU}`);
+            const badge = row?.querySelector('.badge-disponible');
+            if (badge && currentModalSeriales) {
+                const disponibles = currentModalSeriales.length - seleccionados.length;
+                badge.textContent = `${disponibles} disponibles`;
+                badge.style.background = disponibles > 0 ? '#3498db' : '#e74c3c';
+            }
+
+            // Actualizar botón de selección
+            const btn = row?.querySelector('.btn-seleccionar-series');
+            if (btn) {
+                if (seleccionados.length > 0) {
+                    btn.textContent = `${seleccionados.length} seleccionados`;
+                    btn.style.background = '#27ae60';
+                } else {
+                    btn.textContent = 'Seleccionar';
+                    btn.style.background = '#27ae60';
+                }
+            }
+
+            cerrarModalSeriales();
+        }
+
+        function cerrarModalSeriales() {
+            document.getElementById('modalSeriales').classList.remove('active');
+            currentModalSKU = null;
+            currentModalSeriales = null;
+        }
+
+        // ========== FIN FUNCIONES DE MODAL ==========
+
         document.getElementById('consumoForm').onsubmit = async (e) => {
             e.preventDefault();
             const alert = document.getElementById('alert');
@@ -376,7 +650,19 @@
             const materiales = [];
             document.querySelectorAll('.sku-input').forEach(i => {
                 const v = parseInt(i.value);
-                if (v > 0) materiales.push({ sku: i.dataset.sku, cantidad: v });
+                if (v > 0) {
+                    const material = { sku: i.dataset.sku, cantidad: v };
+
+                    // Agregar seriales si fueron seleccionados
+                    if (window.SERIALES_SELECCIONADOS && window.SERIALES_SELECCIONADOS[i.dataset.sku]) {
+                        const seriales = window.SERIALES_SELECCIONADOS[i.dataset.sku];
+                        if (seriales.length > 0) {
+                            material.seriales = seriales;
+                        }
+                    }
+
+                    materiales.push(material);
+                }
             });
 
             if (materiales.length === 0) { alert.style.display = 'block'; alert.className = 'alert alert-error'; alert.innerText = '❌ Ingrese al menos un material.'; return; }
@@ -413,7 +699,90 @@
                 }
             } catch { alert.style.display = 'block'; alert.className = 'alert alert-error'; alert.innerText = '❌ Error de red'; }
             finally { submitBtn.disabled = false; submitBtn.innerText = 'Enviar Reporte Final 📤'; window.scrollTo(0, 0); }
+
         };
+
+        // --- SCANNER LOGIC REFINED ---
+        const ALLOWED_SKUS = [
+            "U4-4-633", "4-4-644", "4-4-654", "4-4-656",
+            "4-4-646", "4-4-647", "8-1-902", "8-1-903", "8-1-904"
+        ];
+
+        // 1. Show Scan Icons for Allowed SKUs
+        ALLOWED_SKUS.forEach(sku => {
+            const btn = document.getElementById('btn_scan_' + sku);
+            if (btn) btn.style.display = 'inline-block';
+        });
+
+        // 2. Modal Logic
+        const modal = document.getElementById('scanModal');
+        const modalInput = document.getElementById('modalScanInput');
+        let currentTargetSku = null;
+
+        function openScanner(sku, name) {
+            currentTargetSku = sku;
+            document.getElementById('scanTargetName').innerText = name;
+            modal.classList.add('active');
+            modalInput.value = '';
+            modalInput.focus(); // Focus hidden input to capture scan
+        }
+
+        function closeScanner() {
+            modal.classList.remove('active');
+            currentTargetSku = null;
+        }
+
+        // 3. Listen for Scan in Modal
+        modalInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleScanValues(modalInput.value.trim().toUpperCase());
+            }
+        });
+
+        // Also listen on window for "background" scans if modal is open, 
+        // in case focus was lost but regular scanner input is sent
+        window.addEventListener('keydown', (e) => {
+            if (modal.classList.contains('active') && e.target !== modalInput && e.target.tagName !== 'INPUT') {
+                modalInput.focus();
+            }
+        });
+
+        function handleScanValues(code) {
+            if (!code) return;
+
+            // Validate Match
+            if (code !== currentTargetSku) {
+                alert(`❌ Código incorrecto. Esperado: ${currentTargetSku}, Leído: ${code}`);
+                modalInput.value = '';
+                return;
+            }
+
+            // Valid, Increment Logic
+            const targetInput = document.getElementById('input_' + currentTargetSku);
+            if (targetInput) {
+                let currentVal = parseInt(targetInput.value) || 0;
+
+                // Check Limit
+                if (MAX_LIMITS[currentTargetSku] !== undefined && currentVal >= MAX_LIMITS[currentTargetSku]) {
+                    alert(`⚠️ Límite alcanzado para este equipo.`);
+                    closeScanner();
+                    return;
+                }
+
+                targetInput.value = currentVal + 1;
+                targetInput.dispatchEvent(new Event('input')); // Trigger locks
+
+                // Feedback
+                const row = document.getElementById('row_' + currentTargetSku);
+                row.classList.remove('highlight-row');
+                void row.offsetWidth; // trigger reflow
+                row.classList.add('highlight-row');
+
+                closeScanner();
+            }
+        }
+
     </script>
 </body>
 

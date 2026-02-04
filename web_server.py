@@ -80,6 +80,79 @@ def index():
     except Exception as template_err:
         return f"<h1>⚠️ Error de Servidor</h1><p>Estado: {status}</p><p>Detalle: {error_detail}</p><p>Template: {str(template_err)}</p>"
 
+@app.route('/api/inventario/<movil>')
+def get_inventario_movil(movil):
+    """
+    API para obtener inventario del técnico con seriales disponibles
+    Retorna JSON con inventario actual del móvil
+    """
+    from database import get_db_connection, run_query
+    from config import PRODUCTOS_CON_CODIGO_BARRA
+    
+    try:
+        # Detectar DB correcta (Chiriquí o Santiago)
+        target_db = None
+        from config import MOVILES_SANTIAGO, MYSQL_DB_SANTIAGO
+        if movil in MOVILES_SANTIAGO and MYSQL_DB_SANTIAGO:
+            target_db = MYSQL_DB_SANTIAGO
+            
+        conn = get_db_connection(target_db=target_db)
+        cursor = conn.cursor()
+        
+        # Obtener asignación del móvil
+        sql_asignacion = """
+            SELECT nombre_producto, sku_producto, cantidad_total
+            FROM asignacion_moviles
+            WHERE nombre_movil = ?
+            AND cantidad_total > 0
+        """
+        run_query(cursor, sql_asignacion, (movil,))
+        asignacion = cursor.fetchall()
+        
+        inventario = []
+        for nombre, sku, cantidad in asignacion:
+            if sku in PRODUCTOS_CON_CODIGO_BARRA:
+                # Obtener seriales disponibles (ubicacion = movil)
+                sql_series = """
+                    SELECT serial_number
+                    FROM series_registradas
+                    WHERE sku = ?
+                    AND ubicacion = ?
+                    ORDER BY serial_number
+                """
+                run_query(cursor, sql_series, (sku, movil))
+                seriales = [row[0] for row in cursor.fetchall()]
+                
+                inventario.append({
+                    "sku": sku,
+                    "nombre": nombre,
+                    "seriales": seriales,
+                    "cantidad_total": len(seriales),
+                    "tiene_series": True
+                })
+            else:
+                # Productos sin serie
+                inventario.append({
+                    "sku": sku,
+                    "nombre": nombre,
+                    "cantidad_total": cantidad,
+                    "tiene_series": False
+                })
+        
+        conn.close()
+        return jsonify({
+            "movil": movil,
+            "inventario": inventario,
+            "total_productos": len(inventario)
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "movil": movil,
+            "inventario": []
+        }), 500
+
 @app.route('/debug')
 def debug():
     import os
@@ -133,22 +206,39 @@ def registrar_bulk():
         materiales = data.get('materiales', [])
         
         for item in materiales:
+            # Extraer seriales si existen
+            seriales = item.get('seriales', [])
+            seriales_json = json.dumps(seriales) if seriales else None
+            cantidad = item.get('cantidad', len(seriales) if seriales else 0)
+            
             # Ejecutamos el insert directamente aquí para usar la misma conexión/transacción
             run_query(cursor, """
                 INSERT INTO consumos_pendientes 
-                (movil, sku, cantidad, tecnico_nombre, ayudante_nombre, ticket, fecha, colilla, num_contrato)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (movil, sku, cantidad, tecnico_nombre, ayudante_nombre, ticket, fecha, colilla, num_contrato, seriales_usados)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 data['movil'],
                 item['sku'],
-                item['cantidad'],
+                cantidad,
                 data['tecnico'],
                 data.get('ayudante', ''),
                 data['contrato'], # ticket
                 data['fecha'],
                 data['colilla'],
-                data['contrato']  # num_contrato
+                data['contrato'],  # num_contrato
+                seriales_json  # NUEVO: seriales en JSON
             ))
+            
+            # Actualizar ubicación de series a CONSUMIDO
+            if seriales:
+                print(f"[WEB] Actualizando {len(seriales)} series a CONSUMIDO para {item['sku']}")
+                for serial in seriales:
+                    run_query(cursor, """
+                        UPDATE series_registradas
+                        SET ubicacion = 'CONSUMIDO'
+                        WHERE serial_number = ?
+                    """, (serial,))
+            
             exitos += 1
         
         conn.commit()
