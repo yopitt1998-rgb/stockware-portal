@@ -80,6 +80,61 @@ def index():
     except Exception as template_err:
         return f"<h1>⚠️ Error de Servidor</h1><p>Estado: {status}</p><p>Detalle: {error_detail}</p><p>Template: {str(template_err)}</p>"
 
+@app.route('/debug/productos')
+def debug_productos():
+    """Endpoint de diagnóstico para verificar productos en BD"""
+    from database import get_db_connection, run_query
+    from config import MYSQL_HOST, MYSQL_USER, MYSQL_DB
+    
+    html = "<h1>🔍 Diagnóstico de Productos</h1>"
+    html += f"<p><b>DB_TYPE:</b> {DB_TYPE}</p>"
+    html += f"<p><b>MYSQL_HOST:</b> {MYSQL_HOST}</p>"
+    html += f"<p><b>MYSQL_DB:</b> {MYSQL_DB}</p>"
+    html += f"<p><b>MYSQL_USER:</b> {MYSQL_USER}</p>"
+    html += "<hr>"
+    
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Test 1: Total productos
+        run_query(cursor, "SELECT COUNT(*) FROM productos")
+        total = cursor.fetchone()[0]
+        html += f"<p><b>Total productos en tabla:</b> {total}</p>"
+        
+        # Test 2: Productos únicos
+        run_query(cursor, "SELECT COUNT(DISTINCT sku) FROM productos")
+        unicos = cursor.fetchone()[0]
+        html += f"<p><b>SKUs únicos:</b> {unicos}</p>"
+        
+        # Test 3: Primeros 10
+        run_query(cursor, "SELECT nombre, sku, ubicacion FROM productos LIMIT 10")
+        productos = cursor.fetchall()
+        html += "<h3>Primeros 10 productos:</h3><ul>"
+        for nombre, sku, ub in productos:
+            html += f"<li>{sku} | {nombre} | {ub}</li>"
+        html += "</ul>"
+        
+        # Test 4: Función obtener_todos_los_skus_para_movimiento
+        from database import obtener_todos_los_skus_para_movimiento
+        result = obtener_todos_los_skus_para_movimiento()
+        html += f"<h3>obtener_todos_los_skus_para_movimiento():</h3>"
+        html += f"<p><b>Retornó:</b> {len(result)} productos</p>"
+        if result:
+            html += "<ul>"
+            for nombre, sku, qty in result[:10]:
+                html += f"<li>{sku} | {nombre} | Qty BODEGA: {qty}</li>"
+            html += "</ul>"
+        
+        conn.close()
+        
+    except Exception as e:
+        html += f"<p style='color:red'><b>ERROR:</b> {str(e)}</p>"
+        import traceback
+        html += f"<pre>{traceback.format_exc()}</pre>"
+    
+    return html
+
 @app.route('/api/inventario/<movil>')
 def get_inventario_movil(movil):
     """
