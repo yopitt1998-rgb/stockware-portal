@@ -2524,27 +2524,31 @@ class InventoryTab:
             
             # VALIDACIÓN 1: Verificar que el serial existe
             if not sku:
-                messagebox.showerror("Serial No Encontrado", 
-                                   f"El serial '{code}' no existe en la base de datos.")
+                # Feedback visual de error SIN messagebox que interrumpa
+                entry_scan.config(bg='#f8d7da')  # Rojo
+                ventana.after(1000, lambda: entry_scan.config(bg='#e8f0fe'))
+                # Mostrar en status bar o label si existe
+                print(f"❌ Serial '{code}' no existe en BD")
                 return
             
             # VALIDACIÓN 2: Verificar que pertenece al móvil que está retornando
             if ubicacion != movil:
-                messagebox.showerror("Serial No Pertenece", 
-                                   f"❌ El serial '{code}' NO pertenece a {movil}.\n\n"
-                                   f"Ubicación actual: {ubicacion}\n"
-                                   f"Móvil seleccionado: {movil}")
+                # Feedback visual de error SIN messagebox
+                entry_scan.config(bg='#fff3cd')  # Amarillo
+                ventana.after(1000, lambda: entry_scan.config(bg='#e8f0fe'))
+                print(f"⚠️ Serial '{code}' pertenece a {ubicacion}, no a {movil}")
                 return
             
             # VALIDACIÓN 3: Evitar duplicados en la misma sesión
-            # Contar cuántos de este serial ya se escanearon
             seriales_escaneados_key = f"_seriales_{sku}"
             if seriales_escaneados_key not in session_data:
                 session_data[seriales_escaneados_key] = []
             
             if code in session_data[seriales_escaneados_key]:
-                messagebox.showwarning("Duplicado", 
-                                     f"⚠️ El serial '{code}' ya fue escaneado en esta sesión.")
+                # Feedback visual de warning
+                entry_scan.config(bg='#fff3cd')  # Amarillo
+                ventana.after(1000, lambda: entry_scan.config(bg='#e8f0fe'))
+                print(f"⚠️ Serial '{code}' ya escaneado")
                 return
             
             # Todo OK - Registrar escaneo
@@ -2564,10 +2568,15 @@ class InventoryTab:
                                        "2. Se retornarán los equipos físicos escaneados.\n"
                                        "3. Se limpiarán los pendientes de la App."):
                 return
-
-            exitos_consumo = 0
-            exitos_retorno = 0
-            errors = []
+            
+            # Deshabilitar botón para evitar doble click
+            btn_procesar.config(state='disabled', text="⏳ Procesando...")
+            
+            # Ejecutar en thread para no congelar UI
+            def _procesar_async():
+                exitos_consumo = 0
+                exitos_retorno = 0
+                errors = []
             
             # 1. PROCESAR CONSUMO (Lo que dijo el Excel)
             fecha_evento = entry_fecha.get()
@@ -2605,18 +2614,22 @@ class InventoryTab:
             except Exception as e:
                 print(f"Error limpiando pendientes: {e}")
 
-            # REPORT
-            summary = f"Proceso Completado.\n\nConsumos Registrados: {exitos_consumo}\nRetornos Registrados: {exitos_retorno}"
-            if errors:
-                summary += f"\n\nErrores:\n" + "\n".join(errors[:5])
-                messagebox.showwarning("Resultado con Alertas", summary)
-            else:
-                messagebox.showinfo("Éxito Total", summary)
+                # REPORT (en el thread principal)
+                summary = f"Proceso Completado.\n\nConsumos Registrados: {exitos_consumo}\nRetornos Registrados: {exitos_retorno}"
+                if errors:
+                    summary += f"\n\nErrores:\n" + "\n".join(errors[:5])
+                    ventana.after(0, lambda: messagebox.showwarning("Resultado con Alertas", summary))
+                else:
+                    ventana.after(0, lambda: messagebox.showinfo("Éxito Total", summary))
+                
+                ventana.after(0, ventana.destroy)
+                if hasattr(self.main_app, 'dashboard_tab'):
+                    try: 
+                        ventana.after(0, self.main_app.dashboard_tab.actualizar_metricas)
+                    except: pass
             
-            ventana.destroy()
-            if hasattr(self.main_app, 'dashboard_tab'):
-                try: self.main_app.dashboard_tab.actualizar_metricas()
-                except: pass
+            # Iniciar thread
+            threading.Thread(target=_procesar_async, daemon=True).start()
 
         # Bindings
         movil_combo.bind("<<ComboboxSelected>>", on_movil_select)
