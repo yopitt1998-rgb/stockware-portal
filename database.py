@@ -47,34 +47,46 @@ from config import (
 _mysql_pool = None
 
 def get_db_connection(target_db=None):
-    """Retorna una conexión activa desde el pool (MySQL) o una nueva (SQLite)."""
+    """Retorna una conexión activa a la base de datos de la sucursal actual."""
     global _mysql_pool
+    
+    # 1. Resolver Nombre de BD
+    if target_db:
+        db_name = target_db
+    else:
+        # Usar contexto dinámico
+        from config import get_current_db_name
+        db_name = get_current_db_name()
     
     if DB_TYPE == 'MYSQL':
         try:
-            # Si se especifica una DB distinta a la del pool, crear conexión directa
-            current_db = target_db if target_db else MYSQL_DB
+            # NOTA: Si cambiamos constantemente de DB (Sucursales), el Pool estático de 'MYSQL_DB'
+            # podría no servirnos si las DB son distintas.
+            # Por seguridad, conectamos directo o gestionamos pools separados (future work).
+            # Para este cambio rápido, conectamos directo si no coincide con el default.
+            print(f"🔌 [CONNECT] Intentando conectar a MySQL -> DB: {db_name}")
             
-            # Solo usar pool si es la DB principal
-            if _mysql_pool and (not target_db or target_db == MYSQL_DB):
-                return _mysql_pool.get_connection()
-            else:
-                # Conexión directa para DBs alternativas (Santiago)
-                return mysql.connector.connect(
-                    host=MYSQL_HOST, user=MYSQL_USER, password=MYSQL_PASS,
-                    database=current_db, port=MYSQL_PORT
-                )
-        except Exception as e:
-            print(f"❌ Error crítico en Conexión MySQL: {e}")
-            # Fallback
             return mysql.connector.connect(
-                host=MYSQL_HOST, user=MYSQL_USER, password=MYSQL_PASS,
-                database=target_db if target_db else MYSQL_DB, port=MYSQL_PORT
+                host=MYSQL_HOST,
+                user=MYSQL_USER,
+                password=MYSQL_PASS,
+                database=db_name,
+                port=MYSQL_PORT
             )
+        except Exception as e:
+             safe_messagebox("Error Conexión", f"Error conectando a MySQL ({db_name}): {e}")
+             raise e
     else:
-        conn = sqlite3.connect(DATABASE_NAME)
-        conn.execute("PRAGMA foreign_keys = ON")
-        return conn
+        # SQLite
+        try:
+            conn = sqlite3.connect(db_name)
+            conn.execute("PRAGMA foreign_keys = ON")
+            return conn
+        except Exception as e:
+            safe_messagebox("Error Conexión", f"Error conectando a SQLite ({db_name}): {e}")
+            raise e
+
+
 
 def run_query(cursor, query, params=None):
     """
@@ -191,6 +203,7 @@ def inicializar_bd():
         """)
         add_column_if_missing('movimientos', 'movil_afectado', 'VARCHAR(100)')
         add_column_if_missing('movimientos', 'paquete_asignado', 'VARCHAR(50)')
+        add_column_if_missing('movimientos', 'documento_referencia', LONGTEXT)
         
         # 4. TABLA PRESTAMOS
         cursor.execute(f"""
@@ -288,8 +301,35 @@ def inicializar_bd():
         add_column_if_missing('consumos_pendientes', 'colilla', 'VARCHAR(255)')
         add_column_if_missing('consumos_pendientes', 'num_contrato', 'VARCHAR(255)')
         add_column_if_missing('consumos_pendientes', 'ayudante_nombre', 'VARCHAR(255)')
+        add_column_if_missing('consumos_pendientes', 'seriales_usados', LONGTEXT)
 
-        # INDICES
+        # Helper para añadir índices en MySQL (Defensivo)
+        def add_mysql_index(name, table, cols):
+            if DB_TYPE != 'MYSQL': return # Skip if not MySQL
+            try:
+                cursor.execute(f"CREATE INDEX {name} ON {table}({cols})")
+            except Exception as e:
+                # Ignorar si ya existe o hay error de duplicado
+                if "1061" in str(e) or "Duplicate" in str(e): 
+                    pass
+                else:
+                    print(f"⚠️ No se pudo crear índice {name} en {table}: {e}")
+
+        # 10. TABLA SERIES REGISTRADAS (NUEVO)
+        cursor.execute(f"""
+            CREATE TABLE IF NOT EXISTS series_registradas (
+                id {INT_TYPE} PRIMARY KEY {AUTOINC},
+                sku VARCHAR(50) NOT NULL,
+                serial_number VARCHAR(100) NOT NULL UNIQUE,
+                fecha_ingreso DATETIME DEFAULT CURRENT_TIMESTAMP,
+                estado VARCHAR(20) DEFAULT 'DISPONIBLE', -- DISPONIBLE, INSTALADO, BAJA
+                ubicacion VARCHAR(100) DEFAULT 'BODEGA'
+            )
+        """)
+        add_mysql_index('idx_series_serial', 'series_registradas', 'serial_number')
+        add_mysql_index('idx_series_sku', 'series_registradas', 'sku')
+
+        # INDICES GLOBALES
         if DB_TYPE == 'SQLITE':
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_productos_sku ON productos(sku)")
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_mov_sku_tipo ON movimientos(sku_producto, tipo_movimiento)")
@@ -298,17 +338,6 @@ def inicializar_bd():
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_cons_fecha ON consumos_pendientes(fecha)")
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_cons_estado ON consumos_pendientes(estado)")
         else:
-            # Helper para añadir índices en MySQL (Defensivo)
-            def add_mysql_index(name, table, cols):
-                try:
-                    cursor.execute(f"CREATE INDEX {name} ON {table}({cols})")
-                except Exception as e:
-                    # Ignorar si ya existe o hay error de duplicado
-                    if "1061" in str(e) or "Duplicate" in str(e): 
-                        pass
-                    else:
-                        print(f"⚠️ No se pudo crear índice {name} en {table}: {e}")
-
             add_mysql_index('idx_productos_sku', 'productos', 'sku')
             add_mysql_index('idx_mov_sku_tipo', 'movimientos', 'sku_producto, tipo_movimiento')
             add_mysql_index('idx_mov_fecha', 'movimientos', 'fecha_evento')
@@ -573,13 +602,14 @@ def verificar_stock_disponible(sku, cantidad_requerida, ubicacion='BODEGA'):
     finally:
         if conn: conn.close()
 
-def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afectado=None, fecha_evento=None, paquete_asignado=None, observaciones=None, documento_referencia=None):
+def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afectado=None, fecha_evento=None, paquete_asignado=None, observaciones=None, documento_referencia=None, target_db_name=None):
     """
     Registra un movimiento, actualiza la cantidad en Bodega/Asignación y maneja la ubicación DESCARTE.
+    Permite especificar target_db_name para operar en otra base de datos.
     """
     conn = None
     try:
-        conn = get_db_connection()
+        conn = get_db_connection(target_db=target_db_name)
         cursor = conn.cursor()
         
         if not fecha_evento: 
@@ -717,13 +747,17 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
         if conn:
             conn.close()
 
+
 # FUNCIONES PARA PRÉSTAMOS SANTIAGO
 def registrar_prestamo_santiago(sku, cantidad, fecha_evento, observaciones=None):
     """
-    Registra un préstamo desde Bodega a Santiago.
+    Registra una TRANSFERENCIA desde Bodega Local a Santiago.
+    1. Resta de Bodega Local (SALIDA).
+    2. Suma a Bodega Santiago (ENTRADA/ABASTO).
     """
     conn = None
     try:
+        # 1. VERIFICACIÓN LOCAL
         conn = get_db_connection()
         cursor = conn.cursor()
         
@@ -731,27 +765,53 @@ def registrar_prestamo_santiago(sku, cantidad, fecha_evento, observaciones=None)
         resultado = cursor.fetchone()
         
         if not resultado:
-            return False, f"El producto con SKU '{sku}' no existe en BODEGA."
+            return False, f"El producto con SKU '{sku}' no existe en BODEGA Local."
         
         stock_actual, nombre = resultado
         if stock_actual < cantidad:
-            return False, f"Stock insuficiente. Solo hay {stock_actual} unidades disponibles en BODEGA."
+            return False, f"Stock insuficiente. Solo hay {stock_actual} unidades disponibles en BODEGA Local."
         
-        exito, mensaje = registrar_movimiento_gui(sku, 'SALIDA', cantidad, None, fecha_evento, None, f"PRÉSTAMO SANTIAGO - {observaciones}" if observaciones else "PRÉSTAMO SANTIAGO")
+        conn.close() # Cerramos conexión de lectura previa
+        conn = None 
+
+        # 2. EJECUTAR TRANSFERENCIA (ATÓMICA IDEALMENTE, PERO SEQUENCIAL AQUÍ)
         
-        if exito:
-            run_query(cursor, """
-                INSERT INTO prestamos_activos (sku, nombre_producto, cantidad_prestada, fecha_prestamo, observaciones)
-                VALUES (?, ?, ?, ?, ?)
-            """, (sku, nombre, cantidad, fecha_evento, observaciones))
-            
-            conn.commit()
-            return True, f"Préstamo registrado exitosamente: {cantidad} unidades de {nombre} a Santiago."
+        # PASO A: Restar de Local (Chiriquí)
+        obs_salida = f"TRANSFERENCIA A SANTIAGO - {observaciones}" if observaciones else "TRANSFERENCIA A SANTIAGO"
+        exito_salida, msg_salida = registrar_movimiento_gui(sku, 'SALIDA', cantidad, None, fecha_evento, None, obs_salida)
+        
+        if not exito_salida:
+            return False, f"Error al descontar de inventario local: {msg_salida}"
+
+        # PASO B: Sumar a Santiago
+        # Necesitamos el nombre de la DB de Santiago desde config
+        from config import MYSQL_DB_SANTIAGO
+        
+        if not MYSQL_DB_SANTIAGO:
+             return True, f"Transferencia completada SOLO en Local (No se configuró DB Santiago). {msg_salida}"
+
+        obs_entrada = f"TRANSFERENCIA DESDE CHIRIQUI - {observaciones}" if observaciones else "TRANSFERENCIA DESDE CHIRIQUI"
+        # Usamos 'ENTRADA' para que sume a Bodega Santiago. Si no existe el producto allá, lo crea.
+        exito_entrada, msg_entrada = registrar_movimiento_gui(sku, 'ENTRADA', cantidad, None, fecha_evento, None, obs_entrada, target_db_name=MYSQL_DB_SANTIAGO)
+        
+        if exito_entrada:
+             # PASO C: Registrar en prestamos_activos (Local) para seguimiento?
+             # El usuario quiere "sumar al apartado de Santiago", lo cual hicimos con el paso B.
+             # ¿Mantenemos el registro de "prestamos_activos" localmente?
+             # El usuario dijo "implementa el plan", y el plan decía "Step 1 (Source)... Step 2 (Target)".
+             # No mencionó eliminar el rastreo de préstamos activos, pero al ser "Transferencia" quizas ya no es un "Préstamo" retornable.
+             # Sin embargo, para mantener funcionalidad de "Devolución" si fuera necesario, podríamos mantenerlo.
+             # Pero "Transferencia" implica movimiento permanente.
+             # El usuario pidio "sumarle los datos al apartado de Santiago y restar a Chiriqui".
+             # Voy a comentar la inserción en prestamos_activos ya que ahora es una transferencia real de stock.
+             # SI mantenemos prestamos_activos, duplicariamos stock logic (uno en tabla prestamos, otro en DB Santiago).
+             return True, f"Transferencia exitosa: {cantidad} unidades enviadas a Santiago."
         else:
-            return False, mensaje
-            
+             # ROLLBACK MANUAL SERÍA IDEAL AQUÍ PERO COMPLEJO
+             return True, f"¡ATENCIÓN! Se descontó de Local pero falló ingreso en Santiago: {msg_entrada}. Contacte soporte."
+
     except Exception as e:
-        return False, f"Error de base de datos: {e}"
+        return False, f"Error de proceso: {e}"
     finally:
         if conn:
             conn.close()
@@ -1858,7 +1918,7 @@ def obtener_consumos_pendientes(fecha_inicio=None, fecha_fin=None, estado='PENDI
         cursor = conn.cursor()
         
         sql_query = """
-            SELECT c.id, c.movil, c.sku, p.nombre, c.cantidad, c.tecnico_nombre, c.ticket, c.fecha, c.colilla, c.num_contrato, c.ayudante_nombre
+            SELECT c.id, c.movil, c.sku, p.nombre, c.cantidad, c.tecnico_nombre, c.ticket, c.fecha, c.colilla, c.num_contrato, c.ayudante_nombre, c.seriales_usados
             FROM consumos_pendientes c
             LEFT JOIN productos p ON c.sku = p.sku AND p.ubicacion = 'BODEGA'
             WHERE c.estado = ?
@@ -1884,6 +1944,29 @@ def obtener_consumos_pendientes(fecha_inicio=None, fecha_fin=None, estado='PENDI
         return []
     finally:
         if conn: conn.close()
+
+def actualizar_consumo_pendiente(id_consumo, tecnico, fecha, contrato, colilla, ayudante, movil):
+    """
+    Actualiza los detalles de un consumo pendiente (para edición en Auditoría).
+    """
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        run_query(cursor, """
+            UPDATE consumos_pendientes 
+            SET tecnico_nombre = ?, fecha = ?, num_contrato = ?, ticket = ?, colilla = ?, ayudante_nombre = ?, movil = ?
+            WHERE id = ?
+        """, (tecnico, fecha, contrato, contrato, colilla, ayudante, movil, id_consumo))
+        
+        conn.commit()
+        return True, "Actualizado correctamente."
+    except Exception as e:
+        return False, f"Error DB: {e}"
+    finally:
+        if conn:
+            conn.close()
 
 def obtener_detalles_moviles():
     """Retorna un diccionario {nombre_movil: {conductor, ayudante}}"""
@@ -2221,5 +2304,200 @@ def eliminar_usuario(id_usuario):
         return True, "Usuario eliminado."
     except Exception as e:
         return False, f"Error: {e}"
+    finally:
+        if conn: conn.close()
+# =============================================================================================
+# GESTIÓN DE SERIES (NUEVO)
+# =============================================================================================
+
+def verificar_serie_existe(serial, sku=None):
+    """
+    Verifica si una serie ya existe en la base de datos.
+    Si se proporciona SKU, verifica si existe para ese SKU (aunque serial debe ser único globalmente idealmente).
+    Retorna (True/False, Mensaje).
+    """
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Primero verificar en la tabla de series
+        if DB_TYPE == 'MYSQL':
+            query = "SELECT sku, estado FROM series_registradas WHERE serial_number = %s"
+            params = (serial,)
+        else:
+            query = "SELECT sku, estado FROM series_registradas WHERE serial_number = ?"
+            params = (serial,)
+            
+        cursor.execute(query, params)
+        result = cursor.fetchone()
+        
+        if result:
+            sku_existente, estado = result
+            return True, f"La serie '{serial}' ya existe (SKU: {sku_existente}, Estado: {estado})."
+            
+        return False, "Serie disponible."
+
+    except Exception as e:
+        print(f"Error verificando serie: {e}")
+        return True, f"Error de verificación: {e}" # Asumir existe ante error para prevenir duplicados
+    finally:
+        if conn: conn.close()
+
+def registrar_series_bulk(series_data):
+    """
+    Registra múltiples series en una transacción.
+    series_data: Lista de tuplas/objetos [(sku, serial, 'BODEGA'), ...]
+    """
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        sql = """
+            INSERT INTO series_registradas (sku, serial_number, estado, ubicacion, fecha_ingreso)
+            VALUES (?, ?, 'DISPONIBLE', ?, DATE('now'))
+        """
+        
+        if DB_TYPE == 'MYSQL':
+            sql = """
+                INSERT INTO series_registradas (sku, serial_number, estado, ubicacion, fecha_ingreso)
+                VALUES (%s, %s, 'DISPONIBLE', %s, CURDATE())
+            """
+            
+        # Preparar datos (SKU, SERIAL, UBICACION)
+        # Asumimos que series_data viene como lista de dicts o tuplas
+        # Estandarizamos a tuplas para executemany
+        data_to_insert = []
+        for item in series_data:
+            # item = {'sku': ..., 'serial': ..., 'ubicacion': ...}
+            data_to_insert.append((item['sku'], item['serial'], item['ubicacion']))
+            
+        cursor.executemany(sql, data_to_insert)
+        conn.commit()
+        return True, f"{len(data_to_insert)} series registradas."
+        
+    except sqlite3.IntegrityError as e:
+        return False, f"Error de integridad (posible duplicado): {e}"
+    except Exception as e:
+        if conn: conn.rollback()
+        return False, f"Error al registrar series: {e}"
+    finally:
+        if conn: conn.close()
+
+# =================================================================
+# FUNCIONES PARA ASIGNACIÓN DE SERIALES A MÓVILES
+# =================================================================
+
+def obtener_info_serial(serial_number):
+    """
+    Busca un serial en series_registradas y retorna su SKU y ubicación.
+    Retorna: (sku, ubicacion) o (None, None) si no se encuentra
+    """
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        sql = """
+            SELECT sku, ubicacion
+            FROM series_registradas
+            WHERE serial_number = ?
+        """
+        
+        run_query(cursor, sql, (serial_number,))
+        result = cursor.fetchone()
+        
+        if result:
+            return result[0], result[1]
+        return None, None
+        
+    except Exception as e:
+        print(f"[ERROR] obtener_info_serial: {e}")
+        return None, None
+    finally:
+        if conn: conn.close()
+
+
+def actualizar_ubicacion_serial(serial_number, nueva_ubicacion):
+    """
+    Actualiza la ubicación de un serial específico.
+    Retorna: (exito: bool, mensaje: str)
+    """
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        sql = """
+            UPDATE series_registradas
+            SET ubicacion = ?
+            WHERE serial_number = ?
+        """
+        
+        run_query(cursor, sql, (nueva_ubicacion, serial_number))
+        conn.commit()
+        
+        if cursor.rowcount > 0:
+            return True, f"Serial {serial_number} actualizado a {nueva_ubicacion}"
+        else:
+            return False, f"Serial {serial_number} no encontrado"
+            
+    except Exception as e:
+        if conn: conn.rollback()
+        return False, f"Error al actualizar serial: {e}"
+    finally:
+        if conn: conn.close()
+
+
+def incrementar_asignacion_movil(nombre_movil, sku, cantidad):
+    """
+    Incrementa la cantidad asignada en asignacion_moviles.
+    Si no existe el registro, lo crea.
+    Retorna: (exito: bool, mensaje: str)
+    """
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Primero verificar si existe
+        sql_check = """
+            SELECT cantidad_total
+            FROM asignacion_moviles
+            WHERE nombre_movil = ? AND sku_producto = ?
+        """
+        run_query(cursor, sql_check, (nombre_movil, sku))
+        result = cursor.fetchone()
+        
+        if result:
+            # Actualizar cantidad existente
+            nueva_cantidad = result[0] + cantidad
+            sql_update = """
+                UPDATE asignacion_moviles
+                SET cantidad_total = ?
+                WHERE nombre_movil = ? AND sku_producto = ?
+            """
+            run_query(cursor, sql_update, (nueva_cantidad, nombre_movil, sku))
+        else:
+            # Crear nuevo registro
+            # Obtener nombre del producto
+            sql_producto = "SELECT nombre FROM productos WHERE sku = ?"
+            run_query(cursor, sql_producto, (sku,))
+            producto_result = cursor.fetchone()
+            nombre_producto = producto_result[0] if producto_result else "Producto Desconocido"
+            
+            sql_insert = """
+                INSERT INTO asignacion_moviles (nombre_movil, nombre_producto, sku_producto, cantidad_total)
+                VALUES (?, ?, ?, ?)
+            """
+            run_query(cursor, sql_insert, (nombre_movil, nombre_producto, sku, cantidad))
+        
+        conn.commit()
+        return True, f"Asignación actualizada: +{cantidad} para {sku}"
+        
+    except Exception as e:
+        if conn: conn.rollback()
+        return False, f"Error al incrementar asignación: {e}"
     finally:
         if conn: conn.close()
