@@ -183,42 +183,48 @@ def debug_asignaciones():
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # Test 1: Verificar si existe la tabla
+        # Test 1: Verificar si existe la tabla y mostrar columnas
         try:
             run_query(cursor, "SELECT COUNT(*) FROM asignacion_moviles")
             total = cursor.fetchone()[0]
             html += f"<p style='color:green'><b>✅ Tabla asignacion_moviles existe:</b> {total} registros</p>"
+            
+            # Mostrar estructura de la tabla
+            run_query(cursor, "DESCRIBE asignacion_moviles")
+            columnas = cursor.fetchall()
+            html += "<h3>Estructura de la tabla:</h3><ul>"
+            for col in columnas:
+                html += f"<li><b>{col[0]}</b> - {col[1]}</li>"
+            html += "</ul>"
+            
         except Exception as table_err:
             html += f"<p style='color:red'><b>❌ Tabla asignacion_moviles NO existe o error:</b> {table_err}</p>"
             conn.close()
             return html
         
-        # Test 2: Mostrar todas las asignaciones con stock > 0
-        run_query(cursor, """
-            SELECT nombre_movil, nombre_producto, sku_producto, cantidad_total 
-            FROM asignacion_moviles 
-            WHERE cantidad_total > 0 
-            ORDER BY nombre_movil, nombre_producto
-            LIMIT 50
-        """)
+        # Test 2: Mostrar TODOS los registros sin filtros
+        run_query(cursor, "SELECT * FROM asignacion_moviles LIMIT 20")
         asignaciones = cursor.fetchall()
         
-        html += f"<h3>Asignaciones con stock > 0: {len(asignaciones)}</h3>"
+        html += f"<h3>Registros en tabla (primeros 20): {len(asignaciones)}</h3>"
         
         if asignaciones:
             html += "<table border='1' cellpadding='5' style='border-collapse:collapse'>"
-            html += "<tr><th>Móvil</th><th>Producto</th><th>SKU</th><th>Cantidad</th></tr>"
-            for movil, producto, sku, cantidad in asignaciones:
-                html += f"<tr><td>{movil}</td><td>{producto}</td><td>{sku}</td><td>{cantidad}</td></tr>"
+            html += "<tr><th>#</th><th>Datos (crudo)</th></tr>"
+            for i, row in enumerate(asignaciones):
+                html += f"<tr><td>{i+1}</td><td>{row}</td></tr>"
             html += "</table>"
         else:
-            html += "<p style='color:orange'><b>⚠️ No hay asignaciones con cantidad > 0</b></p>"
+            html += "<p style='color:orange'><b>⚠️ Tabla vacía</b></p>"
         
-        # Test 3: Listar móviles únicos
-        run_query(cursor, "SELECT DISTINCT nombre_movil FROM asignacion_moviles")
-        moviles = [row[0] for row in cursor.fetchall()]
-        html += f"<h3>Móviles en tabla asignacion: {len(moviles)}</h3>"
-        html += f"<p>{', '.join(moviles) if moviles else 'Ninguno'}</p>"
+        # Test 3: Listar móviles únicos (buscar cualquier columna que parezca ser el móvil)
+        try:
+            run_query(cursor, "SELECT DISTINCT nombre_movil FROM asignacion_moviles")
+            moviles = [row[0] for row in cursor.fetchall()]
+            html += f"<h3>Móviles en tabla (columna nombre_movil): {len(moviles)}</h3>"
+            html += f"<p>{', '.join(str(m) for m in moviles) if moviles else 'Ninguno'}</p>"
+        except:
+            html += "<p>No se pudo obtener móviles</p>"
         
         conn.close()
         
