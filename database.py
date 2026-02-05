@@ -1151,19 +1151,21 @@ def obtener_todos_los_skus_para_movimiento():
         conn = get_db_connection()
         cursor = conn.cursor()
         
+        # MODIFICADO: Obtener TODOS los productos únicos (no solo BODEGA)
         sql_unique_skus = """
             SELECT DISTINCT p.nombre, p.sku, p.secuencia_vista
             FROM productos p
-            WHERE p.ubicacion = 'BODEGA'
             ORDER BY p.secuencia_vista ASC
         """
         run_query(cursor, sql_unique_skus)
         all_products_raw = cursor.fetchall()
         
+        # Obtener stock en BODEGA para mostrar disponibilidad
         sql_bodega_stock = """
-            SELECT sku, cantidad
+            SELECT sku, SUM(cantidad) as total
             FROM productos
             WHERE ubicacion = 'BODEGA'
+            GROUP BY sku
         """
         run_query(cursor, sql_bodega_stock)
         bodega_stock = {sku: cantidad for sku, cantidad in cursor.fetchall()}
@@ -1173,7 +1175,7 @@ def obtener_todos_los_skus_para_movimiento():
         
         for nombre, sku, secuencia_vista in all_products_raw:
             if sku not in skus_procesados:  # CLAVE: Verificar que no sea duplicado
-                cantidad = bodega_stock.get(sku, 0)
+                cantidad = bodega_stock.get(sku, 0)  # 0 si no hay en BODEGA
                 result.append((nombre, sku, cantidad))
                 skus_procesados.add(sku)
             
