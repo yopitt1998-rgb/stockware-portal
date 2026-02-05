@@ -364,26 +364,34 @@
         document.getElementById('movil_select').onchange = async function () {
             const movil = this.value;
 
-            // Auto-completar conductor/ayudante
-            const d = DETAILS_MOVILES[movil];
-            if (d) {
-                document.getElementById('tecnico').value = d.conductor;
-                document.getElementById('ayudante').value = d.ayudante;
+            // Auto-completar conductor/ayudante (SIEMPRE funciona)
+            try {
+                const d = DETAILS_MOVILES[movil];
+                if (d) {
+                    document.getElementById('tecnico').value = d.conductor || '';
+                    document.getElementById('ayudante').value = d.ayudante || '';
+                }
+            } catch (error) {
+                console.error('Error en autocompletado:', error);
             }
 
-            // Cargar inventario del móvil
-            if (movil && movil !== '--- Seleccionar ---') {
+            // Cargar inventario del móvil (OPCIONAL - no rompe si falla)
+            if (movil && movil !== '' && movil !== '--- Seleccionar ---') {
                 try {
                     const res = await fetch(`/api/inventario/${encodeURIComponent(movil)}`);
-                    const data = await res.json();
-
-                    if (data.inventario) {
-                        window.INVENTARIO_ACTUAL = data.inventario;
-                        window.SERIALES_SELECCIONADOS = {};  // Resetear
-                        actualizarUIConInventario();
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.inventario) {
+                            window.INVENTARIO_ACTUAL = data.inventario;
+                            window.SERIALES_SELECCIONADOS = {};  // Resetear
+                            actualizarUIConInventario();
+                        }
+                    } else {
+                        console.warn('API inventario no disponible, continuando sin selección de seriales');
                     }
                 } catch (error) {
-                    console.error('Error cargando inventario:', error);
+                    console.warn('Error cargando inventario (continuando sin seriales):', error);
+                    // No hacer nada - el portal funciona sin esta feature
                 }
             }
         };
