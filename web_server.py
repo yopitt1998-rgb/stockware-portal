@@ -183,53 +183,53 @@ def debug_asignaciones():
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # Test 1: Verificar si existe la tabla y mostrar columnas
+        # Paso 1: Verificar estructura de la tabla
+        html += "<h2>1. Estructura de la tabla</h2>"
         try:
-            run_query(cursor, "SELECT COUNT(*) FROM asignacion_moviles")
-            total = cursor.fetchone()[0]
-            html += f"<p style='color:green'><b>✅ Tabla asignacion_moviles existe:</b> {total} registros</p>"
-            
-            # Mostrar estructura de la tabla
             run_query(cursor, "DESCRIBE asignacion_moviles")
             columnas = cursor.fetchall()
-            html += "<h3>Estructura de la tabla:</h3><ul>"
+            html += "<table border='1' cellpadding='5' style='border-collapse:collapse'>"
+            html += "<tr><th>Columna</th><th>Tipo</th><th>Null</th><th>Key</th><th>Default</th></tr>"
+            col_names = []
             for col in columnas:
-                html += f"<li><b>{col[0]}</b> - {col[1]}</li>"
-            html += "</ul>"
-            
-        except Exception as table_err:
-            html += f"<p style='color:red'><b>❌ Tabla asignacion_moviles NO existe o error:</b> {table_err}</p>"
+                html += f"<tr><td><b>{col[0]}</b></td><td>{col[1]}</td><td>{col[2]}</td><td>{col[3]}</td><td>{col[4]}</td></tr>"
+                col_names.append(col[0])
+            html += "</table>"
+            html += f"<p><b>Columnas encontradas:</b> {', '.join(col_names)}</p>"
+        except Exception as e:
+            html += f"<p style='color:red'>Error obteniendo estructura: {e}</p>"
             conn.close()
             return html
         
-        # Test 2: Mostrar TODOS los registros sin filtros
-        run_query(cursor, "SELECT * FROM asignacion_moviles LIMIT 20")
-        asignaciones = cursor.fetchall()
-        
-        html += f"<h3>Registros en tabla (primeros 20): {len(asignaciones)}</h3>"
-        
-        if asignaciones:
-            html += "<table border='1' cellpadding='5' style='border-collapse:collapse'>"
-            html += "<tr><th>#</th><th>Datos (crudo)</th></tr>"
-            for i, row in enumerate(asignaciones):
-                html += f"<tr><td>{i+1}</td><td>{row}</td></tr>"
-            html += "</table>"
-        else:
-            html += "<p style='color:orange'><b>⚠️ Tabla vacía</b></p>"
-        
-        # Test 3: Listar móviles únicos (buscar cualquier columna que parezca ser el móvil)
+        # Paso 2: Contar registros
+        html += "<h2>2. Registros en la tabla</h2>"
         try:
-            run_query(cursor, "SELECT DISTINCT nombre_movil FROM asignacion_moviles")
-            moviles = [row[0] for row in cursor.fetchall()]
-            html += f"<h3>Móviles en tabla (columna nombre_movil): {len(moviles)}</h3>"
-            html += f"<p>{', '.join(str(m) for m in moviles) if moviles else 'Ninguno'}</p>"
-        except:
-            html += "<p>No se pudo obtener móviles</p>"
+            run_query(cursor, "SELECT COUNT(*) FROM asignacion_moviles")
+            total = cursor.fetchone()[0]
+            html += f"<p><b>Total registros:</b> {total}</p>"
+        except Exception as e:
+            html += f"<p style='color:red'>Error contando: {e}</p>"
+        
+        # Paso 3: Mostrar primeros 10 registros SIN especificar columnas
+        html += "<h2>3. Primeros 10 registros (SELECT *)</h2>"
+        try:
+            run_query(cursor, "SELECT * FROM asignacion_moviles LIMIT 10")
+            rows = cursor.fetchall()
+            if rows:
+                html += "<table border='1' cellpadding='5' style='border-collapse:collapse'>"
+                html += "<tr>" + "".join(f"<th>{c}</th>" for c in col_names) + "</tr>"
+                for row in rows:
+                    html += "<tr>" + "".join(f"<td>{val}</td>" for val in row) + "</tr>"
+                html += "</table>"
+            else:
+                html += "<p>No hay registros</p>"
+        except Exception as e:
+            html += f"<p style='color:red'>Error obteniendo datos: {e}</p>"
         
         conn.close()
         
     except Exception as e:
-        html += f"<p style='color:red'><b>ERROR:</b> {str(e)}</p>"
+        html += f"<p style='color:red'><b>ERROR GENERAL:</b> {str(e)}</p>"
         import traceback
         html += f"<pre>{traceback.format_exc()}</pre>"
     
