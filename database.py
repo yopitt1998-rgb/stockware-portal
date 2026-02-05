@@ -54,9 +54,13 @@ def get_db_connection(target_db=None):
     if target_db:
         db_name = target_db
     else:
-        # Usar contexto dinámico
-        from config import get_current_db_name
-        db_name = get_current_db_name()
+        # Usar contexto dinámico (solo en app de escritorio)
+        try:
+            from config import get_current_db_name
+            db_name = get_current_db_name()
+        except ImportError:
+            # Fallback para web server (no tiene contexto de sucursales)
+            db_name = MYSQL_DB if DB_TYPE == 'MYSQL' else DATABASE_NAME
     
     if DB_TYPE == 'MYSQL':
         try:
