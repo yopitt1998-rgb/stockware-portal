@@ -13,6 +13,33 @@ from datetime import date
 import threading
 import json
 
+# Mapeo SKU → Nombre Excel (para mostrar nombres cortos en portal)
+SKU_TO_EXCEL_NAME = {
+    "1-2-16": "FIBUNHILO",
+    "7-1-171": "C_UTP_CAT6",
+    "10-1-04": "CONEC_RJ45",
+    "5-2-443": "MOLDU",
+    "1-4-61": "PLACAS_F_O",
+    "1-8-40": "FAJILLA_8",
+    "1-8-41": "TAPE",
+    "2-5-02": "GRAPAS",
+    "2-5-03": "G_C_PARED6",
+    "2-7-07": "CALCAMONIA",
+    "2-7-11": "COLILLA",
+    "4-2-41": "TOALLAS",
+    "4-3-18": "CONEC_MECA",
+    "4-3-42": "TENSOR_FO",
+    "U4-4-633": "HG8247W5",
+    "4-4-644": "O_EG8145V5",
+    "4-4-654": "O_EG8041X6",
+    "4-4-656": "O_EG8041X6",
+    "4-4-646": "R_K562E_10",
+    "4-4-647": "WIFI_NET",
+    "8-1-902": "T_PLAYPRO",
+    "8-1-903": "T_PLAY",
+    "8-1-904": "E_T_PLAY",
+}
+
 if getattr(sys, 'frozen', False):
     # Estamos corriendo en ejecutable (PyInstaller)
     base_dir = sys._MEIPASS
@@ -50,10 +77,16 @@ def index():
             # FILTER: Remove SKU 4-4-654 as requested by user
             productos = [p for p in productos if p[1] != '4-4-654']
             
+            # MODIFICADO: Usar nombres del Excel en vez de nombres largos de BD
+            productos_excel = []
+            for nombre_largo, sku, cantidad in productos:
+                nombre_excel = SKU_TO_EXCEL_NAME.get(sku, nombre_largo)  # Fallback a nombre largo si no está en mapeo
+                productos_excel.append((nombre_excel, sku, cantidad))
+            
             details_moviles = obtener_detalles_moviles()
             
             count_m = len(moviles)
-            count_p = len(productos)
+            count_p = len(productos_excel)
             
             if count_m == 0 and count_p == 0:
                 status = "BASE DE DATOS VACÍA"
@@ -70,7 +103,7 @@ def index():
         return render_template('index.html', 
                                  hoy=date.today().isoformat(), 
                                  moviles=moviles if 'moviles' in locals() else [], 
-                                 productos=productos if 'productos' in locals() else [],
+                                 productos=productos_excel if 'productos_excel' in locals() else [],
                                  details_moviles=json.dumps(details_moviles if 'details_moviles' in locals() else {}),
                                  db_status=status,
                                  db_engine=engine,
