@@ -15,215 +15,215 @@
         }
 
         body {
-                font-family: 'Segoe UI', sans-serif;
-                background: var(--bg);
-                margin: 0;
-                padding: 10px;
-                color: #333;
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg);
+            margin: 0;
+            padding: 10px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .section-title {
+            background: #f8f9fa;
+            padding: 10px;
+            border-left: 5px solid var(--accent);
+            font-weight: bold;
+            margin: 20px 0 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+
+        select,
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        .material-list {
+            margin-top: 10px;
+        }
+
+        .material-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            transition: all 0.2s;
+        }
+
+        .material-item.disabled {
+            opacity: 0.3;
+            background: #fafafa;
+            filter: grayscale(1);
+            pointer-events: none;
+        }
+
+        .material-info {
+            flex: 1;
+            padding-right: 15px;
+        }
+
+        .material-name {
+            font-weight: bold;
+            font-size: 14px;
+            display: block;
+        }
+
+        .material-sku {
+            font-size: 11px;
+            color: #777;
+        }
+
+        .material-qty {
+            width: 80px !important;
+            text-align: center;
+            border-color: #bbb;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 30px;
+            box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .hint {
+            font-size: 11px;
+            color: #666;
+            font-weight: normal;
+            margin-top: 3px;
+            display: block;
+        }
+
+        /* Scanner Modal */
+        .scan-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .scan-modal.active {
+            display: flex;
+        }
+
+        .scan-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 80%;
+        }
+
+        .scan-icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            margin-left: 10px;
+            padding: 5px;
+            opacity: 0.7;
+            transition: transform 0.2s;
+        }
+
+        .scan-icon-btn:hover {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+
+        .highlight-row {
+            animation: flash 1s;
+        }
+
+        @keyframes flash {
+            0% {
+                background-color: #d4edda;
             }
 
-            .container {
-                max-width: 600px;
-                margin: auto;
-                background: white;
-                padding: 20px;
-                border-radius: 12px;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            100% {
+                background-color: transparent;
             }
-
-            h1 {
-                text-align: center;
-                color: var(--primary);
-                margin-bottom: 20px;
-                font-size: 24px;
-            }
-
-            .logo {
-                text-align: center;
-                font-size: 22px;
-                font-weight: 900;
-                color: var(--primary);
-                margin-bottom: 5px;
-            }
-
-            .section-title {
-                background: #f8f9fa;
-                padding: 10px;
-                border-left: 5px solid var(--accent);
-                font-weight: bold;
-                margin: 20px 0 10px;
-                font-size: 14px;
-                text-transform: uppercase;
-            }
-
-            .form-group {
-                margin-bottom: 15px;
-            }
-
-            label {
-                display: block;
-                font-weight: bold;
-                margin-bottom: 5px;
-                font-size: 13px;
-            }
-
-            select,
-            input {
-                width: 100%;
-                padding: 12px;
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                box-sizing: border-box;
-                font-size: 16px;
-            }
-
-            .material-list {
-                margin-top: 10px;
-            }
-
-            .material-item {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 12px;
-                border-bottom: 1px solid #eee;
-                transition: all 0.2s;
-            }
-
-            .material-item.disabled {
-                opacity: 0.3;
-                background: #fafafa;
-                filter: grayscale(1);
-                pointer-events: none;
-            }
-
-            .material-info {
-                flex: 1;
-                padding-right: 15px;
-            }
-
-            .material-name {
-                font-weight: bold;
-                font-size: 14px;
-                display: block;
-            }
-
-            .material-sku {
-                font-size: 11px;
-                color: #777;
-            }
-
-            .material-qty {
-                width: 80px !important;
-                text-align: center;
-                border-color: #bbb;
-            }
-
-            .submit-btn {
-                width: 100%;
-                padding: 18px;
-                background: var(--success);
-                color: white;
-                border: none;
-                border-radius: 10px;
-                font-size: 18px;
-                font-weight: bold;
-                cursor: pointer;
-                margin-top: 30px;
-                box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
-            }
-
-            .submit-btn:disabled {
-                background: #ccc;
-                box-shadow: none;
-                cursor: not-allowed;
-            }
-
-            .alert {
-                padding: 15px;
-                border-radius: 8px;
-                margin-bottom: 20px;
-                display: none;
-                text-align: center;
-                font-weight: bold;
-            }
-
-            .alert-success {
-                background: #d4edda;
-                color: #155724;
-                border: 1px solid #c3e6cb;
-            }
-
-            .alert-error {
-                background: #f8d7da;
-                color: #721c24;
-                border: 1px solid #f5c6cb;
-            }
-
-            .hint {
-                font-size: 11px;
-                color: #666;
-                font-weight: normal;
-                margin-top: 3px;
-                display: block;
-            }
-
-            /* Scanner Modal */
-            .scan-modal {
-                display: none;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.8);
-                z-index: 1000;
-                justify-content: center;
-                align-items: center;
-                flex-direction: column;
-            }
-
-            .scan-modal.active {
-                display: flex;
-            }
-
-            .scan-content {
-                background: white;
-                padding: 30px;
-                border-radius: 12px;
-                text-align: center;
-                max-width: 80%;
-            }
-
-            .scan-icon-btn {
-                background: none;
-                border: none;
-                cursor: pointer;
-                font-size: 20px;
-                margin-left: 10px;
-                padding: 5px;
-                opacity: 0.7;
-                transition: transform 0.2s;
-            }
-
-            .scan-icon-btn:hover {
-                opacity: 1;
-                transform: scale(1.2);
-            }
-
-            .highlight-row {
-                animation: flash 1s;
-            }
-
-            @keyframes flash {
-                0% {
-                    background-color: #d4edda;
-                }
-
-                100% {
-                    background-color: transparent;
-                }
-            }
+        }
     </style>
 </head>
 
@@ -317,27 +317,28 @@
                 <input type="text" name="ayudante" id="ayudante">
             </div>
 
-            <div class="material-list">
-                {% for p in productos %}
-                <div class="material-item" id="row_{{ p[1] }}">
-                    <div class="material-info">
-                        <span class="material-name">{{ p[0] }}</span>
-                        <span class="material-sku">SKU: {{ p[1] }}</span>
-                    </div>
+            <div class="section-title" id="section_materiales" style="display:none;">📦 Materiales Asignados al Móvil
+            </div>
 
-                    <!-- Container for Input + Scan Icon -->
-                    <div style="display: flex; align-items: center;">
-                        <input type="number" name="qty_{{ p[1] }}" id="input_{{ p[1] }}" class="material-qty sku-input"
-                            data-sku="{{ p[1] }}" data-name="{{ p[0] }}" min="0" placeholder="0">
+            <!-- Mensaje inicial -->
+            <div id="mensaje_seleccionar"
+                style="text-align:center; padding:40px 20px; color:#666; background:#f8f9fa; border-radius:8px; margin:15px 0;">
+                <div style="font-size:40px; margin-bottom:10px;">🚚</div>
+                <p style="font-weight:bold; font-size:16px; margin:0;">Seleccione un Móvil</p>
+                <p style="font-size:13px; margin-top:5px;">Se mostrarán los materiales asignados a esa unidad</p>
+            </div>
 
-                        <!-- Icon will be shown via JS for allowed SKUs -->
-                        <button type="button" class="scan-icon-btn" id="btn_scan_{{ p[1] }}"
-                            onclick="openScanner('{{ p[1] }}', '{{ p[0] }}')" style="display:none;">
-                            📷
-                        </button>
-                    </div>
-                </div>
-                {% endfor %}
+            <!-- Lista dinámica de materiales -->
+            <div class="material-list" id="material_list_container" style="display:none;">
+                <!-- Se genera dinámicamente por JavaScript -->
+            </div>
+
+            <!-- Mensaje cuando no hay stock -->
+            <div id="mensaje_sin_stock"
+                style="display:none; text-align:center; padding:30px 20px; color:#e74c3c; background:#fef0f0; border-radius:8px; margin:15px 0;">
+                <div style="font-size:40px; margin-bottom:10px;">📭</div>
+                <p style="font-weight:bold; font-size:16px; margin:0;">Sin materiales asignados</p>
+                <p style="font-size:13px; margin-top:5px;">Este móvil no tiene materiales en inventario</p>
             </div>
 
             <button type="submit" class="submit-btn" id="submit_btn">Enviar Reporte Final 📤</button>
@@ -397,53 +398,114 @@
             }
         };
 
+        // SKU to Excel Name mapping (para nombres cortos)
+        const SKU_TO_EXCEL_NAME = {{ sku_to_excel_name | safe }};
+
         function actualizarUIConInventario() {
-            if (!window.INVENTARIO_ACTUAL) return;
+            const container = document.getElementById('material_list_container');
+            const mensajeSeleccionar = document.getElementById('mensaje_seleccionar');
+            const mensajeSinStock = document.getElementById('mensaje_sin_stock');
+            const sectionTitle = document.getElementById('section_materiales');
 
+            // Ocultar mensaje inicial
+            mensajeSeleccionar.style.display = 'none';
+
+            // Limpiar lista anterior
+            container.innerHTML = '';
+
+            // Verificar si hay inventario
+            if (!window.INVENTARIO_ACTUAL || window.INVENTARIO_ACTUAL.length === 0) {
+                container.style.display = 'none';
+                sectionTitle.style.display = 'none';
+                mensajeSinStock.style.display = 'block';
+                return;
+            }
+
+            // Mostrar sección de materiales
+            mensajeSinStock.style.display = 'none';
+            sectionTitle.style.display = 'block';
+            container.style.display = 'block';
+
+            // Generar elementos para cada producto del inventario
             window.INVENTARIO_ACTUAL.forEach(item => {
-                const row = document.getElementById(`row_${item.sku}`);
-                if (!row) return;
+                const disponibles = item.tiene_series ? (item.seriales ? item.seriales.length : 0) : item.cantidad_total;
+                const nombreCorto = SKU_TO_EXCEL_NAME[item.sku] || item.nombre;
 
-                const materialInfo = row.querySelector('.material-info');
-                if (!materialInfo) return;
+                const row = document.createElement('div');
+                row.className = 'material-item';
+                row.id = `row_${item.sku}`;
 
-                // Agregar o actualizar badge
-                let badge = row.querySelector('.badge-disponible');
-                if (!badge) {
-                    badge = document.createElement('span');
-                    badge.className = 'badge-disponible';
-                    badge.style.cssText = 'background:#3498db; color:white; padding:3px 8px; border-radius:10px; font-size:11px; margin-left:8px; display:inline-block;';
-                    materialInfo.appendChild(badge);
-                }
+                // Info del material
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'material-info';
+                infoDiv.innerHTML = `
+                    <span class="material-name">${nombreCorto}</span>
+                    <span class="material-sku">SKU: ${item.sku}</span>
+                    <span class="badge-disponible" style="background:${disponibles > 0 ? '#3498db' : '#e74c3c'}; color:white; padding:3px 8px; border-radius:10px; font-size:11px; margin-left:8px; display:inline-block;">
+                        ${disponibles} disponibles
+                    </span>
+                `;
+                row.appendChild(infoDiv);
 
-                const disponibles = item.tiene_series ? item.seriales.length : item.cantidad_total;
-                badge.textContent = `${disponibles} disponibles`;
-                badge.style.background = disponibles > 0 ? '#3498db' : '#e74c3c';
+                // Container para input/botón
+                const inputContainer = document.createElement('div');
+                inputContainer.style.cssText = 'display: flex; align-items: center;';
 
-                // Si tiene series, reemplazar input con botón
                 if (item.tiene_series && item.seriales && item.seriales.length > 0) {
-                    const input = document.getElementById(`input_${item.sku}`);
-                    let btn = row.querySelector('.btn-seleccionar-series');
+                    // Producto con series - botón de selección
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'btn-seleccionar-series';
+                    btn.textContent = 'Seleccionar';
+                    btn.onclick = () => abrirModalSeriales(item.sku, nombreCorto, item.seriales);
+                    btn.style.cssText = 'padding:10px 20px; background:#27ae60; color:white; border:none; border-radius:6px; font-size:13px; font-weight:bold; cursor:pointer;';
+                    inputContainer.appendChild(btn);
 
-                    if (!btn) {
-                        input.style.display = 'none';
+                    // Input oculto para guardar cantidad
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = `qty_${item.sku}`;
+                    hiddenInput.id = `input_${item.sku}`;
+                    hiddenInput.className = 'sku-input';
+                    hiddenInput.dataset.sku = item.sku;
+                    hiddenInput.dataset.name = nombreCorto;
+                    hiddenInput.value = '0';
+                    inputContainer.appendChild(hiddenInput);
 
-                        btn = document.createElement('button');
-                        btn.type = 'button';
-                        btn.className = 'btn-seleccionar-series';
-                        btn.textContent = 'Seleccionar';
-                        btn.onclick = () => abrirModalSeriales(item.sku, item.nombre, item.seriales);
-                        btn.style.cssText = 'padding:10px 20px; background:#27ae60; color:white; border:none; border-radius:6px; font-size:13px; font-weight:bold; cursor:pointer;';
+                    window.SERIALES_SELECCIONADOS[item.sku] = [];
+                } else {
+                    // Producto sin series - input numérico
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.name = `qty_${item.sku}`;
+                    input.id = `input_${item.sku}`;
+                    input.className = 'material-qty sku-input';
+                    input.dataset.sku = item.sku;
+                    input.dataset.name = nombreCorto;
+                    input.min = '0';
+                    input.max = disponibles.toString();
+                    input.placeholder = '0';
+                    input.disabled = disponibles === 0;
 
-                        input.parentNode.insertBefore(btn, input);
-                        window.SERIALES_SELECCIONADOS[item.sku] = [];
+                    if (disponibles === 0) {
+                        row.classList.add('disabled');
                     }
-                } else if (item.cantidad_total === 0) {
-                    // Deshabilitar si no hay stock
-                    const input = document.getElementById(`input_${item.sku}`);
-                    if (input) input.disabled = true;
-                    row.classList.add('disabled');
+
+                    // Validar que no exceda disponibles
+                    input.addEventListener('input', function () {
+                        const val = parseInt(this.value) || 0;
+                        if (val > disponibles) {
+                            this.value = disponibles;
+                            this.style.borderColor = 'red';
+                            setTimeout(() => this.style.borderColor = '#ddd', 500);
+                        }
+                    });
+
+                    inputContainer.appendChild(input);
                 }
+
+                row.appendChild(inputContainer);
+                container.appendChild(row);
             });
         }
 
