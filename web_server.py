@@ -105,6 +105,7 @@ def index():
                                  moviles=moviles if 'moviles' in locals() else [], 
                                  productos=productos_excel if 'productos_excel' in locals() else [],
                                  details_moviles=json.dumps(details_moviles if 'details_moviles' in locals() else {}),
+                                 sku_to_excel_name=json.dumps(SKU_TO_EXCEL_NAME),
                                  db_status=status,
                                  db_engine=engine,
                                  error_detail=error_detail,
