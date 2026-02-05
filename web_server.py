@@ -255,12 +255,14 @@ def get_inventario_movil(movil):
         conn = get_db_connection(target_db=target_db)
         cursor = conn.cursor()
         
-        # Obtener asignación del móvil
+        # Obtener asignación del móvil - CORREGIDO: columnas reales son 'movil' y 'cantidad'
+        # Necesitamos JOIN con productos para obtener el nombre
         sql_asignacion = """
-            SELECT nombre_producto, sku_producto, cantidad_total
-            FROM asignacion_moviles
-            WHERE nombre_movil = ?
-            AND cantidad_total > 0
+            SELECT p.nombre, a.sku_producto, a.cantidad
+            FROM asignacion_moviles a
+            JOIN productos p ON a.sku_producto = p.sku AND p.ubicacion = 'BODEGA'
+            WHERE a.movil = ?
+            AND a.cantidad > 0
         """
         run_query(cursor, sql_asignacion, (movil,))
         asignacion = cursor.fetchall()
