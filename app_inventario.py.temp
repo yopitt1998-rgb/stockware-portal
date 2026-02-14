@@ -1,0 +1,107 @@
+    def perform_inventory_action(self, method_name):
+        """Ejecuta una acción del tab de inventario, cargándolo si es necesario"""
+        try:
+            # Asegurar que Inventario esté cargado
+            self.load_tab("Inventario")
+            
+            # Obtener referencia (puede estar en self.inventory_tab o self.inventorytab depending on capitalization in load_tab)
+            # In load_tab: setattr(self, f"{data['class'].lower()}", instance) -> inventorytab
+            # But specific mapping: if tab_name == "Inventario": self.inventory_tab = instance
+            
+            if not hasattr(self, 'inventory_tab'):
+                 messagebox.showerror("Error", "No se pudo cargar el módulo de Inventario.")
+                 return
+                 
+            # Ejecutar método
+            if hasattr(self.inventory_tab, method_name):
+                method = getattr(self.inventory_tab, method_name)
+                method()
+            else:
+                messagebox.showerror("Error", f"Método {method_name} no encontrado en Inventario.")
+        except Exception as e:
+            logger.error(f"Error executing inventory action {method_name}: {e}")
+            messagebox.showerror("Error", f"Error ejecutando acción: {e}")
+
+    def create_movements_tab(self, notebook):
+        """Crear pestaña de Movimientos"""
+        movements_frame = ttk.Frame(notebook, style='Modern.TFrame')
+        notebook.add(movements_frame, text="🔄 Movimientos")
+        
+        # Implement Scrollable Canvas
+        canvas = tk.Canvas(movements_frame, bg=Styles.LIGHT_BG if hasattr(Styles, 'LIGHT_BG') else '#f8f9fa', highlightthickness=0)
+        scrollbar = ttk.Scrollbar(movements_frame, orient="vertical", command=canvas.yview)
+        
+        movements_frame_inner = ttk.Frame(canvas, style='Modern.TFrame')
+        
+        # Configure scrolling
+        movements_frame_inner.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        
+        canvas.create_window((0, 0), window=movements_frame_inner, anchor="nw", width=canvas.winfo_reqwidth())
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        # Pack layouts
+        canvas.pack(side="left", fill="both", expand=True, padx=20, pady=20)
+        scrollbar.pack(side="right", fill="y")
+        
+        # Ensure inner frame resizes with canvas
+        def on_canvas_configure(event):
+            canvas.itemconfig(canvas.find_withtag("all")[0], width=event.width)
+        canvas.bind("<Configure>", on_canvas_configure)
+        
+        # Botones de movimientos con LAZY LOADING WRAPPERS
+        # Usamos strings en lugar de referencias directas
+        movement_buttons = [
+            ("🚚 Abasto Completo", "Registro de entrada de material a bodega", "abrir_ventana_abasto", Styles.SUCCESS_COLOR),
+            ("📂 Gestión de Abastos", "Historial, detalle y edición de abastos", "abrir_ventana_gestion_abastos", Styles.INFO_COLOR),
+            ("🏁 Inventario Inicial", "Carga de stock inicial (solo inicio)", "abrir_ventana_inicial", "#3f51b5"),
+            ("📤 Salida a Móvil", "Asignación de material a vehículos", "abrir_ventana_salida_movil", Styles.SECONDARY_COLOR),
+            ("🔄 Retorno de Móvil", "Devolución de material desde vehículos", "abrir_ventana_retorno_movil", Styles.INFO_COLOR),
+            ("📂 Conciliación Excel", "Comparar consumo contra archivo Excel", "abrir_conciliacion", Styles.PRIMARY_COLOR),
+            ("⚖️ Conciliación", "Ver y ajustar saldo de móvil (Manual)", "abrir_ventana_consiliacion", Styles.WARNING_COLOR)
+        ]
+        
+        for i, (title, description, method_name, color) in enumerate(movement_buttons):
+            # Wrapper lambda
+            cmd = lambda m=method_name: self.perform_inventory_action(m)
+            self.create_movement_card(movements_frame_inner, title, description, cmd, color, i)
+        
+        movements_frame_inner.columnconfigure(0, weight=1)
+        movements_frame_inner.columnconfigure(1, weight=1)
+
+    def create_movement_card(self, parent, title, description, command, color, index):
+        """Crear tarjeta de movimiento moderna"""
+        row = index // 2
+        col = index % 2
+        
+        card = tk.Frame(parent, bg='white', relief='raised', borderwidth=0,
+                       highlightbackground='#e0e0e0', highlightthickness=1)
+        card.grid(row=row, column=col, padx=10, pady=10, sticky='nsew')
+        
+        # Título
+        title_label = tk.Label(card, text=title, font=('Segoe UI', 14, 'bold'),
+                              bg='white', fg=color, justify='left')
+        title_label.pack(anchor='w', padx=20, pady=(20, 5))
+        
+        # Descripción
+        desc_label = tk.Label(card, text=description, font=('Segoe UI', 10),
+                             bg='white', fg='#666666', justify='left', wraplength=300)
+        desc_label.pack(anchor='w', padx=20, pady=(0, 20))
+        
+        # Botón de acción
+        action_btn = tk.Button(card, text="Abrir", command=command,
+                              bg=color, fg='white', font=('Segoe UI', 10, 'bold'),
+                              relief='flat', bd=0, padx=20, pady=8, cursor='hand2')
+        action_btn.pack(anchor='e', padx=20, pady=(0, 15))
+        
+        # Hover simple
+        def on_enter(e): action_btn.configure(bg=darken_color(color))
+        def on_leave(e): action_btn.configure(bg=color)
+        
+        action_btn.bind("<Enter>", on_enter)
+        action_btn.bind("<Leave>", on_leave)
+        
+        return card
+

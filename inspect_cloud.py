@@ -1,45 +1,23 @@
+
 from database import get_db_connection
-from config import DB_TYPE, MYSQL_HOST, MYSQL_DB, MYSQL_USER
 
-def inspect_cloud():
-    print(f"--- DIAGNÓSTICO DE NUBE ---")
-    print(f"DB_TYPE: {DB_TYPE}")
-    print(f"HOST: {MYSQL_HOST}")
-    print(f"DB: {MYSQL_DB}")
-    print(f"USER: {MYSQL_USER}")
+def inspect_cloud_assignments():
+    print("--- INSPECTING CLOUD ASSIGNMENTS ---")
+    conn = get_db_connection(target_db='MYSQL')
+    cursor = conn.cursor()
     
-    conn = None
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        
-        # Listar tablas
-        print("\n--- TABLAS ENCONTRADAS ---")
-        cursor.execute("SHOW TABLES")
-        tables = cursor.fetchall()
-        for t in tables:
-            print(f"- {t[0]}")
+        cursor.execute("USE test")
+        cursor.execute("SELECT * FROM asignacion_moviles LIMIT 10")
+        rows = cursor.fetchall()
+        print(f"Total rows fetched: {len(rows)}")
+        for r in rows:
+            print(r)
             
-        # Conteo detallado
-        for table in ['productos', 'moviles', 'usuarios', 'movimientos']:
-            try:
-                cursor.execute(f"SELECT COUNT(*) FROM {table}")
-                count = cursor.fetchone()[0]
-                print(f"✅ Tabla '{table}': {count} filas")
-            except Exception as e:
-                print(f"❌ Error en tabla '{table}': {e}")
-                
-        # Verificar BODEGA
-        try:
-            cursor.execute("SELECT COUNT(*) FROM productos WHERE ubicacion = 'BODEGA'")
-            count = cursor.fetchone()[0]
-            print(f"📊 Productos en 'BODEGA': {count}")
-        except: pass
-
     except Exception as e:
-        print(f"❌ ERROR GENERAL: {e}")
+        print(f"Error: {e}")
     finally:
-        if conn: conn.close()
+        conn.close()
 
 if __name__ == "__main__":
-    inspect_cloud()
+    inspect_cloud_assignments()

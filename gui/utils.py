@@ -1,5 +1,54 @@
+import threading
 import tkinter as tk
 from tkinter import ttk
+from utils.logger import get_logger
+
+logger = get_logger(__name__)
+
+def mostrar_cargando_async(ventana, funcion_carga, callback_exito, master_app=None):
+    """
+    Ejecuta una función de carga en un hilo secundario y muestra un loading en la ventana dada.
+    
+    Args:
+        ventana: tk.Toplevel o ventana donde mostrar el loading.
+        funcion_carga: Función que retorna los datos (se ejecuta en thread).
+        callback_exito: Función que recibe los datos (se ejecuta en main thread).
+        master_app: Opcional, referencia a la app principal para logs.
+    """
+    frame_carga = tk.Frame(ventana, bg=ventana.cget('bg'))
+    frame_carga.pack(fill='both', expand=True)
+    
+    content_frame = tk.Frame(frame_carga, bg=ventana.cget('bg'))
+    content_frame.pack(expand=True)
+    
+    tk.Label(content_frame, text="🔄", font=('Segoe UI', 30), 
+            bg=ventana.cget('bg'), fg='#7f8c8d').pack(pady=10)
+    tk.Label(content_frame, text="Cargando datos...", font=('Segoe UI', 12), 
+            bg=ventana.cget('bg'), fg='#7f8c8d').pack()
+    
+    def run_thread():
+        try:
+            import time; time.sleep(0.1) 
+            datos = funcion_carga()
+            if ventana.winfo_exists():
+                ventana.after(0, lambda: _finalizar_carga(ventana, frame_carga, callback_exito, datos))
+        except Exception as e:
+            logger.error(f"Error async: {e}")
+            import traceback; traceback.print_exc()
+            if ventana.winfo_exists():
+                ventana.after(0, lambda: _manejar_error_carga(ventana, e))
+
+    threading.Thread(target=run_thread, daemon=True).start()
+
+def _finalizar_carga(ventana, frame_carga, callback_exito, datos):
+    if not ventana.winfo_exists(): return
+    frame_carga.destroy()
+    callback_exito(datos)
+
+def _manejar_error_carga(ventana, error):
+    mostrar_mensaje_emergente(ventana, "Error", f"Error cargando datos: {error}", "error")
+    ventana.destroy()
+
 
 def darken_color(color, factor=0.8):
     """Oscurece un color hexadecimal"""

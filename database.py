@@ -6,6 +6,17 @@ import sys
 import csv
 import shutil
 from datetime import datetime, date, timedelta
+
+# Logging y Validación
+from utils.logger import get_logger
+from utils.validators import (
+    validate_sku, validate_quantity, validate_date, 
+    validate_movil, validate_tipo_movimiento, 
+    validate_observaciones, ValidationError
+)
+
+logger = get_logger(__name__)
+
 try:
     from tkinter import messagebox
     HAS_TK = True
@@ -22,12 +33,13 @@ def safe_messagebox(title, message, type="error"):
         elif type == "warning":
             messagebox.showwarning(title, message)
     else:
-        print(f"[{title.upper()}] {message}")
+        logger.warning(f"[{title.upper()}] {message}")
 from config import (
     DATABASE_NAME,
     DB_TYPE,
     MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB, MYSQL_PORT,
     MOVILES_DISPONIBLES,
+    MOVILES_SANTIAGO,
     UBICACION_DESCARTE,
     TIPO_MOVIMIENTO_DESCARTE,
     TIPOS_CONSUMO,
@@ -40,55 +52,8 @@ from config import (
 # CONFIGURACIÓN DE CONEXIÓN (PUNTO 3)
 # =================================================================
 
-# =================================================================
-# CONFIGURACIÓN DE CONEXIÓN CON POOLING (PUNTO 3)
-# =================================================================
-
-_mysql_pool = None
-
-def get_db_connection(target_db=None):
-    """Retorna una conexión activa a la base de datos de la sucursal actual."""
-    global _mysql_pool
-    
-    # 1. Resolver Nombre de BD
-    if target_db:
-        db_name = target_db
-    else:
-        # Usar contexto dinámico (solo en app de escritorio)
-        try:
-            from config import get_current_db_name
-            db_name = get_current_db_name()
-        except ImportError:
-            # Fallback para web server (no tiene contexto de sucursales)
-            db_name = MYSQL_DB if DB_TYPE == 'MYSQL' else DATABASE_NAME
-    
-    if DB_TYPE == 'MYSQL':
-        try:
-            # NOTA: Si cambiamos constantemente de DB (Sucursales), el Pool estático de 'MYSQL_DB'
-            # podría no servirnos si las DB son distintas.
-            # Por seguridad, conectamos directo o gestionamos pools separados (future work).
-            # Para este cambio rápido, conectamos directo si no coincide con el default.
-            print(f"🔌 [CONNECT] Intentando conectar a MySQL -> DB: {db_name}")
-            
-            return mysql.connector.connect(
-                host=MYSQL_HOST,
-                user=MYSQL_USER,
-                password=MYSQL_PASS,
-                database=db_name,
-                port=MYSQL_PORT
-            )
-        except Exception as e:
-             safe_messagebox("Error Conexión", f"Error conectando a MySQL ({db_name}): {e}")
-             raise e
-    else:
-        # SQLite
-        try:
-            conn = sqlite3.connect(db_name)
-            conn.execute("PRAGMA foreign_keys = ON")
-            return conn
-        except Exception as e:
-            safe_messagebox("Error Conexión", f"Error conectando a SQLite ({db_name}): {e}")
-            raise e
+# Importar nueva gestión de conexiones
+from utils.db_connector import get_db_connection, close_connection
 
 
 
@@ -96,14 +61,22 @@ def run_query(cursor, query, params=None):
     """
     Ejecuta una consulta ajustando la sintaxis según el motor de DB.
     Convierte '?' a '%s' si el motor es MySQL.
+    Registra errores de consulta.
     """
     if DB_TYPE == 'MYSQL':
+        # Reemplazo básico de placeholder para MySQL
         query = query.replace('?', '%s')
     
-    if params:
-        cursor.execute(query, params)
-    else:
-        cursor.execute(query)
+    try:
+        if params:
+            cursor.execute(query, params)
+        else:
+            cursor.execute(query)
+    except Exception as e:
+        logger.error(f"❌ Error SQL ejecución: {e}")
+        logger.error(f"   Query: {query}")
+        logger.error(f"   Params: {params}")
+        raise e
 
 # =================================================================
 # 2. FUNCIONES DE BASE DE DATOS (CRUD y Movimientos) - CORREGIDAS
@@ -143,7 +116,8 @@ def inicializar_bd():
             try:
                 columns = get_all_columns(table)
                 return column in columns
-            except:
+            except Exception as e:
+                logger.warning(f"⚠️ Error verificando columna {column} en tabla {table}: {e}")
                 return False
 
         def add_column_if_missing(table, column, type, default=None):
@@ -152,7 +126,7 @@ def inicializar_bd():
                 if default is not None:
                     alter_query += f" DEFAULT {default}"
                 cursor.execute(alter_query)
-                print(f"🆕 Columna {column} añadida a {table}")
+                logger.info(f"🆕 Columna {column} añadida a {table}")
                 # Limpiar cache para forzar recarga si se añade otra
                 if table in table_columns_cache:
                     del table_columns_cache[table]
@@ -178,6 +152,8 @@ def inicializar_bd():
         add_column_if_missing('productos', 'categoria', 'VARCHAR(100)', "'General'")
         add_column_if_missing('productos', 'marca', 'VARCHAR(100)', "'N/A'")
         add_column_if_missing('productos', 'secuencia_vista', 'VARCHAR(20)')
+        add_column_if_missing('productos', 'codigo_barra', 'VARCHAR(100)') # Código de barra individual (equipos)
+        add_column_if_missing('productos', 'codigo_barra_maestro', 'VARCHAR(100)') # Código de barra maestro (SKU)
         
         # 2. TABLA ASIGNACION_MOVILES
         cursor.execute(f"""
@@ -185,10 +161,12 @@ def inicializar_bd():
                 id {INT_TYPE} {AUTOINC} PRIMARY KEY,
                 sku_producto VARCHAR(50) NOT NULL,
                 movil VARCHAR(100) NOT NULL,
+                paquete VARCHAR(50),
                 cantidad INTEGER NOT NULL DEFAULT 0,
-                UNIQUE (sku_producto, movil)
+                UNIQUE (sku_producto, movil, paquete)
             )
         """)
+        add_column_if_missing('asignacion_moviles', 'paquete', 'VARCHAR(50)')
         
         # 3. TABLA MOVIMIENTOS
         cursor.execute(f"""
@@ -254,24 +232,9 @@ def inicializar_bd():
         cursor.execute("SELECT COUNT(*) FROM configuracion")
         if cursor.fetchone()[0] == 0:
             cursor.execute("INSERT INTO configuracion (id_config, nombre_empresa) VALUES (1, 'Mi Empresa')")
-            print("⚙️ Configuración inicial creada.")
+            logger.info("⚙️ Configuración inicial creada.")
         
-        # 7. TABLA USUARIOS
-        cursor.execute(f"""
-            CREATE TABLE IF NOT EXISTS usuarios (
-                id {INT_TYPE} PRIMARY KEY {AUTOINC}, 
-                usuario VARCHAR(50) UNIQUE, 
-                password VARCHAR(255), 
-                rol VARCHAR(20)
-            )
-        """)
-        
-        cursor.execute("SELECT COUNT(*) FROM usuarios")
-        if cursor.fetchone()[0] == 0:
-            cursor.execute("INSERT INTO usuarios (usuario, password, rol) VALUES ('admin', 'admin123', 'ADMIN')")
-            print("👤 Usuario administrador inicial creado (admin/admin123)")
-            
-        # 8. TABLA MOVILES
+        # 7. TABLA MOVILES
         cursor.execute(f"""
             CREATE TABLE IF NOT EXISTS moviles (
                 id {INT_TYPE} PRIMARY KEY {AUTOINC},
@@ -309,7 +272,16 @@ def inicializar_bd():
 
         # Helper para añadir índices en MySQL (Defensivo)
         def add_mysql_index(name, table, cols):
-            if DB_TYPE != 'MYSQL': return # Skip if not MySQL
+            """Añade un índice MySQL de forma segura."""
+            if DB_TYPE != 'MYSQL': 
+                return  # Skip if not MySQL
+            
+            # Validar que los nombres solo contengan caracteres alfanuméricos y guiones bajos
+            import re
+            if not re.match(r'^[a-zA-Z0-9_,\s]+$', f"{name}{table}{cols}"):
+                logger.warning(f"⚠️ Nombres de índice/tabla/columnas contienen caracteres no válidos")
+                return
+            
             try:
                 cursor.execute(f"CREATE INDEX {name} ON {table}({cols})")
             except Exception as e:
@@ -317,7 +289,7 @@ def inicializar_bd():
                 if "1061" in str(e) or "Duplicate" in str(e): 
                     pass
                 else:
-                    print(f"⚠️ No se pudo crear índice {name} en {table}: {e}")
+                    logger.warning(f"⚠️ No se pudo crear índice {name} en {table}: {e}")
 
         # 10. TABLA SERIES REGISTRADAS (NUEVO)
         cursor.execute(f"""
@@ -336,22 +308,31 @@ def inicializar_bd():
         # INDICES GLOBALES
         if DB_TYPE == 'SQLITE':
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_productos_sku ON productos(sku)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_productos_codigo_maestro ON productos(codigo_barra_maestro)")  # NUEVO
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_mov_sku_tipo ON movimientos(sku_producto, tipo_movimiento)")
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_mov_fecha ON movimientos(fecha_evento)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_mov_fecha_tipo ON movimientos(fecha_evento, tipo_movimiento)")  # NUEVO: índice compuesto
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_asig_sku ON asignacion_moviles(sku_producto)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_asig_movil ON asignacion_moviles(movil)")  # NUEVO: para filtros por móvil
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_cons_fecha ON consumos_pendientes(fecha)")
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_cons_estado ON consumos_pendientes(estado)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_cons_movil ON consumos_pendientes(movil)")  # NUEVO: para filtros por móvil
         else:
             add_mysql_index('idx_productos_sku', 'productos', 'sku')
+            add_mysql_index('idx_productos_codigo_maestro', 'productos', 'codigo_barra_maestro')  # NUEVO
             add_mysql_index('idx_mov_sku_tipo', 'movimientos', 'sku_producto, tipo_movimiento')
             add_mysql_index('idx_mov_fecha', 'movimientos', 'fecha_evento')
+            add_mysql_index('idx_mov_fecha_tipo', 'movimientos', 'fecha_evento, tipo_movimiento')  # NUEVO: índice compuesto
             add_mysql_index('idx_asig_sku', 'asignacion_moviles', 'sku_producto')
+            add_mysql_index('idx_asig_movil', 'asignacion_moviles', 'movil')  # NUEVO: para filtros por móvil
             add_mysql_index('idx_cons_fecha', 'consumos_pendientes', 'fecha')
             add_mysql_index('idx_cons_estado', 'consumos_pendientes', 'estado')
+            add_mysql_index('idx_cons_movil', 'consumos_pendientes', 'movil')  # NUEVO: para filtros por móvil
+
 
         # MIGRACIÓN AUTOMÁTICA DE MÓVILES (Asegurar que todos existan)
         from config import ALL_MOVILES
-        print("⚙️ Verificando lista completa de móviles...")
+        logger.info("⚙️ Verificando lista completa de móviles...")
         for mv in ALL_MOVILES:
             try:
                 # INSERT IGNORE (MySQL) o INSERT OR IGNORE (SQLite) para no fallar si ya existe
@@ -369,8 +350,7 @@ def inicializar_bd():
         safe_messagebox("Error Crítico", f"❌ Error de {engine} al inicializar la base de datos:\n\n{e}")
         sys.exit(1)
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def diagnosticar_duplicados_movil(movil):
     """Diagnóstico: Identifica duplicados exactos en asignacion_moviles"""
@@ -391,11 +371,10 @@ def diagnosticar_duplicados_movil(movil):
         return duplicados
         
     except Exception as e:
-        print(f"Error en diagnóstico: {e}")
+        logger.error(f"Error en diagnóstico: {e}")
         return []
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def limpiar_productos_duplicados():
     """Elimina productos duplicados manteniendo el registro más reciente"""
@@ -439,8 +418,7 @@ def limpiar_productos_duplicados():
     except Exception as e:
         return 0, f"Error al limpiar duplicados: {e}"
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def limpiar_duplicados_asignacion_moviles():
     """Limpia registros duplicados en la tabla asignacion_moviles y consolida cantidades - CORREGIDA"""
@@ -461,7 +439,7 @@ def limpiar_duplicados_asignacion_moviles():
         if not duplicados:
             return True, "No se encontraron duplicados en asignación móviles"
         
-        print(f"Encontrados {len(duplicados)} SKUs duplicados en asignación móviles")
+        logger.info(f"Encontrados {len(duplicados)} SKUs duplicados en asignación móviles")
         
         # Crear tabla temporal con datos consolidados
         run_query(cursor, """
@@ -491,16 +469,15 @@ def limpiar_duplicados_asignacion_moviles():
     except Exception as e:
         return False, f"Error al limpiar duplicados de asignación: {e}"
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def verificar_y_corregir_duplicados_completo(silent=False):
     """Realiza una limpieza completa de duplicados en todas las tablas."""
-    if not silent: print("🔍 Iniciando verificación y corrección de duplicados...")
+    if not silent: logger.info("🔍 Iniciando verificación y corrección de duplicados...")
     
     # 1. Limpiar duplicados en productos
     eliminados_prod, mensaje_prod = limpiar_productos_duplicados()
-    if not silent: print(f"📦 Productos: {mensaje_prod}")
+    if not silent: logger.info(f"📦 Productos: {mensaje_prod}")
     
     # 2. Limpiar duplicados en asignacion_moviles
     # Solo limpiamos esto SI detectamos que hay duplicados para evitar re-escritura total lenta
@@ -512,11 +489,11 @@ def verificar_y_corregir_duplicados_completo(silent=False):
 
     if tiene_duplicados:
         _, mensaje_asign = limpiar_duplicados_asignacion_moviles()
-        if not silent: print(f"🚚 Asignación Móviles: {mensaje_asign}")
+        if not silent: logger.info(f"🚚 Asignación Móviles: {mensaje_asign}")
     elif not silent:
-        print("🚚 Asignación Móviles: No se encontraron duplicados.")
+        logger.info("🚚 Asignación Móviles: No se encontraron duplicados.")
     
-    if not silent: print("✅ Verificación completada.")
+    if not silent: logger.info("✅ Verificación completada.")
     return True
 
 def poblar_datos_iniciales():
@@ -527,12 +504,12 @@ def poblar_datos_iniciales():
         cursor = conn.cursor()
         
         # Primero limpiar duplicados
-        eliminados, mensaje = limpiar_productos_duplicados()
-        print(f"Limpieza de duplicados: {mensaje}")
+        # eliminados, mensaje = limpiar_productos_duplicados()
+        # logger.info(f"Limpieza de duplicados: {mensaje}")
         
-        # Limpiar duplicados en asignación móviles
-        exito, mensaje_asignacion = limpiar_duplicados_asignacion_moviles()
-        print(f"Limpieza de asignación móviles: {mensaje_asignacion}")
+        # Limpiar duplicados en asignación móviles (Pesado - Movido a segundo plano o manual)
+        # exito, mensaje_asignacion = limpiar_duplicados_asignacion_moviles()
+        # logger.info(f"Limpieza de asignación móviles: {mensaje_asignacion}")
         
         fecha_hoy = date.today().isoformat()
         inserted_count = 0
@@ -551,16 +528,24 @@ def poblar_datos_iniciales():
         return inserted_count > 0
         
     except Exception as e:
-        print(f"Error al poblar datos iniciales: {e}")
+        logger.error(f"Error al poblar datos iniciales: {e}")
         return False
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def anadir_producto(nombre, sku, cantidad, ubicacion, secuencia_vista, minimo_stock=10, categoria='General', marca='N/A', fecha_evento=None):
     """Inserta un nuevo producto con datos enriquecidos."""
     conn = None
     try:
+        # Validación
+        try:
+            sku = validate_sku(sku)
+            cantidad = validate_quantity(cantidad, allow_zero=True, allow_negative=False)
+            from utils.validators import sanitize_string
+            nombre = sanitize_string(nombre)
+        except ValidationError as ve:
+             return False, f"Datos inválidos: {ve}"
+
         conn = get_db_connection()
         cursor = conn.cursor()
         
@@ -583,13 +568,13 @@ def anadir_producto(nombre, sku, cantidad, ubicacion, secuencia_vista, minimo_st
     except Exception as e:
         return False, f"Ocurrió un error al insertar: {e}"
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def verificar_stock_disponible(sku, cantidad_requerida, ubicacion='BODEGA'):
     """
-    Verifica si hay material suficiente en una ubicación (Punto 5).
+    Verifica si hay material suficiente en una ubicación.
     Retorna (boolean, stock_actual)
+    Nota: Deja propagar excepciones de BD para manejo superior.
     """
     conn = None
     try:
@@ -597,24 +582,48 @@ def verificar_stock_disponible(sku, cantidad_requerida, ubicacion='BODEGA'):
         cursor = conn.cursor()
         run_query(cursor, "SELECT cantidad FROM productos WHERE sku = ? AND ubicacion = ?", (sku, ubicacion))
         res = cursor.fetchone()
+        
         if not res:
             return False, 0
+            
         stock_actual = res[0]
         return stock_actual >= cantidad_requerida, stock_actual
-    except Exception:
-        return False, 0
+        
     finally:
-        if conn: conn.close()
+        if conn: close_connection(conn)
 
-def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afectado=None, fecha_evento=None, paquete_asignado=None, observaciones=None, documento_referencia=None, target_db_name=None):
+def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afectado=None, fecha_evento=None, paquete_asignado=None, observaciones=None, documento_referencia=None, target_db_name=None, existing_conn=None):
     """
     Registra un movimiento, actualiza la cantidad en Bodega/Asignación y maneja la ubicación DESCARTE.
     Permite especificar target_db_name para operar en otra base de datos.
+    Allows re-using existing_conn for bulk operations.
     """
     conn = None
+    should_close = True
     try:
-        conn = get_db_connection(target_db=target_db_name)
-        cursor = conn.cursor()
+        # Validación de entrada
+        try:
+            sku = validate_sku(sku)
+            cantidad_afectada = validate_quantity(cantidad_afectada, allow_zero=False, allow_negative=False)
+            if movil_afectado:
+                 # Nota: Validamos móvil solo si se provee, y usamos la lista global en config
+                 from config import CURRENT_CONTEXT
+                 movil_afectado = validate_movil(movil_afectado, CURRENT_CONTEXT['MOVILES'])
+            
+            if observaciones:
+                observaciones = validate_observaciones(observaciones)
+                
+        except ValidationError as ve:
+            logger.warning(f"Intento de movimiento inválido: {ve}")
+            return False, f"Datos inválidos: {ve}"
+
+        if existing_conn:
+            conn = existing_conn
+            should_close = False
+            cursor = conn.cursor()
+        else:
+            conn = get_db_connection(target_db=target_db_name)
+            cursor = conn.cursor()
         
         if not fecha_evento: 
              return False, "Error de Fecha: La fecha del evento es obligatoria."
@@ -637,7 +646,15 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
         
         stock_asignado = 0
         if movil_afectado and tipo_movimiento in ('SALIDA_MOVIL', 'RETORNO_MOVIL', 'CONSUMO_MOVIL'):
-             run_query(cursor, "SELECT cantidad FROM asignacion_moviles WHERE sku_producto = ? AND movil = ?", (sku, movil_afectado))
+             # Si no se especifica paquete, asumimos 'NINGUNO' para la consulta
+             pq_query = paquete_asignado if paquete_asignado else 'NINGUNO'
+             
+             if DB_TYPE == 'MYSQL':
+                 sql_asig = "SELECT cantidad FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s"
+             else:
+                 sql_asig = "SELECT cantidad FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ?"
+             
+             cursor.execute(sql_asig, (sku, movil_afectado, pq_query))
              asignacion_actual = cursor.fetchone()
              stock_asignado = asignacion_actual[0] if asignacion_actual else 0
         
@@ -700,23 +717,45 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
                 run_query(cursor, "INSERT INTO productos (nombre, sku, cantidad, ubicacion, secuencia_vista) VALUES (?, ?, ?, ?, ?)",
                                (nombre_producto, sku, cantidad_descarte_cambio, UBICACION_DESCARTE, f'{secuencia_vista}z'))
 
-        # LOGICA CORREGIDA Y ROBUSTA PARA ASIGNACION MOVILES
+        # LOGICA CORREGIDA Y ROBUSTA PARA ASIGNACION MOVILES (POR PAQUETE)
         if movil_afectado and cantidad_asignacion_cambio != 0:
-             # 1. Obtener suma total actual (consolida duplicados si existen)
-             run_query(cursor, "SELECT SUM(cantidad) FROM asignacion_moviles WHERE sku_producto = ? AND movil = ?", (sku, movil_afectado))
+             pq_actual = paquete_asignado if paquete_asignado else 'NINGUNO'
+             
+             # 1. Obtener suma total actual para ese paquete específico
+             if DB_TYPE == 'MYSQL':
+                 sql_sel = "SELECT SUM(cantidad) FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s"
+             else:
+                 sql_sel = "SELECT SUM(cantidad) FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ?"
+             
+             cursor.execute(sql_sel, (sku, movil_afectado, pq_actual))
              resultado_asignacion = cursor.fetchone()
-             asignacion_actual_total = resultado_asignacion[0] if resultado_asignacion and resultado_asignacion[0] is not None else 0
+             
+             # Convertir Decimal a float para evitar error "unsupported operand type(s) for +: 'decimal.Decimal' and 'float'"
+             valor_actual = 0.0
+             if resultado_asignacion and resultado_asignacion[0] is not None:
+                 valor_actual = float(resultado_asignacion[0])
+                 
+             asignacion_actual_total = valor_actual
              
              # 2. Calcular nueva cantidad final
              nueva_cantidad_asignacion = asignacion_actual_total + cantidad_asignacion_cambio
              
-             # 3. Borrar CUALQUIER registro existente para este SKU/Movil (limpieza de duplicados)
-             run_query(cursor, "DELETE FROM asignacion_moviles WHERE sku_producto = ? AND movil = ?", (sku, movil_afectado))
+             # 3. Borrar registros existentes para este combo exacto (SKU/Movil/Paquete)
+             if DB_TYPE == 'MYSQL':
+                 sql_del = "DELETE FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s"
+             else:
+                 sql_del = "DELETE FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ?"
+             
+             cursor.execute(sql_del, (sku, movil_afectado, pq_actual))
              
              # 4. Insertar NUEVO registro único si la cantidad es positiva
              if nueva_cantidad_asignacion > 0:
-                 run_query(cursor, "INSERT INTO asignacion_moviles (sku_producto, movil, cantidad) VALUES (?, ?, ?)",
-                                (sku, movil_afectado, nueva_cantidad_asignacion))
+                 if DB_TYPE == 'MYSQL':
+                     sql_ins = "INSERT INTO asignacion_moviles (sku_producto, movil, paquete, cantidad) VALUES (%s, %s, %s, %s)"
+                 else:
+                     sql_ins = "INSERT INTO asignacion_moviles (sku_producto, movil, paquete, cantidad) VALUES (?, ?, ?, ?)"
+                 
+                 cursor.execute(sql_ins, (sku, movil_afectado, pq_actual, nueva_cantidad_asignacion))
 
         sql_mov = "INSERT INTO movimientos (sku_producto, tipo_movimiento, cantidad_afectada, movil_afectado, fecha_evento, paquete_asignado, observaciones, documento_referencia) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         run_query(cursor, sql_mov, (sku, tipo_movimiento, cantidad_afectada, movil_afectado, fecha_evento, paquete_asignado, observaciones, documento_referencia))
@@ -736,7 +775,8 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
         if tipo_movimiento == TIPO_MOVIMIENTO_DESCARTE:
             mensaje_final = f"✅ Descarte registrado para SKU {sku} ({cantidad_afectada} unidades)."
         elif tipo_movimiento in ('ENTRADA', 'ABASTO'):
-            mensaje_final = f"✅ Entrada (Abasto) registrada para SKU {sku} ({cantidad_afectada} unidades)."
+            tipo_label = "Abasto" if tipo_movimiento == 'ABASTO' else "Entrada"
+            mensaje_final = f"✅ {tipo_label} registrada para SKU {sku} ({cantidad_afectada} unidades)."
         else:
             movil_msg = f" a/desde el {movil_afectado}" if movil_afectado else ""
             paquete_msg = f" (Paq: {paquete_asignado})" if paquete_asignado else ""
@@ -745,10 +785,11 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
         return True, mensaje_final
 
     except Exception as e:
-        if conn: conn.rollback() 
+        if conn and should_close: conn.rollback() 
+        # If external connection, caller handles rollback
         return False, f"Ocurrió un error al registrar el movimiento: {e}"
     finally:
-        if conn:
+        if conn and should_close:
             conn.close()
 
 
@@ -761,6 +802,16 @@ def registrar_prestamo_santiago(sku, cantidad, fecha_evento, observaciones=None)
     """
     conn = None
     try:
+        # Validación
+        try:
+            sku = validate_sku(sku)
+            cantidad = validate_quantity(cantidad, allow_zero=False, allow_negative=False)
+            if observaciones:
+                 from utils.validators import validate_observaciones
+                 observaciones = validate_observaciones(observaciones)
+        except ValidationError as ve:
+             return False, f"Datos inválidos: {ve}"
+
         # 1. VERIFICACIÓN LOCAL
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -817,8 +868,7 @@ def registrar_prestamo_santiago(sku, cantidad, fecha_evento, observaciones=None)
     except Exception as e:
         return False, f"Error de proceso: {e}"
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def registrar_devolucion_santiago(sku, cantidad, fecha_devolucion, observaciones=None):
     """
@@ -871,8 +921,7 @@ def registrar_devolucion_santiago(sku, cantidad, fecha_devolucion, observaciones
     except Exception as e:
         return False, f"Error de base de datos: {e}"
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def obtener_prestamos_activos():
     """
@@ -895,8 +944,7 @@ def obtener_prestamos_activos():
     except Exception:
         return []
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def obtener_historial_prestamos_completo():
     """
@@ -917,8 +965,7 @@ def obtener_historial_prestamos_completo():
     except Exception:
         return []
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 # FUNCIONES PARA RECORDATORIOS - MEJORADAS
 def crear_recordatorio(movil, paquete, tipo_recordatorio, fecha_recordatorio):
@@ -946,11 +993,10 @@ def crear_recordatorio(movil, paquete, tipo_recordatorio, fecha_recordatorio):
             return True
         return False
     except Exception as e:
-        print(f"Error al crear recordatorio: {e}")
+        logger.error(f"Error al crear recordatorio: {e}")
         return False
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def obtener_recordatorios_pendientes(fecha=None):
     """
@@ -973,11 +1019,10 @@ def obtener_recordatorios_pendientes(fecha=None):
         
         return cursor.fetchall()
     except Exception as e:
-        print(f"Error al obtener recordatorios: {e}")
+        logger.error(f"Error al obtener recordatorios: {e}")
         return []
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def obtener_recordatorios_todos(fecha=None):
     """
@@ -1000,11 +1045,10 @@ def obtener_recordatorios_todos(fecha=None):
         
         return cursor.fetchall()
     except Exception as e:
-        print(f"Error al obtener todos los recordatorios: {e}")
+        logger.error(f"Error al obtener todos los recordatorios: {e}")
         return []
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def marcar_recordatorio_completado(id_recordatorio):
     """
@@ -1024,11 +1068,10 @@ def marcar_recordatorio_completado(id_recordatorio):
         conn.commit()
         return True
     except Exception as e:
-        print(f"Error al marcar recordatorio como completado: {e}")
+        logger.error(f"Error al marcar recordatorio como completado: {e}")
         return False
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def eliminar_recordatorios_completados():
     """
@@ -1043,11 +1086,10 @@ def eliminar_recordatorios_completados():
         conn.commit()
         return True
     except Exception as e:
-        print(f"Error al eliminar recordatorios completados: {e}")
+        logger.error(f"Error al eliminar recordatorios completados: {e}")
         return False
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def verificar_y_crear_recordatorios_salida(fecha_salida):
     """
@@ -1099,8 +1141,7 @@ def verificar_y_crear_recordatorios_salida(fecha_salida):
     except Exception as e:
         return False, f"Error al verificar y crear recordatorios: {e}"
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def obtener_inventario():
     """Obtiene todos los productos enriquecidos para la tabla principal."""
@@ -1123,8 +1164,7 @@ def obtener_inventario():
     except Exception:
         return []
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
             
 def obtener_inventario_para_exportar():
     """Obtiene todos los campos del inventario, incluyendo secuencia_vista y fecha_creacion, para exportar."""
@@ -1142,8 +1182,7 @@ def obtener_inventario_para_exportar():
     except Exception:
         return []
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def obtener_todos_los_skus_para_movimiento():
     """
@@ -1185,11 +1224,10 @@ def obtener_todos_los_skus_para_movimiento():
             
         return result
     except Exception as e:
-        print(f"Error al obtener todos los SKUs para movimiento: {e}")
+        logger.error(f"Error al obtener todos los SKUs para movimiento: {e}")
         return []
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def obtener_ultima_salida_movil(movil):
     """Obtiene la última salida realizada a un móvil específico"""
@@ -1215,8 +1253,7 @@ def obtener_ultima_salida_movil(movil):
     except Exception:
         return []
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def obtener_asignacion_movil(movil):
     """Obtiene el inventario actual asignado a un móvil específico (usado en Consiliación)."""
@@ -1238,8 +1275,7 @@ def obtener_asignacion_movil(movil):
     except Exception:
         return []
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def obtener_asignacion_movil_con_paquetes(movil):
     """
@@ -1316,11 +1352,30 @@ def obtener_asignacion_movil_con_paquetes(movil):
             # 6. Si no cuadra con asignacion_moviles, corregimos PERO SIN ALTERAR PAQUETES
             if total_por_paquetes != total_real:
                 diferencia = total_real - total_por_paquetes
-                # La diferencia se añade SIEMPRE a SIN_PAQUETE (no toca paquetes marcados)
-                saldos["SIN_PAQUETE"] += diferencia
+                
+                # INTENTO DE ASIGNACIÓN INTELIGENTE (Bugfix para Cloud sin historial)
+                # Si hay diferencia (stock huérfano), intentamos asignarlo a su paquete correspondiente
+                from config import PAQUETES_MATERIALES
+                
+                # Extraer SKUs de cada paquete (ineficiente hacerlo en loop, pero seguro)
+                skus_a = set(item[0] for item in PAQUETES_MATERIALES.get("PAQUETE A", []))
+                skus_b = set(item[0] for item in PAQUETES_MATERIALES.get("PAQUETE B", []))
+                
+                if sku in skus_a and sku not in skus_b:
+                    saldos["PAQUETE A"] += diferencia
+                elif sku in skus_b and sku not in skus_a:
+                    saldos["PAQUETE B"] += diferencia
+                elif sku in skus_a and sku in skus_b:
+                    # Si está en ambos, priorizamos A para asegurar visibilidad
+                    saldos["PAQUETE A"] += diferencia
+                else:
+                    # Si no está en ninguno, se queda con SIN_PAQUETE
+                    saldos["SIN_PAQUETE"] += diferencia
+                    
                 if saldos["SIN_PAQUETE"] < 0:
                     saldos["SIN_PAQUETE"] = 0
 
+            # Guardar resultado final para ese SKU
             # Guardar resultado final para ese SKU
             resultado.append((
                 nombre,
@@ -1328,17 +1383,17 @@ def obtener_asignacion_movil_con_paquetes(movil):
                 total_real,
                 saldos["PAQUETE A"],
                 saldos["PAQUETE B"],
-                saldos["CARRO"]
+                saldos["CARRO"],
+                saldos["SIN_PAQUETE"] # NUEVO CAMPO
             ))
 
         return resultado
 
     except Exception as e:
-        print(f"Error en obtener_asignacion_movil_con_paquetes: {e}")
+        logger.error(f"Error en obtener_asignacion_movil_con_paquetes: {e}")
         return []
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def obtener_reporte_asignacion_moviles(movil=None):
     """Obtiene el inventario asignado a TODOS los móviles, opcionalmente filtrado por un móvil específico."""
@@ -1368,8 +1423,7 @@ def obtener_reporte_asignacion_moviles(movil=None):
     except Exception:
         return []
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def eliminar_producto(sku):
     """Elimina un producto y su historial de movimientos y asignación. Elimina todas las ubicaciones de ese SKU."""
@@ -1394,8 +1448,7 @@ def eliminar_producto(sku):
     except Exception as e:
         return False, f"Ocurrió un error al intentar eliminar el producto: {e}"
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def obtener_historial_producto(sku, fecha_inicio=None, fecha_fin=None):
     """Obtiene el historial de movimientos de un producto por SKU, con filtro de rango de fechas de evento, incluyendo el paquete asignado."""
@@ -1434,8 +1487,7 @@ def obtener_historial_producto(sku, fecha_inicio=None, fecha_fin=None):
     except Exception:
         return []
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def obtener_abastos_resumen():
     """Obtiene un resumen de los abastos realizados, agrupados por fecha y referencia."""
@@ -1461,11 +1513,10 @@ def obtener_abastos_resumen():
         run_query(cursor, sql_query)
         return cursor.fetchall()
     except Exception as e:
-        print(f"Error al obtener resumen de abastos: {e}")
+        logger.error(f"Error al obtener resumen de abastos: {e}")
         return []
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def obtener_detalle_abasto(fecha, referencia):
     """Obtiene los detalles de un abasto específico."""
@@ -1492,11 +1543,10 @@ def obtener_detalle_abasto(fecha, referencia):
         run_query(cursor, sql_query, (fecha, referencia))
         return cursor.fetchall()
     except Exception as e:
-        print(f"Error al obtener detalle de abasto: {e}")
+        logger.error(f"Error al obtener detalle de abasto: {e}")
         return []
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def actualizar_movimiento_abasto(id_movimiento, nueva_cantidad, nueva_referencia):
     """Actualiza la cantidad y referencia de un movimiento de abasto, ajustando el stock."""
@@ -1535,8 +1585,7 @@ def actualizar_movimiento_abasto(id_movimiento, nueva_cantidad, nueva_referencia
         if conn: conn.rollback()
         return False, f"Error al actualizar abasto: {e}"
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def obtener_historial_producto_para_exportar(sku, fecha_inicio=None, fecha_fin=None):
     """Obtiene el historial de movimientos de un producto por SKU con todos los campos relevantes para exportar, con filtro de fecha, incluyendo el paquete."""
@@ -1568,8 +1617,7 @@ def obtener_historial_producto_para_exportar(sku, fecha_inicio=None, fecha_fin=N
     except Exception:
         return []
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def obtener_reporte_consumo(fecha_inicio, fecha_fin):
     """Obtiene el consumo total de material (SALIDA, CONSUMO_MOVIL, DESCARTE) entre dos fechas."""
@@ -1599,11 +1647,10 @@ def obtener_reporte_consumo(fecha_inicio, fecha_fin):
         return cursor.fetchall()
         
     except Exception as e:
-        print(f"Error al generar reporte de consumo: {e}")
+        logger.error(f"Error al generar reporte de consumo: {e}")
         return []
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def obtener_reporte_abasto(fecha_inicio, fecha_fin):
     """Obtiene el abasto/entrada total de material (ENTRADA, ABASTO) entre two fechas."""
@@ -1633,11 +1680,10 @@ def obtener_reporte_abasto(fecha_inicio, fecha_fin):
         return cursor.fetchall()
         
     except Exception as e:
-        print(f"Error al generar reporte de abasto: {e}")
+        logger.error(f"Error al generar reporte de abasto: {e}")
         return []
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def obtener_stock_actual_y_moviles():
     """Obtiene el stock actual en bodega y el total asignado a móviles por cada SKU."""
@@ -1646,72 +1692,108 @@ def obtener_stock_actual_y_moviles():
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        sql_bodega = """
-            SELECT sku, SUM(cantidad) as stock_bodega
-            FROM productos 
-            WHERE ubicacion = 'BODEGA'
-            GROUP BY sku
-        """
-        run_query(cursor, sql_bodega)
-        stock_bodega = {sku: cantidad for sku, cantidad in cursor.fetchall()}
+        # OPTIMIZADO: Consolidar 5 queries en 1 sola usando CTEs para mejor rendimiento
+        if DB_TYPE == 'MYSQL':
+            sql_consolidada = """
+                WITH stock_bodega AS (
+                    SELECT sku, SUM(cantidad) as cantidad
+                    FROM productos 
+                    WHERE ubicacion = 'BODEGA'
+                    GROUP BY sku
+                ),
+                stock_moviles AS (
+                    SELECT sku_producto, SUM(cantidad) as cantidad
+                    FROM asignacion_moviles 
+                    WHERE cantidad > 0
+                    GROUP BY sku_producto
+                ),
+                consumo_total AS (
+                    SELECT sku_producto, SUM(cantidad_afectada) as cantidad
+                    FROM movimientos 
+                    WHERE tipo_movimiento IN ({})
+                    GROUP BY sku_producto
+                ),
+                abasto_total AS (
+                    SELECT sku_producto, SUM(cantidad_afectada) as cantidad
+                    FROM movimientos 
+                    WHERE tipo_movimiento IN ({})
+                    GROUP BY sku_producto
+                )
+                SELECT 
+                    p.nombre, 
+                    p.sku, 
+                    COALESCE(sb.cantidad, 0) as stock_bodega,
+                    COALESCE(sm.cantidad, 0) as stock_moviles,
+                    COALESCE(sb.cantidad, 0) + COALESCE(sm.cantidad, 0) as stock_total,
+                    COALESCE(ct.cantidad, 0) as consumo,
+                    COALESCE(at.cantidad, 0) as abasto
+                FROM productos p
+                LEFT JOIN stock_bodega sb ON p.sku = sb.sku
+                LEFT JOIN stock_moviles sm ON p.sku = sm.sku_producto
+                LEFT JOIN consumo_total ct ON p.sku = ct.sku_producto
+                LEFT JOIN abasto_total at ON p.sku = at.sku_producto
+                WHERE p.ubicacion = 'BODEGA'
+                ORDER BY p.secuencia_vista ASC
+            """.format(
+                ','.join(['%s' for _ in TIPOS_CONSUMO]),
+                ','.join(['%s' for _ in TIPOS_ABASTO])
+            )
+            run_query(cursor, sql_consolidada, TIPOS_CONSUMO + TIPOS_ABASTO)
+        else:
+            # SQLite también soporta CTEs desde versión 3.8.3
+            sql_consolidada = """
+                WITH stock_bodega AS (
+                    SELECT sku, SUM(cantidad) as cantidad
+                    FROM productos 
+                    WHERE ubicacion = 'BODEGA'
+                    GROUP BY sku
+                ),
+                stock_moviles AS (
+                    SELECT sku_producto, SUM(cantidad) as cantidad
+                    FROM asignacion_moviles 
+                    WHERE cantidad > 0
+                    GROUP BY sku_producto
+                ),
+                consumo_total AS (
+                    SELECT sku_producto, SUM(cantidad_afectada) as cantidad
+                    FROM movimientos 
+                    WHERE tipo_movimiento IN ({})
+                    GROUP BY sku_producto
+                ),
+                abasto_total AS (
+                    SELECT sku_producto, SUM(cantidad_afectada) as cantidad
+                    FROM movimientos 
+                    WHERE tipo_movimiento IN ({})
+                    GROUP BY sku_producto
+                )
+                SELECT 
+                    p.nombre, 
+                    p.sku, 
+                    COALESCE(sb.cantidad, 0) as stock_bodega,
+                    COALESCE(sm.cantidad, 0) as stock_moviles,
+                    COALESCE(sb.cantidad, 0) + COALESCE(sm.cantidad, 0) as stock_total,
+                    COALESCE(ct.cantidad, 0) as consumo,
+                    COALESCE(at.cantidad, 0) as abasto
+                FROM productos p
+                LEFT JOIN stock_bodega sb ON p.sku = sb.sku
+                LEFT JOIN stock_moviles sm ON p.sku = sm.sku_producto
+                LEFT JOIN consumo_total ct ON p.sku = ct.sku_producto
+                LEFT JOIN abasto_total at ON p.sku = at.sku_producto
+                WHERE p.ubicacion = 'BODEGA'
+                ORDER BY p.secuencia_vista ASC
+            """.format(
+                ','.join(['?' for _ in TIPOS_CONSUMO]),
+                ','.join(['?' for _ in TIPOS_ABASTO])
+            )
+            run_query(cursor, sql_consolidada, TIPOS_CONSUMO + TIPOS_ABASTO)
         
-        sql_moviles = """
-            SELECT sku_producto, SUM(cantidad) as stock_moviles
-            FROM asignacion_moviles 
-            WHERE cantidad > 0
-            GROUP BY sku_producto
-        """
-        run_query(cursor, sql_moviles)
-        stock_moviles = {sku: cantidad for sku, cantidad in cursor.fetchall()}
-        
-        # NUEVO: Obtener consumo total por SKU
-        sql_consumo = """
-            SELECT sku_producto, SUM(cantidad_afectada) as consumo_total
-            FROM movimientos 
-            WHERE tipo_movimiento IN ({})
-            GROUP BY sku_producto
-        """.format(','.join(['?' for _ in TIPOS_CONSUMO]))
-        
-        run_query(cursor, sql_consumo, TIPOS_CONSUMO)
-        consumo_total = {sku: cantidad for sku, cantidad in cursor.fetchall()}
-        
-        # NUEVO: Obtener abasto total por SKU
-        sql_abasto = """
-            SELECT sku_producto, SUM(cantidad_afectada) as abasto_total
-            FROM movimientos 
-            WHERE tipo_movimiento IN ({})
-            GROUP BY sku_producto
-        """.format(','.join(['?' for _ in TIPOS_ABASTO]))
-        
-        run_query(cursor, sql_abasto, TIPOS_ABASTO)
-        abasto_total = {sku: cantidad for sku, cantidad in cursor.fetchall()}
-        
-        sql_productos = """
-            SELECT DISTINCT p.sku, p.nombre, p.secuencia_vista
-            FROM productos p
-            WHERE p.ubicacion = 'BODEGA'
-            ORDER BY p.secuencia_vista ASC
-        """
-        run_query(cursor, sql_productos)
-        productos = cursor.fetchall()
-        
-        resultado = []
-        for sku, nombre, secuencia in productos:
-            bodega = stock_bodega.get(sku, 0)
-            moviles = stock_moviles.get(sku, 0)
-            total = bodega + moviles
-            consumo = consumo_total.get(sku, 0)
-            abasto = abasto_total.get(sku, 0)
-            resultado.append((nombre, sku, bodega, moviles, total, consumo, abasto))
-            
-        return resultado
+        return cursor.fetchall()
         
     except Exception as e:
-        print(f"❌ Error en obtener_stock_actual_y_moviles: {e}")
+        logger.error(f"❌ Error en obtener_stock_actual_y_moviles: {e}")
         return []
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def obtener_estadisticas_reales():
     """Obtiene estadísticas reales para el dashboard"""
@@ -1765,7 +1847,7 @@ def obtener_estadisticas_reales():
             "bajo_stock": bajo_stock
         }
     except Exception as e:
-        print(f"❌ Error en obtener_estadisticas_reales: {e}")
+        logger.error(f"❌ Error en obtener_estadisticas_reales: {e}")
         return {
             "productos_bodega": 0, "moviles_activos": 0, "stock_total": 0,
             "prestamos_activos": 0, "bajo_stock": 0
@@ -1779,8 +1861,7 @@ def obtener_estadisticas_reales():
             "bajo_stock": 0
         }
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def exportar_a_csv(encabezados, datos, nombre_archivo):
     """
@@ -1827,7 +1908,8 @@ def limpiar_base_datos():
             'asignacion_moviles',
             'consumos_pendientes',
             'recordatorios_pendientes',
-            'prestamos_activos'
+            'prestamos_activos',
+            'series_registradas'
         ]
         
         for tabla in tablas_a_limpiar:
@@ -1842,7 +1924,7 @@ def limpiar_base_datos():
         if conn: conn.rollback()
         return False, f"Error al limpiar la base de datos: {str(e)}"
     finally:
-        if conn: conn.close()
+        if conn: close_connection(conn)
 
 def obtener_movimientos_por_rango(fecha_inicio, fecha_fin):
     """
@@ -1868,11 +1950,10 @@ def obtener_movimientos_por_rango(fecha_inicio, fecha_fin):
         return cursor.fetchall()
         
     except Exception as e:
-        print(f"Error al obtener movimientos por rango: {e}")
+        logger.error(f"Error al obtener movimientos por rango: {e}")
         return []
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 # --- FUNCIONES PARA PORTAL MÓVIL (PUNTO 5) ---
 
@@ -1886,7 +1967,7 @@ def registrar_consumo_pendiente(movil, sku, cantidad, tecnico, ticket, fecha, co
         
         if movil in MOVILES_SANTIAGO and MYSQL_DB_SANTIAGO:
             target_db = MYSQL_DB_SANTIAGO
-            print(f"[ROUTING] Redirigiendo consumo de {movil} a {target_db}")
+            logger.info(f"[ROUTING] Redirigiendo consumo de {movil} a {target_db}")
             
         conn = get_db_connection(target_db=target_db)
         cursor = conn.cursor()
@@ -1899,7 +1980,7 @@ def registrar_consumo_pendiente(movil, sku, cantidad, tecnico, ticket, fecha, co
     except Exception as e:
         return False, str(e)
     finally:
-        if conn: conn.close()
+        if conn: close_connection(conn)
 
 def eliminar_consumo_pendiente(id_consumo):
     """Elimina un consumo pendiente específico por su ID."""
@@ -1913,11 +1994,10 @@ def eliminar_consumo_pendiente(id_consumo):
     except Exception as e:
         return False, f"Error al eliminar registro: {e}"
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
-def obtener_consumos_pendientes(fecha_inicio=None, fecha_fin=None, estado='PENDIENTE'):
-    """Obtiene consumos reportados por móviles filtrando opcionalmente por rango de fechas."""
+def obtener_consumos_pendientes(fecha_inicio=None, fecha_fin=None, estado='PENDIENTE', moviles_filtro=None, limite=None):
+    """Obtiene consumos reportados por móviles filtrando opcionalmente por rango de fechas y móviles específicos."""
     conn = None
     try:
         conn = get_db_connection()
@@ -1931,6 +2011,12 @@ def obtener_consumos_pendientes(fecha_inicio=None, fecha_fin=None, estado='PENDI
         """
         params = [estado]
         
+        # OPTIMIZADO: Filtrar por móviles en SQL en lugar de Python
+        if moviles_filtro and len(moviles_filtro) > 0:
+            placeholders = ','.join(['?' for _ in moviles_filtro])
+            sql_query += f" AND c.movil IN ({placeholders})"
+            params.extend(moviles_filtro)
+        
         if fecha_inicio and fecha_fin:
             sql_query += " AND c.fecha BETWEEN ? AND ?"
             params.extend([fecha_inicio, fecha_fin])
@@ -1943,13 +2029,17 @@ def obtener_consumos_pendientes(fecha_inicio=None, fecha_fin=None, estado='PENDI
             
         sql_query += " ORDER BY c.fecha_registro DESC"
         
+        # NUEVO: Agregar LIMIT para evitar cargar miles de registros
+        if limite:
+            sql_query += f" LIMIT {int(limite)}"
+        
         run_query(cursor, sql_query, tuple(params))
         return cursor.fetchall()
     except Exception as e:
-        print(f"Error al obtener consumos pendientes: {e}")
+        logger.error(f"Error al obtener consumos pendientes: {e}")
         return []
     finally:
-        if conn: conn.close()
+        if conn: close_connection(conn)
 
 def actualizar_consumo_pendiente(id_consumo, tecnico, fecha, contrato, colilla, ayudante, movil):
     """
@@ -1971,8 +2061,7 @@ def actualizar_consumo_pendiente(id_consumo, tecnico, fecha, contrato, colilla, 
     except Exception as e:
         return False, f"Error DB: {e}"
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def obtener_detalles_moviles():
     """Retorna un diccionario {nombre_movil: {conductor, ayudante}}"""
@@ -1982,34 +2071,107 @@ def obtener_detalles_moviles():
         cursor = conn.cursor()
         run_query(cursor, "SELECT nombre, conductor, ayudante FROM moviles WHERE activo = 1")
         filas = cursor.fetchall()
+        
+        # Si la tabla existe pero está vacía, o si la consulta falla abajo, usamos fallback
+        if not filas:
+             from config import MOVILES_DETAILS_FALLBACK
+             return MOVILES_DETAILS_FALLBACK
+             
         return {f[0]: {"conductor": f[1] or "", "ayudante": f[2] or ""} for f in filas}
+        
     except Exception as e:
-        print(f"❌ Error en obtener_detalles_moviles: {e}")
+        logger.error(f"⚠️ Error en obtener_detalles_moviles (usando fallback): {e}")
+        from config import MOVILES_DETAILS_FALLBACK
+        return MOVILES_DETAILS_FALLBACK
+    finally:
+        if conn: close_connection(conn)
+
+def obtener_inventario_movil(movil):
+    """
+    Retorna el inventario actual de un móvil específico como diccionario {sku: cantidad}.
+    """
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        sql = "SELECT sku_producto, SUM(cantidad) FROM asignacion_moviles WHERE movil = %s GROUP BY sku_producto" if DB_TYPE == 'MYSQL' else "SELECT sku_producto, SUM(cantidad) FROM asignacion_moviles WHERE movil = ? GROUP BY sku_producto"
+            
+        run_query(cursor, sql, (movil,))
+        resultados = cursor.fetchall()
+        
+        return {row[0]: row[1] for row in resultados if row[1] > 0}
+        
+    except Exception as e:
+        logger.error(f"❌ Error al obtener inventario de {movil}: {e}")
         return {}
     finally:
-        if conn: conn.close()
+        if conn: close_connection(conn)
 
 def procesar_auditoria_consumo(id_consumo, sku, cantidad, movil, fecha, ticket, observaciones):
     """
     Confirma un consumo pendiente: lo marca como AUDITADO y realiza el movimiento real.
+    Maneja lógica de 'AUTO_APROBADO' para evitar doble deducción.
     """
-    # 1. Realizar movimiento real
-    exito, mensaje = registrar_movimiento_gui(
-        sku, 'CONSUMO_MOVIL', cantidad, movil, fecha, None, observaciones
-    )
-    
-    if exito:
-        # 2. Marcar como auditado
-        conn = None
-        try:
-            conn = get_db_connection()
-            cursor = conn.cursor()
-            run_query(cursor, "UPDATE consumos_pendientes SET estado = 'AUDITADO' WHERE id = ?", (id_consumo,))
-            conn.commit()
-        finally:
-            if conn: conn.close()
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # 1. Verificar estado actual del consumo pendiente
+        run_query(cursor, "SELECT estado FROM consumos_pendientes WHERE id = ?", (id_consumo,))
+        res = cursor.fetchone()
+        estado_actual = res[0] if res else 'PENDIENTE'
+        
+        exito = False
+        mensaje = ""
+
+        # 2. Si es 'AUTO_APROBADO', NO descontamos inventario (ya se hizo en el servidor)
+        if estado_actual == 'AUTO_APROBADO':
+             logger.info(f"Procesando auditoría AUTO_APROBADA para {sku}. Omitiendo deducción de stock.")
+             exito = True
+             mensaje = "Confirmado (Ya estaba descontado)"
+             
+        else:
+            # Lógica TRADICIONAL (PENDIENTE -> Descontar stock ahora)
+            # 1. Realizar movimiento real
+            exito, mensaje = registrar_movimiento_gui(
+                sku, 'CONSUMO_MOVIL', cantidad, movil, fecha, None, observaciones,
+                existing_conn=conn # Usar conexión existente
+            )
+        
+        if exito:
+            # 2. Marcar como auditado (o eliminar si prefieres limpiar)
+            # Por ahora mantenemos 'AUDITADO' para historial o 'eliminamos' según lógica original
+            # La lógica original hacía UPDATE a 'AUDITADO'.
+            # Sin embargo, gui/audit.py tiene una opción de 'eliminar_auditoria_completa' que borra 'PENDIENTE'.
+            # Si queremos que desaparezca de la lista de pendientes, deberíamos cambiar estado o borrarlo.
+            # Al parecer la GUI filtra por estado? No, carga todo 'consumos_pendientes'.
+            # Si cambiamos a 'AUDITADO', debemos asegurarnos que la GUI ya no lo muestre.
             
-    return exito, mensaje
+            # Revisando gui/audit.py -> carga todo.
+            # Vamos a ELIMINAR el registro para que salga de la lista, como se hace típicamente en estos flujos
+            # O cambiar a un estado final 'FINALIZADO' y filtrar en la query de carga.
+            
+            # Para mantener compatibilidad con la lógica anterior que hacía UPDATE:
+            run_query(cursor, "UPDATE consumos_pendientes SET estado = 'AUDITADO' WHERE id = ?", (id_consumo,))
+            
+            # ADICIONAL: Si la GUI muestra todo, esto seguirá apareciendo.
+            # Vamos a asumir que el usuario quiere que "desaparezca" de la lista de pendientes.
+            # Pero el código original hacía UPDATE. 
+            # CAMBIO: Vamos a ELIMINARLO de consumos_pendientes para limpiar la bandeja.
+            run_query(cursor, "DELETE FROM consumos_pendientes WHERE id = ?", (id_consumo,))
+            
+            conn.commit()
+            
+        return exito, mensaje
+
+    except Exception as e:
+        if conn: conn.rollback()
+        logger.error(f"Error procesando auditoría: {e}")
+        return False, f"Error: {e}"
+    finally:
+        if conn: close_connection(conn)
 
 def eliminar_auditoria_completa():
     """Elimina todos los consumos pendientes de la tabla de auditoría."""
@@ -2024,8 +2186,7 @@ def eliminar_auditoria_completa():
         if conn: conn.rollback()
         return False, f"Error al limpiar auditoría: {e}"
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 def obtener_ultimos_movimientos(limite=15):
     """
@@ -2072,11 +2233,10 @@ def obtener_ultimos_movimientos(limite=15):
         return cursor.fetchall()
         
     except Exception as e:
-        print(f"Error al obtener últimos movimientos: {e}")
+        logger.error(f"Error al obtener últimos movimientos: {e}")
         return []
     finally:
-        if conn:
-            conn.close()
+        if conn: close_connection(conn)
 
 # =================================================================
 # GESTIÓN DE MÓVILES (CRUD)
@@ -2099,7 +2259,7 @@ def crear_movil(nombre, patente=None, conductor=None, ayudante=None):
     except Exception as e:
         return False, str(e)
     finally:
-        if conn: conn.close()
+        if conn: close_connection(conn)
 
 def obtener_moviles(solo_activos=True):
     """Obtiene la lista de móviles. Retorna lista de tuplas (nombre, patente, conductor, ayudante, activo)."""
@@ -2115,10 +2275,10 @@ def obtener_moviles(solo_activos=True):
         run_query(cursor, query)
         return cursor.fetchall()
     except Exception as e:
-        print(f"Error al obtener móviles: {e}")
+        logger.error(f"Error al obtener móviles: {e}")
         return []
     finally:
-        if conn: conn.close()
+        if conn: close_connection(conn)
 
 def obtener_nombres_moviles(solo_activos=True):
     """Retorna una LISTA de STRINGS con los nombres de los móviles (para compatibilidad con comboboxes)."""
@@ -2156,7 +2316,7 @@ def editar_movil(nombre_actual, nuevo_nombre, nueva_patente, nuevo_conductor, nu
     except Exception as e:
         return False, f"Error al actualizar: {e}"
     finally:
-        if conn: conn.close()
+        if conn: close_connection(conn)
 
 def eliminar_movil(nombre):
     """
@@ -2178,7 +2338,7 @@ def eliminar_movil(nombre):
     except Exception as e:
         return False, f"Error al eliminar: {e}"
     finally:
-        if conn: conn.close()
+        if conn: close_connection(conn)
 
 # =================================================================
 # CONFIGURACIÓN DE EMPRESA
@@ -2201,10 +2361,10 @@ def obtener_configuracion():
             return dict(row)
         return {}
     except Exception as e:
-        print(f"Error al obtener configuración: {e}")
+        logger.error(f"Error al obtener configuración: {e}")
         return {}
     finally:
-        if conn: conn.close()
+        if conn: close_connection(conn)
 
 def guardar_configuracion(datos):
     """Guarda/Actualiza los datos de configuración."""
@@ -2231,7 +2391,7 @@ def guardar_configuracion(datos):
     except Exception as e:
         return False, f"Error al guardar: {e}"
     finally:
-        if conn: conn.close()
+        if conn: close_connection(conn)
 
 # =================================================================
 # GESTIÓN DE USUARIOS Y AUTENTICACIÓN
@@ -2262,10 +2422,10 @@ def autenticar_usuario(username, password):
                 return dict(row)
         return None
     except Exception as e:
-        print(f"Error en autenticación: {e}")
+        logger.error(f"Error en autenticación: {e}")
         return None
     finally:
-        if conn: conn.close()
+        if conn: close_connection(conn)
 
 def crear_usuario(username, password, rol, nombre):
     """Crea un nuevo usuario."""
@@ -2284,7 +2444,7 @@ def crear_usuario(username, password, rol, nombre):
             return False, f"El nombre de usuario '{username}' ya existe."
         return False, f"Error: {e}"
     finally:
-        if conn: conn.close()
+        if conn: close_connection(conn)
 
 def obtener_usuarios():
     """Obtiene lista de usuarios."""
@@ -2297,7 +2457,7 @@ def obtener_usuarios():
     except Exception:
         return []
     finally:
-        if conn: conn.close()
+        if conn: close_connection(conn)
 
 def eliminar_usuario(id_usuario):
     """Elimina un usuario por su ID."""
@@ -2311,15 +2471,17 @@ def eliminar_usuario(id_usuario):
     except Exception as e:
         return False, f"Error: {e}"
     finally:
-        if conn: conn.close()
+        if conn: close_connection(conn)
 # =============================================================================================
 # GESTIÓN DE SERIES (NUEVO)
 # =============================================================================================
 
-def verificar_serie_existe(serial, sku=None):
+def verificar_serie_existe(serial, sku=None, ubicacion_requerida=None, estado_requerido=None):
     """
     Verifica si una serie ya existe en la base de datos.
-    Si se proporciona SKU, verifica si existe para ese SKU (aunque serial debe ser único globalmente idealmente).
+    Si se proporciona SKU, verifica si existe para ese SKU.
+    ubicacion_requerida: Si se indica, la serie debe estar en esa ubicación (ej: 'BODEGA').
+    estado_requerido: Si se indica, la serie debe tener ese estado (ej: 'DISPONIBLE').
     Retorna (True/False, Mensaje).
     """
     conn = None
@@ -2329,32 +2491,44 @@ def verificar_serie_existe(serial, sku=None):
         
         # Primero verificar en la tabla de series
         if DB_TYPE == 'MYSQL':
-            query = "SELECT sku, estado FROM series_registradas WHERE serial_number = %s"
+            query = "SELECT sku, estado, ubicacion FROM series_registradas WHERE serial_number = %s"
             params = (serial,)
         else:
-            query = "SELECT sku, estado FROM series_registradas WHERE serial_number = ?"
+            query = "SELECT sku, estado, ubicacion FROM series_registradas WHERE serial_number = ?"
             params = (serial,)
             
         cursor.execute(query, params)
         result = cursor.fetchone()
         
         if result:
-            sku_existente, estado = result
-            return True, f"La serie '{serial}' ya existe (SKU: {sku_existente}, Estado: {estado})."
+            sku_existente, estado, ubicacion = result
             
-        return False, "Serie disponible."
+            # Validaciones adicionales para Salida
+            if estado_requerido and estado != estado_requerido:
+                return True, f"La serie '{serial}' no está DISPONIBLE (Estado actual: {estado})"
+            
+            if ubicacion_requerida and ubicacion != ubicacion_requerida:
+                return True, f"La serie '{serial}' no está en {ubicacion_requerida} (Ubicación actual: {ubicacion})"
+                
+            return True, f"La serie '{serial}' ya existe (SKU: {sku_existente}, Estado: {estado}, Ubicación: {ubicacion})"
+            
+        return False, "Serie no encontrada o disponible para registro nuevo."
 
     except Exception as e:
-        print(f"Error verificando serie: {e}")
-        return True, f"Error de verificación: {e}" # Asumir existe ante error para prevenir duplicados
+        logger.error(f"Error verificando serie: {e}")
+        return True, f"Error de verificación: {e}"
     finally:
-        if conn: conn.close()
+        if conn: close_connection(conn)
 
-def registrar_series_bulk(series_data):
+def registrar_series_bulk(series_data, fecha_ingreso=None):
     """
     Registra múltiples series en una transacción.
     series_data: Lista de tuplas/objetos [(sku, serial, 'BODEGA'), ...]
+    fecha_ingreso: Opcional, fecha de registro (YYYY-MM-DD)
     """
+    if not fecha_ingreso:
+        fecha_ingreso = date.today().isoformat()
+        
     conn = None
     try:
         conn = get_db_connection()
@@ -2362,22 +2536,19 @@ def registrar_series_bulk(series_data):
         
         sql = """
             INSERT INTO series_registradas (sku, serial_number, estado, ubicacion, fecha_ingreso)
-            VALUES (?, ?, 'DISPONIBLE', ?, DATE('now'))
+            VALUES (?, ?, 'DISPONIBLE', ?, ?)
         """
         
         if DB_TYPE == 'MYSQL':
             sql = """
                 INSERT INTO series_registradas (sku, serial_number, estado, ubicacion, fecha_ingreso)
-                VALUES (%s, %s, 'DISPONIBLE', %s, CURDATE())
+                VALUES (%s, %s, 'DISPONIBLE', %s, %s)
             """
             
-        # Preparar datos (SKU, SERIAL, UBICACION)
-        # Asumimos que series_data viene como lista de dicts o tuplas
-        # Estandarizamos a tuplas para executemany
+        # Preparar datos (SKU, SERIAL, UBICACION, FECHA)
         data_to_insert = []
         for item in series_data:
-            # item = {'sku': ..., 'serial': ..., 'ubicacion': ...}
-            data_to_insert.append((item['sku'], item['serial'], item['ubicacion']))
+            data_to_insert.append((item['sku'], item['serial'], item['ubicacion'], fecha_ingreso))
             
         cursor.executemany(sql, data_to_insert)
         conn.commit()
@@ -2389,7 +2560,7 @@ def registrar_series_bulk(series_data):
         if conn: conn.rollback()
         return False, f"Error al registrar series: {e}"
     finally:
-        if conn: conn.close()
+        if conn: close_connection(conn)
 
 # =================================================================
 # FUNCIONES PARA ASIGNACIÓN DE SERIALES A MÓVILES
@@ -2419,21 +2590,28 @@ def obtener_info_serial(serial_number):
         return None, None
         
     except Exception as e:
-        print(f"[ERROR] obtener_info_serial: {e}")
+        logger.error(f"[ERROR] obtener_info_serial: {e}")
         return None, None
     finally:
-        if conn: conn.close()
+        if conn: close_connection(conn)
 
 
-def actualizar_ubicacion_serial(serial_number, nueva_ubicacion):
+def actualizar_ubicacion_serial(serial_number, nueva_ubicacion, existing_conn=None):
     """
     Actualiza la ubicación de un serial específico.
     Retorna: (exito: bool, mensaje: str)
+    Allows re-using existing_conn.
     """
     conn = None
+    should_close = True
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        if existing_conn:
+            conn = existing_conn
+            should_close = False
+            cursor = conn.cursor()
+        else:
+            conn = get_db_connection()
+            cursor = conn.cursor()
         
         sql = """
             UPDATE series_registradas
@@ -2442,18 +2620,42 @@ def actualizar_ubicacion_serial(serial_number, nueva_ubicacion):
         """
         
         run_query(cursor, sql, (nueva_ubicacion, serial_number))
-        conn.commit()
         
-        if cursor.rowcount > 0:
-            return True, f"Serial {serial_number} actualizado a {nueva_ubicacion}"
-        else:
-            return False, f"Serial {serial_number} no encontrado"
+        if should_close:
+            conn.commit()
             
+        return True, "Ubicación actualizada"
+        
     except Exception as e:
-        if conn: conn.rollback()
-        return False, f"Error al actualizar serial: {e}"
+        if conn and should_close: conn.rollback()
+        logger.error(f"Error actualizando ubicación serial: {e}")
+        return False, f"Error: {e}"
     finally:
-        if conn: conn.close()
+        if conn and should_close:
+            close_connection(conn)
+
+def obtener_series_por_sku_y_ubicacion(sku, ubicacion):
+    """
+    Retorna una lista de seriales (MACs) para un SKU en una ubicación específica.
+    """
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Manejo especial para ubicacion 'BODEGA' que puede ser NULL en algunos sistemas legacy, 
+        # pero aquí asumimos 'BODEGA' explícito.
+        
+        run_query(cursor, "SELECT serial_number FROM series_registradas WHERE sku = ? AND ubicacion = ? AND estado = 'DISPONIBLE'", (sku, ubicacion))
+        resultados = cursor.fetchall()
+        
+        return [r[0] for r in resultados]
+        
+    except Exception as e:
+        logger.error(f"Error obteniendo series: {e}")
+        return []
+    finally:
+        if conn: close_connection(conn)
 
 
 def incrementar_asignacion_movil(nombre_movil, sku, cantidad):
@@ -2506,4 +2708,474 @@ def incrementar_asignacion_movil(nombre_movil, sku, cantidad):
         if conn: conn.rollback()
         return False, f"Error al incrementar asignación: {e}"
     finally:
-        if conn: conn.close()
+        if conn: close_connection(conn)
+
+# =================================================================
+# FUNCIONES PARA RETORNO MANUAL DE MATERIALES (AUDITORÍA)
+# =================================================================
+
+def obtener_asignacion_movil_activa(movil):
+    """
+    Obtiene todos los productos asignados a un móvil con cantidad > 0
+    
+    Returns:
+        List of tuples: (sku, nombre_producto, cantidad)
+    """
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Obtener asignaciones actuales del móvil
+        query = """
+            SELECT a.sku_producto, p.nombre, a.cantidad
+            FROM asignacion_moviles a
+            INNER JOIN productos p ON a.sku_producto = p.sku AND p.ubicacion = 'BODEGA'
+            WHERE a.movil = ? AND a.cantidad > 0
+            ORDER BY p.nombre
+        """
+        run_query(cursor, query, (movil,))
+        return cursor.fetchall()
+        
+    except Exception as e:
+        logger.error(f"Error al obtener asignación de móvil: {e}")
+        return []
+    finally:
+        if conn: close_connection(conn)
+
+def procesar_retorno_manual(movil, sku, cantidad, fecha_evento, observaciones=None):
+    """
+    Procesa un retorno manual desde móvil a bodega
+    
+    Returns:
+        tuple: (exito: bool, mensaje: str)
+    """
+    conn = None
+    try:
+        # Validar que el móvil tenga material asignado
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        run_query(cursor, """
+            SELECT cantidad FROM asignacion_moviles 
+            WHERE sku_producto = ? AND movil = ?
+        """, (sku, movil))
+        
+        resultado = cursor.fetchone()
+        
+        if not resultado:
+            return False, f"El móvil {movil} no tiene material asignado del SKU {sku}"
+        
+        cantidad_asignada = resultado[0]
+        
+        if cantidad > cantidad_asignada:
+            return False, f"Cantidad a retornar ({cantidad}) excede la cantidad asignada ({cantidad_asignada})"
+        
+        conn.close()
+        
+        # Crear observación descriptiva
+        obs_final = f"RETORNO MANUAL desde Auditoría"
+        if observaciones:
+            obs_final += f" - {observaciones}"
+        
+        # Procesar retorno usando función existente
+        exito, mensaje = registrar_movimiento_gui(
+            sku=sku,
+            tipo_movimiento='RETORNO_MOVIL',
+            cantidad_afectada=cantidad,
+            movil_afectado=movil,
+            fecha_evento=fecha_evento,
+            paquete_asignado=None,
+            observaciones=obs_final
+        )
+        
+        return exito, mensaje
+        
+    except Exception as e:
+        return False, f"Error al procesar retorno: {e}"
+    finally:
+        if conn: close_connection(conn)
+
+def obtener_sku_por_codigo_barra(codigo_barra):
+    """
+    Busca un producto por su código de barra y retorna el SKU.
+    Retorna None si no se encuentra.
+    Incluye normalización automática de comillas/apóstrofes.
+    """
+    if not codigo_barra: return None
+    
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # NORMALIZACIÓN CENTRAL: Reemplazar comillas por guiones
+        raw_code = str(codigo_barra).strip().upper()
+        codigo = raw_code.replace("'", "-").replace("´", "-").replace("`", "-")
+        
+        # 1. Buscar en columna codigo_barra (Legacy/Original)
+        try:
+             query = "SELECT sku FROM productos WHERE codigo_barra = ? OR codigo_barra = ? LIMIT 1"
+             run_query(cursor, query, (codigo, raw_code))
+             result = cursor.fetchone()
+             if result:
+                 return result[0]
+        except:
+             pass 
+        
+        # 2. Buscar en columna codigo_barra_maestro (NUEVO SISTEMA)
+        try:
+             # Logic expanded to handle ' vs - mismatch
+             candidates = [codigo, raw_code]
+             
+             # Reverse Normalization: If input has dashes, try replacing with single quotes
+             # DB has 1'2'16 but scanner reads 1-2-16
+             if "-" in raw_code:
+                 candidates.append(raw_code.replace("-", "'"))
+                 
+             for cand in candidates:
+                 query_maestro = "SELECT sku FROM productos WHERE codigo_barra_maestro = ? LIMIT 1"
+                 run_query(cursor, query_maestro, (cand,))
+                 result_maestro = cursor.fetchone()
+                 if result_maestro:
+                     return result_maestro[0]
+        except:
+             pass
+
+        # 3. Fallback: Buscar si el codigo ES el SKU
+        query_sku = "SELECT sku FROM productos WHERE sku = ? OR sku = ? LIMIT 1"
+        run_query(cursor, query_sku, (codigo, raw_code))
+        result_sku = cursor.fetchone()
+        if result_sku:
+            return result_sku[0]
+            
+        return None
+    except Exception as e:
+        logger.error(f"Error buscando por código de barra: {e}")
+        return None
+    finally:
+        if conn: close_connection(conn)
+
+def obtener_sku_por_serial(serial):
+    """
+    Busca el SKU asociado a un número de serie (MAC, etc) en la tabla series_registradas.
+    Retorna (sku, existe)
+    """
+    if not serial: return None, False
+    
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Reemplazos básicos para evitar errores de scanner
+        serial_clean = str(serial).strip().upper().replace("'", "-")
+        
+        sql = "SELECT sku FROM series_registradas WHERE serial_number = ? LIMIT 1"
+        run_query(cursor, sql, (serial_clean,))
+        result = cursor.fetchone()
+        
+        if result:
+            return result[0], True
+            
+        return None, False
+
+    except Exception as e:
+        logger.error(f"❌ Error en obtener_sku_por_serial: {e}")
+        return None, False
+    finally:
+        if conn: close_connection(conn)
+
+
+# =================================================================
+# FUNCIONES PARA SISTEMA DE ESCANEO UNIVERSAL
+# Agregado: 2026-02-11
+# =================================================================
+
+def buscar_producto_por_codigo_barra_maestro(codigo_barra):
+    """
+    Busca un producto por su código de barra maestro o por SKU.
+    Incluye normalización automática de comillas/apóstrofes.
+    
+    Args:
+        codigo_barra: Código de barra maestro o SKU del producto
+        
+    Returns:
+        dict con información del producto o None si no existe
+    """
+    if not codigo_barra: return None
+    
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # NORMALIZACIÓN CENTRAL: Reemplazar comillas por guiones
+        raw_code = str(codigo_barra).strip().upper()
+        codigo = raw_code.replace("'", "-").replace("´", "-").replace("`", "-")
+        
+        # Buscar por código de barra (maestro o legacy) O por SKU (case-insensitive)
+        run_query(cursor, """
+            SELECT p.sku, p.nombre, p.cantidad as stock
+            FROM productos p
+            WHERE (UPPER(TRIM(p.codigo_barra_maestro)) IN (?, ?) 
+               OR UPPER(TRIM(p.codigo_barra)) IN (?, ?)
+               OR UPPER(TRIM(p.sku)) IN (?, ?))
+               AND p.ubicacion = 'BODEGA'
+            LIMIT 1
+        """, (codigo, raw_code, codigo, raw_code, codigo, raw_code))
+        
+        resultado = cursor.fetchone()
+        if not resultado:
+            return None
+            
+        sku, nombre, stock = resultado
+        
+        # Determinar si tiene seriales
+        from config import PRODUCTOS_CON_CODIGO_BARRA
+        tiene_seriales = sku in PRODUCTOS_CON_CODIGO_BARRA
+        
+        return {
+            'sku': sku,
+            'nombre': nombre,
+            'stock_actual': stock,
+            'tiene_seriales': tiene_seriales
+        }
+    except Exception as e:
+        logger.error(f"Error buscando producto por código de barra {codigo_barra}: {e}")
+        return None
+    finally:
+        if conn: 
+            close_connection(conn)
+
+
+
+
+def obtener_producto_nombre(sku):
+    """Obtiene el nombre de un producto por su SKU"""
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        run_query(cursor, "SELECT nombre FROM productos WHERE sku = ? LIMIT 1", (sku,))
+        resultado = cursor.fetchone()
+        return resultado[0] if resultado else None
+    except Exception as e:
+        logger.error(f"Error obteniendo nombre de producto: {e}")
+        return None
+    finally:
+        if conn:
+            close_connection(conn)
+
+
+def buscar_producto_por_mac(mac_address):
+    """
+    Busca un producto por su MAC/serial en la tabla series_registradas.
+    
+    Args:
+        mac_address: MAC o serial del equipo
+        
+    Returns:
+        dict con información del producto o None si no existe
+    """
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Normalizar MAC (uppercase y trim)
+        mac = mac_address.strip().upper()
+        
+        # Buscar en tabla series_registradas
+        run_query(cursor, """
+            SELECT s.sku, p.nombre, s.ubicacion, s.mac
+            FROM series_registradas s
+            JOIN productos p ON s.sku = p.sku
+            WHERE UPPER(TRIM(s.mac)) = ? AND s.estado = 'activo'
+            LIMIT 1
+        """, (mac,))
+        
+        resultado = cursor.fetchone()
+        if not resultado:
+            return None
+            
+        sku, nombre, ubicacion, serial_mac = resultado
+        
+        # Verificar que esté en BODEGA
+        if ubicacion != 'BODEGA':
+            logger.warning(f"MAC {mac} encontrado pero no está en BODEGA (ubicación: {ubicacion})")
+            return None
+        
+        return {
+            'sku': sku,
+            'nombre': nombre,
+            'serial_mac': serial_mac,
+            'ubicacion': ubicacion,
+            'tiene_seriales': True,
+            'es_mac': True  # Flag para identificar que fue búsqueda por MAC
+        }
+    except Exception as e:
+        logger.error(f"Error buscando producto por MAC {mac_address}: {e}")
+        return None
+    finally:
+        if conn: 
+            close_connection(conn)
+
+
+
+def actualizar_codigo_barra_maestro(sku, codigo_barra_maestro):
+    """
+    Actualiza el código de barra maestro de un producto.
+    
+    Args:
+        sku: SKU del producto
+        codigo_barra_maestro: Nuevo código de barra maestro
+    
+    Returns:
+        tuple (exito: bool, mensaje: str)
+    """
+    conn = None
+    try:
+        # NORMALIZAR código escaneado (convertir caracteres problemáticos del scanner)
+        if codigo_barra_maestro:
+            # Reemplazar comillas arriba/acentos por guiones
+            codigo_barra_maestro = codigo_barra_maestro.replace('´', '-')
+            codigo_barra_maestro = codigo_barra_maestro.replace('`', '-')
+            codigo_barra_maestro = codigo_barra_maestro.replace('′', '-')
+            codigo_barra_maestro = codigo_barra_maestro.strip().upper()
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Verificar si el código ya existe en otro producto
+        if codigo_barra_maestro:
+            run_query(cursor, """
+                SELECT sku FROM productos 
+                WHERE codigo_barra_maestro = ? AND sku != ?
+                LIMIT 1
+            """, (codigo_barra_maestro, sku))
+            
+            if cursor.fetchone():
+                return False, f"El código de barra '{codigo_barra_maestro}' ya está asignado a otro producto"
+        
+        # Actualizar en todas las ubicaciones (el código maestro pertenece al SKU)
+        run_query(cursor, """
+            UPDATE productos 
+            SET codigo_barra_maestro = ?
+            WHERE sku = ?
+        """, (codigo_barra_maestro, sku))
+        
+        conn.commit()
+        logger.info(f"Código de barra maestro actualizado: {sku} -> {codigo_barra_maestro}")
+        return True, "Código de barra actualizado exitosamente"
+        
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        logger.error(f"Error actualizando código de barra maestro: {e}")
+        return False, f"Error: {e}"
+    finally:
+        if conn:
+            close_connection(conn)
+
+
+def registrar_abasto_batch(items_abasto, fecha_evento, numero_abasto=None):
+    """
+    Registra múltiples items de abasto en una sola transacción.
+    
+    Args:
+        items_abasto: Lista de dicts [{'sku': '1-2-16', 'cantidad': 50, 'seriales': []}, ...]
+        fecha_evento: Fecha del abasto
+        numero_abasto: Número opcional del abasto
+    
+    Returns:
+        tuple (exito: bool, mensaje: str)
+    """
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Iniciar transacción explícita
+        if DB_TYPE == 'MYSQL':
+            cursor.execute("START TRANSACTION")
+        else:
+            cursor.execute("BEGIN IMMEDIATE")
+        
+        total_unidades = 0
+        
+        for item in items_abasto:
+            sku = item['sku']
+            cantidad = item['cantidad']
+            seriales = item.get('seriales', [])
+            
+            observacion = f"Abasto por escaneo"
+            if numero_abasto:
+                observacion += f" #{numero_abasto}"
+            if seriales:
+                observacion += f" ({len(seriales)} equipos con seriales)"
+            
+            # Registrar movimiento usando existing_conn
+            exito, msg = registrar_movimiento_gui(
+                sku=sku,
+                tipo_movimiento='ABASTO',
+                cantidad_afectada=cantidad,
+                fecha_evento=fecha_evento,
+                observaciones=observacion,
+                existing_conn=conn
+            )
+            
+            if not exito:
+                conn.rollback()
+                logger.error(f"Error registrando abasto para {sku}: {msg}")
+                return False, f"Error en {sku}: {msg}"
+            
+            # Registrar seriales si aplica
+            if seriales:
+                for serial in seriales:
+                    try:
+                        # Verificar si el serial ya existe
+                        run_query(cursor, """
+                            SELECT COUNT(*) FROM series_registradas 
+                            WHERE serial_number = ?
+                        """, (serial,))
+                        
+                        if cursor.fetchone()[0] > 0:
+                            conn.rollback()
+                            return False, f"El serial '{serial}' ya está registrado en el sistema"
+                        
+                        # Insertar serial
+                        run_query(cursor, """
+                            INSERT INTO series_registradas 
+                            (sku, serial_number, estado, ubicacion, fecha_ingreso)
+                            VALUES (?, ?, 'DISPONIBLE', 'BODEGA', ?)
+                        """, (sku, serial, fecha_evento))
+                        
+                    except Exception as e:
+                        conn.rollback()
+                        logger.error(f"Error registrando serial {serial}: {e}")
+                        return False, f"Error registrando serial '{serial}': {e}"
+            
+            total_unidades += cantidad
+        
+        # Commit de toda la transacción
+        conn.commit()
+        
+        mensaje_exito = f"Abasto registrado exitosamente: {len(items_abasto)} productos, {total_unidades} unidades totales"
+        logger.info(mensaje_exito)
+        return True, mensaje_exito
+        
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        error_msg = f"Error al registrar abasto batch: {e}"
+        logger.error(error_msg)
+        return False, error_msg
+    finally:
+        if conn:
+            close_connection(conn)
+
+
+def obtener_nombres_moviles():
+    """Retorna la lista de todos los móviles disponibles (Bodega y Santiago)"""
+    return MOVILES_DISPONIBLES + MOVILES_SANTIAGO

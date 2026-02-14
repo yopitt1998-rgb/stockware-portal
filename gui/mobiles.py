@@ -42,13 +42,13 @@ class MobilesManager(tk.Toplevel):
         self.patente_entry = ttk.Entry(form_frame, width=20)
         self.patente_entry.grid(row=0, column=3, sticky='w', padx=10, pady=5)
         
-        tk.Label(form_frame, text="Conductor:", bg='#f8f9fa').grid(row=1, column=0, sticky='w', pady=5)
+        tk.Label(form_frame, text="Técnico 1:", bg='#f8f9fa').grid(row=1, column=0, sticky='w', pady=5)
         self.conductor_entry = ttk.Entry(form_frame, width=30)
         self.conductor_entry.grid(row=1, column=1, sticky='w', padx=10, pady=5)
         
-        tk.Label(form_frame, text="Ayudante:", bg='#f8f9fa').grid(row=1, column=2, sticky='w', pady=5)
-        self.ayudante_entry = ttk.Entry(form_frame, width=30)
-        self.ayudante_entry.grid(row=1, column=3, sticky='w', padx=10, pady=5)
+        # Ayudante Removed as per user request
+        self.ayudante_entry = None # Placeholder logic if needed to avoid referencing undefined var
+
         
         # Buttons
         btn_frame = tk.Frame(form_frame, bg='#f8f9fa')
@@ -73,7 +73,7 @@ class MobilesManager(tk.Toplevel):
         table_frame = tk.Frame(content_frame, bg='#f8f9fa')
         table_frame.pack(fill='both', expand=True)
         
-        columns = ("Nombre", "Patente", "Conductor", "Ayudante", "Estado")
+        columns = ("Nombre", "Patente", "Técnico 1", "Estado")
         self.tabla = ttk.Treeview(table_frame, columns=columns, show='headings', style='Modern.Treeview')
         
         for col in columns:
@@ -108,7 +108,7 @@ class MobilesManager(tk.Toplevel):
         for nombre, patente, conductor, ayudante, activo in moviles:
             estado = "Activo" if activo else "Inactivo"
             tags = () if activo else ('inactivo',)
-            self.tabla.insert('', tk.END, values=(nombre, patente, conductor, ayudante, estado), tags=tags)
+            self.tabla.insert('', tk.END, values=(nombre, patente, conductor, estado), tags=tags)
         
         self.tabla.tag_configure('inactivo', foreground='gray')
 
@@ -127,8 +127,7 @@ class MobilesManager(tk.Toplevel):
             self.conductor_entry.delete(0, tk.END)
             self.conductor_entry.insert(0, "" if not valores[2] or valores[2] == "None" else valores[2])
             
-            self.ayudante_entry.delete(0, tk.END)
-            self.ayudante_entry.insert(0, "" if not valores[3] or valores[3] == "None" else valores[3])
+            # Ayudante logic removed
             
             self.btn_editar.config(state='normal')
             self.btn_guardar.config(state='disabled')
@@ -137,7 +136,7 @@ class MobilesManager(tk.Toplevel):
         self.nombre_entry.delete(0, tk.END)
         self.patente_entry.delete(0, tk.END)
         self.conductor_entry.delete(0, tk.END)
-        self.ayudante_entry.delete(0, tk.END)
+        # self.ayudante_entry.delete(0, tk.END)
         self.btn_editar.config(state='disabled')
         self.btn_guardar.config(state='normal')
 
@@ -145,7 +144,7 @@ class MobilesManager(tk.Toplevel):
         nombre = self.nombre_entry.get().strip()
         patente = self.patente_entry.get().strip()
         conductor = self.conductor_entry.get().strip()
-        ayudante = self.ayudante_entry.get().strip()
+        ayudante = "" # self.ayudante_entry.get().strip()
         
         if not nombre:
             mostrar_mensaje_emergente(self, "Error", "El nombre es obligatorio.", "error")
@@ -163,7 +162,7 @@ class MobilesManager(tk.Toplevel):
         nuevo_nombre = self.nombre_entry.get().strip()
         nueva_patente = self.patente_entry.get().strip()
         nuevo_conductor = self.conductor_entry.get().strip()
-        nuevo_ayudante = self.ayudante_entry.get().strip()
+        nuevo_ayudante = "" # self.ayudante_entry.get().strip()
         
         if not nuevo_nombre:
             mostrar_mensaje_emergente(self, "Error", "El nombre es obligatorio.", "error")

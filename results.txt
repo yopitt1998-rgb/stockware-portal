@@ -1,0 +1,7 @@
+DB_TYPE: MYSQL
+MYSQL_HOST: gateway01.us-east-1.prod.aws.tidbcloud.com
+MYSQL_DB: test
+Connection successful
+Count Assignments: 4
+Count Bodega Products: 23
+Cable UTP in Bodega: (23, 'CABLE COBRE UTP CM CATEGORIA 6 AZUL 9C6M4E20', '7-1-171', 2905, 'BODEGA', 10, 'General', 'N/A', datetime.datetime(2025, 12, 22, 14, 21, 46), '023', "7'1'171", "7'1'171")

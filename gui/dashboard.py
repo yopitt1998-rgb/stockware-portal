@@ -52,17 +52,20 @@ class DashboardTab:
         # Actualizar valores iniciales
         self.actualizar_metricas()
         
-        # Iniciar ciclo de auto-actualización (cada 30 segundos)
+        # Iniciar ciclo de auto-actualización (cada 60 segundos)
         self.iniciar_auto_refresh()
 
     def iniciar_auto_refresh(self):
-        """Actualiza las métricas automáticamente cada 30 segundos"""
-        try:
-             if self.notebook.winfo_exists():
+        """Actualiza las métricas automáticamente cada 60 segundos"""
+        def refresh_loop():
+            # Check if the notebook still exists before updating
+            if self.notebook.winfo_exists():
                 self.actualizar_metricas()
-                self.notebook.after(30000, self.iniciar_auto_refresh)
-        except Exception:
-            pass # Evitar errores si se cierra la ventana
+                # OPTIMIZADO: Reducido de 30 a 60 segundos para disminuir carga en la base de datos
+                self.main_app.master.after(60000, refresh_loop)  # 60 segundos
+            # else: the window is closed, stop scheduling
+        
+        refresh_loop()
         
     def create_metric_card(self, parent, metric, index):
         """Crear tarjeta de métrica individual moderna"""
@@ -100,10 +103,10 @@ class DashboardTab:
         # Se asume que main_app tiene estos métodos (o el inventory tab)
         # Nota: Idealmente moveremos estos métodos a gui/inventory.py y accederemos a traves de main_app.inventory_tab
         quick_actions = [
-            ("🚚 Abasto Rápido", lambda: self.main_app.inventory_tab.abrir_ventana_abasto(), Styles.SUCCESS_COLOR),
-            ("📤 Salida Móvil", lambda: self.main_app.inventory_tab.abrir_ventana_salida_movil(), Styles.SECONDARY_COLOR),
-            ("🔄 Retorno", lambda: self.main_app.inventory_tab.abrir_ventana_retorno_movil(), Styles.INFO_COLOR),
-            ("⚖️ Consiliación", lambda: self.main_app.inventory_tab.abrir_ventana_consiliacion(), Styles.WARNING_COLOR)
+            ("🔫 Abasto Scanner", lambda: self.main_app.perform_inventory_action('abrir_ventana_abasto_scanner'), '#00C853'),
+            ("🔫 Salida Scanner", lambda: self.main_app.perform_inventory_action('abrir_ventana_salida_movil_scanner'), '#FF6F00'),
+            ("🔄 Devolución / Entrada", lambda: self.main_app.perform_inventory_action('abrir_ventana_retorno_movil'), Styles.SUCCESS_COLOR),
+            ("📋 Auditoría de Terreno", lambda: self.main_app.switch_to_tab("Auditoría"), Styles.ACCENT_COLOR)
         ]
         
         actions_frame = ttk.Frame(quick_actions_frame, style='Modern.TFrame')
@@ -111,12 +114,12 @@ class DashboardTab:
         
         for i, (text, command, color) in enumerate(quick_actions):
             btn = tk.Button(actions_frame, text=text, command=command,
-                          bg=color, fg='white', font=('Segoe UI', 10, 'bold'),
-                          relief='flat', bd=0, padx=20, pady=12, cursor='hand2')
+                          bg=color, fg='white', font=('Segoe UI', 9 if i == 1 else 10, 'bold'),
+                          relief='flat', bd=0, padx=15 if i == 1 else 20, pady=12, cursor='hand2')
             btn.pack(side='left', padx=5, fill='x', expand=True)
             
             # Agregar tooltips
-            tooltip_keys = ["nuevo_abasto", "salida_movil", "retorno_movil", "conciliacion_manual"]
+            tooltip_keys = ["nuevo_abasto", "salida_movil", "retorno_movil", "auditoria_terreno"]
             if i < len(tooltip_keys):
                 create_tooltip(btn, TOOLTIPS.get(tooltip_keys[i], ""))
             

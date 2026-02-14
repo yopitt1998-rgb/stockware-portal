@@ -1,0 +1,1 @@
+1142 (42000): CREATE command denied to user 'Prd5AFSJB3QoRPe.root'@'%' for table 'productos'

@@ -1,0 +1,850 @@
+2026-02-10 14:51:37 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-02-10 14:51:37 | CRITICAL | database             | FATAL BOOTSTRAP ERROR: Failed getting connection; pool exhausted
+2026-02-10 14:51:37 | CRITICAL | database             | Traceback (most recent call last):
+  File "C:\Users\johni\AppData\Roaming\Python\Python312\site-packages\mysql\connector\pooling.py", line 577, in get_connection
+    cnx = self._cnx_queue.get(block=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\queue.py", line 168, in get
+    raise Empty
+_queue.Empty
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 597, in bootstrap_app
+    app = ModernInventarioApp(root, usuario)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 89, in __init__
+    self.create_modern_gui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 380, in create_modern_gui
+    self.products_tab = ProductsTab(self.main_notebook, self)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\products.py", line 14, in __init__
+    self.cargar_productos()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\products.py", line 75, in cargar_productos
+    conn = get_db_connection()
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\utils\db_connector.py", line 76, in get_db_connection
+    raise e
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\utils\db_connector.py", line 72, in get_db_connection
+    return _mysql_pools[db_name].get_connection()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\johni\AppData\Roaming\Python\Python312\site-packages\mysql\connector\pooling.py", line 579, in get_connection
+    raise PoolError("Failed getting connection; pool exhausted") from err
+mysql.connector.errors.PoolError: Failed getting connection; pool exhausted
+
+2026-02-10 15:32:07 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-02-10 15:32:07 | CRITICAL | database             | FATAL BOOTSTRAP ERROR: Failed getting connection; pool exhausted
+2026-02-10 15:32:07 | CRITICAL | database             | Traceback (most recent call last):
+  File "C:\Users\johni\AppData\Roaming\Python\Python312\site-packages\mysql\connector\pooling.py", line 577, in get_connection
+    cnx = self._cnx_queue.get(block=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\queue.py", line 168, in get
+    raise Empty
+_queue.Empty
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 597, in bootstrap_app
+    app = ModernInventarioApp(root, usuario)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 89, in __init__
+    self.create_modern_gui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 380, in create_modern_gui
+    self.products_tab = ProductsTab(self.main_notebook, self)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\products.py", line 14, in __init__
+    self.cargar_productos()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\products.py", line 75, in cargar_productos
+    conn = get_db_connection()
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\utils\db_connector.py", line 76, in get_db_connection
+    raise e
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\utils\db_connector.py", line 72, in get_db_connection
+    return _mysql_pools[db_name].get_connection()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\johni\AppData\Roaming\Python\Python312\site-packages\mysql\connector\pooling.py", line 579, in get_connection
+    raise PoolError("Failed getting connection; pool exhausted") from err
+mysql.connector.errors.PoolError: Failed getting connection; pool exhausted
+
+2026-02-10 15:32:07 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-02-10 15:32:07 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: Failed getting connection; pool exhausted
+2026-02-10 15:32:07 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-02-10 15:32:07 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-02-10 16:14:52 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-02-10 16:14:52 | CRITICAL | database             | FATAL BOOTSTRAP ERROR: Failed getting connection; pool exhausted
+2026-02-10 16:14:52 | CRITICAL | database             | Traceback (most recent call last):
+  File "C:\Users\johni\Documents\GestorInventario_MySQL\.venv\Lib\site-packages\mysql\connector\pooling.py", line 654, in get_connection
+    cnx = self._cnx_queue.get(block=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\queue.py", line 168, in get
+    raise Empty
+_queue.Empty
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 597, in bootstrap_app
+    app = ModernInventarioApp(root, usuario)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 89, in __init__
+    self.create_modern_gui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 380, in create_modern_gui
+    self.products_tab = ProductsTab(self.main_notebook, self)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\products.py", line 14, in __init__
+    self.cargar_productos()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\products.py", line 75, in cargar_productos
+    conn = get_db_connection()
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\utils\db_connector.py", line 76, in get_db_connection
+    raise e
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\utils\db_connector.py", line 72, in get_db_connection
+    return _mysql_pools[db_name].get_connection()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\johni\Documents\GestorInventario_MySQL\.venv\Lib\site-packages\mysql\connector\pooling.py", line 656, in get_connection
+    raise PoolError("Failed getting connection; pool exhausted") from err
+mysql.connector.errors.PoolError: Failed getting connection; pool exhausted
+
+2026-02-11 14:21:29 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:21:29 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-11 14:21:29 | ERROR    | database             |    Params: ('C45E5C994759', 'C45E5C994759')
+2026-02-11 14:21:29 | ERROR    | database             | Error buscando producto por código de barra C45E5C994759: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:21:34 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:21:34 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-11 14:21:34 | ERROR    | database             |    Params: ('485754432B2E9DAF', '485754432B2E9DAF')
+2026-02-11 14:21:34 | ERROR    | database             | Error buscando producto por código de barra 485754432B2E9DAF: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:21:45 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:21:45 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-11 14:21:45 | ERROR    | database             |    Params: ("7'1'171", "7'1'171")
+2026-02-11 14:21:45 | ERROR    | database             | Error buscando producto por código de barra 7'1'171: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:21:52 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:21:52 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-11 14:21:52 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-11 14:21:52 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:22:00 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:22:00 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-11 14:22:00 | ERROR    | database             |    Params: ("1'4'61", "1'4'61")
+2026-02-11 14:22:00 | ERROR    | database             | Error buscando producto por código de barra 1'4'61: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:24:51 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:24:51 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-11 14:24:51 | ERROR    | database             |    Params: ("1'4'61", "1'4'61")
+2026-02-11 14:24:51 | ERROR    | database             | Error buscando producto por código de barra 1'4'61: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:25:08 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:25:08 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-11 14:25:08 | ERROR    | database             |    Params: ("5'2'433", "5'2'433")
+2026-02-11 14:25:08 | ERROR    | database             | Error buscando producto por código de barra 5'2'433: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:25:13 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:25:13 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-11 14:25:13 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-11 14:25:13 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:25:20 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.serials' doesn't exist
+2026-02-11 14:25:20 | ERROR    | database             |    Query: 
+            SELECT s.sku, p.nombre, s.ubicacion, s.serial_mac
+            FROM serials s
+            JOIN productos p ON s.sku = p.sku
+            WHERE UPPER(TRIM(s.serial_mac)) = %s
+            LIMIT 1
+        
+2026-02-11 14:25:20 | ERROR    | database             |    Params: ('485754432B2E9DAF',)
+2026-02-11 14:25:20 | ERROR    | database             | Error buscando producto por MAC 485754432B2E9DAF: 1146 (42S02): Table 'test.serials' doesn't exist
+2026-02-11 14:25:21 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:25:21 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-11 14:25:21 | ERROR    | database             |    Params: ('485754432B2E9DAF', '485754432B2E9DAF')
+2026-02-11 14:25:21 | ERROR    | database             | Error buscando producto por código de barra 485754432B2E9DAF: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:33:11 | ERROR    | database             | ❌ Error SQL ejecución: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 1 column 6 near "PRAGMA table_info(productos)" 
+2026-02-11 14:33:11 | ERROR    | database             |    Query: PRAGMA table_info(productos)
+2026-02-11 14:33:11 | ERROR    | database             |    Params: None
+2026-02-11 14:43:31 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:43:31 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-11 14:43:31 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-11 14:43:31 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 09:04:56 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\core.py", line 1499, in abrir_gestion_codigos
+    for i in range(self.master_app.main_notebook.index("end")):
+                   ^^^^^^^^^^^^^^^
+AttributeError: 'InventoryTab' object has no attribute 'master_app'
+
+2026-02-12 09:26:21 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\core.py", line 1499, in abrir_gestion_codigos
+    for i in range(self.master_app.main_notebook.index("end")):
+                   ^^^^^^^^^^^^^^^
+AttributeError: 'InventoryTab' object has no attribute 'master_app'
+
+2026-02-12 10:18:36 | CRITICAL | database             | FATAL BOOTSTRAP ERROR: invalid syntax (abasto_scanner.py, line 1)
+2026-02-12 10:18:36 | CRITICAL | database             | Traceback (most recent call last):
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 567, in bootstrap_app
+    from gui.inventory import InventoryTab
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\__init__.py", line 1, in <module>
+    from .core import InventoryTab
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\core.py", line 35, in <module>
+    from ..abasto_scanner import AbastoScannerWindow  # NUEVO: Sistema de escaneo universal
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\abasto_scanner.py", line 1
+    ```python
+    ^
+SyntaxError: invalid syntax
+
+2026-02-12 11:23:11 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 567, in bootstrap_app
+    y = (root.winfo_screenheight() - 350) // 2
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\__init__.py", line 1, in <module>
+    from .core import InventoryTab
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\core.py", line 35, in <module>
+    from ..abasto_scanner import AbastoScannerWindow  # NUEVO: Sistema de escaneo universal
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\abasto_scanner.py", line 1
+    ```python
+    ^
+SyntaxError: invalid syntax
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 594, in bootstrap_app
+    def seleccionar(self, sucursal):
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\messagebox.py", line 98, in showerror
+    return _show(title, message, ERROR, OK, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\messagebox.py", line 76, in _show
+    res = Message(**options).show()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\commondialog.py", line 45, in show
+    s = master.tk.call(self.command, *master._options(self.options))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt
+
+2026-02-12 11:40:31 | CRITICAL | database             | FATAL BOOTSTRAP ERROR: 'ModernInventarioApp' object has no attribute 'create_sidebar_header'
+2026-02-12 11:40:31 | CRITICAL | database             | Traceback (most recent call last):
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 765, in bootstrap_app
+    app = ModernInventarioApp(root)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 88, in __init__
+    self.create_modern_gui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 342, in create_modern_gui
+    self.create_sidebar_header()
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ModernInventarioApp' object has no attribute 'create_sidebar_header'
+
+2026-02-12 11:52:06 | ERROR    | database             | Error loading tab Dashboard: 'Frame' object has no attribute 'add'
+2026-02-12 11:52:06 | ERROR    | database             | Error loading tab Dashboard: 'Frame' object has no attribute 'add'
+2026-02-12 11:58:47 | ERROR    | database             | Error loading tab Inventario: 'Frame' object has no attribute 'add'
+2026-02-12 11:58:52 | ERROR    | database             | Error loading tab Inventario: 'Frame' object has no attribute 'add'
+2026-02-12 11:58:52 | ERROR    | database             | Error loading tab Recordatorios: 'ModernInventarioApp' object has no attribute 'inventory_tab'
+2026-02-12 11:58:52 | ERROR    | database             | Error loading tab Analíticas: 'Frame' object has no attribute 'add'
+2026-02-12 11:58:53 | ERROR    | database             | Error loading tab Cuadre Masivo: CuadreContableMasivo.__init__() takes 2 positional arguments but 3 were given
+2026-02-12 11:58:55 | ERROR    | database             | Error loading tab Analíticas: 'Frame' object has no attribute 'add'
+2026-02-12 11:58:58 | ERROR    | database             | Error loading tab Cuadre Masivo: CuadreContableMasivo.__init__() takes 2 positional arguments but 3 were given
+2026-02-12 11:58:58 | ERROR    | database             | Error loading tab Inventario: 'Frame' object has no attribute 'add'
+2026-02-12 11:58:58 | ERROR    | database             | Error loading tab Recordatorios: 'ModernInventarioApp' object has no attribute 'inventory_tab'
+2026-02-12 11:58:59 | ERROR    | database             | Error loading tab Inventario: 'Frame' object has no attribute 'add'
+2026-02-12 11:58:59 | ERROR    | database             | Error loading tab Dashboard: 'Frame' object has no attribute 'add'
+2026-02-12 12:25:22 | ERROR    | database             | Error loading tab Dashboard: 'NotebookAdapter' object has no attribute 'tk'
+2026-02-12 12:25:22 | ERROR    | database             | Error loading tab Dashboard: 'NotebookAdapter' object has no attribute 'tk'
+2026-02-12 12:27:15 | ERROR    | database             | Error loading tab Dashboard: 'NotebookAdapter' object has no attribute 'tk'
+2026-02-12 12:27:15 | ERROR    | database             | Error loading tab Dashboard: 'NotebookAdapter' object has no attribute 'tk'
+2026-02-12 12:32:35 | ERROR    | database             | Error loading tab Dashboard: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:32:35 | ERROR    | database             | Error loading tab Dashboard: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:32:44 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:32:56 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:33:00 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:33:04 | ERROR    | database             | Error loading tab Dashboard: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:33:05 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:33:05 | ERROR    | database             | Error loading tab Dashboard: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:33:06 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:33:07 | ERROR    | database             | Error loading tab Dashboard: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:33:09 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:33:09 | ERROR    | database             | Error loading tab Dashboard: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:33:12 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:33:19 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:33:19 | ERROR    | database             | Error loading tab Recordatorios: 'ModernInventarioApp' object has no attribute 'inventory_tab'
+2026-02-12 12:33:21 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:33:21 | ERROR    | database             | Error loading tab Recordatorios: 'ModernInventarioApp' object has no attribute 'inventory_tab'
+2026-02-12 12:33:52 | ERROR    | database             | Error loading tab Analíticas: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:34:02 | ERROR    | database             | Error loading tab Analíticas: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:34:03 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:37:08 | ERROR    | database             | Error loading tab Dashboard: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:37:08 | ERROR    | database             | Error loading tab Dashboard: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:37:33 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:37:36 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:37:46 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:37:46 | ERROR    | database             | Error loading tab Recordatorios: 'ModernInventarioApp' object has no attribute 'inventory_tab'
+2026-02-12 12:37:50 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:37:50 | ERROR    | database             | Error loading tab Recordatorios: 'ModernInventarioApp' object has no attribute 'inventory_tab'
+2026-02-12 12:37:52 | ERROR    | database             | Error loading tab Analíticas: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:37:55 | ERROR    | database             | Error loading tab Movimientos: 'Frame' object has no attribute 'add'
+2026-02-12 12:46:56 | ERROR    | database             | Error loading tab Dashboard: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:46:56 | ERROR    | database             | Error loading tab Dashboard: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:47:31 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:47:44 | ERROR    | database             | Error loading tab Movimientos: 'Frame' object has no attribute 'add'
+2026-02-12 13:07:41 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\core.py", line 1502, in abrir_gestion_codigos
+    messagebox.showinfo("Gestión de Códigos",
+  File "C:\Python312\Lib\tkinter\messagebox.py", line 88, in showinfo
+    return _show(title, message, INFO, OK, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\messagebox.py", line 76, in _show
+    res = Message(**options).show()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\commondialog.py", line 45, in show
+    s = master.tk.call(self.command, *master._options(self.options))
+        ^^^^^^^^^
+AttributeError: 'InventoryTab' object has no attribute 'tk'
+
+2026-02-12 13:09:18 | ERROR    | database             | Error executing inventory action abrir_ventana_salida_movil_scanner: 'ModernInventarioApp' object has no attribute 'root'
+2026-02-12 15:39:21 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\core.py", line 1502, in abrir_gestion_codigos
+    messagebox.showinfo("Gestión de Códigos",
+  File "C:\Python312\Lib\tkinter\messagebox.py", line 88, in showinfo
+    return _show(title, message, INFO, OK, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\messagebox.py", line 76, in _show
+    res = Message(**options).show()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\commondialog.py", line 45, in show
+    s = master.tk.call(self.command, *master._options(self.options))
+        ^^^^^^^^^
+AttributeError: 'InventoryTab' object has no attribute 'tk'
+
+2026-02-12 15:41:22 | ERROR    | database             | Error executing inventory action abrir_ventana_salida_movil_scanner: 'ModernInventarioApp' object has no attribute 'root'
+2026-02-12 15:52:30 | ERROR    | database             | Error executing inventory action abrir_ventana_salida_movil_scanner: 'ModernInventarioApp' object has no attribute 'root'
+2026-02-12 16:12:26 | ERROR    | gui.inventory.core   | Error opening scanner window: 'ModernInventarioApp' object has no attribute 'root'
+2026-02-12 16:24:30 | ERROR    | gui.inventory.core   | Error opening scanner window: 'ModernInventarioApp' object has no attribute 'root'
+2026-02-12 16:34:27 | ERROR    | gui.inventory.core   | Error opening scanner window: type object 'Styles' has no attribute 'BACKGROUND_COLOR'
+2026-02-12 16:34:31 | ERROR    | gui.inventory.core   | Error opening scanner window: type object 'Styles' has no attribute 'BACKGROUND_COLOR'
+2026-02-12 16:36:23 | ERROR    | gui.inventory.core   | Error opening scanner window: type object 'Styles' has no attribute 'BACKGROUND_COLOR'
+2026-02-12 16:36:41 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:36:41 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-12 16:36:41 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-12 16:36:41 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:36:58 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:36:58 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-12 16:36:58 | ERROR    | database             |    Params: ("1'4'61", "1'4'61")
+2026-02-12 16:36:58 | ERROR    | database             | Error buscando producto por código de barra 1'4'61: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:37:04 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:37:04 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-12 16:37:04 | ERROR    | database             |    Params: ("10'1'04", "10'1'04")
+2026-02-12 16:37:04 | ERROR    | database             | Error buscando producto por código de barra 10'1'04: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:37:09 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:37:09 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-12 16:37:09 | ERROR    | database             |    Params: ("7'1'171", "7'1'171")
+2026-02-12 16:37:09 | ERROR    | database             | Error buscando producto por código de barra 7'1'171: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:37:18 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:37:18 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-12 16:37:18 | ERROR    | database             |    Params: ("1'2'16", "1'2'16")
+2026-02-12 16:37:18 | ERROR    | database             | Error buscando producto por código de barra 1'2'16: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:45:08 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\core.py", line 1535, in abrir_gestion_codigos
+    messagebox.showinfo("Gestión de Códigos",
+  File "C:\Python312\Lib\tkinter\messagebox.py", line 88, in showinfo
+    return _show(title, message, INFO, OK, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\messagebox.py", line 76, in _show
+    res = Message(**options).show()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\commondialog.py", line 45, in show
+    s = master.tk.call(self.command, *master._options(self.options))
+        ^^^^^^^^^
+AttributeError: 'InventoryTab' object has no attribute 'tk'
+
+2026-02-12 16:45:52 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:45:52 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-12 16:45:52 | ERROR    | database             |    Params: ("10'1'04", "10'1'04")
+2026-02-12 16:45:52 | ERROR    | database             | Error buscando producto por código de barra 10'1'04: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:46:02 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:46:02 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-12 16:46:02 | ERROR    | database             |    Params: ("7'1'171", "7'1'171")
+2026-02-12 16:46:02 | ERROR    | database             | Error buscando producto por código de barra 7'1'171: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:46:15 | ERROR    | gui.inventory.core   | Error opening scanner window: type object 'Styles' has no attribute 'BACKGROUND_COLOR'
+2026-02-13 08:36:10 | ERROR    | gui.inventory.core   | Error opening scanner window: unknown option "-weight"
+2026-02-13 09:09:09 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:09:09 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:09:09 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-13 09:09:09 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:14:11 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:14:11 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:14:11 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-13 09:14:11 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:14:39 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:14:39 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:14:39 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-13 09:14:39 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:14:46 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:14:46 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:14:46 | ERROR    | database             |    Params: ("1'4'61", "1'4'61")
+2026-02-13 09:14:46 | ERROR    | database             | Error buscando producto por código de barra 1'4'61: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:14:49 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:14:49 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:14:49 | ERROR    | database             |    Params: ("10'1'04", "10'1'04")
+2026-02-13 09:14:49 | ERROR    | database             | Error buscando producto por código de barra 10'1'04: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:14:53 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:14:53 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:14:53 | ERROR    | database             |    Params: ("7'1'171", "7'1'171")
+2026-02-13 09:14:53 | ERROR    | database             | Error buscando producto por código de barra 7'1'171: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:26:26 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:26:26 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:26:26 | ERROR    | database             |    Params: ("7'1'171", "7'1'171")
+2026-02-13 09:26:26 | ERROR    | database             | Error buscando producto por código de barra 7'1'171: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:26:33 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:26:33 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:26:33 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-13 09:26:33 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:26:40 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:26:40 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:26:40 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-13 09:26:40 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:30:09 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:30:09 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:30:09 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-13 09:30:09 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:34:08 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:34:08 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:34:08 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-13 09:34:08 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:43:08 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:43:08 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:43:08 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-13 09:43:08 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:47:13 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:47:13 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:47:13 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-13 09:47:13 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:59:59 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:59:59 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:59:59 | ERROR    | database             |    Params: ("7'1'171", "7'1'171")
+2026-02-13 09:59:59 | ERROR    | database             | Error buscando producto por código de barra 7'1'171: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 10:00:09 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 10:00:09 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 10:00:09 | ERROR    | database             |    Params: ("10'1'04", "10'1'04")
+2026-02-13 10:00:09 | ERROR    | database             | Error buscando producto por código de barra 10'1'04: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 10:05:52 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 10:05:52 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 10:05:52 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-13 10:05:52 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 11:38:45 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 11:38:45 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 11:38:45 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-13 11:38:45 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 11:52:02 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 11:52:02 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) IN (%s, %s) 
+               OR UPPER(TRIM(p.sku)) IN (%s, %s)
+            LIMIT 1
+        
+2026-02-13 11:52:02 | ERROR    | database             |    Params: ('4-4-644', "4'4'644", '4-4-644', "4'4'644")
+2026-02-13 11:52:02 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 12:22:39 | ERROR    | database             | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'fecha_registro' in 'field list'
+2026-02-13 12:22:39 | ERROR    | database             |    Query: 
+                            INSERT INTO series_registradas 
+                            (sku, serial_number, estado, ubicacion, fecha_registro)
+                            VALUES (%s, %s, 'DISPONIBLE', 'BODEGA', %s)
+                        
+2026-02-13 12:22:39 | ERROR    | database             |    Params: ('4-4-644', '485754432B33CCAF', '2026-02-13')
+2026-02-13 12:22:40 | ERROR    | database             | Error registrando serial 485754432B33CCAF: 1054 (42S22): Unknown column 'fecha_registro' in 'field list'
+2026-02-13 14:09:24 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\abasto_scanner.py", line 108, in _on_mousewheel
+    canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+  File "C:\Python312\Lib\tkinter\__init__.py", line 2014, in yview_scroll
+    self.tk.call(self._w, 'yview', 'scroll', number, what)
+_tkinter.TclError: invalid command name ".!toplevel.!notebook.!frame.!frame.!frame2.!canvas"
+
+2026-02-13 14:09:28 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\abasto_scanner.py", line 108, in _on_mousewheel
+    canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+  File "C:\Python312\Lib\tkinter\__init__.py", line 2014, in yview_scroll
+    self.tk.call(self._w, 'yview', 'scroll', number, what)
+_tkinter.TclError: invalid command name ".!toplevel.!notebook.!frame.!frame.!frame2.!canvas"
+
+2026-02-13 14:09:31 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\abasto_scanner.py", line 108, in _on_mousewheel
+    canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+  File "C:\Python312\Lib\tkinter\__init__.py", line 2014, in yview_scroll
+    self.tk.call(self._w, 'yview', 'scroll', number, what)
+_tkinter.TclError: invalid command name ".!toplevel.!notebook.!frame.!frame.!frame2.!canvas"
+
+2026-02-13 14:13:38 | ERROR    | database             | ❌ Error SQL ejecución: Not enough parameters for the SQL statement
+2026-02-13 14:13:38 | ERROR    | database             |    Query: 
+            SELECT 
+                sr.sku,
+                GROUP_CONCAT(sr.serial_number ORDER BY sr.serial_number SEPARATOR '|') as series
+            FROM series_registradas sr
+            WHERE sr.sku IN (
+                SELECT sku_producto 
+                FROM movimientos 
+                WHERE tipo_movimiento = 'ABASTO' 
+                AND fecha_evento = %s 
+                AND COALESCE(documento_referencia, 'Sin Referencia') = %s
+            )
+             AND (DATE(sr.fecha_ingreso) = %s OR sr.fecha_ingreso BETWEEN DATE(%s, '-1 day') AND DATE(%s, '+1 day'))
+            GROUP BY sr.sku
+        
+2026-02-13 14:13:38 | ERROR    | database             |    Params: ('2026-02-13', 'Sin Referencia', '2026-02-13')
+2026-02-13 14:13:38 | ERROR    | gui.abasto           | Error obteniendo series: Not enough parameters for the SQL statement
+2026-02-14 09:33:23 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'mysql.productos' doesn't exist
+2026-02-14 09:33:23 | ERROR    | database             |    Query: SELECT COUNT(*) FROM productos WHERE ubicacion = 'BODEGA'
+2026-02-14 09:33:23 | ERROR    | database             |    Params: None
+2026-02-14 09:40:41 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'mysql.productos' doesn't exist
+2026-02-14 09:40:41 | ERROR    | database             |    Query: SELECT COUNT(*) FROM productos WHERE ubicacion = 'BODEGA'
+2026-02-14 09:40:41 | ERROR    | database             |    Params: None
+2026-02-14 09:44:57 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'mysql.productos' doesn't exist
+2026-02-14 09:44:57 | ERROR    | database             |    Query: SELECT COUNT(*) FROM productos WHERE sku = %s AND ubicacion = 'BODEGA'
+2026-02-14 09:44:57 | ERROR    | database             |    Params: ('1-2-16',)
+2026-02-14 09:48:37 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'mysql.productos' doesn't exist
+2026-02-14 09:48:37 | ERROR    | database             |    Query: SELECT COUNT(*) FROM productos WHERE sku = %s AND ubicacion = 'BODEGA'
+2026-02-14 09:48:37 | ERROR    | database             |    Params: ('1-2-16',)
+2026-02-14 10:29:42 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'mysql.productos' doesn't exist
+2026-02-14 10:29:42 | ERROR    | database             |    Query: SELECT COUNT(*) FROM productos WHERE sku = %s AND ubicacion = 'BODEGA'
+2026-02-14 10:29:42 | ERROR    | database             |    Params: ('1-2-16',)
+2026-02-14 10:33:35 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'mysql.productos' doesn't exist
+2026-02-14 10:33:35 | ERROR    | database             |    Query: SELECT COUNT(*) FROM productos WHERE sku = %s AND ubicacion = 'BODEGA'
+2026-02-14 10:33:35 | ERROR    | database             |    Params: ('1-2-16',)
+2026-02-14 10:51:06 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'mysql.productos' doesn't exist
+2026-02-14 10:51:06 | ERROR    | database             |    Query: SELECT COUNT(*) FROM productos WHERE ubicacion = 'BODEGA'
+2026-02-14 10:51:06 | ERROR    | database             |    Params: None
+2026-02-14 11:34:55 | ERROR    | utils.db_connector   | Error creando pool MySQL para SQLITE: 1049 (42000): Unknown database 'SQLITE'
+2026-02-14 11:34:55 | ERROR    | utils.db_connector   | Error conectando a MySQL (SQLITE): 1049 (42000): Unknown database 'SQLITE'
+2026-02-14 13:03:15 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'mysql.productos' doesn't exist
+2026-02-14 13:03:15 | ERROR    | database             |    Query: SELECT COUNT(*) FROM productos WHERE ubicacion = 'BODEGA'
+2026-02-14 13:03:15 | ERROR    | database             |    Params: None
+2026-02-14 13:39:54 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 34, in <lambda>
+    ventana.after(0, lambda: _finalizar_carga(ventana, frame_carga, callback_exito, datos))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 46, in _finalizar_carga
+    callback_exito(datos)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\abasto_scanner.py", line 399, in on_complete
+    self.limpiar_carrito()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\abasto_scanner.py", line 356, in limpiar_carrito
+    for item in self.tabla_carrito.get_children():
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\ttk.py", line 1198, in get_children
+    self.tk.call(self._w, "children", item or '') or ())
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: invalid command name ".!toplevel3.!notebook.!frame.!frame.!frame2.!canvas.!frame.!labelframe.!treeview"
+
+2026-02-14 15:43:44 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'mysql.moviles' doesn't exist
+2026-02-14 15:43:44 | ERROR    | database             |    Query: SELECT nombre, conductor, ayudante FROM moviles
+2026-02-14 15:43:44 | ERROR    | database             |    Params: None

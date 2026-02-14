@@ -1,0 +1,323 @@
+2026-02-04 12:06:34.074443 [DEBUG] Bootstrap Start: Admin
+2026-02-04 12:06:34.077254 [DEBUG] Importing GUI modules...
+2026-02-04 12:06:39.162664 [DEBUG] FATAL BOOTSTRAP ERROR: expected an indented block after 'if' statement on line 401 (abasto.py, line 403)
+2026-02-04 12:06:39.169426 [DEBUG] Traceback (most recent call last):
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 641, in bootstrap_app
+    from gui.inventory import InventoryTab
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory.py", line 30, in <module>
+    from .abasto import AbastoWindow
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\abasto.py", line 403
+    if errors:
+    ^^
+IndentationError: expected an indented block after 'if' statement on line 401
+
+2026-02-04 12:24:43.076956 [DEBUG] Bootstrap Start: Admin
+2026-02-04 12:24:43.081596 [DEBUG] Importing GUI modules...
+2026-02-04 12:24:47.181967 [DEBUG] GUI Modules Imported
+2026-02-04 12:24:47.662950 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-04 12:24:50.869843 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-04 12:37:39.550264 [DEBUG] Bootstrap Start: Admin
+2026-02-04 12:37:39.554260 [DEBUG] Importing GUI modules...
+2026-02-04 12:37:43.237377 [DEBUG] GUI Modules Imported
+2026-02-04 12:37:43.654725 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-04 12:37:46.817806 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-04 12:52:14.370688 [DEBUG] Bootstrap Start: Admin
+2026-02-04 12:52:14.376208 [DEBUG] Importing GUI modules...
+2026-02-04 12:52:18.022782 [DEBUG] GUI Modules Imported
+2026-02-04 12:52:18.406830 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-04 12:52:21.817893 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-04 13:01:41.175102 [DEBUG] Bootstrap Start: Admin
+2026-02-04 13:01:41.179500 [DEBUG] Importing GUI modules...
+2026-02-04 13:01:53.802703 [DEBUG] GUI Modules Imported
+2026-02-04 13:01:55.370168 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-04 13:01:58.927137 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-04 13:06:32.021861 [DEBUG] Bootstrap Start: Admin
+2026-02-04 13:06:32.027936 [DEBUG] Importing GUI modules...
+2026-02-04 13:06:36.027476 [DEBUG] GUI Modules Imported
+2026-02-04 13:06:36.427156 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-04 13:06:40.376449 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-04 13:13:42.255954 [DEBUG] Bootstrap Start: Admin
+2026-02-04 13:13:42.261465 [DEBUG] Importing GUI modules...
+2026-02-04 13:13:45.977269 [DEBUG] GUI Modules Imported
+2026-02-04 13:13:46.375537 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-04 13:13:50.197878 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-04 13:16:58.868078 [DEBUG] Bootstrap Start: Admin
+2026-02-04 13:16:58.874562 [DEBUG] Importing GUI modules...
+2026-02-04 13:17:05.126926 [DEBUG] GUI Modules Imported
+2026-02-04 13:17:05.876957 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-04 13:17:10.475955 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-04 13:22:55.809923 [DEBUG] Bootstrap Start: Admin
+2026-02-04 13:22:55.815383 [DEBUG] Importing GUI modules...
+2026-02-04 13:22:59.954516 [DEBUG] GUI Modules Imported
+2026-02-04 13:23:00.384341 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-04 13:23:03.820858 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-04 13:33:36.083203 [DEBUG] Bootstrap Start: Admin
+2026-02-04 13:33:36.091416 [DEBUG] Importing GUI modules...
+2026-02-04 13:33:39.821772 [DEBUG] GUI Modules Imported
+2026-02-04 13:33:40.255616 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-04 13:33:44.185749 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-04 13:52:27.410168 [DEBUG] Bootstrap Start: Admin
+2026-02-04 13:52:27.418368 [DEBUG] Importing GUI modules...
+2026-02-04 13:52:33.242850 [DEBUG] GUI Modules Imported
+2026-02-04 13:52:33.701631 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-04 13:52:38.028118 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-04 14:02:08.012478 [DEBUG] Bootstrap Start: Admin
+2026-02-04 14:02:08.018053 [DEBUG] Importing GUI modules...
+2026-02-04 14:02:12.118815 [DEBUG] GUI Modules Imported
+2026-02-04 14:02:12.560585 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-04 14:02:16.168417 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-04 14:03:36.088014 [DEBUG] Bootstrap Start: Admin
+2026-02-04 14:03:36.093805 [DEBUG] Importing GUI modules...
+2026-02-04 14:03:40.432822 [DEBUG] GUI Modules Imported
+2026-02-04 14:03:40.875294 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-04 14:03:44.935852 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-04 14:40:58.144690 [DEBUG] Bootstrap Start: Admin
+2026-02-04 14:40:58.149915 [DEBUG] Importing GUI modules...
+2026-02-04 14:41:02.817579 [DEBUG] GUI Modules Imported
+2026-02-04 14:41:03.278007 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-04 14:41:07.764229 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-04 14:57:38.756900 [DEBUG] Bootstrap Start: Admin
+2026-02-04 14:57:39.027355 [DEBUG] Importing GUI modules...
+2026-02-04 14:57:43.010701 [DEBUG] GUI Modules Imported
+2026-02-04 14:57:43.400079 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-04 14:57:46.325205 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-04 16:01:29.179024 [DEBUG] Bootstrap Start: Admin
+2026-02-04 16:01:29.184174 [DEBUG] Importing GUI modules...
+2026-02-04 16:01:39.175245 [DEBUG] GUI Modules Imported
+2026-02-04 16:01:39.594803 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-04 16:01:43.030085 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-04 16:16:24.954378 [DEBUG] Bootstrap Start: Admin
+2026-02-04 16:16:24.959522 [DEBUG] Importing GUI modules...
+2026-02-04 16:16:29.225673 [DEBUG] GUI Modules Imported
+2026-02-04 16:16:29.860299 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-04 16:16:33.373964 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-05 07:56:56.136795 [DEBUG] Bootstrap Start: Admin
+2026-02-05 07:56:56.141582 [DEBUG] Importing GUI modules...
+2026-02-05 07:57:07.587645 [DEBUG] GUI Modules Imported
+2026-02-05 07:57:08.196264 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-05 07:57:11.514559 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-05 08:18:10.583216 [DEBUG] Bootstrap Start: Admin
+2026-02-05 08:18:10.590959 [DEBUG] Importing GUI modules...
+2026-02-05 08:18:14.343094 [DEBUG] GUI Modules Imported
+2026-02-05 08:18:14.741770 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-05 08:18:17.612643 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-05 10:54:33.548604 [DEBUG] Bootstrap Start: Admin
+2026-02-05 10:54:33.554743 [DEBUG] Importing GUI modules...
+2026-02-05 10:54:36.977469 [DEBUG] GUI Modules Imported
+2026-02-05 10:54:37.365559 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-05 10:54:40.125324 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-05 11:52:54.411389 [DEBUG] Bootstrap Start: Admin
+2026-02-05 11:52:54.417934 [DEBUG] Importing GUI modules...
+2026-02-05 11:52:58.232225 [DEBUG] GUI Modules Imported
+2026-02-05 11:52:58.774564 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-05 11:53:02.836854 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-05 12:29:36.495368 [DEBUG] Bootstrap Start: Admin
+2026-02-05 12:29:36.502054 [DEBUG] Importing GUI modules...
+2026-02-05 12:29:40.468018 [DEBUG] GUI Modules Imported
+2026-02-05 12:29:40.970771 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-05 12:29:45.773327 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-05 12:46:04.207211 [DEBUG] Bootstrap Start: Admin
+2026-02-05 12:46:04.211151 [DEBUG] Importing GUI modules...
+2026-02-05 12:46:07.610988 [DEBUG] GUI Modules Imported
+2026-02-05 12:46:07.977556 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-05 12:46:10.733192 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-05 13:02:47.898546 [DEBUG] Bootstrap Start: Admin
+2026-02-05 13:02:47.904836 [DEBUG] Importing GUI modules...
+2026-02-05 13:02:51.415358 [DEBUG] GUI Modules Imported
+2026-02-05 13:02:51.776393 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-05 13:02:54.738151 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-05 13:25:47.502681 [DEBUG] Bootstrap Start: Admin
+2026-02-05 13:25:47.509540 [DEBUG] Importing GUI modules...
+2026-02-05 13:25:50.904296 [DEBUG] GUI Modules Imported
+2026-02-05 13:25:51.261782 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-05 13:25:54.000283 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-05 14:13:56.253818 [DEBUG] Bootstrap Start: Admin
+2026-02-05 14:13:56.328148 [DEBUG] Importing GUI modules...
+2026-02-05 14:13:58.454862 [DEBUG] FATAL BOOTSTRAP ERROR: expected an indented block after 'else' statement on line 2069 (inventory.py, line 2071)
+2026-02-05 14:13:58.461088 [DEBUG] Traceback (most recent call last):
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 641, in bootstrap_app
+    from gui.inventory import InventoryTab
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory.py", line 2071
+    for sku, entry in self.salida_entries.items():
+    ^^^
+IndentationError: expected an indented block after 'else' statement on line 2069
+
+2026-02-05 14:15:29.506133 [DEBUG] Bootstrap Start: Admin
+2026-02-05 14:15:29.510558 [DEBUG] Importing GUI modules...
+2026-02-05 14:15:31.052172 [DEBUG] FATAL BOOTSTRAP ERROR: expected an indented block after 'else' statement on line 2069 (inventory.py, line 2071)
+2026-02-05 14:15:31.057329 [DEBUG] Traceback (most recent call last):
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 641, in bootstrap_app
+    from gui.inventory import InventoryTab
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory.py", line 2071
+    for sku, entry in self.salida_entries.items():
+    ^^^
+IndentationError: expected an indented block after 'else' statement on line 2069
+
+2026-02-05 15:39:42.554712 [DEBUG] Bootstrap Start: Admin
+2026-02-05 15:39:42.558229 [DEBUG] Importing GUI modules...
+2026-02-05 15:39:46.242356 [DEBUG] GUI Modules Imported
+2026-02-05 15:39:46.679678 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-05 15:39:49.787021 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-06 08:12:06.373483 [DEBUG] Bootstrap Start: Admin
+2026-02-06 08:12:06.380617 [DEBUG] Importing GUI modules...
+2026-02-06 08:12:22.839109 [DEBUG] GUI Modules Imported
+2026-02-06 08:12:23.924568 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-06 08:12:29.692314 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-06 08:18:23.723475 [DEBUG] Bootstrap Start: Admin
+2026-02-06 08:18:23.729389 [DEBUG] Importing GUI modules...
+2026-02-06 08:18:29.043077 [DEBUG] GUI Modules Imported
+2026-02-06 08:18:29.523387 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-06 08:18:35.130416 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-06 08:24:09.910254 [DEBUG] Bootstrap Start: Admin
+2026-02-06 08:24:09.918837 [DEBUG] Importing GUI modules...
+2026-02-06 08:24:14.920012 [DEBUG] GUI Modules Imported
+2026-02-06 08:24:15.465077 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-06 08:24:21.164867 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-06 08:26:01.335781 [DEBUG] Bootstrap Start: Admin
+2026-02-06 08:26:01.350657 [DEBUG] Importing GUI modules...
+2026-02-06 08:26:19.117426 [DEBUG] GUI Modules Imported
+2026-02-06 08:26:19.755853 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-06 08:26:23.406353 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-06 08:29:38.535455 [DEBUG] Bootstrap Start: Admin
+2026-02-06 08:29:38.544170 [DEBUG] Importing GUI modules...
+2026-02-06 08:29:45.223072 [DEBUG] GUI Modules Imported
+2026-02-06 08:29:45.730733 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-06 08:29:51.899247 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-06 08:59:06.155502 [DEBUG] Bootstrap Start: Admin
+2026-02-06 08:59:06.159043 [DEBUG] Importing GUI modules...
+2026-02-06 08:59:12.894104 [DEBUG] GUI Modules Imported
+2026-02-06 08:59:13.519467 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-06 08:59:17.985984 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-06 09:11:12.946361 [DEBUG] Bootstrap Start: Admin
+2026-02-06 09:11:12.953390 [DEBUG] Importing GUI modules...
+2026-02-06 09:11:30.247099 [DEBUG] GUI Modules Imported
+2026-02-06 09:11:32.049006 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-06 09:11:36.635217 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-06 09:38:09.977403 [DEBUG] Bootstrap Start: Admin
+2026-02-06 09:38:09.982734 [DEBUG] Importing GUI modules...
+2026-02-06 09:38:15.705742 [DEBUG] GUI Modules Imported
+2026-02-06 09:38:16.141293 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-06 09:38:19.279990 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-06 09:51:49.979952 [DEBUG] Bootstrap Start: Admin
+2026-02-06 09:51:49.985641 [DEBUG] Importing GUI modules...
+2026-02-06 09:51:57.180165 [DEBUG] GUI Modules Imported
+2026-02-06 09:51:58.106421 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-06 09:52:07.664126 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-06 10:58:00.649281 [DEBUG] Bootstrap Start: Admin
+2026-02-06 10:58:00.655414 [DEBUG] Importing GUI modules...
+2026-02-06 10:58:04.605368 [DEBUG] GUI Modules Imported
+2026-02-06 10:58:04.992485 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-06 10:58:09.551169 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-06 11:12:58.445168 [DEBUG] Bootstrap Start: Admin
+2026-02-06 11:12:58.449818 [DEBUG] Importing GUI modules...
+2026-02-06 11:13:01.832709 [DEBUG] GUI Modules Imported
+2026-02-06 11:13:02.206891 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-06 11:13:05.012816 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-06 13:21:58.738381 [DEBUG] Bootstrap Start: Admin
+2026-02-06 13:21:58.742690 [DEBUG] Importing GUI modules...
+2026-02-06 13:22:04.571163 [DEBUG] GUI Modules Imported
+2026-02-06 13:22:05.243902 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-06 13:22:09.403081 [DEBUG] App Instantiated. Deiconifying root.
+2026-02-06 16:04:51.835438 [DEBUG] Bootstrap Start: Admin
+2026-02-06 16:04:51.841587 [DEBUG] Importing GUI modules...
+2026-02-06 16:04:59.503456 [DEBUG] GUI Modules Imported
+2026-02-06 16:05:00.367751 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-06 16:05:03.876606 [DEBUG] FATAL BOOTSTRAP ERROR: name 'ProductsTab' is not defined
+2026-02-06 16:05:03.889479 [DEBUG] Traceback (most recent call last):
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 668, in bootstrap_app
+    app = ModernInventarioApp(root, usuario)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 84, in __init__
+    self.create_modern_gui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 373, in create_modern_gui
+    self.products_tab = ProductsTab(self.main_notebook, self)
+                        ^^^^^^^^^^^
+NameError: name 'ProductsTab' is not defined
+
+2026-02-06 16:05:38.814034 [DEBUG] Bootstrap Start: Admin
+2026-02-06 16:05:38.818067 [DEBUG] Importing GUI modules...
+2026-02-06 16:05:42.773173 [DEBUG] GUI Modules Imported
+2026-02-06 16:05:43.225968 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-06 16:05:45.460113 [DEBUG] FATAL BOOTSTRAP ERROR: name 'ProductsTab' is not defined
+2026-02-06 16:05:45.475558 [DEBUG] Traceback (most recent call last):
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 668, in bootstrap_app
+    app = ModernInventarioApp(root, usuario)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 84, in __init__
+    self.create_modern_gui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 373, in create_modern_gui
+    self.products_tab = ProductsTab(self.main_notebook, self)
+                        ^^^^^^^^^^^
+NameError: name 'ProductsTab' is not defined
+
+2026-02-06 16:07:22.886161 [DEBUG] Bootstrap Start: Admin
+2026-02-06 16:07:22.893077 [DEBUG] Importing GUI modules...
+2026-02-06 16:07:27.077666 [DEBUG] GUI Modules Imported
+2026-02-06 16:07:27.520859 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-06 16:07:29.503257 [DEBUG] FATAL BOOTSTRAP ERROR: name 'ProductsTab' is not defined
+2026-02-06 16:07:29.516054 [DEBUG] Traceback (most recent call last):
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 668, in bootstrap_app
+    app = ModernInventarioApp(root, usuario)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 84, in __init__
+    self.create_modern_gui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 373, in create_modern_gui
+    self.products_tab = ProductsTab(self.main_notebook, self)
+                        ^^^^^^^^^^^
+NameError: name 'ProductsTab' is not defined
+
+2026-02-06 16:09:21.261063 [DEBUG] Bootstrap Start: Admin
+2026-02-06 16:09:21.266064 [DEBUG] Importing GUI modules...
+2026-02-06 16:09:51.062471 [DEBUG] Bootstrap Start: Admin
+2026-02-06 16:09:51.066580 [DEBUG] Importing GUI modules...
+2026-02-06 16:09:56.334563 [DEBUG] GUI Modules Imported
+2026-02-06 16:09:56.795355 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-06 16:09:59.462921 [DEBUG] FATAL BOOTSTRAP ERROR: name 'ProductsTab' is not defined
+2026-02-06 16:09:59.488240 [DEBUG] Traceback (most recent call last):
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 668, in bootstrap_app
+    app = ModernInventarioApp(root, usuario)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 84, in __init__
+    self.create_modern_gui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 373, in create_modern_gui
+    self.products_tab = ProductsTab(self.main_notebook, self)
+                        ^^^^^^^^^^^
+NameError: name 'ProductsTab' is not defined
+
+2026-02-06 16:11:33.455528 [DEBUG] Bootstrap Start: Admin
+2026-02-06 16:11:33.458915 [DEBUG] Importing GUI modules...
+2026-02-06 16:11:38.278054 [DEBUG] GUI Modules Imported
+2026-02-06 16:11:38.713644 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-06 16:11:40.906726 [DEBUG] FATAL BOOTSTRAP ERROR: 'NoneType' object is not callable
+2026-02-06 16:11:40.912539 [DEBUG] Traceback (most recent call last):
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 679, in bootstrap_app
+    app = ModernInventarioApp(root, usuario)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 95, in __init__
+    self.create_modern_gui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 384, in create_modern_gui
+    self.products_tab = ProductsTab(self.main_notebook, self)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'NoneType' object is not callable
+
+2026-02-06 16:14:02.036455 [DEBUG] Bootstrap Start: Admin
+2026-02-06 16:14:02.040029 [DEBUG] Importing GUI modules...
+2026-02-06 16:14:06.695395 [DEBUG] GUI Modules Imported
+2026-02-06 16:14:07.189685 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-06 16:14:10.997433 [DEBUG] FATAL BOOTSTRAP ERROR: 'NoneType' object is not callable
+2026-02-06 16:14:11.010188 [DEBUG] Traceback (most recent call last):
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 682, in bootstrap_app
+    app = ModernInventarioApp(root, usuario)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 95, in __init__
+    self.create_modern_gui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 384, in create_modern_gui
+    self.products_tab = ProductsTab(self.main_notebook, self)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'NoneType' object is not callable
+
+2026-02-06 16:16:21.872640 [DEBUG] Bootstrap Start: Admin
+2026-02-06 16:16:21.876497 [DEBUG] Importing GUI modules...
+2026-02-06 16:16:25.965480 [DEBUG] GUI Modules Imported
+2026-02-06 16:16:26.387229 [DEBUG] Instantiating ModernInventarioApp...
+2026-02-06 16:16:30.859891 [DEBUG] App Instantiated. Deiconifying root.

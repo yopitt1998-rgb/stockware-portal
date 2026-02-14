@@ -1,0 +1,2042 @@
+2026-02-10 14:08:00 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-10 14:50:56 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-10 14:51:10 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-10 14:51:19 | INFO     | database             | Bootstrap Start: admin
+2026-02-10 14:51:19 | INFO     | database             | [LOGIN] Sesión iniciada: admin (ADMIN)
+2026-02-10 14:51:35 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-10 14:51:35 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-10 14:51:37 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-02-10 14:51:37 | CRITICAL | database             | FATAL BOOTSTRAP ERROR: Failed getting connection; pool exhausted
+2026-02-10 14:51:37 | CRITICAL | database             | Traceback (most recent call last):
+  File "C:\Users\johni\AppData\Roaming\Python\Python312\site-packages\mysql\connector\pooling.py", line 577, in get_connection
+    cnx = self._cnx_queue.get(block=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\queue.py", line 168, in get
+    raise Empty
+_queue.Empty
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 597, in bootstrap_app
+    app = ModernInventarioApp(root, usuario)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 89, in __init__
+    self.create_modern_gui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 380, in create_modern_gui
+    self.products_tab = ProductsTab(self.main_notebook, self)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\products.py", line 14, in __init__
+    self.cargar_productos()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\products.py", line 75, in cargar_productos
+    conn = get_db_connection()
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\utils\db_connector.py", line 76, in get_db_connection
+    raise e
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\utils\db_connector.py", line 72, in get_db_connection
+    return _mysql_pools[db_name].get_connection()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\johni\AppData\Roaming\Python\Python312\site-packages\mysql\connector\pooling.py", line 579, in get_connection
+    raise PoolError("Failed getting connection; pool exhausted") from err
+mysql.connector.errors.PoolError: Failed getting connection; pool exhausted
+
+2026-02-10 15:31:04 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-10 15:31:36 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-10 15:31:53 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-10 15:31:58 | INFO     | database             | Auto-login iniciado (Login desactivado)
+2026-02-10 15:31:58 | INFO     | database             | Bootstrap Start: Admin
+2026-02-10 15:31:58 | INFO     | database             | [LOGIN] Sesión iniciada: Admin (ADMIN)
+2026-02-10 15:32:04 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-10 15:32:04 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-10 15:32:07 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-02-10 15:32:07 | CRITICAL | database             | FATAL BOOTSTRAP ERROR: Failed getting connection; pool exhausted
+2026-02-10 15:32:07 | CRITICAL | database             | Traceback (most recent call last):
+  File "C:\Users\johni\AppData\Roaming\Python\Python312\site-packages\mysql\connector\pooling.py", line 577, in get_connection
+    cnx = self._cnx_queue.get(block=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\queue.py", line 168, in get
+    raise Empty
+_queue.Empty
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 597, in bootstrap_app
+    app = ModernInventarioApp(root, usuario)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 89, in __init__
+    self.create_modern_gui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 380, in create_modern_gui
+    self.products_tab = ProductsTab(self.main_notebook, self)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\products.py", line 14, in __init__
+    self.cargar_productos()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\products.py", line 75, in cargar_productos
+    conn = get_db_connection()
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\utils\db_connector.py", line 76, in get_db_connection
+    raise e
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\utils\db_connector.py", line 72, in get_db_connection
+    return _mysql_pools[db_name].get_connection()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\johni\AppData\Roaming\Python\Python312\site-packages\mysql\connector\pooling.py", line 579, in get_connection
+    raise PoolError("Failed getting connection; pool exhausted") from err
+mysql.connector.errors.PoolError: Failed getting connection; pool exhausted
+
+2026-02-10 15:32:07 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-02-10 15:32:07 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: Failed getting connection; pool exhausted
+2026-02-10 15:32:07 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-02-10 15:32:07 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-02-10 16:14:18 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-10 16:14:23 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-10 16:14:35 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-10 16:14:38 | INFO     | database             | Auto-login iniciado (Login desactivado)
+2026-02-10 16:14:38 | INFO     | database             | Bootstrap Start: Admin
+2026-02-10 16:14:38 | INFO     | database             | [LOGIN] Sesión iniciada: Admin (ADMIN)
+2026-02-10 16:14:50 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-10 16:14:50 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-10 16:14:52 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-02-10 16:14:52 | CRITICAL | database             | FATAL BOOTSTRAP ERROR: Failed getting connection; pool exhausted
+2026-02-10 16:14:52 | CRITICAL | database             | Traceback (most recent call last):
+  File "C:\Users\johni\Documents\GestorInventario_MySQL\.venv\Lib\site-packages\mysql\connector\pooling.py", line 654, in get_connection
+    cnx = self._cnx_queue.get(block=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\queue.py", line 168, in get
+    raise Empty
+_queue.Empty
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 597, in bootstrap_app
+    app = ModernInventarioApp(root, usuario)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 89, in __init__
+    self.create_modern_gui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 380, in create_modern_gui
+    self.products_tab = ProductsTab(self.main_notebook, self)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\products.py", line 14, in __init__
+    self.cargar_productos()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\products.py", line 75, in cargar_productos
+    conn = get_db_connection()
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\utils\db_connector.py", line 76, in get_db_connection
+    raise e
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\utils\db_connector.py", line 72, in get_db_connection
+    return _mysql_pools[db_name].get_connection()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\johni\Documents\GestorInventario_MySQL\.venv\Lib\site-packages\mysql\connector\pooling.py", line 656, in get_connection
+    raise PoolError("Failed getting connection; pool exhausted") from err
+mysql.connector.errors.PoolError: Failed getting connection; pool exhausted
+
+2026-02-10 16:17:23 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-10 16:17:27 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-10 16:18:09 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-10 16:18:12 | INFO     | database             | Auto-login iniciado (Login desactivado)
+2026-02-10 16:18:12 | INFO     | database             | Bootstrap Start: Admin
+2026-02-10 16:18:12 | INFO     | database             | [LOGIN] Sesión iniciada: Admin (ADMIN)
+2026-02-10 16:18:16 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-10 16:18:16 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-11 08:45:07 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-11 08:45:37 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-11 08:46:16 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-11 08:46:19 | INFO     | database             | Auto-login iniciado (Login desactivado)
+2026-02-11 08:46:19 | INFO     | database             | Bootstrap Start: Admin
+2026-02-11 08:46:19 | INFO     | database             | [LOGIN] Sesión iniciada: Admin (ADMIN)
+2026-02-11 08:46:34 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-11 08:46:34 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-11 08:55:18 | INFO     | app_inventario       | Inicializando app_inventario...
+2026-02-11 11:34:28 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-11 11:34:36 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-11 11:35:12 | INFO     | database             | 🆕 Columna codigo_barra_maestro añadida a productos
+2026-02-11 11:35:16 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-11 11:35:19 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-11 11:35:19 | INFO     | database             | Bootstrap Start
+2026-02-11 11:35:19 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-11 11:35:34 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-11 11:35:34 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-11 11:40:08 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-11 11:40:17 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-11 11:41:12 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-11 11:41:15 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-11 11:41:16 | INFO     | database             | Bootstrap Start
+2026-02-11 11:41:16 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-11 11:41:19 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-11 11:41:19 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-11 11:54:19 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-11 11:54:25 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-11 11:55:05 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-11 11:55:07 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-11 11:55:08 | INFO     | database             | Bootstrap Start
+2026-02-11 11:55:08 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-11 11:55:13 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-11 11:55:13 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-11 12:18:28 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-11 12:18:36 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-11 12:19:24 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-11 12:19:28 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-11 12:19:28 | INFO     | database             | Bootstrap Start
+2026-02-11 12:19:28 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-11 12:19:32 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-11 12:19:32 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-11 12:21:44 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-11 12:21:54 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-11 12:22:41 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-11 12:22:44 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-11 12:22:45 | INFO     | database             | Bootstrap Start
+2026-02-11 12:22:45 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-11 12:22:49 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-11 12:22:49 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-11 12:23:38 | INFO     | gui.abasto           | 🔍 Iniciando captura de series: 4-4-644, Cantidad: 2
+2026-02-11 12:24:13 | INFO     | gui.abasto           | 🗑️ Serie eliminada: C45E5C9F0C40
+2026-02-11 12:24:15 | INFO     | gui.abasto           | 🗑️ Serie eliminada: 28FBAEC9D226
+2026-02-11 12:25:11 | INFO     | gui.abasto           | 🗑️ Serie eliminada: C45E5C9F0C40
+2026-02-11 12:25:13 | INFO     | gui.abasto           | 🗑️ Serie eliminada: 28FBAEC9D226
+2026-02-11 12:26:02 | INFO     | gui.abasto           | 🗑️ Serie eliminada: C45E5C994759
+2026-02-11 12:26:23 | INFO     | gui.abasto           | 🗑️ Serie eliminada: 2150085243AGQ3029790
+2026-02-11 12:26:33 | INFO     | gui.abasto           | 🗑️ Serie eliminada: C45E5C994759
+2026-02-11 12:26:42 | INFO     | gui.abasto           | 🗑️ Serie eliminada: 2150085243AGQ3029790
+2026-02-11 12:26:51 | INFO     | gui.abasto           | ✅ 2 series capturadas para 4-4-644
+2026-02-11 12:29:12 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-11 12:29:15 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-11 12:30:04 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-11 12:30:06 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-11 12:30:06 | INFO     | database             | Bootstrap Start
+2026-02-11 12:30:06 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-11 12:30:10 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-11 12:30:10 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-11 12:39:41 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-11 12:39:49 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-11 12:40:47 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-11 12:40:50 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-11 12:40:51 | INFO     | database             | Bootstrap Start
+2026-02-11 12:40:51 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-11 12:40:55 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-11 12:40:55 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-11 13:33:39 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-11 13:33:43 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-11 13:34:41 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-11 13:34:45 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-11 13:34:45 | INFO     | database             | Bootstrap Start
+2026-02-11 13:34:45 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-11 13:34:56 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-11 13:34:56 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-11 13:38:22 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-11 13:38:28 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-11 13:39:10 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-11 13:39:12 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-11 13:39:12 | INFO     | database             | Bootstrap Start
+2026-02-11 13:39:12 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-11 13:39:16 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-11 13:39:16 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-11 13:41:42 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-11 13:42:12 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-11 13:42:53 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-11 13:42:56 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-11 13:42:56 | INFO     | database             | Bootstrap Start
+2026-02-11 13:42:56 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-11 13:43:12 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-11 13:43:12 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-11 14:00:21 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-11 14:00:28 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-11 14:01:11 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-11 14:01:14 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-11 14:01:14 | INFO     | database             | Bootstrap Start
+2026-02-11 14:01:14 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-11 14:01:19 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-11 14:01:19 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-11 14:02:38 | INFO     | gui.mobile_output_scanner | 🔍 Código escaneado: '10'1'04'
+2026-02-11 14:02:39 | WARNING  | gui.mobile_output_scanner | ❌ Producto no encontrado para código: '10'1'04'
+2026-02-11 14:02:47 | INFO     | gui.mobile_output_scanner | 🔍 Código escaneado: '7'1'171'
+2026-02-11 14:02:48 | WARNING  | gui.mobile_output_scanner | ❌ Producto no encontrado para código: '7'1'171'
+2026-02-11 14:03:37 | INFO     | gui.mobile_output_scanner | 🔍 Código escaneado: '7'1'171'
+2026-02-11 14:03:37 | INFO     | gui.mobile_output_scanner | 🔍 Código escaneado: '7'1'171'
+2026-02-11 14:03:38 | WARNING  | gui.mobile_output_scanner | ❌ Producto no encontrado para código: '7'1'171'
+2026-02-11 14:03:43 | WARNING  | gui.mobile_output_scanner | ❌ Producto no encontrado para código: '7'1'171'
+2026-02-11 14:14:34 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-11 14:15:08 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-11 14:15:51 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-11 14:15:53 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-11 14:15:54 | INFO     | database             | Bootstrap Start
+2026-02-11 14:15:54 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-11 14:15:59 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-11 14:15:59 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-11 14:21:29 | INFO     | gui.mobile_output_scanner | 🔍 Código escaneado: 'C45E5C994759'
+2026-02-11 14:21:29 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:21:29 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-11 14:21:29 | ERROR    | database             |    Params: ('C45E5C994759', 'C45E5C994759')
+2026-02-11 14:21:29 | ERROR    | database             | Error buscando producto por código de barra C45E5C994759: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:21:30 | WARNING  | gui.mobile_output_scanner | ❌ Producto no encontrado para código: 'C45E5C994759'
+2026-02-11 14:21:34 | INFO     | gui.mobile_output_scanner | 🔍 Código escaneado: '485754432B2E9DAF'
+2026-02-11 14:21:34 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:21:34 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-11 14:21:34 | ERROR    | database             |    Params: ('485754432B2E9DAF', '485754432B2E9DAF')
+2026-02-11 14:21:34 | ERROR    | database             | Error buscando producto por código de barra 485754432B2E9DAF: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:21:35 | WARNING  | gui.mobile_output_scanner | ❌ Producto no encontrado para código: '485754432B2E9DAF'
+2026-02-11 14:21:45 | INFO     | gui.mobile_output_scanner | 🔍 Código escaneado: '7'1'171'
+2026-02-11 14:21:45 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:21:45 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-11 14:21:45 | ERROR    | database             |    Params: ("7'1'171", "7'1'171")
+2026-02-11 14:21:45 | ERROR    | database             | Error buscando producto por código de barra 7'1'171: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:21:46 | WARNING  | gui.mobile_output_scanner | ❌ Producto no encontrado para código: '7'1'171'
+2026-02-11 14:21:51 | INFO     | gui.mobile_output_scanner | 🔍 Código escaneado: '4'4'644'
+2026-02-11 14:21:52 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:21:52 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-11 14:21:52 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-11 14:21:52 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:21:53 | WARNING  | gui.mobile_output_scanner | ❌ Producto no encontrado para código: '4'4'644'
+2026-02-11 14:22:00 | INFO     | gui.mobile_output_scanner | 🔍 Código escaneado: '1'4'61'
+2026-02-11 14:22:00 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:22:00 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-11 14:22:00 | ERROR    | database             |    Params: ("1'4'61", "1'4'61")
+2026-02-11 14:22:00 | ERROR    | database             | Error buscando producto por código de barra 1'4'61: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:22:01 | WARNING  | gui.mobile_output_scanner | ❌ Producto no encontrado para código: '1'4'61'
+2026-02-11 14:23:24 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-11 14:23:28 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-11 14:24:09 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-11 14:24:12 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-11 14:24:12 | INFO     | database             | Bootstrap Start
+2026-02-11 14:24:12 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-11 14:24:17 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-11 14:24:17 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-11 14:24:50 | INFO     | gui.mobile_output_scanner | 🔍 Código escaneado: '1'4'61'
+2026-02-11 14:24:51 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:24:51 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-11 14:24:51 | ERROR    | database             |    Params: ("1'4'61", "1'4'61")
+2026-02-11 14:24:51 | ERROR    | database             | Error buscando producto por código de barra 1'4'61: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:24:52 | WARNING  | gui.mobile_output_scanner | ❌ Producto no encontrado para código: '1'4'61'
+2026-02-11 14:25:07 | INFO     | gui.mobile_output_scanner | 🔍 Código escaneado: '5'2'433'
+2026-02-11 14:25:08 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:25:08 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-11 14:25:08 | ERROR    | database             |    Params: ("5'2'433", "5'2'433")
+2026-02-11 14:25:08 | ERROR    | database             | Error buscando producto por código de barra 5'2'433: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:25:09 | WARNING  | gui.mobile_output_scanner | ❌ Producto no encontrado para código: '5'2'433'
+2026-02-11 14:25:13 | INFO     | gui.mobile_output_scanner | 🔍 Código escaneado: '4'4'644'
+2026-02-11 14:25:13 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:25:13 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-11 14:25:13 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-11 14:25:13 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:25:14 | WARNING  | gui.mobile_output_scanner | ❌ Producto no encontrado para código: '4'4'644'
+2026-02-11 14:25:19 | INFO     | gui.mobile_output_scanner | 🔍 Código escaneado: '485754432B2E9DAF'
+2026-02-11 14:25:20 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.serials' doesn't exist
+2026-02-11 14:25:20 | ERROR    | database             |    Query: 
+            SELECT s.sku, p.nombre, s.ubicacion, s.serial_mac
+            FROM serials s
+            JOIN productos p ON s.sku = p.sku
+            WHERE UPPER(TRIM(s.serial_mac)) = %s
+            LIMIT 1
+        
+2026-02-11 14:25:20 | ERROR    | database             |    Params: ('485754432B2E9DAF',)
+2026-02-11 14:25:20 | ERROR    | database             | Error buscando producto por MAC 485754432B2E9DAF: 1146 (42S02): Table 'test.serials' doesn't exist
+2026-02-11 14:25:21 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:25:21 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-11 14:25:21 | ERROR    | database             |    Params: ('485754432B2E9DAF', '485754432B2E9DAF')
+2026-02-11 14:25:21 | ERROR    | database             | Error buscando producto por código de barra 485754432B2E9DAF: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:25:22 | WARNING  | gui.mobile_output_scanner | ❌ Producto no encontrado para código: '485754432B2E9DAF'
+2026-02-11 14:32:33 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-11 14:33:11 | ERROR    | database             | ❌ Error SQL ejecución: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 1 column 6 near "PRAGMA table_info(productos)" 
+2026-02-11 14:33:11 | ERROR    | database             |    Query: PRAGMA table_info(productos)
+2026-02-11 14:33:11 | ERROR    | database             |    Params: None
+2026-02-11 14:33:47 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-11 14:34:08 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-11 14:34:59 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-11 14:35:34 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-11 14:35:50 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-11 14:38:21 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-11 14:38:32 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-11 14:39:30 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-11 14:39:33 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-11 14:39:33 | INFO     | database             | Bootstrap Start
+2026-02-11 14:39:33 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-11 14:39:38 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-11 14:39:38 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-11 14:43:31 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 14:43:31 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-11 14:43:31 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-11 14:43:31 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-11 15:09:23 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-11 15:09:31 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-11 15:10:14 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-11 15:10:17 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-11 15:10:17 | INFO     | database             | Bootstrap Start
+2026-02-11 15:10:17 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-11 15:10:23 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-11 15:10:23 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-11 15:37:16 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-11 15:37:21 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-11 15:38:04 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-11 15:38:06 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-11 15:38:07 | INFO     | database             | Bootstrap Start
+2026-02-11 15:38:07 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-11 15:38:24 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-11 15:38:24 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-11 15:43:27 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-11 15:43:34 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-11 15:44:32 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-11 15:44:35 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-11 15:44:35 | INFO     | database             | Bootstrap Start
+2026-02-11 15:44:35 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-11 15:44:39 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-11 15:44:39 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-11 16:02:50 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-11 16:02:55 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-11 16:03:54 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-11 16:03:58 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-11 16:03:58 | INFO     | database             | Bootstrap Start
+2026-02-11 16:03:58 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-11 16:04:02 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-11 16:04:02 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-12 09:02:41 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-12 09:03:04 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-12 09:03:59 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-12 09:04:03 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-12 09:04:03 | INFO     | database             | Bootstrap Start
+2026-02-12 09:04:03 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-12 09:04:18 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-12 09:04:18 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-12 09:04:56 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\core.py", line 1499, in abrir_gestion_codigos
+    for i in range(self.master_app.main_notebook.index("end")):
+                   ^^^^^^^^^^^^^^^
+AttributeError: 'InventoryTab' object has no attribute 'master_app'
+
+2026-02-12 09:10:46 | INFO     | app_inventario       | Inicializando app_inventario...
+2026-02-12 09:24:26 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-12 09:24:36 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-12 09:25:15 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-12 09:25:18 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-12 09:25:18 | INFO     | database             | Bootstrap Start
+2026-02-12 09:25:18 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-12 09:25:21 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-12 09:25:21 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-12 09:26:21 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\core.py", line 1499, in abrir_gestion_codigos
+    for i in range(self.master_app.main_notebook.index("end")):
+                   ^^^^^^^^^^^^^^^
+AttributeError: 'InventoryTab' object has no attribute 'master_app'
+
+2026-02-12 10:17:32 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-12 10:17:36 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-12 10:18:28 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-12 10:18:32 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-12 10:18:32 | INFO     | database             | Bootstrap Start
+2026-02-12 10:18:32 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-12 10:18:36 | CRITICAL | database             | FATAL BOOTSTRAP ERROR: invalid syntax (abasto_scanner.py, line 1)
+2026-02-12 10:18:36 | CRITICAL | database             | Traceback (most recent call last):
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 567, in bootstrap_app
+    from gui.inventory import InventoryTab
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\__init__.py", line 1, in <module>
+    from .core import InventoryTab
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\core.py", line 35, in <module>
+    from ..abasto_scanner import AbastoScannerWindow  # NUEVO: Sistema de escaneo universal
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\abasto_scanner.py", line 1
+    ```python
+    ^
+SyntaxError: invalid syntax
+
+2026-02-12 11:23:11 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 567, in bootstrap_app
+    y = (root.winfo_screenheight() - 350) // 2
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\__init__.py", line 1, in <module>
+    from .core import InventoryTab
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\core.py", line 35, in <module>
+    from ..abasto_scanner import AbastoScannerWindow  # NUEVO: Sistema de escaneo universal
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\abasto_scanner.py", line 1
+    ```python
+    ^
+SyntaxError: invalid syntax
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 594, in bootstrap_app
+    def seleccionar(self, sucursal):
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\messagebox.py", line 98, in showerror
+    return _show(title, message, ERROR, OK, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\messagebox.py", line 76, in _show
+    res = Message(**options).show()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\commondialog.py", line 45, in show
+    s = master.tk.call(self.command, *master._options(self.options))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt
+
+2026-02-12 11:39:12 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-12 11:39:17 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-12 11:40:26 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-12 11:40:30 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-12 11:40:30 | INFO     | database             | Bootstrap Start
+2026-02-12 11:40:30 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-12 11:40:31 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-12 11:40:31 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-12 11:40:31 | CRITICAL | database             | FATAL BOOTSTRAP ERROR: 'ModernInventarioApp' object has no attribute 'create_sidebar_header'
+2026-02-12 11:40:31 | CRITICAL | database             | Traceback (most recent call last):
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 765, in bootstrap_app
+    app = ModernInventarioApp(root)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 88, in __init__
+    self.create_modern_gui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 342, in create_modern_gui
+    self.create_sidebar_header()
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ModernInventarioApp' object has no attribute 'create_sidebar_header'
+
+2026-02-12 11:51:05 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-12 11:51:08 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-12 11:52:00 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-12 11:52:03 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-12 11:52:03 | INFO     | database             | Bootstrap Start
+2026-02-12 11:52:03 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-12 11:52:04 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-12 11:52:04 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-12 11:52:04 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-12 11:52:06 | ERROR    | database             | Error loading tab Dashboard: 'Frame' object has no attribute 'add'
+2026-02-12 11:52:06 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-12 11:52:06 | ERROR    | database             | Error loading tab Dashboard: 'Frame' object has no attribute 'add'
+2026-02-12 11:58:44 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-12 11:58:47 | ERROR    | database             | Error loading tab Inventario: 'Frame' object has no attribute 'add'
+2026-02-12 11:58:47 | INFO     | database             | Lazy loading tab: Productos...
+2026-02-12 11:58:51 | INFO     | database             | Tab Productos loaded successfully.
+2026-02-12 11:58:51 | INFO     | database             | Lazy loading tab: Auditoría...
+2026-02-12 11:58:52 | INFO     | database             | Tab Auditoría loaded successfully.
+2026-02-12 11:58:52 | INFO     | database             | Lazy loading tab: Recordatorios...
+2026-02-12 11:58:52 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-12 11:58:52 | ERROR    | database             | Error loading tab Inventario: 'Frame' object has no attribute 'add'
+2026-02-12 11:58:52 | ERROR    | database             | Error loading tab Recordatorios: 'ModernInventarioApp' object has no attribute 'inventory_tab'
+2026-02-12 11:58:52 | INFO     | database             | Lazy loading tab: Analíticas...
+2026-02-12 11:58:52 | ERROR    | database             | Error loading tab Analíticas: 'Frame' object has no attribute 'add'
+2026-02-12 11:58:53 | INFO     | database             | Lazy loading tab: Cuadre Masivo...
+2026-02-12 11:58:53 | ERROR    | database             | Error loading tab Cuadre Masivo: CuadreContableMasivo.__init__() takes 2 positional arguments but 3 were given
+2026-02-12 11:58:55 | INFO     | database             | Lazy loading tab: Analíticas...
+2026-02-12 11:58:55 | ERROR    | database             | Error loading tab Analíticas: 'Frame' object has no attribute 'add'
+2026-02-12 11:58:55 | INFO     | database             | Lazy loading tab: Configuración...
+2026-02-12 11:58:58 | INFO     | database             | Tab Configuración loaded successfully.
+2026-02-12 11:58:58 | INFO     | database             | Lazy loading tab: Cuadre Masivo...
+2026-02-12 11:58:58 | ERROR    | database             | Error loading tab Cuadre Masivo: CuadreContableMasivo.__init__() takes 2 positional arguments but 3 were given
+2026-02-12 11:58:58 | INFO     | database             | Lazy loading tab: Recordatorios...
+2026-02-12 11:58:58 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-12 11:58:58 | ERROR    | database             | Error loading tab Inventario: 'Frame' object has no attribute 'add'
+2026-02-12 11:58:58 | ERROR    | database             | Error loading tab Recordatorios: 'ModernInventarioApp' object has no attribute 'inventory_tab'
+2026-02-12 11:58:59 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-12 11:58:59 | ERROR    | database             | Error loading tab Inventario: 'Frame' object has no attribute 'add'
+2026-02-12 11:58:59 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-12 11:58:59 | ERROR    | database             | Error loading tab Dashboard: 'Frame' object has no attribute 'add'
+2026-02-12 12:24:02 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-12 12:24:09 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-12 12:25:13 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-12 12:25:18 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-12 12:25:18 | INFO     | database             | Bootstrap Start
+2026-02-12 12:25:18 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-12 12:25:18 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-12 12:25:18 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-12 12:25:20 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-12 12:25:22 | ERROR    | database             | Error loading tab Dashboard: 'NotebookAdapter' object has no attribute 'tk'
+2026-02-12 12:25:22 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-12 12:25:22 | ERROR    | database             | Error loading tab Dashboard: 'NotebookAdapter' object has no attribute 'tk'
+2026-02-12 12:25:50 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-12 12:25:53 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-12 12:27:07 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-12 12:27:12 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-12 12:27:12 | INFO     | database             | Bootstrap Start
+2026-02-12 12:27:12 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-12 12:27:12 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-12 12:27:12 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-12 12:27:13 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-12 12:27:15 | ERROR    | database             | Error loading tab Dashboard: 'NotebookAdapter' object has no attribute 'tk'
+2026-02-12 12:27:15 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-12 12:27:15 | ERROR    | database             | Error loading tab Dashboard: 'NotebookAdapter' object has no attribute 'tk'
+2026-02-12 12:31:32 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-12 12:31:38 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-12 12:32:27 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-12 12:32:29 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-12 12:32:29 | INFO     | database             | Bootstrap Start
+2026-02-12 12:32:29 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-12 12:32:31 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-12 12:32:31 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-12 12:32:32 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-12 12:32:35 | ERROR    | database             | Error loading tab Dashboard: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:32:35 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-12 12:32:35 | ERROR    | database             | Error loading tab Dashboard: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:32:42 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-12 12:32:44 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:32:45 | INFO     | database             | Lazy loading tab: Productos...
+2026-02-12 12:32:47 | INFO     | database             | Tab Productos loaded successfully.
+2026-02-12 12:32:56 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-12 12:32:56 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:32:58 | INFO     | database             | Lazy loading tab: Auditoría...
+2026-02-12 12:32:58 | INFO     | database             | Tab Auditoría loaded successfully.
+2026-02-12 12:33:00 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-12 12:33:00 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:33:04 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-12 12:33:04 | ERROR    | database             | Error loading tab Dashboard: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:33:05 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-12 12:33:05 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:33:05 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-12 12:33:05 | ERROR    | database             | Error loading tab Dashboard: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:33:06 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-12 12:33:06 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:33:07 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-12 12:33:07 | ERROR    | database             | Error loading tab Dashboard: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:33:09 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-12 12:33:09 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:33:09 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-12 12:33:09 | ERROR    | database             | Error loading tab Dashboard: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:33:12 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-12 12:33:12 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:33:17 | INFO     | database             | Lazy loading tab: Reportes...
+2026-02-12 12:33:18 | INFO     | database             | Tab Reportes loaded successfully.
+2026-02-12 12:33:19 | INFO     | database             | Lazy loading tab: Recordatorios...
+2026-02-12 12:33:19 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-12 12:33:19 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:33:19 | ERROR    | database             | Error loading tab Recordatorios: 'ModernInventarioApp' object has no attribute 'inventory_tab'
+2026-02-12 12:33:20 | INFO     | database             | Lazy loading tab: Cuadre Masivo...
+2026-02-12 12:33:21 | INFO     | database             | Tab Cuadre Masivo loaded successfully.
+2026-02-12 12:33:21 | INFO     | database             | Lazy loading tab: Recordatorios...
+2026-02-12 12:33:21 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-12 12:33:21 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:33:21 | ERROR    | database             | Error loading tab Recordatorios: 'ModernInventarioApp' object has no attribute 'inventory_tab'
+2026-02-12 12:33:52 | INFO     | database             | Lazy loading tab: Analíticas...
+2026-02-12 12:33:52 | ERROR    | database             | Error loading tab Analíticas: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:33:53 | INFO     | database             | Lazy loading tab: Configuración...
+2026-02-12 12:33:55 | INFO     | database             | Tab Configuración loaded successfully.
+2026-02-12 12:34:02 | INFO     | database             | Lazy loading tab: Analíticas...
+2026-02-12 12:34:02 | ERROR    | database             | Error loading tab Analíticas: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:34:03 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-12 12:34:03 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:35:56 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-12 12:36:01 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-12 12:37:01 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-12 12:37:04 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-12 12:37:04 | INFO     | database             | Bootstrap Start
+2026-02-12 12:37:04 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-12 12:37:05 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-12 12:37:05 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-12 12:37:06 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-12 12:37:08 | ERROR    | database             | Error loading tab Dashboard: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:37:08 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-12 12:37:08 | ERROR    | database             | Error loading tab Dashboard: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:37:31 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-12 12:37:33 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:37:33 | INFO     | database             | Lazy loading tab: Productos...
+2026-02-12 12:37:35 | INFO     | database             | Tab Productos loaded successfully.
+2026-02-12 12:37:36 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-12 12:37:36 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:37:37 | INFO     | database             | Lazy loading tab: Auditoría...
+2026-02-12 12:37:38 | INFO     | database             | Tab Auditoría loaded successfully.
+2026-02-12 12:37:45 | INFO     | database             | Lazy loading tab: Reportes...
+2026-02-12 12:37:46 | INFO     | database             | Tab Reportes loaded successfully.
+2026-02-12 12:37:46 | INFO     | database             | Lazy loading tab: Recordatorios...
+2026-02-12 12:37:46 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-12 12:37:46 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:37:46 | ERROR    | database             | Error loading tab Recordatorios: 'ModernInventarioApp' object has no attribute 'inventory_tab'
+2026-02-12 12:37:47 | INFO     | database             | Lazy loading tab: Cuadre Masivo...
+2026-02-12 12:37:47 | INFO     | database             | Tab Cuadre Masivo loaded successfully.
+2026-02-12 12:37:50 | INFO     | database             | Lazy loading tab: Recordatorios...
+2026-02-12 12:37:50 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-12 12:37:50 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:37:50 | ERROR    | database             | Error loading tab Recordatorios: 'ModernInventarioApp' object has no attribute 'inventory_tab'
+2026-02-12 12:37:52 | INFO     | database             | Lazy loading tab: Analíticas...
+2026-02-12 12:37:52 | ERROR    | database             | Error loading tab Analíticas: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:37:53 | INFO     | database             | Lazy loading tab: Configuración...
+2026-02-12 12:37:55 | INFO     | database             | Tab Configuración loaded successfully.
+2026-02-12 12:37:55 | INFO     | database             | Lazy loading tab: Movimientos...
+2026-02-12 12:37:55 | ERROR    | database             | Error loading tab Movimientos: 'Frame' object has no attribute 'add'
+2026-02-12 12:45:52 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-12 12:45:58 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-12 12:46:49 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-12 12:46:53 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-12 12:46:53 | INFO     | database             | Bootstrap Start
+2026-02-12 12:46:53 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-12 12:46:53 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-12 12:46:53 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-12 12:46:54 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-12 12:46:56 | ERROR    | database             | Error loading tab Dashboard: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:46:56 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-12 12:46:56 | ERROR    | database             | Error loading tab Dashboard: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:47:29 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-12 12:47:31 | ERROR    | database             | Error loading tab Inventario: ModernInventarioApp.load_tab.<locals>._fake_add() takes 1 positional argument but 2 were given
+2026-02-12 12:47:32 | INFO     | database             | Lazy loading tab: Productos...
+2026-02-12 12:47:34 | INFO     | database             | Tab Productos loaded successfully.
+2026-02-12 12:47:35 | INFO     | database             | Lazy loading tab: Auditoría...
+2026-02-12 12:47:35 | INFO     | database             | Tab Auditoría loaded successfully.
+2026-02-12 12:47:40 | INFO     | database             | Lazy loading tab: Reportes...
+2026-02-12 12:47:40 | INFO     | database             | Tab Reportes loaded successfully.
+2026-02-12 12:47:41 | INFO     | database             | Lazy loading tab: Configuración...
+2026-02-12 12:47:43 | INFO     | database             | Tab Configuración loaded successfully.
+2026-02-12 12:47:44 | INFO     | database             | Lazy loading tab: Movimientos...
+2026-02-12 12:47:44 | ERROR    | database             | Error loading tab Movimientos: 'Frame' object has no attribute 'add'
+2026-02-12 13:02:25 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-12 13:02:30 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-12 13:03:39 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-12 13:03:44 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-12 13:03:44 | INFO     | database             | Bootstrap Start
+2026-02-12 13:03:44 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-12 13:03:45 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-12 13:03:45 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-12 13:03:47 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-12 13:03:49 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-12 13:03:59 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-12 13:04:02 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-12 13:04:07 | INFO     | database             | Lazy loading tab: Productos...
+2026-02-12 13:04:08 | INFO     | database             | Tab Productos loaded successfully.
+2026-02-12 13:06:50 | INFO     | database             | Lazy loading tab: Auditoría...
+2026-02-12 13:06:50 | INFO     | database             | Tab Auditoría loaded successfully.
+2026-02-12 13:06:56 | INFO     | database             | Lazy loading tab: Configuración...
+2026-02-12 13:06:58 | INFO     | database             | Tab Configuración loaded successfully.
+2026-02-12 13:06:59 | INFO     | database             | Lazy loading tab: Movimientos...
+2026-02-12 13:07:41 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\core.py", line 1502, in abrir_gestion_codigos
+    messagebox.showinfo("Gestión de Códigos",
+  File "C:\Python312\Lib\tkinter\messagebox.py", line 88, in showinfo
+    return _show(title, message, INFO, OK, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\messagebox.py", line 76, in _show
+    res = Message(**options).show()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\commondialog.py", line 45, in show
+    s = master.tk.call(self.command, *master._options(self.options))
+        ^^^^^^^^^
+AttributeError: 'InventoryTab' object has no attribute 'tk'
+
+2026-02-12 13:09:18 | ERROR    | database             | Error executing inventory action abrir_ventana_salida_movil_scanner: 'ModernInventarioApp' object has no attribute 'root'
+2026-02-12 15:38:15 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-12 15:38:20 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-12 15:39:05 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-12 15:39:08 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-12 15:39:08 | INFO     | database             | Bootstrap Start
+2026-02-12 15:39:08 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-12 15:39:09 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.2.80:5000
+2026-02-12 15:39:09 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-12 15:39:09 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-12 15:39:12 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-12 15:39:16 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-12 15:39:18 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-12 15:39:21 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\core.py", line 1502, in abrir_gestion_codigos
+    messagebox.showinfo("Gestión de Códigos",
+  File "C:\Python312\Lib\tkinter\messagebox.py", line 88, in showinfo
+    return _show(title, message, INFO, OK, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\messagebox.py", line 76, in _show
+    res = Message(**options).show()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\commondialog.py", line 45, in show
+    s = master.tk.call(self.command, *master._options(self.options))
+        ^^^^^^^^^
+AttributeError: 'InventoryTab' object has no attribute 'tk'
+
+2026-02-12 15:39:21 | INFO     | database             | Lazy loading tab: Productos...
+2026-02-12 15:39:23 | INFO     | database             | Tab Productos loaded successfully.
+2026-02-12 15:39:37 | INFO     | database             | Código de barra maestro actualizado: 1-2-16 -> 1'2'16
+2026-02-12 15:39:56 | INFO     | database             | Código de barra maestro actualizado: 7-1-171 -> 7'1'171
+2026-02-12 15:40:06 | INFO     | database             | Código de barra maestro actualizado: 10-1-04 -> 10'1'04
+2026-02-12 15:40:47 | INFO     | database             | Código de barra maestro actualizado: 1-4-61 -> 1'4'61
+2026-02-12 15:40:56 | INFO     | database             | Código de barra maestro actualizado: 4-4-644 -> 4'4'644
+2026-02-12 15:41:09 | INFO     | database             | Lazy loading tab: Auditoría...
+2026-02-12 15:41:09 | INFO     | database             | Tab Auditoría loaded successfully.
+2026-02-12 15:41:13 | INFO     | database             | Lazy loading tab: Configuración...
+2026-02-12 15:41:14 | INFO     | database             | Tab Configuración loaded successfully.
+2026-02-12 15:41:16 | INFO     | database             | Lazy loading tab: Movimientos...
+2026-02-12 15:41:22 | ERROR    | database             | Error executing inventory action abrir_ventana_salida_movil_scanner: 'ModernInventarioApp' object has no attribute 'root'
+2026-02-12 15:50:53 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-12 15:50:57 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-12 15:51:46 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-12 15:51:49 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-12 15:51:49 | INFO     | database             | Bootstrap Start
+2026-02-12 15:51:49 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-12 15:51:49 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.2.80:5000
+2026-02-12 15:51:49 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-12 15:51:50 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-12 15:51:53 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-12 15:51:58 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-12 15:52:02 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-12 15:52:30 | ERROR    | database             | Error executing inventory action abrir_ventana_salida_movil_scanner: 'ModernInventarioApp' object has no attribute 'root'
+2026-02-12 15:53:54 | INFO     | database             | Lazy loading tab: Productos...
+2026-02-12 15:53:55 | INFO     | database             | Tab Productos loaded successfully.
+2026-02-12 15:53:59 | INFO     | database             | Lazy loading tab: Auditoría...
+2026-02-12 15:53:59 | INFO     | database             | Tab Auditoría loaded successfully.
+2026-02-12 15:54:29 | INFO     | database             | Lazy loading tab: Configuración...
+2026-02-12 15:54:31 | INFO     | database             | Tab Configuración loaded successfully.
+2026-02-12 16:07:27 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-12 16:07:32 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-12 16:08:24 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-12 16:08:26 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-12 16:08:27 | INFO     | database             | Bootstrap Start
+2026-02-12 16:08:27 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-12 16:08:27 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.2.80:5000
+2026-02-12 16:08:27 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-12 16:08:28 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-12 16:08:32 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-12 16:11:01 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-12 16:11:17 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-12 16:12:06 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-12 16:12:10 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-12 16:12:10 | INFO     | database             | Bootstrap Start
+2026-02-12 16:12:10 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-12 16:12:11 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.2.80:5000
+2026-02-12 16:12:11 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-12 16:12:12 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-12 16:12:14 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-12 16:12:22 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-12 16:12:26 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-12 16:12:26 | ERROR    | gui.inventory.core   | Error opening scanner window: 'ModernInventarioApp' object has no attribute 'root'
+2026-02-12 16:22:51 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-12 16:22:57 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-12 16:23:38 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-12 16:23:41 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-12 16:23:41 | INFO     | database             | Bootstrap Start
+2026-02-12 16:23:41 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-12 16:23:42 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.2.80:5000
+2026-02-12 16:23:42 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-12 16:23:43 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-12 16:23:46 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-12 16:24:13 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-12 16:24:15 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-12 16:24:30 | ERROR    | gui.inventory.core   | Error opening scanner window: 'ModernInventarioApp' object has no attribute 'root'
+2026-02-12 16:24:36 | INFO     | database             | Lazy loading tab: Auditoría...
+2026-02-12 16:24:36 | INFO     | database             | Tab Auditoría loaded successfully.
+2026-02-12 16:32:53 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-12 16:33:14 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-12 16:34:03 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-12 16:34:06 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-12 16:34:06 | INFO     | database             | Bootstrap Start
+2026-02-12 16:34:06 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-12 16:34:06 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.2.80:5000
+2026-02-12 16:34:06 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-12 16:34:07 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-12 16:34:09 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-12 16:34:19 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-12 16:34:21 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-12 16:34:27 | ERROR    | gui.inventory.core   | Error opening scanner window: type object 'Styles' has no attribute 'BACKGROUND_COLOR'
+2026-02-12 16:34:31 | ERROR    | gui.inventory.core   | Error opening scanner window: type object 'Styles' has no attribute 'BACKGROUND_COLOR'
+2026-02-12 16:35:05 | INFO     | database             | Lazy loading tab: Auditoría...
+2026-02-12 16:35:05 | INFO     | database             | Tab Auditoría loaded successfully.
+2026-02-12 16:35:06 | INFO     | database             | Lazy loading tab: Configuración...
+2026-02-12 16:35:08 | INFO     | database             | Tab Configuración loaded successfully.
+2026-02-12 16:35:08 | INFO     | database             | Lazy loading tab: Productos...
+2026-02-12 16:35:09 | INFO     | database             | Tab Productos loaded successfully.
+2026-02-12 16:36:13 | INFO     | database             | 🔍 Iniciando verificación y corrección de duplicados...
+2026-02-12 16:36:14 | INFO     | database             | 📦 Productos: No se encontraron productos duplicados
+2026-02-12 16:36:15 | INFO     | database             | 🚚 Asignación Móviles: No se encontraron duplicados.
+2026-02-12 16:36:15 | INFO     | database             | ✅ Verificación completada.
+2026-02-12 16:36:23 | ERROR    | gui.inventory.core   | Error opening scanner window: type object 'Styles' has no attribute 'BACKGROUND_COLOR'
+2026-02-12 16:36:41 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:36:41 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-12 16:36:41 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-12 16:36:41 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:36:58 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:36:58 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-12 16:36:58 | ERROR    | database             |    Params: ("1'4'61", "1'4'61")
+2026-02-12 16:36:58 | ERROR    | database             | Error buscando producto por código de barra 1'4'61: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:37:04 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:37:04 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-12 16:37:04 | ERROR    | database             |    Params: ("10'1'04", "10'1'04")
+2026-02-12 16:37:04 | ERROR    | database             | Error buscando producto por código de barra 10'1'04: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:37:09 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:37:09 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-12 16:37:09 | ERROR    | database             |    Params: ("7'1'171", "7'1'171")
+2026-02-12 16:37:09 | ERROR    | database             | Error buscando producto por código de barra 7'1'171: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:37:18 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:37:18 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-12 16:37:18 | ERROR    | database             |    Params: ("1'2'16", "1'2'16")
+2026-02-12 16:37:18 | ERROR    | database             | Error buscando producto por código de barra 1'2'16: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:42:24 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-12 16:43:39 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-12 16:44:21 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-12 16:44:24 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-12 16:44:24 | INFO     | database             | Bootstrap Start
+2026-02-12 16:44:24 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-12 16:44:25 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.2.80:5000
+2026-02-12 16:44:25 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-12 16:44:26 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-12 16:44:27 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-12 16:44:33 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-12 16:44:36 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-12 16:44:38 | INFO     | database             | Lazy loading tab: Productos...
+2026-02-12 16:44:39 | INFO     | database             | Tab Productos loaded successfully.
+2026-02-12 16:44:40 | INFO     | database             | Lazy loading tab: Auditoría...
+2026-02-12 16:44:40 | INFO     | database             | Tab Auditoría loaded successfully.
+2026-02-12 16:45:08 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\core.py", line 1535, in abrir_gestion_codigos
+    messagebox.showinfo("Gestión de Códigos",
+  File "C:\Python312\Lib\tkinter\messagebox.py", line 88, in showinfo
+    return _show(title, message, INFO, OK, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\messagebox.py", line 76, in _show
+    res = Message(**options).show()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\commondialog.py", line 45, in show
+    s = master.tk.call(self.command, *master._options(self.options))
+        ^^^^^^^^^
+AttributeError: 'InventoryTab' object has no attribute 'tk'
+
+2026-02-12 16:45:26 | INFO     | database             | Código de barra maestro actualizado: 7-1-171 -> 7'1'171
+2026-02-12 16:45:42 | INFO     | database             | Código de barra maestro actualizado: 10-1-04 -> 10'1'04
+2026-02-12 16:45:52 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:45:52 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-12 16:45:52 | ERROR    | database             |    Params: ("10'1'04", "10'1'04")
+2026-02-12 16:45:52 | ERROR    | database             | Error buscando producto por código de barra 10'1'04: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:46:02 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:46:02 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-12 16:46:02 | ERROR    | database             |    Params: ("7'1'171", "7'1'171")
+2026-02-12 16:46:02 | ERROR    | database             | Error buscando producto por código de barra 7'1'171: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-12 16:46:15 | ERROR    | gui.inventory.core   | Error opening scanner window: type object 'Styles' has no attribute 'BACKGROUND_COLOR'
+2026-02-13 07:55:22 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 07:56:02 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 07:56:42 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 07:56:44 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 07:56:45 | INFO     | database             | Bootstrap Start
+2026-02-13 07:56:45 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 07:56:45 | INFO     | database             | [WEB] PORTAL MOVIL ACTIVO: http://192.168.100.7:5000
+2026-02-13 07:56:45 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 07:56:46 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 07:56:51 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 08:04:49 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-13 08:04:57 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-13 08:14:05 | INFO     | database             | Lazy loading tab: Productos...
+2026-02-13 08:14:07 | INFO     | database             | Tab Productos loaded successfully.
+2026-02-13 08:16:07 | INFO     | database             | Lazy loading tab: Auditoría...
+2026-02-13 08:16:08 | INFO     | database             | Tab Auditoría loaded successfully.
+2026-02-13 08:16:09 | INFO     | database             | Lazy loading tab: Configuración...
+2026-02-13 08:16:12 | INFO     | database             | Tab Configuración loaded successfully.
+2026-02-13 08:34:15 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 08:34:19 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 08:34:59 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 08:35:01 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 08:35:02 | INFO     | database             | Bootstrap Start
+2026-02-13 08:35:02 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 08:35:02 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-13 08:35:02 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 08:35:02 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 08:35:04 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 08:35:11 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-13 08:35:13 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-13 08:35:13 | INFO     | database             | Lazy loading tab: Productos...
+2026-02-13 08:35:14 | INFO     | database             | Tab Productos loaded successfully.
+2026-02-13 08:35:30 | INFO     | database             | Lazy loading tab: Auditoría...
+2026-02-13 08:35:30 | INFO     | database             | Tab Auditoría loaded successfully.
+2026-02-13 08:36:10 | ERROR    | gui.inventory.core   | Error opening scanner window: unknown option "-weight"
+2026-02-13 08:43:11 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 08:43:12 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 08:43:51 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 08:43:53 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 08:43:53 | INFO     | database             | Bootstrap Start
+2026-02-13 08:43:53 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 08:43:53 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-13 08:43:53 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 08:43:55 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 08:43:56 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 08:44:33 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-13 08:44:34 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-13 08:46:57 | INFO     | gui.mobile_output_scanner | Item agregado: 7-1-171 x1
+2026-02-13 08:47:31 | INFO     | gui.mobile_output_scanner | Item agregado: 1-2-16 x1
+2026-02-13 08:47:45 | INFO     | gui.mobile_output_scanner | Item agregado: 10-1-04 x1
+2026-02-13 08:47:50 | INFO     | gui.mobile_output_scanner | Item agregado: 1-4-61 x1
+2026-02-13 08:47:54 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-13 08:48:08 | INFO     | gui.mobile_output_scanner | Item agregado: 1-4-61 x1
+2026-02-13 08:48:11 | INFO     | gui.mobile_output_scanner | Item agregado: 1-4-61 x1
+2026-02-13 08:48:12 | INFO     | gui.mobile_output_scanner | Item agregado: 1-4-61 x1
+2026-02-13 08:48:14 | INFO     | gui.mobile_output_scanner | Item agregado: 1-4-61 x1
+2026-02-13 08:48:16 | INFO     | gui.mobile_output_scanner | Item agregado: 1-4-61 x1
+2026-02-13 08:48:17 | INFO     | gui.mobile_output_scanner | Item agregado: 1-4-61 x1
+2026-02-13 08:48:18 | INFO     | gui.mobile_output_scanner | Item agregado: 1-4-61 x1
+2026-02-13 08:48:19 | INFO     | gui.mobile_output_scanner | Item agregado: 1-4-61 x1
+2026-02-13 08:48:20 | INFO     | gui.mobile_output_scanner | Item agregado: 1-4-61 x1
+2026-02-13 08:48:22 | INFO     | gui.mobile_output_scanner | Item agregado: 1-4-61 x1
+2026-02-13 08:48:23 | INFO     | gui.mobile_output_scanner | Item agregado: 1-4-61 x1
+2026-02-13 08:48:24 | INFO     | gui.mobile_output_scanner | Item agregado: 1-4-61 x1
+2026-02-13 08:54:25 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 08:54:26 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 08:55:05 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 08:55:07 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 08:55:07 | INFO     | database             | Bootstrap Start
+2026-02-13 08:55:07 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 08:55:07 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-13 08:55:07 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 08:55:08 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 08:55:10 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 08:55:22 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-13 08:55:24 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-13 08:56:10 | INFO     | gui.mobile_output_scanner | Item agregado: 1-4-61 x5
+2026-02-13 08:57:59 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-13 08:58:20 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-13 08:59:08 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-13 08:59:09 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-13 08:59:10 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-13 08:59:12 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-13 08:59:28 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-13 08:59:37 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-13 08:59:39 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-13 09:05:28 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 09:05:29 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 09:06:07 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 09:06:10 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 09:06:10 | INFO     | database             | Bootstrap Start
+2026-02-13 09:06:10 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 09:06:10 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-13 09:06:10 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 09:06:11 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 09:06:13 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 09:06:19 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-13 09:06:21 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-13 09:08:05 | INFO     | database             | Lazy loading tab: Configuración...
+2026-02-13 09:08:07 | INFO     | database             | Tab Configuración loaded successfully.
+2026-02-13 09:09:09 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:09:09 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:09:09 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-13 09:09:09 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:09:21 | INFO     | database             | Lazy loading tab: Productos...
+2026-02-13 09:09:22 | INFO     | database             | Tab Productos loaded successfully.
+2026-02-13 09:12:56 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 09:12:56 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 09:13:36 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 09:13:38 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 09:13:38 | INFO     | database             | Bootstrap Start
+2026-02-13 09:13:38 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 09:13:38 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-13 09:13:38 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 09:13:39 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 09:13:41 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 09:13:54 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-13 09:13:55 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-13 09:14:11 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:14:11 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:14:11 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-13 09:14:11 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:14:18 | INFO     | database             | Lazy loading tab: Productos...
+2026-02-13 09:14:19 | INFO     | database             | Tab Productos loaded successfully.
+2026-02-13 09:14:26 | INFO     | database             | Código de barra maestro actualizado: 4-4-644 -> 4'4'644
+2026-02-13 09:14:39 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:14:39 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:14:39 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-13 09:14:39 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:14:46 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:14:46 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:14:46 | ERROR    | database             |    Params: ("1'4'61", "1'4'61")
+2026-02-13 09:14:46 | ERROR    | database             | Error buscando producto por código de barra 1'4'61: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:14:49 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:14:49 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:14:49 | ERROR    | database             |    Params: ("10'1'04", "10'1'04")
+2026-02-13 09:14:49 | ERROR    | database             | Error buscando producto por código de barra 10'1'04: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:14:53 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:14:53 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:14:53 | ERROR    | database             |    Params: ("7'1'171", "7'1'171")
+2026-02-13 09:14:53 | ERROR    | database             | Error buscando producto por código de barra 7'1'171: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:23:32 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 09:23:34 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 09:24:15 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 09:24:17 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 09:24:17 | INFO     | database             | Bootstrap Start
+2026-02-13 09:24:17 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 09:24:17 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-13 09:24:17 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 09:24:19 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 09:24:28 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 09:25:45 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-13 09:25:58 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-13 09:26:26 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:26:26 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:26:26 | ERROR    | database             |    Params: ("7'1'171", "7'1'171")
+2026-02-13 09:26:26 | ERROR    | database             | Error buscando producto por código de barra 7'1'171: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:26:33 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:26:33 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:26:33 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-13 09:26:33 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:26:40 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:26:40 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:26:40 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-13 09:26:40 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:26:49 | INFO     | database             | Lazy loading tab: Productos...
+2026-02-13 09:26:50 | INFO     | database             | Tab Productos loaded successfully.
+2026-02-13 09:26:55 | INFO     | database             | Código de barra maestro actualizado: 4-4-644 -> 4'4'644
+2026-02-13 09:27:21 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 09:27:23 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 09:28:01 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 09:28:04 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 09:28:04 | INFO     | database             | Bootstrap Start
+2026-02-13 09:28:04 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 09:28:04 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-13 09:28:04 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 09:28:06 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 09:28:10 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 09:28:21 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-13 09:28:33 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-13 09:29:49 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x3
+2026-02-13 09:30:09 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:30:09 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:30:09 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-13 09:30:09 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:32:31 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 09:32:32 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 09:33:10 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 09:33:13 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 09:33:13 | INFO     | database             | Bootstrap Start
+2026-02-13 09:33:13 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 09:33:13 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-13 09:33:13 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 09:33:14 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 09:33:16 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 09:33:50 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-13 09:33:52 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-13 09:34:08 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:34:08 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:34:08 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-13 09:34:08 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:37:12 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 09:37:13 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 09:39:59 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 09:40:00 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 09:40:15 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 09:40:18 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 09:40:18 | INFO     | database             | Bootstrap Start
+2026-02-13 09:40:18 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 09:40:18 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-13 09:40:18 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 09:40:19 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 09:40:21 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 09:42:57 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-13 09:42:59 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-13 09:43:08 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:43:08 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:43:08 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-13 09:43:08 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:46:31 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 09:46:32 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 09:46:47 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 09:46:50 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 09:46:50 | INFO     | database             | Bootstrap Start
+2026-02-13 09:46:50 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 09:46:50 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-13 09:46:50 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 09:46:51 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 09:46:53 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 09:46:58 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-13 09:46:59 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-13 09:47:13 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:47:13 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:47:13 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-13 09:47:13 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:48:47 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x2
+2026-02-13 09:59:15 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 09:59:16 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 09:59:31 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 09:59:34 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 09:59:34 | INFO     | database             | Bootstrap Start
+2026-02-13 09:59:34 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 09:59:34 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-13 09:59:34 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 09:59:35 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 09:59:40 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 09:59:48 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-13 09:59:56 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-13 09:59:59 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 09:59:59 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 09:59:59 | ERROR    | database             |    Params: ("7'1'171", "7'1'171")
+2026-02-13 09:59:59 | ERROR    | database             | Error buscando producto por código de barra 7'1'171: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 10:00:09 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 10:00:09 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 10:00:09 | ERROR    | database             |    Params: ("10'1'04", "10'1'04")
+2026-02-13 10:00:09 | ERROR    | database             | Error buscando producto por código de barra 10'1'04: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 10:03:14 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 10:03:15 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 10:03:30 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 10:03:32 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 10:03:33 | INFO     | database             | Bootstrap Start
+2026-02-13 10:03:33 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 10:03:33 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-13 10:03:33 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 10:03:34 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 10:03:36 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 10:03:44 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-13 10:03:46 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-13 10:05:52 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 10:05:52 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 10:05:52 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-13 10:05:52 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 11:35:41 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 11:35:41 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 11:35:58 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 11:36:00 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 11:36:00 | INFO     | database             | Bootstrap Start
+2026-02-13 11:36:00 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 11:36:00 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-13 11:36:00 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 11:36:02 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 11:36:04 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 11:36:39 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-13 11:36:41 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-13 11:38:45 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 11:38:45 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) = %s 
+               OR UPPER(TRIM(p.sku)) = %s
+            LIMIT 1
+        
+2026-02-13 11:38:45 | ERROR    | database             |    Params: ("4'4'644", "4'4'644")
+2026-02-13 11:38:45 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 11:50:22 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 11:50:23 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 11:50:38 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 11:50:41 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 11:50:41 | INFO     | database             | Bootstrap Start
+2026-02-13 11:50:41 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 11:50:41 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-13 11:50:41 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 11:50:42 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 11:50:44 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 11:51:34 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-13 11:51:36 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-13 11:52:02 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 11:52:02 | ERROR    | database             |    Query: 
+            SELECT p.sku, p.nombre, COALESCE(s.cantidad, 0) as stock
+            FROM productos p
+            LEFT JOIN stock s ON p.sku = s.sku 
+              AND s.ubicacion = 'BODEGA'
+            WHERE UPPER(TRIM(p.codigo_barra_maestro)) IN (%s, %s) 
+               OR UPPER(TRIM(p.sku)) IN (%s, %s)
+            LIMIT 1
+        
+2026-02-13 11:52:02 | ERROR    | database             |    Params: ('4-4-644', "4'4'644", '4-4-644', "4'4'644")
+2026-02-13 11:52:02 | ERROR    | database             | Error buscando producto por código de barra 4'4'644: 1146 (42S02): Table 'test.stock' doesn't exist
+2026-02-13 12:03:50 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 12:03:51 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 12:04:07 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 12:04:10 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 12:04:10 | INFO     | database             | Bootstrap Start
+2026-02-13 12:04:10 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 12:04:10 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-13 12:04:10 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 12:04:11 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 12:04:13 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 12:04:46 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-13 12:04:47 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-13 12:05:30 | INFO     | gui.abasto           | 🗑️ Serie eliminada: 28FBAEC9D226
+2026-02-13 12:06:30 | INFO     | gui.abasto           | 🗑️ Serie eliminada: 28FBAECA5B8B
+2026-02-13 12:07:19 | INFO     | gui.abasto           | 🗑️ Serie eliminada: C45E5C999F78
+2026-02-13 12:07:29 | INFO     | gui.abasto           | 🗑️ Serie eliminada: 2150085243AGQ3034118
+2026-02-13 12:07:40 | INFO     | gui.abasto           | 🗑️ Serie eliminada: 2150085243AGQ3034118
+2026-02-13 12:15:09 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 12:15:10 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 12:15:26 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 12:15:28 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 12:15:29 | INFO     | database             | Bootstrap Start
+2026-02-13 12:15:29 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 12:15:29 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-13 12:15:29 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 12:15:30 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 12:15:32 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 12:17:12 | INFO     | database             | Lazy loading tab: Auditoría...
+2026-02-13 12:17:13 | INFO     | database             | Tab Auditoría loaded successfully.
+2026-02-13 12:17:29 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-13 12:17:30 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-13 12:19:38 | INFO     | gui.abasto           | 🗑️ Serie eliminada: C45E5C999F78
+2026-02-13 12:22:39 | ERROR    | database             | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'fecha_registro' in 'field list'
+2026-02-13 12:22:39 | ERROR    | database             |    Query: 
+                            INSERT INTO series_registradas 
+                            (sku, serial_number, estado, ubicacion, fecha_registro)
+                            VALUES (%s, %s, 'DISPONIBLE', 'BODEGA', %s)
+                        
+2026-02-13 12:22:39 | ERROR    | database             |    Params: ('4-4-644', '485754432B33CCAF', '2026-02-13')
+2026-02-13 12:22:40 | ERROR    | database             | Error registrando serial 485754432B33CCAF: 1054 (42S22): Unknown column 'fecha_registro' in 'field list'
+2026-02-13 12:44:49 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 12:44:49 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 12:45:05 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 12:45:08 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 12:45:08 | INFO     | database             | Bootstrap Start
+2026-02-13 12:45:08 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 12:45:08 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-13 12:45:08 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 12:45:09 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 12:45:11 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 12:46:11 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-13 12:46:13 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-13 12:48:40 | INFO     | database             | Lazy loading tab: Productos...
+2026-02-13 12:48:41 | INFO     | database             | Tab Productos loaded successfully.
+2026-02-13 12:48:44 | INFO     | database             | Lazy loading tab: Auditoría...
+2026-02-13 12:48:44 | INFO     | database             | Tab Auditoría loaded successfully.
+2026-02-13 12:48:46 | INFO     | database             | Lazy loading tab: Configuración...
+2026-02-13 12:48:47 | INFO     | database             | Tab Configuración loaded successfully.
+2026-02-13 13:42:31 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 13:53:49 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 13:56:11 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 13:58:14 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 13:59:43 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 14:00:34 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 14:01:10 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 14:01:41 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 14:03:07 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 14:08:29 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 14:08:30 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 14:08:45 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 14:08:48 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 14:08:48 | INFO     | database             | Bootstrap Start
+2026-02-13 14:08:48 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 14:08:48 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-13 14:08:48 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 14:08:49 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 14:08:52 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 14:08:54 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-13 14:08:56 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-13 14:08:58 | INFO     | database             | Lazy loading tab: Productos...
+2026-02-13 14:08:59 | INFO     | database             | Tab Productos loaded successfully.
+2026-02-13 14:09:01 | INFO     | database             | Lazy loading tab: Auditoría...
+2026-02-13 14:09:01 | INFO     | database             | Tab Auditoría loaded successfully.
+2026-02-13 14:09:02 | INFO     | database             | Lazy loading tab: Configuración...
+2026-02-13 14:09:04 | INFO     | database             | Tab Configuración loaded successfully.
+2026-02-13 14:09:24 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\abasto_scanner.py", line 108, in _on_mousewheel
+    canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+  File "C:\Python312\Lib\tkinter\__init__.py", line 2014, in yview_scroll
+    self.tk.call(self._w, 'yview', 'scroll', number, what)
+_tkinter.TclError: invalid command name ".!toplevel.!notebook.!frame.!frame.!frame2.!canvas"
+
+2026-02-13 14:09:28 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\abasto_scanner.py", line 108, in _on_mousewheel
+    canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+  File "C:\Python312\Lib\tkinter\__init__.py", line 2014, in yview_scroll
+    self.tk.call(self._w, 'yview', 'scroll', number, what)
+_tkinter.TclError: invalid command name ".!toplevel.!notebook.!frame.!frame.!frame2.!canvas"
+
+2026-02-13 14:09:31 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\abasto_scanner.py", line 108, in _on_mousewheel
+    canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+  File "C:\Python312\Lib\tkinter\__init__.py", line 2014, in yview_scroll
+    self.tk.call(self._w, 'yview', 'scroll', number, what)
+_tkinter.TclError: invalid command name ".!toplevel.!notebook.!frame.!frame.!frame2.!canvas"
+
+2026-02-13 14:11:02 | INFO     | gui.abasto           | 🗑️ Serie eliminada: C45E5C999F78
+2026-02-13 14:11:16 | INFO     | gui.abasto           | 🗑️ Serie eliminada: C45E5C999F78
+2026-02-13 14:11:24 | INFO     | gui.abasto           | 🗑️ Serie eliminada: 54F6E2D9F36B
+2026-02-13 14:11:39 | INFO     | gui.abasto           | 🗑️ Serie eliminada: 54F6E2D9F36B
+2026-02-13 14:13:12 | INFO     | database             | Abasto registrado exitosamente: 6 productos, 15210 unidades totales
+2026-02-13 14:13:38 | ERROR    | database             | ❌ Error SQL ejecución: Not enough parameters for the SQL statement
+2026-02-13 14:13:38 | ERROR    | database             |    Query: 
+            SELECT 
+                sr.sku,
+                GROUP_CONCAT(sr.serial_number ORDER BY sr.serial_number SEPARATOR '|') as series
+            FROM series_registradas sr
+            WHERE sr.sku IN (
+                SELECT sku_producto 
+                FROM movimientos 
+                WHERE tipo_movimiento = 'ABASTO' 
+                AND fecha_evento = %s 
+                AND COALESCE(documento_referencia, 'Sin Referencia') = %s
+            )
+             AND (DATE(sr.fecha_ingreso) = %s OR sr.fecha_ingreso BETWEEN DATE(%s, '-1 day') AND DATE(%s, '+1 day'))
+            GROUP BY sr.sku
+        
+2026-02-13 14:13:38 | ERROR    | database             |    Params: ('2026-02-13', 'Sin Referencia', '2026-02-13')
+2026-02-13 14:13:38 | ERROR    | gui.abasto           | Error obteniendo series: Not enough parameters for the SQL statement
+2026-02-13 14:16:19 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x2
+2026-02-13 14:16:30 | INFO     | gui.mobile_output_scanner | Item agregado: 1-4-61 x200
+2026-02-13 14:17:10 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 14:31:57 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 14:31:59 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 14:32:16 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 14:32:19 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 14:32:19 | INFO     | database             | Bootstrap Start
+2026-02-13 14:32:19 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 14:32:19 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-13 14:32:19 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 14:32:21 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 14:32:23 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 14:32:27 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-13 14:32:29 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-13 14:33:27 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-02-13 14:33:31 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-02-13 14:33:39 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-02-13 14:33:41 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE CARRO
+2026-02-13 14:33:44 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PERSONALIZADO
+2026-02-13 14:33:46 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-02-13 14:33:53 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-02-13 14:33:55 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-02-13 14:38:44 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 14:38:46 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 14:39:01 | INFO     | database             | 🆕 Columna paquete añadida a asignacion_moviles
+2026-02-13 14:39:05 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 14:39:08 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 14:39:08 | INFO     | database             | Bootstrap Start
+2026-02-13 14:39:08 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 14:39:08 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-13 14:39:08 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 14:39:09 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 14:39:11 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 14:39:35 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-13 14:39:37 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-13 14:43:57 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 14:43:58 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 14:44:16 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 14:44:18 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 14:44:19 | INFO     | database             | Bootstrap Start
+2026-02-13 14:44:19 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 14:44:19 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-13 14:44:19 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 14:44:20 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 14:44:22 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 14:44:30 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-13 14:44:32 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-13 14:44:38 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-02-13 14:44:40 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-02-13 14:44:50 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432B33CCAF -> SKU 4-4-644
+2026-02-13 14:53:19 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 14:53:20 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 14:53:36 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 14:53:39 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 14:53:39 | INFO     | database             | Bootstrap Start
+2026-02-13 14:53:39 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 14:53:39 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-13 14:53:39 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 14:53:41 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 14:53:43 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 14:53:51 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-13 14:53:53 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-13 14:53:54 | INFO     | database             | Lazy loading tab: Productos...
+2026-02-13 14:53:55 | INFO     | database             | Tab Productos loaded successfully.
+2026-02-13 14:54:11 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-02-13 14:54:14 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-02-13 14:54:24 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432B33CCAF -> SKU 4-4-644
+2026-02-13 14:54:24 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-13 14:59:40 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 14:59:41 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 14:59:59 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 15:00:02 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 15:00:02 | INFO     | database             | Bootstrap Start
+2026-02-13 15:00:02 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 15:00:02 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-13 15:00:02 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 15:00:04 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 15:00:06 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 15:00:13 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-13 15:00:15 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-13 15:00:20 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-02-13 15:00:34 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-02-13 15:00:46 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432B33CCAF -> SKU 4-4-644
+2026-02-13 15:00:46 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-13 15:01:12 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754430199B6AF -> SKU 4-4-644
+2026-02-13 15:01:12 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-13 15:01:25 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544301BC84AF -> SKU 4-4-644
+2026-02-13 15:01:25 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-13 15:01:46 | INFO     | gui.mobile_output_scanner | Item agregado: 1-4-61 x5
+2026-02-13 15:02:08 | INFO     | gui.mobile_output_scanner | Item agregado: 1-2-16 x1000
+2026-02-13 15:37:51 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 15:37:51 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 15:38:08 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 15:38:11 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 15:38:11 | INFO     | database             | Bootstrap Start
+2026-02-13 15:38:11 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 15:38:11 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-13 15:38:11 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 15:38:13 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 15:38:15 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 15:38:28 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-13 15:38:30 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-13 15:38:52 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544301BC84AF -> SKU 4-4-644
+2026-02-13 15:38:52 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-13 15:39:03 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754430199B6AF -> SKU 4-4-644
+2026-02-13 15:39:03 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-13 15:39:14 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432B33CCAF -> SKU 4-4-644
+2026-02-13 15:39:14 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-13 15:56:35 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 16:00:19 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 16:00:19 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 16:00:20 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 16:00:38 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 16:00:41 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 16:00:41 | INFO     | database             | Bootstrap Start
+2026-02-13 16:00:41 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 16:00:41 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-13 16:00:41 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 16:00:43 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 16:00:45 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 16:02:33 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 16:02:34 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 16:02:51 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 16:02:54 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 16:02:54 | INFO     | database             | Bootstrap Start
+2026-02-13 16:02:54 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 16:02:54 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-13 16:02:54 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 16:02:55 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 16:02:57 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 16:03:17 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-13 16:03:19 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-13 16:03:32 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-02-13 16:03:39 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432B33CCAF -> SKU 4-4-644
+2026-02-13 16:04:24 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432B33CCAF -> SKU 4-4-644
+2026-02-13 16:04:42 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754430199B6AF -> SKU 4-4-644
+2026-02-13 16:04:44 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754430199B6AF -> SKU 4-4-644
+2026-02-13 16:04:47 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754430199B6AF -> SKU 4-4-644
+2026-02-13 16:04:58 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544301BC84AF -> SKU 4-4-644
+2026-02-13 16:15:07 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-13 16:15:08 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-13 16:15:24 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-13 16:15:27 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-13 16:15:27 | INFO     | database             | Bootstrap Start
+2026-02-13 16:15:27 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-13 16:15:27 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-13 16:15:27 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-13 16:15:29 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-13 16:15:31 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-13 16:16:36 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-13 16:16:38 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-13 16:16:43 | INFO     | database             | Lazy loading tab: Configuración...
+2026-02-13 16:16:44 | INFO     | database             | Tab Configuración loaded successfully.
+2026-02-13 16:18:14 | INFO     | gui.abasto           | 🗑️ Serie eliminada: C45E5C999F78
+2026-02-13 16:18:16 | INFO     | gui.abasto           | 🗑️ Serie eliminada: 54F6E2D7E16E
+2026-02-13 16:18:17 | INFO     | gui.abasto           | 🗑️ Serie eliminada: 2150085243AGQ3006228
+2026-02-13 16:18:18 | INFO     | gui.abasto           | 🗑️ Serie eliminada: 54F6E2DA311C
+2026-02-13 16:18:41 | INFO     | database             | Abasto registrado exitosamente: 2 productos, 103 unidades totales
+2026-02-13 16:19:26 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432B33CCAF -> SKU 4-4-644
+2026-02-13 16:19:26 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-13 16:19:51 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544301BC84AF -> SKU 4-4-644
+2026-02-13 16:19:51 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-13 16:20:10 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754430199B6AF -> SKU 4-4-644
+2026-02-13 16:20:10 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-13 16:23:50 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 08:13:15 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-14 08:13:20 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 08:13:37 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-14 08:13:40 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-14 08:13:40 | INFO     | database             | Bootstrap Start
+2026-02-14 08:13:40 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-14 08:13:40 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-14 08:13:40 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-14 08:13:43 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-14 08:13:51 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-14 08:14:08 | INFO     | database             | Lazy loading tab: Auditoría...
+2026-02-14 08:14:14 | INFO     | database             | Tab Auditoría loaded successfully.
+2026-02-14 08:14:39 | INFO     | database             | Lazy loading tab: Configuración...
+2026-02-14 08:14:41 | INFO     | database             | Tab Configuración loaded successfully.
+2026-02-14 08:16:34 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-14 08:16:35 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 08:16:51 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-14 08:16:54 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-14 08:16:54 | INFO     | database             | Bootstrap Start
+2026-02-14 08:16:54 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-14 08:16:54 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-14 08:16:54 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-14 08:16:56 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-14 08:16:58 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-14 08:17:12 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-14 08:17:24 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-14 08:19:17 | INFO     | gui.abasto           | 🗑️ Serie eliminada: C45E5C999F78
+2026-02-14 08:19:19 | INFO     | gui.abasto           | 🗑️ Serie eliminada: 2150085243AGQ3006228
+2026-02-14 08:19:20 | INFO     | gui.abasto           | 🗑️ Serie eliminada: 1492
+2026-02-14 08:19:22 | INFO     | gui.abasto           | 🗑️ Serie eliminada: 54F6E2D7E16E
+2026-02-14 08:20:14 | INFO     | gui.abasto           | 🗑️ Serie eliminada: 54F6E2DA311C
+2026-02-14 08:20:15 | INFO     | gui.abasto           | 🗑️ Serie eliminada: 28FBAECA5B8B
+2026-02-14 08:21:01 | INFO     | database             | Abasto registrado exitosamente: 4 productos, 3210 unidades totales
+2026-02-14 08:21:17 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-02-14 08:21:20 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-02-14 08:21:23 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-02-14 08:21:25 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-02-14 08:21:40 | INFO     | gui.mobile_output_scanner | SKU 7-1-171 no encontrado en paquete base: ['1-4-61', '1-8-40', '2-5-02', '2-7-07', '2-7-11']...
+2026-02-14 08:21:40 | INFO     | gui.mobile_output_scanner | Item agregado: 7-1-171 x100
+2026-02-14 08:21:49 | INFO     | gui.mobile_output_scanner | SKU 10-1-04 no encontrado en paquete base: ['1-4-61', '1-8-40', '2-5-02', '2-7-07', '2-7-11']...
+2026-02-14 08:21:49 | INFO     | gui.mobile_output_scanner | Item agregado: 10-1-04 x5
+2026-02-14 08:21:57 | INFO     | gui.mobile_output_scanner | Item agregado: 1-4-61 x5
+2026-02-14 08:22:16 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544301B8E3AF -> SKU 4-4-644
+2026-02-14 08:22:16 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-14 08:22:26 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754431F7742AF -> SKU 4-4-644
+2026-02-14 08:22:26 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-14 08:22:36 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544301BC84AF -> SKU 4-4-644
+2026-02-14 08:22:36 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-14 08:23:12 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754430199B6AF -> SKU 4-4-644
+2026-02-14 08:23:12 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-14 08:23:30 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432B33CCAF -> SKU 4-4-644
+2026-02-14 08:23:30 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-14 08:24:39 | INFO     | database             | Lazy loading tab: Auditoría...
+2026-02-14 08:24:39 | INFO     | database             | Tab Auditoría loaded successfully.
+2026-02-14 08:25:53 | INFO     | database             | Lazy loading tab: Configuración...
+2026-02-14 08:25:55 | INFO     | database             | Tab Configuración loaded successfully.
+2026-02-14 08:26:08 | INFO     | database             | Lazy loading tab: Productos...
+2026-02-14 08:26:09 | INFO     | database             | Tab Productos loaded successfully.
+2026-02-14 08:27:43 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 08:29:06 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 08:32:38 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 08:33:20 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 08:35:07 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 08:35:45 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 08:37:57 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 08:50:35 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 08:51:15 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 08:55:59 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 08:57:12 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 09:00:14 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 09:01:04 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 09:02:09 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 09:03:26 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 09:05:14 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 09:33:11 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 09:33:23 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'mysql.productos' doesn't exist
+2026-02-14 09:33:23 | ERROR    | database             |    Query: SELECT COUNT(*) FROM productos WHERE ubicacion = 'BODEGA'
+2026-02-14 09:33:23 | ERROR    | database             |    Params: None
+2026-02-14 09:35:02 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 09:36:25 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 09:40:29 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 09:40:41 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'mysql.productos' doesn't exist
+2026-02-14 09:40:41 | ERROR    | database             |    Query: SELECT COUNT(*) FROM productos WHERE ubicacion = 'BODEGA'
+2026-02-14 09:40:41 | ERROR    | database             |    Params: None
+2026-02-14 09:42:50 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 09:44:45 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 09:44:57 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'mysql.productos' doesn't exist
+2026-02-14 09:44:57 | ERROR    | database             |    Query: SELECT COUNT(*) FROM productos WHERE sku = %s AND ubicacion = 'BODEGA'
+2026-02-14 09:44:57 | ERROR    | database             |    Params: ('1-2-16',)
+2026-02-14 09:47:16 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 09:48:26 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 09:48:37 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'mysql.productos' doesn't exist
+2026-02-14 09:48:37 | ERROR    | database             |    Query: SELECT COUNT(*) FROM productos WHERE sku = %s AND ubicacion = 'BODEGA'
+2026-02-14 09:48:37 | ERROR    | database             |    Params: ('1-2-16',)
+2026-02-14 09:50:31 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 09:52:37 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 10:28:31 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 10:29:30 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 10:29:42 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'mysql.productos' doesn't exist
+2026-02-14 10:29:42 | ERROR    | database             |    Query: SELECT COUNT(*) FROM productos WHERE sku = %s AND ubicacion = 'BODEGA'
+2026-02-14 10:29:42 | ERROR    | database             |    Params: ('1-2-16',)
+2026-02-14 10:30:18 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 10:32:43 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 10:32:54 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-14 10:32:56 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 10:33:13 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-14 10:33:16 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-14 10:33:16 | INFO     | database             | Bootstrap Start
+2026-02-14 10:33:16 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-14 10:33:16 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-14 10:33:16 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-14 10:33:18 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-14 10:33:22 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 10:33:26 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-14 10:33:35 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'mysql.productos' doesn't exist
+2026-02-14 10:33:35 | ERROR    | database             |    Query: SELECT COUNT(*) FROM productos WHERE sku = %s AND ubicacion = 'BODEGA'
+2026-02-14 10:33:35 | ERROR    | database             |    Params: ('1-2-16',)
+2026-02-14 10:34:10 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 10:34:17 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-14 10:34:28 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-14 10:38:56 | WARNING  | gui.inventory.movements | ❌ Serial '54F6E2DA311C' no existe en BD
+2026-02-14 10:40:04 | WARNING  | gui.inventory.movements | ❌ Serial '1'4'61' no existe en BD
+2026-02-14 10:40:08 | WARNING  | gui.inventory.movements | ❌ Serial '10'1'04' no existe en BD
+2026-02-14 10:40:11 | WARNING  | gui.inventory.movements | ❌ Serial '7'1'171' no existe en BD
+2026-02-14 10:40:16 | WARNING  | gui.inventory.movements | ❌ Serial '7'1'171' no existe en BD
+2026-02-14 10:40:17 | WARNING  | gui.inventory.movements | ❌ Serial '7'1'171' no existe en BD
+2026-02-14 10:40:20 | WARNING  | gui.inventory.movements | ❌ Serial '7'1'171' no existe en BD
+2026-02-14 10:40:22 | WARNING  | gui.inventory.movements | ❌ Serial '7'1'171' no existe en BD
+2026-02-14 10:40:24 | WARNING  | gui.inventory.movements | ❌ Serial '1'2'16' no existe en BD
+2026-02-14 10:40:26 | WARNING  | gui.inventory.movements | ❌ Serial '1'2'16' no existe en BD
+2026-02-14 10:40:27 | WARNING  | gui.inventory.movements | ❌ Serial '1'2'16' no existe en BD
+2026-02-14 10:40:29 | WARNING  | gui.inventory.movements | ❌ Serial '1'2'16' no existe en BD
+2026-02-14 10:40:31 | WARNING  | gui.inventory.movements | ❌ Serial '1'2'16' no existe en BD
+2026-02-14 10:40:33 | WARNING  | gui.inventory.movements | ❌ Serial '1'2'16' no existe en BD
+2026-02-14 10:41:02 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 10:49:43 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 10:50:54 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 10:51:06 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'mysql.productos' doesn't exist
+2026-02-14 10:51:06 | ERROR    | database             |    Query: SELECT COUNT(*) FROM productos WHERE ubicacion = 'BODEGA'
+2026-02-14 10:51:06 | ERROR    | database             |    Params: None
+2026-02-14 10:52:41 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-14 10:52:42 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 10:52:59 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-14 10:53:02 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-14 10:53:02 | INFO     | database             | Bootstrap Start
+2026-02-14 10:53:02 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-14 10:53:02 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-14 10:53:02 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-14 10:53:05 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-14 10:53:07 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-14 10:55:01 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-14 10:55:03 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-14 10:55:06 | INFO     | database             | Lazy loading tab: Productos...
+2026-02-14 10:55:07 | INFO     | database             | Tab Productos loaded successfully.
+2026-02-14 10:55:08 | INFO     | database             | Lazy loading tab: Auditoría...
+2026-02-14 10:55:08 | INFO     | database             | Tab Auditoría loaded successfully.
+2026-02-14 11:12:07 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 11:13:05 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 11:17:50 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 11:19:46 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 11:22:20 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 11:23:28 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 11:33:40 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 11:34:53 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: SQLITE
+2026-02-14 11:34:53 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-14 11:34:55 | ERROR    | utils.db_connector   | Error creando pool MySQL para SQLITE: 1049 (42000): Unknown database 'SQLITE'
+2026-02-14 11:34:55 | ERROR    | utils.db_connector   | Error conectando a MySQL (SQLITE): 1049 (42000): Unknown database 'SQLITE'
+2026-02-14 11:34:57 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 11:35:16 | INFO     | database             | ⚙️ Verificando lista completa de móviles...
+2026-02-14 11:35:18 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-14 11:35:18 | INFO     | database             | Bootstrap Start
+2026-02-14 11:35:18 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-14 11:35:18 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-14 11:35:18 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-14 11:35:20 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-14 11:35:23 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-14 11:39:53 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 11:40:36 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 11:41:34 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 11:42:24 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 13:02:21 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 13:03:03 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 13:03:15 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'mysql.productos' doesn't exist
+2026-02-14 13:03:15 | ERROR    | database             |    Query: SELECT COUNT(*) FROM productos WHERE ubicacion = 'BODEGA'
+2026-02-14 13:03:15 | ERROR    | database             |    Params: None
+2026-02-14 13:28:13 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-14 13:28:15 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-14 13:29:35 | INFO     | database             | Lazy loading tab: Configuración...
+2026-02-14 13:29:37 | INFO     | database             | Tab Configuración loaded successfully.
+2026-02-14 13:29:58 | INFO     | database             | Lazy loading tab: Auditoría...
+2026-02-14 13:29:59 | INFO     | database             | Tab Auditoría loaded successfully.
+2026-02-14 13:32:36 | INFO     | gui.abasto           | 🗑️ Serie eliminada: 54F6E2D7E16E
+2026-02-14 13:32:38 | INFO     | gui.abasto           | 🗑️ Serie eliminada: C45E5C999F78
+2026-02-14 13:32:39 | INFO     | gui.abasto           | 🗑️ Serie eliminada: 2150085243AGQ3034118
+2026-02-14 13:32:53 | INFO     | gui.abasto           | 🗑️ Serie eliminada: 2150085243AGQ3024248
+2026-02-14 13:38:07 | INFO     | database             | Abasto registrado exitosamente: 5 productos, 15208 unidades totales
+2026-02-14 13:39:54 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 34, in <lambda>
+    ventana.after(0, lambda: _finalizar_carga(ventana, frame_carga, callback_exito, datos))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 46, in _finalizar_carga
+    callback_exito(datos)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\abasto_scanner.py", line 399, in on_complete
+    self.limpiar_carrito()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\abasto_scanner.py", line 356, in limpiar_carrito
+    for item in self.tabla_carrito.get_children():
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\ttk.py", line 1198, in get_children
+    self.tk.call(self._w, "children", item or '') or ())
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: invalid command name ".!toplevel3.!notebook.!frame.!frame.!frame2.!canvas.!frame.!labelframe.!treeview"
+
+2026-02-14 13:41:11 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754431F7742AF -> SKU 4-4-644
+2026-02-14 13:41:11 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-14 13:41:43 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432B33CCAF -> SKU 4-4-644
+2026-02-14 13:41:44 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-14 13:41:52 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754430199B6AF -> SKU 4-4-644
+2026-02-14 13:41:52 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-02-14 13:44:50 | INFO     | gui.mobile_output_scanner | Item agregado: 1-4-61 x5
+2026-02-14 13:52:19 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 13:52:34 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-14 15:43:30 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 15:43:44 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'mysql.moviles' doesn't exist
+2026-02-14 15:43:44 | ERROR    | database             |    Query: SELECT nombre, conductor, ayudante FROM moviles
+2026-02-14 15:43:44 | ERROR    | database             |    Params: None
+2026-02-14 15:46:34 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 16:21:44 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 16:22:40 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 16:23:55 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL
+2026-02-14 16:26:18 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: MYSQL

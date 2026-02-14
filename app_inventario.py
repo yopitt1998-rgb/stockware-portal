@@ -1,15 +1,20 @@
 import sqlite3
 import sys
 import os
+from datetime import datetime, date, timedelta
+
+# Sistema de Logging Centralizado
+from utils.logger import get_logger, log_startup
+
+logger = get_logger(__name__)
+logger.info("Inicializando app_inventario...")
+
 
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox 
-from tkinter import filedialog 
-from datetime import datetime, date, timedelta
-import csv 
-from collections import defaultdict
-from dateutil import parser as dateparser
+from tkinter import filedialog
+
 import threading
 
 
@@ -18,18 +23,26 @@ import threading
 # =================================================================
 
 from config import *
+from config import set_branch_context # Explicit import
 
 from database import *
 
 # GUI Modules
-# GUI Modules
 from gui.utils import darken_color
-from gui.login import LoginWindow
 from gui.keyboard_shortcuts import setup_keyboard_shortcuts
 from gui.theme_manager import create_theme_manager
+from gui.styles import Styles
 
 
 
+
+# Global placeholders for lazy loaded modules
+DashboardTab = None
+InventoryTab = None
+SettingsTab = None
+AuditTab = None
+ProductsTab = None
+ProductsTab = None
 
 # =================================================================
 # 3. FUNCIONES DE EXPORTACIÓN
@@ -45,11 +58,15 @@ from gui.theme_manager import create_theme_manager
 # =================================================================
 
 class ModernInventarioApp:
-    def __init__(self, master, usuario=None):
+    def __init__(self, master):
         self.master = master
-        self.usuario_actual = usuario
-        branch_display = f" | 📍 {BRANCH_NAME}" if BRANCH_NAME else ""
-        self.master.title(f"🚀 StockWare - Gestión de Inventario ({usuario.get('usuario') if usuario else ''}){branch_display}")
+        
+        # Obtener contexto actual
+        from config import CURRENT_CONTEXT
+        branch_name = CURRENT_CONTEXT.get('BRANCH', 'Desconocido')
+        
+        branch_display = f" | 📍 SUCURSAL: {branch_name}" 
+        self.master.title(f"🚀 StockWare - Gestión de Inventario{branch_display}")
         self.master.configure(bg='#f8f9fa')
         
         # CONFIGURAR ICONO - NUEVO: Agregar ícono del programa
@@ -201,12 +218,12 @@ class ModernInventarioApp:
                         icon = tk.PhotoImage(file=icon_path)
                         self.master.iconphoto(True, icon)
                     except:
-                        print("No se pudo cargar el ícono PNG, usando ícono por defecto")
-                print(f"Ícono cargado: {icon_path}")
+                        logger.warning("No se pudo cargar el ícono PNG, usando ícono por defecto")
+                logger.info(f"Ícono cargado: {icon_path}")
             else:
-                print("No se encontró el archivo logo-StockWare.ico o logo-StockWare.png")
+                logger.warning("No se encontró el archivo logo-StockWare.ico o logo-StockWare.png")
         except Exception as e:
-            print(f"Error al cargar el ícono: {e}")
+            logger.error(f"Error al cargar el ícono: {e}")
 
     def setup_styles(self):
         """Configura estilos modernos para la aplicación"""
@@ -305,140 +322,222 @@ class ModernInventarioApp:
         header_frame.pack(fill='x', padx=0, pady=0)
         header_frame.pack_propagate(False)
         
-        title_label = ttk.Label(header_frame, 
-                               text="🚀 SISTEMA DE GESTIÓN DE INVENTARIO", 
-                               style='Title.TLabel')
-        title_label.pack(side='left', padx=30, pady=30)
-        
-        # Frame para información de usuario
-        user_frame = ttk.Frame(header_frame, style='Header.TFrame')
-        user_frame.pack(side='right', padx=30, pady=30)
-        
-        user_label = ttk.Label(user_frame, 
-                               text="👤 Administrador", 
-                               style='Title.TLabel',
-                               font=('Segoe UI', 12))
-        user_label.pack(side='right')
+        # Frame Principal
+        main_frame = tk.Frame(self.master, bg='#f8f9fa')
+        main_frame.pack(fill='both', expand=True)
 
-        # Panel principal con pestañas
-        self.main_notebook = ttk.Notebook(self.master, style='Modern.TFrame')
-        self.main_notebook.pack(fill='both', expand=True, padx=20, pady=20)
-        
-        # Pestaña 1: Dashboard Principal
-        self.dashboard_tab = DashboardTab(self.main_notebook, self)
-        
-        # Pestaña 2: Gestión de Inventario
-        self.inventory_tab = InventoryTab(self.main_notebook, self)
-        
-        # Pestaña 3: Movimientos (Mantiene estructura legacy por ahora o usa funciones de inventario)
-        self.create_movements_tab(self.main_notebook)
-        
-        # Pestaña 4: Reportes
-        self.reports_tab = ReportsTab(self.main_notebook, open_history_callback=self.inventory_tab.abrir_ventana_historial)
-        self.main_notebook.add(self.reports_tab, text="📊 Reportes")
-        
-        # Pestaña 5: Recordatorios
-        self.reminders_tab = RemindersTab(self.main_notebook, inventory_tab=self.inventory_tab)
-        self.main_notebook.add(self.reminders_tab, text="🔔 Recordatorios")
-        
-        # Pestaña 6: Cuadre Contable
-        cuadre_frame = ttk.Frame(self.main_notebook, style='Modern.TFrame')
-        self.main_notebook.add(cuadre_frame, text="💰 Cuadre Contable")
-        self.accounting_tab = CuadreContableMasivo(cuadre_frame)
+        # Configurar Grid
+        main_frame.columnconfigure(1, weight=1)
+        main_frame.rowconfigure(0, weight=1)
 
-        # Pestaña 7: Auditoría de Terreno (NUEVO - PUNTO 5)
-        self.audit_tab = AuditTab(self.main_notebook, self)
-        self.main_notebook.add(self.audit_tab, text="🔍 Auditoría Terreno")
+        # Sidebar Navigation
+        self.sidebar = tk.Frame(main_frame, bg='#2c3e50', width=250)
+        self.sidebar.grid(row=0, column=0, sticky='ns')
+        self.sidebar.pack_propagate(False)
+
+        # Header Sidebar
+        self.create_sidebar_header()
+
+        # Botones de Navegación
+        self.nav_buttons = {}
         
-        # Pestaña 8: Analítica Avanzada
-        self.analytics_tab = AnalyticsTab(self.main_notebook, self)
+        # NOTEBOOK PRINCIPAL
+        self.main_notebook = ttk.Notebook(main_frame)
+        self.main_notebook.grid(row=0, column=1, sticky='nsew', padx=20, pady=20)
         
-        # Pestaña 9: Configuración
-        if self.usuario_actual and self.usuario_actual.get('rol') == 'ADMIN':
-            self.settings_tab = SettingsTab(self.main_notebook, self)
-            self.main_notebook.add(self.settings_tab, text="⚙️ Configuración")
+        # DICCIONARIO DE PESTAÑAS (Nombre -> {frame, loaded, module_path, class_name})
+        self.tabs_data = {
+            "Dashboard": {
+                "loaded": False, 
+                "module": "gui.dashboard", 
+                "class": "DashboardTab",
+                "icon": "📊",
+                "btn_text": "Dashboard"
+            },
+            "Inventario": {
+                "loaded": False,
+                "module": "gui.inventory",
+                "class": "InventoryTab",
+                "icon": "📦",
+                "btn_text": "Inventario"
+            },
+            "Productos": {
+                "loaded": False,
+                "module": "gui.products",
+                "class": "ProductsTab",
+                "icon": "🏷️",
+                "btn_text": "Productos"
+            },
+
+            "Auditoría": {
+                "loaded": False,
+                "module": "gui.audit",
+                "class": "AuditTab",
+                "icon": "📋",
+                "btn_text": "Cuadre Terreno"
+            },
+
+            "Configuración": {
+                "loaded": False,
+                "module": "gui.settings",
+                "class": "SettingsTab",
+                "icon": "⚙️",
+                "btn_text": "Configuración"
+            },
+
+        }
+        
+        # CREAR PLACEHOLDERS
+        for name, data in self.tabs_data.items():
+            frame = ttk.Frame(self.main_notebook)
+            self.main_notebook.add(frame, text=name)
+            data['frame'] = frame # Guardar referencia al frame contenedor
+            
+            # Crear botón en sidebar
+            btn = self.create_nav_button(data['btn_text'], data['icon'], name)
+            self.nav_buttons[name] = btn
+
+        # BIND EVENTO DE CAMBIO DE PESTAÑA
+        self.main_notebook.bind("<<NotebookTabChanged>>", self.on_tab_changed)
+        
+        # CARGAR DASHBOARD INMEDIATAMENTE (Para que no esté vacío al inicio)
+        self.load_tab("Dashboard")
+
+    def create_sidebar_header(self):
+        header = tk.Frame(self.sidebar, bg='#2c3e50', pady=20)
+        header.pack(fill='x')
+        
+        tk.Label(header, text="STOCKWARE", font=('Segoe UI', 16, 'bold'), 
+                bg='#2c3e50', fg='white').pack()
+        tk.Label(header, text="Enterprise Edition", font=('Segoe UI', 8), 
+                bg='#2c3e50', fg='#bdc3c7').pack()
+
+    def create_nav_button(self, text, icon, tab_name):
+        btn = tk.Button(self.sidebar, text=f"  {icon}  {text}", anchor='w',
+                       font=('Segoe UI', 11), bg='#2c3e50', fg='#ecf0f1',
+                       activebackground='#34495e', activeforeground='white',
+                       relief='flat', bd=0, padx=20, pady=12,
+                       command=lambda: self.switch_to_tab(tab_name))
+        btn.pack(fill='x', pady=2)
+        return btn
+
+    def switch_to_tab(self, tab_name):
+        # Encontrar índice
+        for i, name in enumerate(self.tabs_data.keys()):
+            if name == tab_name:
+                self.main_notebook.select(i)
+                break
+                
+    def on_tab_changed(self, event):
+        # Identificar pestaña actual
+        try:
+            current_tab_index = self.main_notebook.index(self.main_notebook.select())
+            tab_name = self.main_notebook.tab(current_tab_index, "text")
+            
+            # Actualizar estilo botones
+            for name, btn in self.nav_buttons.items():
+                if name == tab_name:
+                    btn.configure(bg='#34495e', fg='#3498db', font=('Segoe UI', 11, 'bold'))
+                else:
+                    btn.configure(bg='#2c3e50', fg='#ecf0f1', font=('Segoe UI', 11))
+                    
+            # Cargar módulo si no está cargado
+            self.load_tab(tab_name)
+        except Exception:
+            pass
+
+    def load_tab(self, tab_name):
+        data = self.tabs_data.get(tab_name)
+        if not data: return
+        
+        if data['loaded']:
+            return # Ya cargado
+            
+        # =================================================================
+        # ADAPTER: Inyectar método .add() al frame contenedor
+        # =================================================================
+        # Esto permite que los tabs (Dashboard, etc.) usen este frame como si fuera 
+        # un Notebook (llamando a .add) y como master (para crear widgets hijos).
+        if not hasattr(data['frame'], 'add'):
+            def _fake_add(self, child, **kwargs):
+                child.pack(fill='both', expand=True)
+            
+            # Monkey-patch del método add en la instancia del frame
+            import types
+            data['frame'].add = types.MethodType(_fake_add, data['frame'])
+
+        # Mostrar indicador de carga (opcional, si es muy lento)
+        logger.info(f"Lazy loading tab: {tab_name}...")
+        
+        try:
+            import importlib
+            module = importlib.import_module(data['module'])
+            cls = getattr(module, data['class'])
+            
+            # Limpiar cualquier cosa previa en el frame (no debería haber)
+            for widget in data['frame'].winfo_children():
+                widget.destroy()
+                
+            # Instanciar clase dentro del frame placeholder
+            # Nota: Algunas clases requieren parámetros específicos
+            instance = None
+            # Instanciar clase dentro del frame placeholder
+            instance = None
+            
+            # TABS ESTÁNDAR
+            # Pasamos data['frame'] que ahora tiene .add() y es un Widget válido
+            instance = cls(data['frame'], self)
+                
+            # Si la instancia es un Widget (como Reportes o Recordatorios que heredan de Frame),
+            # necesitamos empacarla dentro del placeholder.
+            # Los controladores (Dashboard, Inventario) no son widgets, sus vistas se empacan vía Adapter.
+            if isinstance(instance, tk.Widget):
+                instance.pack(fill='both', expand=True)
+            
+            # Guardar referencia
+            setattr(self, f"{data['class'].lower()}", instance) 
+            
+            # Mapeos específicos legado
+            if tab_name == "Dashboard": self.dashboard_tab = instance
+            elif tab_name == "Inventario": self.inventory_tab = instance
+            elif tab_name == "Auditoría": self.audit_tab = instance
+            elif tab_name == "Productos": self.products_tab = instance
+            elif tab_name == "Configuración": self.settings_tab = instance
+            
+            data['loaded'] = True
+            logger.info(f"Tab {tab_name} loaded successfully.")
+            
+        except Exception as e:
+            logger.error(f"Error loading tab {tab_name}: {e}")
+            import traceback
+            traceback.print_exc()
+            tk.Label(data['frame'], text=f"Error cargando módulo:\n{e}", fg='red').pack()
 
 
-    # create_dashboard_tab moved to gui/dashboard.py
 
-    # create_metric_card moved to gui/dashboard.py
+    def perform_inventory_action(self, method_name):
+        """Ejecuta una acción del tab de inventario, cargándolo si es necesario"""
+        try:
+            # Asegurar que Inventario esté cargado
+            self.load_tab("Inventario")
+            
+            # Obtener referencia
+            if not hasattr(self, 'inventory_tab'):
+                 messagebox.showerror("Error", "No se pudo cargar el módulo de Inventario.")
+                 return
+                 
+            # Ejecutar método
+            if hasattr(self.inventory_tab, method_name):
+                method = getattr(self.inventory_tab, method_name)
+                method()
+            else:
+                messagebox.showerror("Error", f"Método {method_name} no encontrado en Inventario.")
+        except Exception as e:
+            logger.error(f"Error executing inventory action {method_name}: {e}")
+            messagebox.showerror("Error", f"Error ejecutando acción: {e}")
 
-    # create_inventory_tab moved to gui/inventory.py
 
-    def create_movements_tab(self, notebook):
-        """Crear pestaña de Movimientos"""
-        movements_frame = ttk.Frame(notebook, style='Modern.TFrame')
-        notebook.add(movements_frame, text="🔄 Movimientos")
-        
-        # Implement Scrollable Canvas
-        canvas = tk.Canvas(movements_frame, bg=self.light_bg, highlightthickness=0)
-        scrollbar = ttk.Scrollbar(movements_frame, orient="vertical", command=canvas.yview)
-        
-        movements_frame_inner = ttk.Frame(canvas, style='Modern.TFrame')
-        
-        # Configure scrolling
-        movements_frame_inner.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
-        
-        canvas.create_window((0, 0), window=movements_frame_inner, anchor="nw", width=canvas.winfo_reqwidth())
-        canvas.configure(yscrollcommand=scrollbar.set)
-        
-        # Pack layouts
-        canvas.pack(side="left", fill="both", expand=True, padx=20, pady=20)
-        scrollbar.pack(side="right", fill="y")
-        
-        # Ensure inner frame resizes with canvas
-        def on_canvas_configure(event):
-            canvas.itemconfig(canvas.find_withtag("all")[0], width=event.width)
-        canvas.bind("<Configure>", on_canvas_configure)
 
-        
-        movement_buttons = [
-            ("🚚 Abasto Completo", "Registro de entrada de material a bodega", self.inventory_tab.abrir_ventana_abasto, self.success_color),
-            ("📂 Gestión de Abastos", "Historial, detalle y edición de abastos", self.inventory_tab.abrir_ventana_gestion_abastos, self.info_color),
-            ("🏁 Inventario Inicial", "Carga de stock inicial (solo inicio)", self.inventory_tab.abrir_ventana_inicial, "#3f51b5"),
-            ("📤 Salida a Móvil", "Asignación de material a vehículos", self.inventory_tab.abrir_ventana_salida_movil, self.secondary_color),
-            ("🔄 Retorno de Móvil", "Devolución de material desde vehículos", self.inventory_tab.abrir_ventana_retorno_movil, self.info_color),
-            ("📂 Conciliación Excel", "Comparar consumo contra archivo Excel", self.inventory_tab.abrir_conciliacion, self.primary_color),
-            ("⚖️ Conciliación", "Ver y ajustar saldo de móvil (Manual)", self.inventory_tab.abrir_ventana_consiliacion, self.warning_color)
-        ]
-        
-        for i, (title, description, command, color) in enumerate(movement_buttons):
-            card = self.create_movement_card(movements_frame_inner, title, description, command, color, i)
-        
-        movements_frame_inner.columnconfigure(0, weight=1)
-        movements_frame_inner.columnconfigure(1, weight=1)
-
-    def create_movement_card(self, parent, title, description, command, color, index):
-        """Crear tarjeta de movimiento moderna"""
-        row = index // 2
-        col = index % 2
-        
-        card = tk.Frame(parent, bg='white', relief='raised', borderwidth=0,
-                       highlightbackground='#e0e0e0', highlightthickness=1)
-        card.grid(row=row, column=col, padx=10, pady=10, sticky='nsew')
-        
-        # Título
-        title_label = tk.Label(card, text=title, font=('Segoe UI', 14, 'bold'),
-                              bg='white', fg=color, justify='left')
-        title_label.pack(anchor='w', padx=20, pady=(20, 5))
-        
-        # Descripción
-        desc_label = tk.Label(card, text=description, font=('Segoe UI', 10),
-                             bg='white', fg='#666666', justify='left', wraplength=300)
-        desc_label.pack(anchor='w', padx=20, pady=(0, 20))
-        
-        # Botón de acción
-        action_btn = tk.Button(card, text="Abrir", command=command,
-                              bg=color, fg='white', font=('Segoe UI', 10, 'bold'),
-                              relief='flat', bd=0, padx=20, pady=8, cursor='hand2')
-        action_btn.pack(anchor='e', padx=20, pady=(0, 15))
-        action_btn.bind("<Enter>", lambda e, b=action_btn: b.configure(bg=darken_color(b.cget('bg'))))
-        action_btn.bind("<Leave>", lambda e, b=action_btn, c=color: b.configure(bg=c))
-        
-        return card
 
 
 
@@ -446,82 +545,176 @@ class ModernInventarioApp:
 # 6. INICIALIZACIÓN DE LA APLICACIÓN
 # =================================================================
 
+# =================================================================
+# 0. SELECTOR DE SUCURSAL
+# =================================================================
+class BranchSelectorWindow:
+    def __init__(self, root, on_select_callback):
+        self.root = root
+        self.on_select_callback = on_select_callback
+        
+        root.title("Seleccionar Sucursal")
+        root.geometry("400x350")
+        root.configure(bg='#2c3e50')
+        
+        # Centrar
+        root.withdraw()
+        root.update_idletasks()
+        x = (root.winfo_screenwidth() - 400) // 2
+        y = (root.winfo_screenheight() - 350) // 2
+        root.geometry(f"+{x}+{y}")
+        root.deiconify()
+
+        # UI
+        main_frame = tk.Frame(root, bg='#2c3e50', padx=20, pady=20)
+        main_frame.pack(fill='both', expand=True)
+
+        tk.Label(main_frame, text="STOCKWARE", font=('Segoe UI', 20, 'bold'), fg='#ecf0f1', bg='#2c3e50').pack(pady=(10, 5))
+        tk.Label(main_frame, text="Seleccione su Ubicación", font=('Segoe UI', 12), fg='#bdc3c7', bg='#2c3e50').pack(pady=(0, 20))
+
+        # Botón CHIRIQUÍ
+        btn_chiriqui = tk.Button(main_frame, text="📍 CHIRIQUÍ\n(Bodega Principal)", 
+                                command=lambda: self.seleccionar("CHIRIQUI"),
+                                bg='#3498db', fg='white', font=('Segoe UI', 12, 'bold'),
+                                relief='flat', pady=10, cursor='hand2')
+        btn_chiriqui.pack(fill='x', pady=10)
+
+        # Botón SANTIAGO
+        btn_santiago = tk.Button(main_frame, text="📍 SANTIAGO\n(Sucursal)", 
+                                command=lambda: self.seleccionar("SANTIAGO"),
+                                bg='#e67e22', fg='white', font=('Segoe UI', 12, 'bold'),
+                                relief='flat', pady=10, cursor='hand2')
+        btn_santiago.pack(fill='x', pady=10)
+
+        tk.Label(main_frame, text="v2.5.0 Enterprise", font=('Segoe UI', 8), fg='#7f8c8d', bg='#2c3e50').pack(side='bottom', pady=10)
+
+    def seleccionar(self, sucursal):
+        set_branch_context(sucursal)
+        self.root.destroy()
+        self.on_select_callback()
 
 def main():
-    # 1. Crear ventana principal de inmediato para evitar sensación de lentitud
-    root = tk.Tk()
-    root.withdraw()
 
-    # 2. Inicializar base de datos (con optimización de cache ya aplicada)
-    db_existe = os.path.exists(DATABASE_NAME)
-    inicializar_bd()
+    # 0. CARGAR PREFERENCIA DE SUCURSAL
+    from config import load_branch_preference, set_branch_context
+    sucursal = load_branch_preference()
+    set_branch_context(sucursal)
     
-    if not db_existe:
-        poblar_datos_iniciales()
-        print("[OK] Base de datos inicializada y poblada con datos iniciales.")
-    else:
-        print("[OK] Base de datos ya existe. Esquema verificado.")
+    # Iniciar aplicación directamente
+    iniciar_aplicacion_principal()
+
+    # (Selector eliminado para agilizar inicio)
+    # BranchSelectorWindow(selector_root, on_branch_selected)
+    # selector_root.mainloop()
+
+def iniciar_aplicacion_principal():
+    """Inicia el flujo normal Login -> App, una vez configurada la sucursal"""
+    root = tk.Tk()
+    root.withdraw() # Ocultar ventana principal hasta login
+    
+    # 1. VERIFICAR DB
+    db_existe = os.path.exists(DATABASE_NAME) # Nota: Esto verifica la SQLite local base, para MySQL no importa tanto
+    # Si estamos en modo Local-Santiago, quizá debamos checkear esa DB.
+    # Pero `inicializar_bd` usará `get_db_connection` que ya conoce el contexto.
+    
+    try:
+        inicializar_bd()
+    except Exception as e:
+        messagebox.showerror("Error de Inicio", f"No se pudo conectar a la Base de Datos:\\n{e}")
+        root.destroy()
+        return
+
+    # Si es SQLite y no existía, poblar (Solo para la default por ahora)
+    # Mejorar lógica si se requiere poblar Santiago independiente.
     
     # 3. EJECUTAR LIMPIEZA EN SEGUNDO PLANO
     def iniciar_tareas_segundo_plano():
         def run_optimization():
             try:
-                print("[INFO] Ejecutando tareas de optimización en segundo plano...")
-                verificar_y_corregir_duplicados_completo(silent=True)
-                print("[OK] Tareas de optimización completadas.")
+                # logger.info("Ejecutando tareas de optimización en segundo plano...")
+                # verificar_y_corregir_duplicados_completo(silent=True)
+                pass # Desactivado temporalmente para agilizar inicio
             except Exception as e:
-                print(f"[ERROR] Error en tareas de optimización: {e}")
+                logger.error(f"Error en tareas de optimización: {e}")
         
         thread = threading.Thread(target=run_optimization, daemon=True)
         thread.start()
     
-    def bootstrap_app(usuario):
-        print(f"[LOGIN] Sesión iniciada: {usuario['usuario']} ({usuario['rol']})")
+    def bootstrap_app():
+        logger.info("Bootstrap Start")
+        try:
+            logger.info("[INIT] Iniciando aplicación principal")
+            
+            # INICIAR PORTAL MÓVIL (en segundo plano)
+            # DESACTIVADO POR PETICIÓN: Solo usar portal Render
+            # try:
+            #     import web_server
+            #     portal_ip = web_server.start_server_thread()
+            #     logger.info(f"[WEB] PORTAL MOVIL ACTIVO: http://{portal_ip}:5000")
+            # except Exception as w:
+            #     logger.error(f"[WEB] No se pudo iniciar servidor web: {w}")
+            logger.info("Local Web Server is disabled. Using Render Portal.")
+            
+            # Inicializar App principal (SIN importar módulos GUI pesados aún)
+            logger.debug("Instantiating ModernInventarioApp...")
+            app = ModernInventarioApp(root)
+            logger.debug("App Instantiated. Deiconifying root.")
+        except Exception as e:
+            msg = f"FATAL BOOTSTRAP ERROR: {e}"
+            logger.critical(msg)
+            import traceback
+            logger.critical(traceback.format_exc())
+            messagebox.showerror("Fatal Error", msg)
+            root.destroy()
+            return
+            
+        root.deiconify()
         
-        # IMPORTACIÓN DIFERIDA (PUNTO 3 - RENDIMIENTO)
-        # Cargamos los módulos pesados SOLO después del login exitoso
-        global DashboardTab, InventoryTab, ReportsTab, RemindersTab, CuadreContableMasivo, SettingsTab, AuditTab, AnalyticsTab
-        from gui.dashboard import DashboardTab
-        from gui.inventory import InventoryTab
-        from gui.reports import ReportsTab
-        from gui.reminders import RemindersTab
-        from gui.accounting import CuadreContableMasivo
-        from gui.settings import SettingsTab
-        from gui.audit import AuditTab
-        from gui.analytics import AnalyticsTab
-        
-        login_top.destroy()
-        
-        # INICIAR PORTAL MÓVIL (PUNTO 5)
-        import web_server
-        portal_ip = web_server.start_server_thread()
-        print(f"[WEB] PORTAL MOVIL ACTIVO: http://{portal_ip}:5000")
-        
-        # Inicializar App principal
-        app = ModernInventarioApp(root, usuario)
-        root.deiconify() # Mostrar ventana principal
-        
-        # Mostrar alerta de portal móvil (opcional pero util)
-        # app.mostrar_mensaje_emergente("Portal Móvil", f"Servidor iniciado en http://{portal_ip}:5000", "info")
-        
-        # Configurar cierre seguro
         def on_closing():
             if messagebox.askokcancel("Salir", "¿Está seguro que desea salir de la aplicación?"):
                 root.destroy()
         
         root.protocol("WM_DELETE_WINDOW", on_closing)
 
-    # Mostrar ventana de Login
-    login_top = tk.Toplevel(root)
-    # login_top.protocol("WM_DELETE_WINDOW", root.destroy) # Si cierran login, cierran todo -> CAUSABA DOBLE CIERRE CON ROOT
-    login_top.protocol("WM_DELETE_WINDOW", lambda: sys.exit(0))
-    LoginWindow(login_top, bootstrap_app)
+    # Iniciar aplicación directamente (login removido)
+    logger.info("Iniciando aplicación sin sistema de login")
+    root.after(100, bootstrap_app)
+ 
     
-    # Programar limpieza para 1 segundo después para no bloquear ventana de login
+    # MANEJADOR GLOBAL DE EXCEPCIONES GUI
+    def report_callback_exception(exc, val, tb):
+        import traceback
+        err_msg = "".join(traceback.format_exception(exc, val, tb))
+        logger.error(f"UNHANDLED GUI EXCEPTION:\n{err_msg}")
+        messagebox.showerror("Error Inesperado", f"Se ha producido un error inesperado:\n\n{val}\n\nRevise el log para más detalles.")
+        
+    root.report_callback_exception = report_callback_exception
+
     root.after(1000, iniciar_tareas_segundo_plano)
-    
-    # Iniciar aplicación
     root.mainloop()
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        import traceback
+        with open("crash_log.txt", "w") as f:
+            f.write(traceback.format_exc())
+            
+        # Intentar loguear si es posible
+        try:
+            from utils.logger import get_logger
+            logger = get_logger("CRASH")
+            logger.critical(f"APP CRASHED: {e}")
+            logger.critical(traceback.format_exc())
+        except:
+            print("CRASHED:", e)
+            
+        # Si hay GUI, mostrar error
+        try:
+            import tkinter.messagebox
+            tkinter.messagebox.showerror("Fatal Error", f"La aplicación se cerró inesperadamente:\n{e}")
+        except:
+            pass
+            
+        # input("Press Enter to exit...") # Desactivado para producción

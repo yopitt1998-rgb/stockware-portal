@@ -8,10 +8,9 @@ from database import (
     obtener_todos_los_skus_para_movimiento,
     obtener_detalles_moviles
 )
-from config import DB_TYPE
-from datetime import date
 import threading
 import json
+from config import DB_TYPE, PAQUETES_MATERIALES
 
 # Mapeo SKU → Nombre Excel (para mostrar nombres cortos en portal)
 SKU_TO_EXCEL_NAME = {
@@ -106,6 +105,7 @@ def index():
                                  productos=productos_excel if 'productos_excel' in locals() else [],
                                  details_moviles=json.dumps(details_moviles if 'details_moviles' in locals() else {}),
                                  sku_to_excel_name=json.dumps(SKU_TO_EXCEL_NAME),
+                                 paquetes=json.dumps(PAQUETES_MATERIALES),
                                  db_status=status,
                                  db_engine=engine,
                                  error_detail=error_detail,
@@ -255,10 +255,9 @@ def get_inventario_movil(movil):
         conn = get_db_connection(target_db=target_db)
         cursor = conn.cursor()
         
-        # Obtener asignación del móvil - CORREGIDO: columnas reales son 'movil' y 'cantidad'
-        # Necesitamos JOIN con productos para obtener el nombre
+        # Obtener asignación del móvil - INCLUYENDO PAQUETE
         sql_asignacion = """
-            SELECT p.nombre, a.sku_producto, a.cantidad
+            SELECT p.nombre, a.sku_producto, a.cantidad, COALESCE(a.paquete, 'NINGUNO') as paquete
             FROM asignacion_moviles a
             JOIN productos p ON a.sku_producto = p.sku AND p.ubicacion = 'BODEGA'
             WHERE a.movil = ?
@@ -268,7 +267,7 @@ def get_inventario_movil(movil):
         asignacion = cursor.fetchall()
         
         inventario = []
-        for nombre, sku, cantidad in asignacion:
+        for nombre, sku, cantidad, paquete in asignacion:
             if sku in PRODUCTOS_CON_CODIGO_BARRA:
                 # Obtener seriales disponibles (ubicacion = movil)
                 sql_series = """
@@ -284,6 +283,7 @@ def get_inventario_movil(movil):
                 inventario.append({
                     "sku": sku,
                     "nombre": nombre,
+                    "paquete": paquete,
                     "seriales": seriales,
                     "cantidad_total": len(seriales),
                     "tiene_series": True
@@ -293,6 +293,7 @@ def get_inventario_movil(movil):
                 inventario.append({
                     "sku": sku,
                     "nombre": nombre,
+                    "paquete": paquete,
                     "cantidad_total": cantidad,
                     "tiene_series": False
                 })
@@ -364,19 +365,49 @@ def registrar_bulk():
         materiales = data.get('materiales', [])
         
         for item in materiales:
+            sku = item['sku']
             # Extraer seriales si existen
             seriales = item.get('seriales', [])
             seriales_json = json.dumps(seriales) if seriales else None
             cantidad = item.get('cantidad', len(seriales) if seriales else 0)
             
-            # Ejecutamos el insert directamente aquí para usar la misma conexión/transacción
+            # 1. DEDUCCIÓN INMEDIATA DEL STOCK (Para que funcione Offline/PC Apagada)
+            try:
+                # Importar función de movimiento (asegurar que está disponible)
+                from database import registrar_movimiento_gui
+                
+                # Crear observación
+                obs = f"Consumo Web - Ticket: {data.get('contrato')} - Colilla: {data.get('colilla')}"
+                
+                # Registrar movimiento REAL inmediatamente
+                exito_mov, msg_mov = registrar_movimiento_gui(
+                    sku=sku,
+                    tipo_movimiento='CONSUMO_MOVIL',
+                    cantidad_afectada=cantidad,
+                    movil_afectado=data['movil'],
+                    fecha_evento=data['fecha'],
+                    paquete_asignado=data.get('paquete'), # Pass package from web portal
+                    observaciones=obs,
+                    documento_referencia=data.get('contrato'),
+                    existing_conn=conn # Usar misma conexión
+                )
+                
+                if not exito_mov:
+                    raise Exception(f"Fallo al descontar {sku}: {msg_mov}")
+                    
+            except Exception as e:
+                # Si falla la deducción, abortamos todo el bloque
+                raise Exception(f"Error procesando {sku}: {str(e)}")
+
+            # 2. CREAR REGISTRO DE AUDITORÍA (AUTO_APROBADO)
+            # Esto permite que en la PC se vea el registro, pero marcado como ya procesado
             run_query(cursor, """
                 INSERT INTO consumos_pendientes 
-                (movil, sku, cantidad, tecnico_nombre, ayudante_nombre, ticket, fecha, colilla, num_contrato, seriales_usados)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (movil, sku, cantidad, tecnico_nombre, ayudante_nombre, ticket, fecha, colilla, num_contrato, seriales_usados, estado)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'AUTO_APROBADO')
             """, (
                 data['movil'],
-                item['sku'],
+                sku,
                 cantidad,
                 data['tecnico'],
                 data.get('ayudante', ''),
@@ -384,12 +415,12 @@ def registrar_bulk():
                 data['fecha'],
                 data['colilla'],
                 data['contrato'],  # num_contrato
-                seriales_json  # NUEVO: seriales en JSON
+                seriales_json
             ))
             
-            # Actualizar ubicación de series a CONSUMIDO
+            # 3. Actualizar ubicación de series a CONSUMIDO (Redundante si registrar_movimiento lo hace, pero seguro)
             if seriales:
-                print(f"[WEB] Actualizando {len(seriales)} series a CONSUMIDO para {item['sku']}")
+                print(f"[WEB] Actualizando {len(seriales)} series a CONSUMIDO para {sku}")
                 for serial in seriales:
                     run_query(cursor, """
                         UPDATE series_registradas
@@ -400,13 +431,24 @@ def registrar_bulk():
             exitos += 1
         
         conn.commit()
-        return jsonify({"exito": True, "mensaje": f"Reporte enviado con éxito ({exitos} materiales)"})
+        return jsonify({"exito": True, "mensaje": f"Consumo procesado y descontado exitosamente ({exitos} items)"})
 
     except Exception as e:
         if conn: conn.rollback()
         return jsonify({"exito": False, "mensaje": f"Error de base de datos: {str(e)}"})
     finally:
         if conn: conn.close()
+
+@app.route('/api/stock_movil/<movil>')
+def api_stock_movil(movil):
+    """Retorna el inventario actual de un móvil en formato JSON"""
+    try:
+        from database import obtener_inventario_movil
+        inventario = obtener_inventario_movil(movil)
+        return jsonify(inventario)
+    except Exception as e:
+        print(f"Error en api_stock_movil: {e}")
+        return jsonify({}), 500
 
 def start_server():
     # Detectar puerto (Render asigna uno dinámicamente)

@@ -1,0 +1,195 @@
+﻿# =================================================================
+# FUNCIONES PARA SISTEMA DE ESCANEO UNIVERSAL
+# Agregado: 2026-02-11
+# =================================================================
+
+def buscar_producto_por_codigo_barra_maestro(codigo_barra):
+    '''
+    Busca un producto por su código de barra maestro en BODEGA.
+    
+    Args:
+        codigo_barra: Código de barra maestro o SKU
+    
+    Returns:
+        dict con {sku, nombre, stock_actual, tiene_seriales} o None
+    '''
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Buscar por codigo_barra_maestro o por SKU (fallback)
+        run_query(cursor, '''
+            SELECT sku, nombre, cantidad 
+            FROM productos 
+            WHERE (codigo_barra_maestro = ? OR sku = ?) 
+              AND ubicacion = ''BODEGA''
+            LIMIT 1
+        ''', (codigo_barra, codigo_barra))
+        
+        resultado = cursor.fetchone()
+        if not resultado:
+            return None
+            
+        sku, nombre, stock = resultado
+        
+        # Determinar si tiene seriales
+        from config import PRODUCTOS_CON_CODIGO_BARRA
+        tiene_seriales = sku in PRODUCTOS_CON_CODIGO_BARRA
+        
+        return {
+            ''sku'': sku,
+            ''nombre'': nombre,
+            ''stock_actual'': stock,
+            ''tiene_seriales'': tiene_seriales
+        }
+    except Exception as e:
+        logger.error(f'Error buscando producto por código de barra {codigo_barra}: {e}')
+        return None
+    finally:
+        if conn: 
+            close_connection(conn)
+
+
+def actualizar_codigo_barra_maestro(sku, codigo_barra_maestro):
+    '''
+    Actualiza el código de barra maestro de un producto.
+    
+    Args:
+        sku: SKU del producto
+        codigo_barra_maestro: Nuevo código de barra maestro
+    
+    Returns:
+        tuple (exito: bool, mensaje: str)
+    '''
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Verificar si el código ya existe en otro producto
+        if codigo_barra_maestro:
+            run_query(cursor, '''
+                SELECT sku FROM productos 
+                WHERE codigo_barra_maestro = ? AND sku != ?
+                LIMIT 1
+            ''', (codigo_barra_maestro, sku))
+            
+            if cursor.fetchone():
+                return False, f'El código de barra ''{codigo_barra_maestro}'' ya está asignado a otro producto'
+        
+        # Actualizar
+        run_query(cursor, '''
+            UPDATE productos 
+            SET codigo_barra_maestro = ?
+            WHERE sku = ? AND ubicacion = ''BODEGA''
+        ''', (codigo_barra_maestro, sku))
+        
+        conn.commit()
+        logger.info(f'Código de barra maestro actualizado: {sku} -> {codigo_barra_maestro}')
+        return True, 'Código de barra actualizado exitosamente'
+        
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        logger.error(f'Error actualizando código de barra maestro: {e}')
+        return False, f'Error: {e}'
+    finally:
+        if conn:
+            close_connection(conn)
+
+
+def registrar_abasto_batch(items_abasto, fecha_evento, numero_abasto=None):
+    '''
+    Registra múltiples items de abasto en una sola transacción.
+    
+    Args:
+        items_abasto: Lista de dicts [{sku, cantidad, seriales}, ...]
+        fecha_evento: Fecha del abasto
+        numero_abasto: Número opcional del abasto
+    
+    Returns:
+        tuple (exito: bool, mensaje: str)
+    '''
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Iniciar transacción
+        if DB_TYPE == ''MYSQL'':
+            cursor.execute('START TRANSACTION')
+        else:
+            cursor.execute('BEGIN IMMEDIATE')
+        
+        total_unidades = 0
+        
+        for item in items_abasto:
+            sku = item[''sku'']
+            cantidad = item[''cantidad'']
+            seriales = item.get(''seriales'', [])
+            
+            observacion = f'Abasto por escaneo'
+            if numero_abasto:
+                observacion += f' #{numero_abasto}'
+            if seriales:
+                observacion += f' ({len(seriales)} equipos con seriales)'
+            
+            # Registrar movimiento
+            exito, msg = registrar_movimiento_gui(
+                sku=sku,
+                tipo_movimiento=''ABASTO'',
+                cantidad_afectada=cantidad,
+                fecha_evento=fecha_evento,
+                observaciones=observacion,
+                existing_conn=conn
+            )
+            
+            if not exito:
+                conn.rollback()
+                logger.error(f'Error registrando abasto para {sku}: {msg}')
+                return False, f'Error en {sku}: {msg}'
+            
+            # Registrar seriales si aplica
+            if seriales:
+                for serial in seriales:
+                    try:
+                        # Verificar duplicado
+                        run_query(cursor, '''
+                            SELECT COUNT(*) FROM series_registradas 
+                            WHERE serial_number = ?
+                        ''', (serial,))
+                        
+                        if cursor.fetchone()[0] > 0:
+                            conn.rollback()
+                            return False, f'El serial ''{serial}'' ya está registrado'
+                        
+                        # Insertar serial
+                        run_query(cursor, '''
+                            INSERT INTO series_registradas 
+                            (sku, serial_number, estado, ubicacion, fecha_registro)
+                            VALUES (?, ?, ''DISPONIBLE'', ''BODEGA'', ?)
+                        ''', (sku, serial, fecha_evento))
+                        
+                    except Exception as e:
+                        conn.rollback()
+                        logger.error(f'Error registrando serial {serial}: {e}')
+                        return False, f'Error registrando serial: {e}'
+            
+            total_unidades += cantidad
+        
+        # Commit
+        conn.commit()
+        
+        mensaje = f'Abasto registrado: {len(items_abasto)} productos, {total_unidades} unidades'
+        logger.info(mensaje)
+        return True, mensaje
+        
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        logger.error(f'Error en abasto batch: {e}')
+        return False, f'Error: {e}'
+    finally:
+        if conn:
+            close_connection(conn)

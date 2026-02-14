@@ -1,0 +1,21 @@
+Checking 11 mobiles...
+Total assignments in DB: 4
+
+--- Testing Portal Query for Movil 201 ---
+1. Raw Assignment Table:
+   ('7-1-171', 100, 'PAQUETE A')
+   ('10-1-04', 5, 'PAQUETE A')
+   ('1-4-61', 5, 'PAQUETE A')
+   ('4-4-644', 5, 'PAQUETE A')
+
+2. Products Table (BODEGA check for assigned SKUs):
+   [OK] 7-1-171 found in BODEGA: ('7-1-171', 'CABLE COBRE UTP CM CATEGORIA 6 AZUL 9C6M4E20', 'BODEGA')
+   [OK] 10-1-04 found in BODEGA: ('10-1-04', 'CONECTOR SENCILLO MACHO RJ-45 CATEGORIA 6 P', 'BODEGA')
+   [OK] 1-4-61 found in BODEGA: ('1-4-61', 'PLACA PEQ. "PRECAUCION FIBRA"', 'BODEGA')
+   [OK] 4-4-644 found in BODEGA: ('4-4-644', 'ONT HUAWEI EchoLife EG8145V5 2PLAY @ + TELF. + WIFI', 'BODEGA')
+
+3. Full Portal Query Simulation:
+   ('PLACA PEQ. "PRECAUCION FIBRA"', '1-4-61', 5, 'PAQUETE A')
+   ('CONECTOR SENCILLO MACHO RJ-45 CATEGORIA 6 P', '10-1-04', 5, 'PAQUETE A')
+   ('ONT HUAWEI EchoLife EG8145V5 2PLAY @ + TELF. + WIFI', '4-4-644', 5, 'PAQUETE A')
+   ('CABLE COBRE UTP CM CATEGORIA 6 AZUL 9C6M4E20', '7-1-171', 100, 'PAQUETE A')
