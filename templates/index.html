@@ -308,6 +308,14 @@
                     {% endfor %}
                 </select>
             </div>
+
+            <div class="form-group" id="group_paquete" style="display:none;">
+                <label>Paquete de Trabajo:</label>
+                <select name="paquete" id="paquete_select">
+                    <option value="PAQUETE A">PAQUETE A (Hoy)</option>
+                    <option value="PAQUETE B">PAQUETE B (Hoy)</option>
+                </select>
+            </div>
             <div class="form-group">
                 <label>Técnico (Conductor):</label>
                 <input type="text" name="tecnico" id="tecnico" required>
@@ -359,12 +367,23 @@
         const EXTENDER_B = '4-4-647';
 
         // Variables globales para inventario y selección
-        window.INVENTARIO_ACTUAL = null;
+        // Transformar tuplas de Python (nombre, sku, cantidad) a Objetos JS
+        const RAW_INVENTARIO = {{ productos | tojson | safe }};
+        const PRODUCTOS = RAW_INVENTARIO.map(p => ({
+            nombre: p[0],
+            sku: p[1],
+            cantidad_bodega: p[2],
+            tiene_series: ["U4-4-633", "4-4-644", "4-4-646", "4-4-647", "4-4-654", "4-4-656"].includes(p[1]) || p[1].startsWith("8-1-9")
+        }));
+
+        window.INVENTARIO_ACTUAL = PRODUCTOS;
+        window.INVENTARIO_MOVIL = {}; // Nuevo: Almacena stock actual del móvil
         window.SERIALES_SELECCIONADOS = {};  // {sku: [seriales]}
 
         // Auto-completado + Carga de Inventario
         document.getElementById('movil_select').onchange = async function () {
             const movil = this.value;
+            const groupPaquete = document.getElementById('group_paquete');
 
             // Auto-completar conductor/ayudante (SIEMPRE funciona)
             try {
@@ -379,27 +398,42 @@
 
             // Cargar inventario del móvil (OPCIONAL - no rompe si falla)
             if (movil && movil !== '' && movil !== '--- Seleccionar ---') {
+                groupPaquete.style.display = 'block'; // Mostrar selector de paquete
                 try {
-                    const res = await fetch(`/api/inventario/${encodeURIComponent(movil)}`);
-                    if (res.ok) {
-                        const data = await res.json();
-                        if (data.inventario) {
-                            window.INVENTARIO_ACTUAL = data.inventario;
-                            window.SERIALES_SELECCIONADOS = {};  // Resetear
-                            actualizarUIConInventario();
+                    // Cargar inventario del móvil (Stock Asignado)
+                    try {
+                        const resMovil = await fetch(`/api/stock_movil/${encodeURIComponent(movil)}`);
+                        if (resMovil.ok) {
+                            window.INVENTARIO_MOVIL = await resMovil.json();
+                        } else {
+                            window.INVENTARIO_MOVIL = {};
                         }
-                    } else {
-                        console.warn('API inventario no disponible, continuando sin selección de seriales');
+                    } catch (e) {
+                        console.error("Error cargando stock móvil:", e);
+                        window.INVENTARIO_MOVIL = {};
                     }
+
+                    // Calcular items a mostrar según paquete
+                    actualizarUIConInventario();
+
                 } catch (error) {
-                    console.warn('Error cargando inventario (continuando sin seriales):', error);
-                    // No hacer nada - el portal funciona sin esta feature
+                    console.error("Error al cargar datos:", error);
                 }
+            } else {
+                groupPaquete.style.display = 'none';
+                document.getElementById('material_list_container').style.display = 'none';
+                window.INVENTARIO_MOVIL = {};
             }
+        };
+
+        // Cambio de Paquete disparador
+        document.getElementById('paquete_select').onchange = function () {
+            actualizarUIConInventario();
         };
 
         // SKU to Excel Name mapping (para nombres cortos)
         const SKU_TO_EXCEL_NAME = {{ sku_to_excel_name | safe }};
+        const PAQUETES_DATA = {{ paquetes | safe }};
 
         function actualizarUIConInventario() {
             const container = document.getElementById('material_list_container');
@@ -426,24 +460,43 @@
             sectionTitle.style.display = 'block';
             container.style.display = 'block';
 
-            // Generar elementos para cada producto del inventario
-            window.INVENTARIO_ACTUAL.forEach(item => {
-                const disponibles = item.tiene_series ? (item.seriales ? item.seriales.length : 0) : item.cantidad_total;
-                const nombreCorto = SKU_TO_EXCEL_NAME[item.sku] || item.nombre;
+            // Agrupar por paquete y FILTRAR por el seleccionado
+            const paqueteSeleccionado = document.getElementById('paquete_select').value;
+            // PAQUETES_DATA es { 'PAQUETE A': [['sku', qty], ...], ... }
+            const paqueteArray = PAQUETES_DATA[paqueteSeleccionado] || [];
 
+            // Crear Set de SKUs en el paquete para filtrado rápido
+            const skusEnPaquete = new Set(paqueteArray.map(item => item[0])); // item is [sku, qty]
+
+            let itemsMostrados = 0;
+
+            // Iterar sobre TODOS los productos disponibles en sistema (PRODUCTOS viene de Jinja2)
+            PRODUCTOS.forEach(item => {
+                // FILTRO: Solo mostrar si está en el paquete seleccionado
+                if (!skusEnPaquete.has(item.sku)) return;
+
+                itemsMostrados++;
+
+                // Obtener stock en móvil
+                const stockEnMovil = window.INVENTARIO_MOVIL[item.sku] || 0;
+
+                // Renderizar fila
                 const row = document.createElement('div');
-                row.className = 'material-item';
-                row.id = `row_${item.sku}`;
+                row.className = 'material-row';
 
-                // Info del material
+                // Info del producto
                 const infoDiv = document.createElement('div');
-                infoDiv.className = 'material-info';
+                infoDiv.className = 'info';
+
+                // Badge de Stock en Móvil
+                let badgeStock = '';
+                if (stockEnMovil > 0) {
+                    badgeStock = `<span style="display:inline-block; background:#e1f5fe; color:#0277bd; padding:2px 6px; border-radius:4px; font-size:11px; margin-left:8px; border:1px solid #b3e5fc;">🚚 En Móvil: ${stockEnMovil}</span>`;
+                }
+
                 infoDiv.innerHTML = `
-                    <span class="material-name">${nombreCorto}</span>
-                    <span class="material-sku">SKU: ${item.sku}</span>
-                    <span class="badge-disponible" style="background:${disponibles > 0 ? '#3498db' : '#e74c3c'}; color:white; padding:3px 8px; border-radius:10px; font-size:11px; margin-left:8px; display:inline-block;">
-                        ${disponibles} disponibles
-                    </span>
+                    <div class="name">${item.nombre} ${badgeStock}</div>
+                    <span class="sku">SKU: ${item.sku}</span>
                 `;
                 row.appendChild(infoDiv);
 
@@ -451,61 +504,130 @@
                 const inputContainer = document.createElement('div');
                 inputContainer.style.cssText = 'display: flex; align-items: center;';
 
-                if (item.tiene_series && item.seriales && item.seriales.length > 0) {
-                    // Producto con series - botón de selección
+                if (item.tiene_series) {
+                    // Botón para seleccionar series
                     const btn = document.createElement('button');
                     btn.type = 'button';
                     btn.className = 'btn-seleccionar-series';
                     btn.textContent = 'Seleccionar';
-                    btn.onclick = () => abrirModalSeriales(item.sku, nombreCorto, item.seriales);
+                    btn.onclick = () => abrirModalSeriales(item.sku, item.nombre, [], paqueteSeleccionado);
                     btn.style.cssText = 'padding:10px 20px; background:#27ae60; color:white; border:none; border-radius:6px; font-size:13px; font-weight:bold; cursor:pointer;';
                     inputContainer.appendChild(btn);
 
-                    // Input oculto para guardar cantidad
                     const hiddenInput = document.createElement('input');
                     hiddenInput.type = 'hidden';
                     hiddenInput.name = `qty_${item.sku}`;
                     hiddenInput.id = `input_${item.sku}`;
                     hiddenInput.className = 'sku-input';
                     hiddenInput.dataset.sku = item.sku;
-                    hiddenInput.dataset.name = nombreCorto;
+                    hiddenInput.dataset.paquete = paqueteSeleccionado;
+                    hiddenInput.dataset.name = item.nombre;
                     hiddenInput.value = '0';
                     inputContainer.appendChild(hiddenInput);
-
-                    window.SERIALES_SELECCIONADOS[item.sku] = [];
                 } else {
-                    // Producto sin series - input numérico
+                    // Input numérico simple
                     const input = document.createElement('input');
                     input.type = 'number';
                     input.name = `qty_${item.sku}`;
                     input.id = `input_${item.sku}`;
                     input.className = 'material-qty sku-input';
                     input.dataset.sku = item.sku;
-                    input.dataset.name = nombreCorto;
+                    input.dataset.paquete = paqueteSeleccionado;
+                    input.dataset.name = item.nombre;
                     input.min = '0';
-                    input.max = disponibles.toString();
                     input.placeholder = '0';
-                    input.disabled = disponibles === 0;
-
-                    if (disponibles === 0) {
-                        row.classList.add('disabled');
-                    }
-
-                    // Validar que no exceda disponibles
-                    input.addEventListener('input', function () {
-                        const val = parseInt(this.value) || 0;
-                        if (val > disponibles) {
-                            this.value = disponibles;
-                            this.style.borderColor = 'red';
-                            setTimeout(() => this.style.borderColor = '#ddd', 500);
-                        }
-                    });
 
                     inputContainer.appendChild(input);
                 }
-
                 row.appendChild(inputContainer);
                 container.appendChild(row);
+            });
+
+            // Generar UI por grupo
+            ordenPaquetes.forEach(paqueteNombre => {
+                // Título del grupo
+                const groupTitle = document.createElement('div');
+                groupTitle.style.cssText = 'background:#eee; padding:8px 12px; font-weight:bold; font-size:12px; color:#555; border-radius:6px; margin:15px 0 5px; border-left:4px solid #3498db;';
+                groupTitle.textContent = paqueteNombre;
+                container.appendChild(groupTitle);
+
+                // Items del grupo
+                grupos[paqueteNombre].forEach(item => {
+                    const disponibles = item.tiene_series ? (item.seriales ? item.seriales.length : 0) : item.cantidad_total;
+                    const nombreCorto = SKU_TO_EXCEL_NAME[item.sku] || item.nombre;
+
+                    const row = document.createElement('div');
+                    row.className = 'material-item';
+                    row.id = `row_${item.sku}_${paqueteNombre.replace(/\s+/g, '_')}`; // ID único por paquete
+
+                    // Info del material
+                    const infoDiv = document.createElement('div');
+                    infoDiv.className = 'material-info';
+                    infoDiv.innerHTML = `
+                        <span class="material-name">${nombreCorto}</span>
+                        <span class="material-sku">SKU: ${item.sku}</span>
+                        <span class="badge-disponible" style="background:${disponibles > 0 ? '#3498db' : '#e74c3c'}; color:white; padding:3px 8px; border-radius:10px; font-size:11px; margin-left:8px; display:inline-block;">
+                            ${disponibles} disponibles
+                        </span>
+                    `;
+                    row.appendChild(infoDiv);
+
+                    // Container para input/botón
+                    const inputContainer = document.createElement('div');
+                    inputContainer.style.cssText = 'display: flex; align-items: center;';
+
+                    if (item.tiene_series && item.seriales && item.seriales.length > 0) {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'btn-seleccionar-series';
+                        btn.textContent = 'Seleccionar';
+                        btn.onclick = () => abrirModalSeriales(item.sku, nombreCorto, item.seriales, paqueteNombre);
+                        btn.style.cssText = 'padding:10px 20px; background:#27ae60; color:white; border:none; border-radius:6px; font-size:13px; font-weight:bold; cursor:pointer;';
+                        inputContainer.appendChild(btn);
+
+                        const hiddenInput = document.createElement('input');
+                        hiddenInput.type = 'hidden';
+                        hiddenInput.name = `qty_${item.sku}`;
+                        hiddenInput.id = `input_${item.sku}_${paqueteNombre.replace(/\s+/g, '_')}`;
+                        hiddenInput.className = 'sku-input';
+                        hiddenInput.dataset.sku = item.sku;
+                        hiddenInput.dataset.paquete = paqueteNombre;
+                        hiddenInput.dataset.name = nombreCorto;
+                        hiddenInput.value = '0';
+                        inputContainer.appendChild(hiddenInput);
+
+                        // Inicializar seriales seleccionados con llave compuesta si es necesario
+                        const key = `${item.sku}_${paqueteNombre}`;
+                        if (!window.SERIALES_SELECCIONADOS[key]) window.SERIALES_SELECCIONADOS[key] = [];
+                    } else {
+                        const input = document.createElement('input');
+                        input.type = 'number';
+                        input.name = `qty_${item.sku}`;
+                        input.id = `input_${item.sku}_${paqueteNombre.replace(/\s+/g, '_')}`;
+                        input.className = 'material-qty sku-input';
+                        input.dataset.sku = item.sku;
+                        input.dataset.paquete = paqueteNombre;
+                        input.dataset.name = nombreCorto;
+                        input.min = '0';
+                        input.max = disponibles.toString();
+                        input.placeholder = '0';
+                        input.disabled = disponibles === 0;
+
+                        if (disponibles === 0) row.classList.add('disabled');
+
+                        input.addEventListener('input', function () {
+                            const val = parseInt(this.value) || 0;
+                            if (val > disponibles) {
+                                this.value = disponibles;
+                                this.style.borderColor = 'red';
+                                setTimeout(() => this.style.borderColor = '#ddd', 500);
+                            }
+                        });
+                        inputContainer.appendChild(input);
+                    }
+                    row.appendChild(inputContainer);
+                    container.appendChild(row);
+                });
             });
         }
 
@@ -573,64 +695,66 @@
             };
         });
 
-        function setDisabled(id, state) {
-            const el = document.getElementById(id);
-            if (el) {
+        function setDisabled(sku, state) {
+            // Deshabilitar el item en TODOS los paquetes donde aparezca
+            const inputsEscogidos = document.querySelectorAll(`.sku-input[data-sku="${sku}"]`);
+            inputsEscogidos.forEach(el => {
                 el.disabled = state;
-                const row = document.getElementById('row_' + el.dataset.sku);
+                const rowId = `row_${el.dataset.sku}_${el.dataset.paquete.replace(/\s+/g, '_')}`;
+                const row = document.getElementById(rowId);
                 if (row) row.classList.toggle('disabled', state);
-            }
+            });
         }
 
         function checkAllLocks() {
-            // Verificar estado actual de todos los inputs clave
-            const val = (id) => (parseInt(document.getElementById('input_' + id)?.value) || 0);
+            // Verificar estado actual de todos los inputs clave (sumando por SKU entre paquetes)
+            const getSkuQty = (sku) => {
+                let total = 0;
+                document.querySelectorAll(`.sku-input[data-sku="${sku}"]`).forEach(i => {
+                    total += parseInt(i.value) || 0;
+                });
+                return total;
+            };
 
-            const selectedONT = ALL_ONTS.find(o => val(o) > 0);
-            const selectedExtA = val(EXTENDER_A) > 0;
-            const selectedExtB = val(EXTENDER_B) > 0;
+            const selectedONT = ALL_ONTS.find(o => getSkuQty(o) > 0);
+            const selectedExtA = getSkuQty(EXTENDER_A) > 0;
+            const selectedExtB = getSkuQty(EXTENDER_B) > 0;
 
             // Primero habilitar todo como base
-            [...ALL_ONTS, EXTENDER_A, EXTENDER_B].forEach(sku => setDisabled('input_' + sku, false));
+            [...ALL_ONTS, EXTENDER_A, EXTENDER_B].forEach(sku => setDisabled(sku, false));
 
             if (selectedONT) {
-                // Bloquear otras ONTs
-                ALL_ONTS.forEach(o => { if (o !== selectedONT) setDisabled('input_' + o, true); });
-                // Bloquear extensor correspondiente
-                if (ONT_GROUP_A.includes(selectedONT)) setDisabled('input_' + EXTENDER_A, true);
-                if (ONT_GROUP_B.includes(selectedONT)) setDisabled('input_' + EXTENDER_B, true);
+                ALL_ONTS.forEach(o => { if (o !== selectedONT) setDisabled(o, true); });
+                if (ONT_GROUP_A.includes(selectedONT)) setDisabled(EXTENDER_A, true);
+                if (ONT_GROUP_B.includes(selectedONT)) setDisabled(EXTENDER_B, true);
             }
 
-            if (selectedExtA) {
-                // Bloquear grupo A de ONTs
-                ONT_GROUP_A.forEach(o => setDisabled('input_' + o, true));
-            }
-
-            if (selectedExtB) {
-                // Bloquear grupo B de ONTs
-                ONT_GROUP_B.forEach(o => setDisabled('input_' + o, true));
-            }
+            if (selectedExtA) ONT_GROUP_A.forEach(o => setDisabled(o, true));
+            if (selectedExtB) ONT_GROUP_B.forEach(o => setDisabled(o, true));
         }
 
-        // ========== FUNCIONES PARA MODAL DE SELECCIÓN DE SERIALES (NUEVO) ==========
+        // ========== FUNCIONES PARA MODAL DE SELECCIÓN DE SERIALES ==========
 
         let currentModalSKU = null;
+        let currentModalPaquete = null;
         let currentModalSeriales = null;
 
-        function abrirModalSeriales(sku, nombre, seriales) {
+        function abrirModalSeriales(sku, nombre, seriales, paquete) {
             currentModalSKU = sku;
+            currentModalPaquete = paquete;
             currentModalSeriales = seriales;
 
-            document.getElementById('modalSeriesTitulo').textContent = nombre;
+            document.getElementById('modalSeriesTitulo').textContent = `${nombre} (${paquete})`;
 
             const lista = document.getElementById('listaSeriales');
             lista.innerHTML = '';
 
-            // Obtener selección actual
-            const seleccionados = window.SERIALES_SELECCIONADOS[sku] || [];
+            // Obtener selección actual usando llave compuesta
+            const key = `${sku}_${paquete}`;
+            const seleccionados = window.SERIALES_SELECCIONADOS[key] || [];
 
             // Crear checkboxes para cada serial
-            seriales.forEach((serial, index) => {
+            seriales.forEach((serial) => {
                 const label = document.createElement('label');
                 label.style.cssText = 'display:block; padding:12px 15px; border-bottom:1px solid #e0e0e0; cursor:pointer; transition:background 0.2s;';
                 label.onmouseover = () => label.style.background = '#f0f0f0';
@@ -646,7 +770,7 @@
                 const serialText = document.createElement('span');
                 serialText.textContent = serial;
                 serialText.style.fontFamily = 'Courier, monospace';
-                serialText.style.fontSize = '13px';
+                serialText.style.fontSize = '12px';
 
                 label.appendChild(checkbox);
                 label.appendChild(serialText);
@@ -666,17 +790,22 @@
             const checkboxes = document.querySelectorAll('#listaSeriales input:checked');
             const seleccionados = Array.from(checkboxes).map(cb => cb.value);
 
-            // Guardar selección
-            window.SERIALES_SELECCIONADOS[currentModalSKU] = seleccionados;
+            // Guardar selección con llave compuesta
+            const key = `${currentModalSKU}_${currentModalPaquete}`;
+            window.SERIALES_SELECCIONADOS[key] = seleccionados;
 
             // Actualizar input oculto con cantidad
-            const input = document.getElementById(`input_${currentModalSKU}`);
+            const inputId = `input_${currentModalSKU}_${currentModalPaquete.replace(/\s+/g, '_')}`;
+            const input = document.getElementById(inputId);
             if (input) {
                 input.value = seleccionados.length;
+                // Disparar evento input para las reglas de bloqueo
+                input.dispatchEvent(new Event('input', { bubbles: true }));
             }
 
             // Actualizar badge de disponibilidad
-            const row = document.getElementById(`row_${currentModalSKU}`);
+            const rowId = `row_${currentModalSKU}_${currentModalPaquete.replace(/\s+/g, '_')}`;
+            const row = document.getElementById(rowId);
             const badge = row?.querySelector('.badge-disponible');
             if (badge && currentModalSeriales) {
                 const disponibles = currentModalSeriales.length - seleccionados.length;
@@ -687,13 +816,7 @@
             // Actualizar botón de selección
             const btn = row?.querySelector('.btn-seleccionar-series');
             if (btn) {
-                if (seleccionados.length > 0) {
-                    btn.textContent = `${seleccionados.length} seleccionados`;
-                    btn.style.background = '#27ae60';
-                } else {
-                    btn.textContent = 'Seleccionar';
-                    btn.style.background = '#27ae60';
-                }
+                btn.textContent = seleccionados.length > 0 ? `${seleccionados.length} seleccionados` : 'Seleccionar';
             }
 
             cerrarModalSeriales();
@@ -702,6 +825,7 @@
         function cerrarModalSeriales() {
             document.getElementById('modalSeriales').classList.remove('active');
             currentModalSKU = null;
+            currentModalPaquete = null;
             currentModalSeriales = null;
         }
 
@@ -724,9 +848,10 @@
                 if (v > 0) {
                     const material = { sku: i.dataset.sku, cantidad: v };
 
-                    // Agregar seriales si fueron seleccionados
-                    if (window.SERIALES_SELECCIONADOS && window.SERIALES_SELECCIONADOS[i.dataset.sku]) {
-                        const seriales = window.SERIALES_SELECCIONADOS[i.dataset.sku];
+                    // Agregar seriales si fueron seleccionados usando llave compuesta
+                    const key = `${i.dataset.sku}_${i.dataset.paquete}`;
+                    if (window.SERIALES_SELECCIONADOS && window.SERIALES_SELECCIONADOS[key]) {
+                        const seriales = window.SERIALES_SELECCIONADOS[key];
                         if (seriales.length > 0) {
                             material.seriales = seriales;
                         }
@@ -749,6 +874,7 @@
                 tecnico: fd.get('tecnico'),
                 ayudante: fd.get('ayudante'),
                 movil: fd.get('movil'),
+                paquete: fd.get('paquete'), // Incluir paquete en el payload
                 materiales: materiales
             };
 
