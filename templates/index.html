@@ -309,6 +309,14 @@
                 </select>
             </div>
 
+            <div class="form-group" id="group_paquete" style="display:none;">
+                <label>Paquete de Trabajo: <span class="hint">(Seleccione el paquete que está reportando
+                        hoy)</span></label>
+                <select name="paquete" id="paquete_select">
+                    <option value="PAQUETE A">PAQUETE A</option>
+                    <option value="PAQUETE B">PAQUETE B</option>
+                </select>
+            </div>
 
             <div class="form-group">
                 <label>Técnico (Conductor):</label>
@@ -364,8 +372,9 @@
         document.getElementById('movil_select').onchange = async function () {
             const movil = this.value;
 
-            // Reset seriales
+            // Reset seriales y lista
             window.SERIALES_SELECCIONADOS = {};
+            document.getElementById('group_paquete').style.display = 'none';
 
             // Auto-completar conductor/ayudante
             try {
@@ -400,10 +409,18 @@
                 window.INVENTARIO_MOVIL = [];
             }
 
+            // Mostrar selector de paquete y renderizar con el paquete actual
+            document.getElementById('group_paquete').style.display = 'block';
             renderizarInventario();
         };
 
-        // ── Renderizar lista de materiales de la móvil ───────────────────
+        // ── Al cambiar paquete, re-renderizar ────────────────────────────
+        document.getElementById('paquete_select').onchange = function () {
+            window.SERIALES_SELECCIONADOS = {}; // Reset selección al cambiar paquete
+            renderizarInventario();
+        };
+
+        // ── Renderizar lista filtrada por paquete seleccionado ───────────
         function renderizarInventario() {
             const container = document.getElementById('material_list_container');
             const mensajeSinStock = document.getElementById('mensaje_sin_stock');
@@ -411,17 +428,28 @@
 
             container.innerHTML = '';
 
-            const items = window.INVENTARIO_MOVIL;
+            const paqueteSeleccionado = document.getElementById('paquete_select').value;
 
-            if (!items || items.length === 0) {
+            // Filtrar inventario de la móvil por el paquete seleccionado
+            const items = (window.INVENTARIO_MOVIL || []).filter(item =>
+                (item.paquete || 'NINGUNO') === paqueteSeleccionado
+            );
+
+            if (items.length === 0) {
                 container.style.display = 'none';
                 sectionTitle.style.display = 'none';
                 mensajeSinStock.style.display = 'block';
+                mensajeSinStock.innerHTML = `
+                    <div style="font-size:32px;margin-bottom:8px;">📭</div>
+                    <p style="font-weight:bold;margin:0;">Sin materiales de ${paqueteSeleccionado}</p>
+                    <p style="font-size:13px;margin-top:5px;color:#888;">Esta móvil no tiene materiales asignados para este paquete</p>
+                `;
                 return;
             }
 
             mensajeSinStock.style.display = 'none';
             sectionTitle.style.display = 'block';
+            sectionTitle.textContent = `📦 Materiales del ${paqueteSeleccionado}`;
             container.style.display = 'block';
 
             items.forEach(item => {
@@ -450,7 +478,6 @@
                 inputContainer.style.cssText = 'display:flex; align-items:center;';
 
                 if (item.tiene_series) {
-                    // Botón para seleccionar seriales reales de la móvil
                     const btn = document.createElement('button');
                     btn.type = 'button';
                     btn.id = `btn_${item.sku}`;
@@ -472,7 +499,6 @@
                     inputContainer.appendChild(hiddenInput);
 
                 } else {
-                    // Input numérico con máximo = stock en móvil
                     const input = document.createElement('input');
                     input.type = 'number';
                     input.name = `qty_${item.sku}`;
@@ -636,6 +662,7 @@
                 tecnico: fd.get('tecnico'),
                 ayudante: fd.get('ayudante'),
                 movil: fd.get('movil'),
+                paquete: document.getElementById('paquete_select').value,
                 materiales: materiales
             };
 
