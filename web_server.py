@@ -257,10 +257,11 @@ def get_inventario_movil(movil):
         cursor = conn.cursor()
         
         # Obtener asignación del móvil - INCLUYENDO PAQUETE
+        # Usamos subconsulta para obtener nombre sin depender de ubicacion=BODEGA
         sql_asignacion = """
-            SELECT p.nombre, a.sku_producto, a.cantidad, COALESCE(a.paquete, 'NINGUNO') as paquete
+            SELECT (SELECT p2.nombre FROM productos p2 WHERE p2.sku = a.sku_producto LIMIT 1) as nombre,
+                   a.sku_producto, a.cantidad, COALESCE(a.paquete, 'NINGUNO') as paquete
             FROM asignacion_moviles a
-            JOIN productos p ON a.sku_producto = p.sku AND p.ubicacion = 'BODEGA'
             WHERE a.movil = ?
             AND a.cantidad > 0
         """
