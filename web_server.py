@@ -441,6 +441,160 @@ def registrar_bulk():
     finally:
         if conn: conn.close()
 
+@app.route('/auditoria')
+def auditoria():
+    """Página de Auditoría de Terreno y Retorno"""
+    try:
+        moviles = obtener_nombres_moviles()
+    except Exception:
+        moviles = []
+    return render_template('auditoria.html',
+                           hoy=date.today().isoformat(),
+                           moviles=moviles,
+                           sku_to_excel_name=json.dumps(SKU_TO_EXCEL_NAME))
+
+@app.route('/api/consumos_dia')
+def api_consumos_dia():
+    """Devuelve los consumos del día para una móvil y fecha dadas"""
+    movil = request.args.get('movil', '')
+    fecha = request.args.get('fecha', date.today().isoformat())
+
+    try:
+        from database import get_db_connection, run_query
+        from config import MOVILES_SANTIAGO, MYSQL_DB_SANTIAGO
+
+        target_db = None
+        if movil and movil in MOVILES_SANTIAGO and MYSQL_DB_SANTIAGO:
+            target_db = MYSQL_DB_SANTIAGO
+
+        conn = get_db_connection(target_db=target_db)
+        cursor = conn.cursor()
+
+        # Traer consumos del día para esa móvil (o todas si no se especifica)
+        if movil:
+            sql = """
+                SELECT id, movil, sku, cantidad, tecnico_nombre, ayudante_nombre,
+                       ticket, fecha, colilla, num_contrato, seriales_usados, estado
+                FROM consumos_pendientes
+                WHERE fecha = ? AND movil = ?
+                ORDER BY id DESC
+            """
+            run_query(cursor, sql, (fecha, movil))
+        else:
+            sql = """
+                SELECT id, movil, sku, cantidad, tecnico_nombre, ayudante_nombre,
+                       ticket, fecha, colilla, num_contrato, seriales_usados, estado
+                FROM consumos_pendientes
+                WHERE fecha = ?
+                ORDER BY movil, id DESC
+            """
+            run_query(cursor, sql, (fecha,))
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        consumos = []
+        for row in rows:
+            id_, movil_r, sku, cantidad, tecnico, ayudante, ticket, fecha_r, colilla, contrato, seriales_json, estado = row
+            nombre = SKU_TO_EXCEL_NAME.get(sku, sku)
+            seriales = []
+            if seriales_json:
+                try:
+                    seriales = json.loads(seriales_json)
+                except Exception:
+                    seriales = []
+            consumos.append({
+                "id": id_,
+                "movil": movil_r,
+                "sku": sku,
+                "nombre": nombre,
+                "cantidad": cantidad,
+                "tecnico": tecnico,
+                "ayudante": ayudante or "",
+                "ticket": ticket or "",
+                "fecha": str(fecha_r),
+                "colilla": colilla or "",
+                "contrato": contrato or "",
+                "seriales": seriales,
+                "estado": estado or ""
+            })
+
+        return jsonify({"fecha": fecha, "movil": movil, "consumos": consumos, "total": len(consumos)})
+
+    except Exception as e:
+        import traceback
+        return jsonify({"error": str(e), "trace": traceback.format_exc(), "consumos": []}), 500
+
+@app.route('/api/comparar_excel', methods=['POST'])
+def api_comparar_excel():
+    """Recibe un Excel, lo parsea y compara con los consumos de la DB"""
+    if 'archivo' not in request.files:
+        return jsonify({"error": "No se recibió archivo"}), 400
+
+    archivo = request.files['archivo']
+    movil = request.form.get('movil', '')
+    fecha = request.form.get('fecha', date.today().isoformat())
+
+    try:
+        import openpyxl
+        import io
+
+        wb = openpyxl.load_workbook(io.BytesIO(archivo.read()), data_only=True)
+        ws = wb.active
+
+        # Leer encabezados de la primera fila
+        headers = []
+        for cell in ws[1]:
+            headers.append(str(cell.value or '').strip())
+
+        # Leer filas de datos
+        filas_excel = []
+        for row in ws.iter_rows(min_row=2, values_only=True):
+            if any(v is not None for v in row):
+                fila = {headers[i]: str(v or '').strip() for i, v in enumerate(row) if i < len(headers)}
+                filas_excel.append(fila)
+
+        # Obtener consumos de la DB para comparar
+        from database import get_db_connection, run_query
+        from config import MOVILES_SANTIAGO, MYSQL_DB_SANTIAGO
+
+        target_db = None
+        if movil and movil in MOVILES_SANTIAGO and MYSQL_DB_SANTIAGO:
+            target_db = MYSQL_DB_SANTIAGO
+
+        conn = get_db_connection(target_db=target_db)
+        cursor = conn.cursor()
+
+        if movil:
+            run_query(cursor, """
+                SELECT sku, SUM(cantidad) as total
+                FROM consumos_pendientes
+                WHERE fecha = ? AND movil = ?
+                GROUP BY sku
+            """, (fecha, movil))
+        else:
+            run_query(cursor, """
+                SELECT sku, SUM(cantidad) as total
+                FROM consumos_pendientes
+                WHERE fecha = ?
+                GROUP BY sku
+            """, (fecha,))
+
+        consumos_db = {row[0]: row[1] for row in cursor.fetchall()}
+        conn.close()
+
+        return jsonify({
+            "headers": headers,
+            "filas": filas_excel,
+            "consumos_db": {sku: {"cantidad": qty, "nombre": SKU_TO_EXCEL_NAME.get(sku, sku)}
+                            for sku, qty in consumos_db.items()},
+            "total_filas": len(filas_excel)
+        })
+
+    except Exception as e:
+        import traceback
+        return jsonify({"error": str(e), "trace": traceback.format_exc()}), 500
+
 @app.route('/api/stock_movil/<movil>')
 def api_stock_movil(movil):
     """Retorna el inventario actual de un móvil en formato JSON"""

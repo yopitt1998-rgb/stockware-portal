@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auditoría de Terreno | StockWare</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f1117;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        /* ── Header ── */
+        .header {
+            background: linear-gradient(135deg, #1a1f2e 0%, #16213e 100%);
+            border-bottom: 1px solid #2d3748;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: #63b3ed;
+            letter-spacing: -0.5px;
+        }
+
+        .page-title {
+            font-size: 14px;
+            color: #718096;
+            font-weight: 500;
+        }
+
+        .btn-back {
+            background: #2d3748;
+            color: #a0aec0;
+            border: 1px solid #4a5568;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-back:hover {
+            background: #4a5568;
+            color: #e2e8f0;
+        }
+
+        /* ── Layout ── */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px 16px;
+        }
+
+        /* ── Filtros ── */
+        .filtros-card {
+            background: #1a1f2e;
+            border: 1px solid #2d3748;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 16px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .filtro-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .filtro-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filtro-group select,
+        .filtro-group input[type="date"] {
+            background: #0f1117;
+            border: 1px solid #2d3748;
+            color: #e2e8f0;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .filtro-group select:focus,
+        .filtro-group input:focus {
+            border-color: #63b3ed;
+        }
+
+        .btn-cargar {
+            background: linear-gradient(135deg, #3182ce, #2b6cb0);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-cargar:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(49, 130, 206, 0.4);
+        }
+
+        /* ── Sección 1: Consumos del Día ── */
+        .section-card {
+            background: #1a1f2e;
+            border: 1px solid #2d3748;
+            border-radius: 12px;
+            margin-bottom: 32px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid #2d3748;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-header h2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge-count {
+            background: #2d3748;
+            color: #63b3ed;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* ── Tabla de Consumos ── */
+        .tabla-consumos {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .tabla-consumos th {
+            background: #0f1117;
+            color: #718096;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #2d3748;
+        }
+
+        .tabla-consumos td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #1e2535;
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        .tabla-consumos tr:hover td {
+            background: #1e2535;
+        }
+
+        .tabla-consumos tr:last-child td {
+            border-bottom: none;
+        }
+
+        .tag-movil {
+            background: #1e3a5f;
+            color: #63b3ed;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .tag-sku {
+            background: #1a2744;
+            color: #90cdf4;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .qty-badge {
+            background: #22543d;
+            color: #68d391;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        .seriales-list {
+            font-size: 11px;
+            color: #718096;
+            font-family: 'Courier New', monospace;
+            max-width: 200px;
+            word-break: break-all;
+        }
+
+        .estado-badge {
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .estado-AUTO_APROBADO {
+            background: #1c4532;
+            color: #68d391;
+        }
+
+        .estado-PENDIENTE {
+            background: #744210;
+            color: #f6ad55;
+        }
+
+        .estado-AUDITADO {
+            background: #1a365d;
+            color: #63b3ed;
+        }
+
+        /* ── Totales ── */
+        .totales-row td {
+            background: #0f1117 !important;
+            font-weight: 700;
+            color: #63b3ed;
+            border-top: 2px solid #2d3748 !important;
+        }
+
+        /* ── Sección 2: Excel ── */
+        .excel-section {
+            margin-bottom: 32px;
+        }
+
+        .dropzone {
+            border: 2px dashed #2d3748;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #1a1f2e;
+        }
+
+        .dropzone:hover,
+        .dropzone.drag-over {
+            border-color: #63b3ed;
+            background: #1e2a3a;
+        }
+
+        .dropzone-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+
+        .dropzone-text {
+            font-size: 15px;
+            font-weight: 600;
+            color: #a0aec0;
+            margin-bottom: 6px;
+        }
+
+        .dropzone-hint {
+            font-size: 12px;
+            color: #4a5568;
+        }
+
+        .dropzone input[type="file"] {
+            display: none;
+        }
+
+        .btn-comparar {
+            background: linear-gradient(135deg, #276749, #22543d);
+            color: white;
+            border: none;
+            padding: 11px 28px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 16px;
+        }
+
+        .btn-comparar:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(39, 103, 73, 0.4);
+        }
+
+        .btn-comparar:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ── Tabla Excel ── */
+        .tabla-excel-wrapper {
+            overflow-x: auto;
+        }
+
+        .tabla-excel {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .tabla-excel th {
+            background: #0f1117;
+            color: #718096;
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #2d3748;
+            white-space: nowrap;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .tabla-excel td {
+            padding: 9px 12px;
+            border-bottom: 1px solid #1e2535;
+            color: #cbd5e0;
+        }
+
+        .tabla-excel tr:hover td {
+            background: #1e2535;
+        }
+
+        /* ── Tabla Comparación ── */
+        .tabla-comparacion {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .tabla-comparacion th {
+            background: #0f1117;
+            color: #718096;
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #2d3748;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .tabla-comparacion td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #1e2535;
+            font-size: 13px;
+        }
+
+        .tabla-comparacion tr:hover td {
+            background: #1e2535;
+        }
+
+        .diff-ok {
+            color: #68d391;
+            font-weight: 700;
+        }
+
+        .diff-warn {
+            color: #f6ad55;
+            font-weight: 700;
+        }
+
+        .diff-error {
+            color: #fc8181;
+            font-weight: 700;
+        }
+
+        /* ── Estado vacío ── */
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: #4a5568;
+        }
+
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        /* ── Loading ── */
+        .loading {
+            text-align: center;
+            padding: 32px;
+            color: #718096;
+            font-size: 14px;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 640px) {
+            .filtros-card {
+                flex-direction: column;
+            }
+
+            .filtro-group {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="header-left">
+            <span class="logo">📋 StockWare</span>
+            <span class="page-title">/ Auditoría de Terreno y Retorno</span>
+        </div>
+        <a href="/" class="btn-back">← Volver al Portal</a>
+    </div>
+
+    <div class="container">
+
+        <!-- ── Filtros ── -->
+        <div class="filtros-card">
+            <div class="filtro-group">
+                <label>Móvil</label>
+                <select id="filtro_movil">
+                    <option value="">— Todas las móviles —</option>
+                    {% for m in moviles %}
+                    <option value="{{ m }}">{{ m }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filtro-group">
+                <label>Fecha</label>
+                <input type="date" id="filtro_fecha" value="{{ hoy }}">
+            </div>
+            <button class="btn-cargar" onclick="cargarConsumos()">🔍 Cargar Consumos</button>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════ -->
+        <!-- SECCIÓN 1: CONSUMOS DEL DÍA                              -->
+        <!-- ══════════════════════════════════════════════════════════ -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2>🚚 Consumo del Día</h2>
+                <span class="badge-count" id="badge_total">0 registros</span>
+            </div>
+
+            <div id="consumos_container">
+                <div class="empty-state">
+                    <div class="icon">📊</div>
+                    <p>Selecciona una móvil y fecha, luego haz clic en <strong>Cargar Consumos</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════ -->
+        <!-- SECCIÓN 2: EXCEL Y COMPARACIÓN                           -->
+        <!-- ══════════════════════════════════════════════════════════ -->
+        <div class="section-card excel-section">
+            <div class="section-header">
+                <h2>📂 Subir Excel de Órdenes de Trabajo</h2>
+            </div>
+            <div style="padding: 24px;">
+
+                <!-- Drop Zone -->
+                <div class="dropzone" id="dropzone" onclick="document.getElementById('input_excel').click()">
+                    <div class="dropzone-icon">📄</div>
+                    <div class="dropzone-text" id="dropzone_text">Arrastra tu Excel aquí o haz clic para seleccionar
+                    </div>
+                    <div class="dropzone-hint">.xlsx, .xls — máx. 10 MB</div>
+                    <input type="file" id="input_excel" accept=".xlsx,.xls" onchange="archivoSeleccionado(this)">
+                </div>
+
+                <div style="display:flex; gap:12px; margin-top:16px; flex-wrap:wrap;">
+                    <button class="btn-comparar" id="btn_comparar" onclick="compararExcel()" disabled>
+                        ⚖️ Comparar con Consumos del Día
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla del Excel -->
+        <div class="section-card" id="card_excel" style="display:none;">
+            <div class="section-header">
+                <h2>📋 Contenido del Excel</h2>
+                <span class="badge-count" id="badge_excel_filas">0 filas</span>
+            </div>
+            <div class="tabla-excel-wrapper" id="tabla_excel_container" style="padding:0 0 8px 0;"></div>
+        </div>
+
+        <!-- Tabla de Comparación -->
+        <div class="section-card" id="card_comparacion" style="display:none;">
+            <div class="section-header">
+                <h2>⚖️ Comparación: DB vs Excel</h2>
+            </div>
+            <div id="tabla_comparacion_container" style="padding:0 0 8px 0;"></div>
+        </div>
+
+    </div><!-- /container -->
+
+    <script>
+        const SKU_TO_EXCEL_NAME = {{ sku_to_excel_name | safe }};
+        let archivoExcel = null;
+        let consumosActuales = [];
+
+        // ── Cargar consumos del día ────────────────────────────────────
+        async function cargarConsumos() {
+            const movil = document.getElementById('filtro_movil').value;
+            const fecha = document.getElementById('filtro_fecha').value;
+            const container = document.getElementById('consumos_container');
+            const badge = document.getElementById('badge_total');
+
+            container.innerHTML = '<div class="loading">⏳ Cargando consumos...</div>';
+            badge.textContent = '...';
+
+            try {
+                const params = new URLSearchParams({ fecha });
+                if (movil) params.append('movil', movil);
+                const res = await fetch(`/api/consumos_dia?${params}`);
+                const data = await res.json();
+
+                if (data.error) {
+                    container.innerHTML = `<div class="empty-state"><div class="icon">❌</div><p>${data.error}</p></div>`;
+                    return;
+                }
+
+                consumosActuales = data.consumos || [];
+                badge.textContent = `${consumosActuales.length} registros`;
+
+                if (consumosActuales.length === 0) {
+                    container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📭</div>
+                        <p>No hay consumos registrados para ${movil || 'ninguna móvil'} el ${fecha}</p>
+                    </div>`;
+                    return;
+                }
+
+                renderizarConsumos(consumosActuales);
+
+            } catch (e) {
+                container.innerHTML = `<div class="empty-state"><div class="icon">❌</div><p>Error de red: ${e.message}</p></div>`;
+            }
+        }
+
+        function renderizarConsumos(consumos) {
+            const container = document.getElementById('consumos_container');
+
+            // Calcular totales por SKU
+            const totalesSku = {};
+            consumos.forEach(c => {
+                if (!totalesSku[c.sku]) totalesSku[c.sku] = { nombre: c.nombre, total: 0 };
+                totalesSku[c.sku].total += c.cantidad;
+            });
+
+            let html = `
+        <div style="overflow-x:auto;">
+        <table class="tabla-consumos">
+            <thead>
+                <tr>
+                    <th>Móvil</th>
+                    <th>Técnico</th>
+                    <th>Ayudante</th>
+                    <th>Colilla</th>
+                    <th>Contrato</th>
+                    <th>SKU</th>
+                    <th>Material</th>
+                    <th>Cantidad</th>
+                    <th>Seriales</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+            consumos.forEach(c => {
+                const serialesHtml = c.seriales && c.seriales.length > 0
+                    ? `<div class="seriales-list">${c.seriales.join('<br>')}</div>`
+                    : '<span style="color:#4a5568;">—</span>';
+                html += `
+                <tr>
+                    <td><span class="tag-movil">${c.movil}</span></td>
+                    <td>${c.tecnico}</td>
+                    <td>${c.ayudante || '—'}</td>
+                    <td style="font-family:monospace;font-size:12px;">${c.colilla || '—'}</td>
+                    <td style="font-family:monospace;font-size:12px;">${c.contrato || '—'}</td>
+                    <td><span class="tag-sku">${c.sku}</span></td>
+                    <td style="font-weight:500;">${c.nombre}</td>
+                    <td><span class="qty-badge">${c.cantidad}</span></td>
+                    <td>${serialesHtml}</td>
+                    <td><span class="estado-badge estado-${c.estado}">${c.estado}</span></td>
+                </tr>`;
+            });
+
+            // Fila de totales
+            html += `</tbody><tfoot>`;
+            Object.entries(totalesSku).forEach(([sku, info]) => {
+                html += `
+                <tr class="totales-row">
+                    <td colspan="6" style="text-align:right; color:#a0aec0; font-size:12px;">TOTAL ${sku} (${info.nombre}):</td>
+                    <td></td>
+                    <td><span class="qty-badge" style="background:#1a365d; color:#63b3ed;">${info.total}</span></td>
+                    <td colspan="2"></td>
+                </tr>`;
+            });
+            html += `</tfoot></table></div>`;
+
+            container.innerHTML = html;
+        }
+
+        // ── Manejo de archivo Excel ────────────────────────────────────
+        function archivoSeleccionado(input) {
+            if (input.files && input.files[0]) {
+                archivoExcel = input.files[0];
+                document.getElementById('dropzone_text').textContent = `✅ ${archivoExcel.name}`;
+                document.getElementById('btn_comparar').disabled = false;
+            }
+        }
+
+        // Drag & drop
+        const dropzone = document.getElementById('dropzone');
+        dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+        dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+        dropzone.addEventListener('drop', e => {
+            e.preventDefault();
+            dropzone.classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
+                archivoExcel = file;
+                document.getElementById('dropzone_text').textContent = `✅ ${file.name}`;
+                document.getElementById('btn_comparar').disabled = false;
+            }
+        });
+
+        // ── Comparar Excel con DB ──────────────────────────────────────
+        async function compararExcel() {
+            if (!archivoExcel) return;
+
+            const movil = document.getElementById('filtro_movil').value;
+            const fecha = document.getElementById('filtro_fecha').value;
+            const btn = document.getElementById('btn_comparar');
+
+            btn.disabled = true;
+            btn.textContent = '⏳ Procesando...';
+
+            const formData = new FormData();
+            formData.append('archivo', archivoExcel);
+            formData.append('movil', movil);
+            formData.append('fecha', fecha);
+
+            try {
+                const res = await fetch('/api/comparar_excel', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+
+                // Mostrar tabla del Excel
+                renderizarTablaExcel(data.headers, data.filas);
+
+                // Mostrar comparación
+                renderizarComparacion(data.consumos_db);
+
+            } catch (e) {
+                alert('Error de red: ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '⚖️ Comparar con Consumos del Día';
+            }
+        }
+
+        function renderizarTablaExcel(headers, filas) {
+            const card = document.getElementById('card_excel');
+            const container = document.getElementById('tabla_excel_container');
+            document.getElementById('badge_excel_filas').textContent = `${filas.length} filas`;
+
+            let html = '<div style="overflow-x:auto;"><table class="tabla-excel"><thead><tr>';
+            headers.forEach(h => { html += `<th>${h}</th>`; });
+            html += '</tr></thead><tbody>';
+            filas.forEach(fila => {
+                html += '<tr>';
+                headers.forEach(h => { html += `<td>${fila[h] || ''}</td>`; });
+                html += '</tr>';
+            });
+            html += '</tbody></table></div>';
+
+            container.innerHTML = html;
+            card.style.display = 'block';
+            card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function renderizarComparacion(consumos_db) {
+            const card = document.getElementById('card_comparacion');
+            const container = document.getElementById('tabla_comparacion_container');
+
+            // Obtener todos los SKUs únicos (de DB)
+            const skusDB = Object.keys(consumos_db);
+
+            if (skusDB.length === 0) {
+                container.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>No hay consumos en la DB para esta fecha/móvil</p></div>`;
+                card.style.display = 'block';
+                return;
+            }
+
+            let html = `
+        <table class="tabla-comparacion">
+            <thead>
+                <tr>
+                    <th>SKU</th>
+                    <th>Material</th>
+                    <th>Consumido en Sistema</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+            skusDB.forEach(sku => {
+                const info = consumos_db[sku];
+                const qty = info.cantidad;
+                html += `
+                <tr>
+                    <td><span class="tag-sku">${sku}</span></td>
+                    <td style="font-weight:500;">${info.nombre}</td>
+                    <td><span class="qty-badge">${qty}</span></td>
+                    <td><span class="diff-ok">✅ Registrado</span></td>
+                </tr>`;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+            card.style.display = 'block';
+            card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Cargar automáticamente al entrar si hay fecha de hoy
+        window.addEventListener('load', () => {
+            // No auto-carga para no sobrecargar — el usuario elige la móvil
+        });
+    </script>
+</body>
+
+</html>
