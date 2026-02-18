@@ -73,9 +73,12 @@ class MobileOutputScannerWindow:
             self.combo_movil['values'] = moviles
             self.productos_cache = cache
             
-            # Pre-seleccionar SANTIAGO si es modo préstamo o devolución
-            if self.mode in ('PRESTAMO_SANTIAGO', 'DEVOLUCION_SANTIAGO'):
+            # Pre-seleccionar según modo
+            if self.mode == 'PRESTAMO_SANTIAGO':
                 self.combo_movil.set("SANTIAGO")
+                self.combo_movil.configure(state='disabled')
+            elif self.mode == 'DEVOLUCION_SANTIAGO':
+                self.combo_movil.set("CHIRIQUI")  # Destino real de la devolución
                 self.combo_movil.configure(state='disabled')
             
         mostrar_cargando_async(self.window, load, on_loaded, self.window)
@@ -113,7 +116,14 @@ class MobileOutputScannerWindow:
                             bg=Styles.LIGHT_BG, fg=Styles.PRIMARY_COLOR, padx=15, pady=10)
         frame.pack(fill='x', pady=(0, 10))
         
-        tk.Label(frame, text="Móvil Destino:", bg=Styles.LIGHT_BG).pack(side='left', padx=5)
+        # Label dinámico según modo
+        if self.mode == 'DEVOLUCION_SANTIAGO':
+            label_movil = "Origen (Santiago) → Destino:"
+        elif self.mode == 'PRESTAMO_SANTIAGO':
+            label_movil = "Destino:"
+        else:
+            label_movil = "Móvil Destino:"
+        tk.Label(frame, text=label_movil, bg=Styles.LIGHT_BG).pack(side='left', padx=5)
         
         self.combo_movil = ttk.Combobox(frame, state='readonly', width=30, font=('Segoe UI', 10))
         self.combo_movil.pack(side='left', padx=5)
@@ -489,9 +499,12 @@ class MobileOutputScannerWindow:
             return
             
         movil = self.combo_movil.get()
-        # Fijar SANTIAGO para modos de transferencia/devolución
-        if self.mode in ('PRESTAMO_SANTIAGO', 'DEVOLUCION_SANTIAGO'):
+        # Para PRESTAMO_SANTIAGO: movil interno = SANTIAGO (destino)
+        # Para DEVOLUCION_SANTIAGO: movil interno = SANTIAGO (origen), el combo muestra CHIRIQUI solo visualmente
+        if self.mode == 'PRESTAMO_SANTIAGO':
             movil = "SANTIAGO"
+        elif self.mode == 'DEVOLUCION_SANTIAGO':
+            movil = "SANTIAGO"  # La función registrar_devolucion_santiago usa SANTIAGO como origen
         elif not movil:
             messagebox.showwarning("Destino", "Seleccione un destino válido.")
             return
