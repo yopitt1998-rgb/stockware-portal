@@ -543,92 +543,11 @@
                 container.appendChild(row);
             });
 
-            // Generar UI por grupo
-            ordenPaquetes.forEach(paqueteNombre => {
-                // Título del grupo
-                const groupTitle = document.createElement('div');
-                groupTitle.style.cssText = 'background:#eee; padding:8px 12px; font-weight:bold; font-size:12px; color:#555; border-radius:6px; margin:15px 0 5px; border-left:4px solid #3498db;';
-                groupTitle.textContent = paqueteNombre;
-                container.appendChild(groupTitle);
-
-                // Items del grupo
-                grupos[paqueteNombre].forEach(item => {
-                    const disponibles = item.tiene_series ? (item.seriales ? item.seriales.length : 0) : item.cantidad_total;
-                    const nombreCorto = SKU_TO_EXCEL_NAME[item.sku] || item.nombre;
-
-                    const row = document.createElement('div');
-                    row.className = 'material-item';
-                    row.id = `row_${item.sku}_${paqueteNombre.replace(/\s+/g, '_')}`; // ID único por paquete
-
-                    // Info del material
-                    const infoDiv = document.createElement('div');
-                    infoDiv.className = 'material-info';
-                    infoDiv.innerHTML = `
-                        <span class="material-name">${nombreCorto}</span>
-                        <span class="material-sku">SKU: ${item.sku}</span>
-                        <span class="badge-disponible" style="background:${disponibles > 0 ? '#3498db' : '#e74c3c'}; color:white; padding:3px 8px; border-radius:10px; font-size:11px; margin-left:8px; display:inline-block;">
-                            ${disponibles} disponibles
-                        </span>
-                    `;
-                    row.appendChild(infoDiv);
-
-                    // Container para input/botón
-                    const inputContainer = document.createElement('div');
-                    inputContainer.style.cssText = 'display: flex; align-items: center;';
-
-                    if (item.tiene_series && item.seriales && item.seriales.length > 0) {
-                        const btn = document.createElement('button');
-                        btn.type = 'button';
-                        btn.className = 'btn-seleccionar-series';
-                        btn.textContent = 'Seleccionar';
-                        btn.onclick = () => abrirModalSeriales(item.sku, nombreCorto, item.seriales, paqueteNombre);
-                        btn.style.cssText = 'padding:10px 20px; background:#27ae60; color:white; border:none; border-radius:6px; font-size:13px; font-weight:bold; cursor:pointer;';
-                        inputContainer.appendChild(btn);
-
-                        const hiddenInput = document.createElement('input');
-                        hiddenInput.type = 'hidden';
-                        hiddenInput.name = `qty_${item.sku}`;
-                        hiddenInput.id = `input_${item.sku}_${paqueteNombre.replace(/\s+/g, '_')}`;
-                        hiddenInput.className = 'sku-input';
-                        hiddenInput.dataset.sku = item.sku;
-                        hiddenInput.dataset.paquete = paqueteNombre;
-                        hiddenInput.dataset.name = nombreCorto;
-                        hiddenInput.value = '0';
-                        inputContainer.appendChild(hiddenInput);
-
-                        // Inicializar seriales seleccionados con llave compuesta si es necesario
-                        const key = `${item.sku}_${paqueteNombre}`;
-                        if (!window.SERIALES_SELECCIONADOS[key]) window.SERIALES_SELECCIONADOS[key] = [];
-                    } else {
-                        const input = document.createElement('input');
-                        input.type = 'number';
-                        input.name = `qty_${item.sku}`;
-                        input.id = `input_${item.sku}_${paqueteNombre.replace(/\s+/g, '_')}`;
-                        input.className = 'material-qty sku-input';
-                        input.dataset.sku = item.sku;
-                        input.dataset.paquete = paqueteNombre;
-                        input.dataset.name = nombreCorto;
-                        input.min = '0';
-                        input.max = disponibles.toString();
-                        input.placeholder = '0';
-                        input.disabled = disponibles === 0;
-
-                        if (disponibles === 0) row.classList.add('disabled');
-
-                        input.addEventListener('input', function () {
-                            const val = parseInt(this.value) || 0;
-                            if (val > disponibles) {
-                                this.value = disponibles;
-                                this.style.borderColor = 'red';
-                                setTimeout(() => this.style.borderColor = '#ddd', 500);
-                            }
-                        });
-                        inputContainer.appendChild(input);
-                    }
-                    row.appendChild(inputContainer);
-                    container.appendChild(row);
-                });
-            });
+            if (itemsMostrados === 0) {
+                mensajeSinStock.style.display = 'block';
+                container.style.display = 'none';
+                sectionTitle.style.display = 'none';
+            }
         }
 
         // Lógica de Exclusión Mutual y Límites de Cantidad
