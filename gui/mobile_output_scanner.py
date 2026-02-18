@@ -18,14 +18,18 @@ logger = get_logger(__name__)
 class MobileOutputScannerWindow:
     def __init__(self, master_app, mode='SALIDA_MOVIL'):
         self.master_app = master_app
-        self.mode = mode  # 'SALIDA_MOVIL', 'TRASLADO', 'PRESTAMO_SANTIAGO'
+        self.mode = mode  # 'SALIDA_MOVIL', 'TRASLADO', 'PRESTAMO_SANTIAGO', 'DEVOLUCION_SANTIAGO'
         self.window = tk.Toplevel(master_app.master)
         
         # Configurar título y colores según modo
         if self.mode == 'PRESTAMO_SANTIAGO':
-            self.title_text = "Transferir a Santiago (Préstamo)"
+            self.title_text = "Transferencia a Santiago"
             self.header_color = '#6f42c1' # Purple
             self.icon = "🚚"
+        elif self.mode == 'DEVOLUCION_SANTIAGO':
+            self.title_text = "Devolución de Santiago"
+            self.header_color = '#fd7e14' # Orange
+            self.icon = "↩️"
         elif self.mode == 'TRASLADO':
             self.title_text = "Traslado de Inventario"
             self.header_color = '#0dcaf0' # Cyan
@@ -69,8 +73,8 @@ class MobileOutputScannerWindow:
             self.combo_movil['values'] = moviles
             self.productos_cache = cache
             
-            # Pre-seleccionar SANTIAGO si es modo préstamo
-            if self.mode == 'PRESTAMO_SANTIAGO':
+            # Pre-seleccionar SANTIAGO si es modo préstamo o devolución
+            if self.mode in ('PRESTAMO_SANTIAGO', 'DEVOLUCION_SANTIAGO'):
                 self.combo_movil.set("SANTIAGO")
                 self.combo_movil.configure(state='disabled')
             
@@ -485,8 +489,8 @@ class MobileOutputScannerWindow:
             return
             
         movil = self.combo_movil.get()
-        # En modo PRESTAMO_SANTIAGO, el móvil es irrelevante (es SANTIAGO fijo), pero validamos 
-        if self.mode == 'PRESTAMO_SANTIAGO':
+        # Fijar SANTIAGO para modos de transferencia/devolución
+        if self.mode in ('PRESTAMO_SANTIAGO', 'DEVOLUCION_SANTIAGO'):
             movil = "SANTIAGO"
         elif not movil:
             messagebox.showwarning("Destino", "Seleccione un destino válido.")
@@ -495,15 +499,19 @@ class MobileOutputScannerWindow:
         fecha = self.fecha_var.get()
         
         # Confirmar
-        action_name = "transferir" if self.mode != 'SALIDA_MOVIL' else "registrar salida"
-        if not messagebox.askyesno("Confirmar", f"¿{action_name.capitalize()} {len(self.items_carrito)} líneas a {movil}?"):
+        if self.mode == 'DEVOLUCION_SANTIAGO':
+            action_name = "registrar devolución desde"
+        elif self.mode == 'PRESTAMO_SANTIAGO':
+            action_name = "transferir a"
+        else:
+            action_name = "registrar salida a"
+        if not messagebox.askyesno("Confirmar", f"¿{action_name.capitalize()} {movil} ({len(self.items_carrito)} líneas)?"):
             return
             
         items_to_process = self.items_carrito
         
         def process_background():
-            # Importar aqui para evitar ciclos
-            from database import registrar_prestamo_santiago, registrar_movimiento_gui, actualizar_ubicacion_serial
+            from database import registrar_movimiento_gui, actualizar_ubicacion_serial, registrar_devolucion_santiago
 
             errores = []
             count = 0
@@ -513,21 +521,40 @@ class MobileOutputScannerWindow:
                 cantidad = item['cantidad']
                 seriales = item['seriales']
                 
-                # A. PRESTAMO SANTIAGO
+                # A. TRANSFERENCIA A SANTIAGO — igual que SALIDA_MOVIL con movil='SANTIAGO'
                 if self.mode == 'PRESTAMO_SANTIAGO':
-                    # Determinar si tiene seriales para el registro
-                    observacion = f"Transferencia a Santiago - {movil}"
                     if seriales:
-                        observacion += f" (Series: {', '.join(seriales)})"
-                    
-                    # Usar la función específica de préstamo
-                    exito, mensaje = registrar_prestamo_santiago(sku, cantidad, fecha, observacion)
-                    
-                    if exito:
-                        # Si tiene seriales, actualizar su ubicación a SANTIAGO
-                        if seriales:
-                            for serial in seriales:
+                        for serial in seriales:
+                            exito, mensaje = registrar_movimiento_gui(
+                                sku, 'SALIDA_MOVIL', 1, 'SANTIAGO',
+                                fecha_evento=fecha,
+                                paquete_asignado=None,
+                                observaciones=f"Transferencia a Santiago"
+                            )
+                            if exito:
                                 actualizar_ubicacion_serial(serial, 'SANTIAGO')
+                                count += 1
+                            else:
+                                errores.append(f"{sku} ({serial}): {mensaje}")
+                    else:
+                        exito, mensaje = registrar_movimiento_gui(
+                            sku, 'SALIDA_MOVIL', cantidad, 'SANTIAGO',
+                            fecha_evento=fecha,
+                            paquete_asignado=None,
+                            observaciones=f"Transferencia a Santiago"
+                        )
+                        if exito:
+                            count += 1
+                        else:
+                            errores.append(f"{sku}: {mensaje}")
+
+                # B. DEVOLUCIÓN DE SANTIAGO — entrada a Bodega Local con seriales nuevos
+                elif self.mode == 'DEVOLUCION_SANTIAGO':
+                    exito, mensaje = registrar_devolucion_santiago(
+                        sku, cantidad, seriales, fecha,
+                        observaciones="Devolución desde Santiago"
+                    )
+                    if exito:
                         count += 1
                     else:
                         errores.append(f"{sku}: {mensaje}")

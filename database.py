@@ -606,9 +606,12 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
             sku = validate_sku(sku)
             cantidad_afectada = validate_quantity(cantidad_afectada, allow_zero=False, allow_negative=False)
             if movil_afectado:
-                 # Nota: Validamos móvil solo si se provee, y usamos la lista global en config
-                 from config import CURRENT_CONTEXT
-                 movil_afectado = validate_movil(movil_afectado, CURRENT_CONTEXT['MOVILES'])
+                 # Aceptar SANTIAGO como destino especial además de las móviles del contexto
+                 if movil_afectado.upper() == 'SANTIAGO':
+                     movil_afectado = 'SANTIAGO'
+                 else:
+                     from config import CURRENT_CONTEXT
+                     movil_afectado = validate_movil(movil_afectado, CURRENT_CONTEXT['MOVILES'])
             
             if observaciones:
                 observaciones = validate_observaciones(observaciones)
@@ -870,56 +873,88 @@ def registrar_prestamo_santiago(sku, cantidad, fecha_evento, observaciones=None)
     finally:
         if conn: close_connection(conn)
 
-def registrar_devolucion_santiago(sku, cantidad, fecha_devolucion, observaciones=None):
+def registrar_devolucion_santiago(sku, cantidad, seriales_nuevos, fecha_evento, observaciones=None):
     """
-    Registra una devolución desde Santiago a Bodega.
+    Registra una devolución desde Santiago a Bodega Local.
+    - Descuenta de asignacion_moviles donde movil='SANTIAGO'
+    - Suma a Bodega Local (ENTRADA)
+    - Registra los seriales nuevos en series_registradas con ubicacion='BODEGA'
+    Los seriales devueltos pueden ser DISTINTOS a los enviados originalmente.
     """
     conn = None
     try:
+        sku = validate_sku(sku)
+        cantidad = validate_quantity(cantidad, allow_zero=False, allow_negative=False)
+        if observaciones:
+            from utils.validators import validate_observaciones
+            observaciones = validate_observaciones(observaciones)
+    except ValidationError as ve:
+        return False, f"Datos inválidos: {ve}"
+
+    try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        
-        run_query(cursor, """
-            SELECT id, cantidad_prestada, nombre_producto 
-            FROM prestamos_activos 
-            WHERE sku = ? AND estado = 'ACTIVO'
-        """, (sku,))
-        prestamos = cursor.fetchall()
-        
-        if not prestamos:
-            return False, f"No hay préstamos activos para el SKU '{sku}'."
-        
-        total_prestado = sum(prestamo[1] for prestamo in prestamos)
-        
-        if cantidad > total_prestado:
-            return False, f"Cantidad a devolver ({cantidad}) excede el total prestado activo ({total_prestado})."
-        
-        exito, mensaje = registrar_movimiento_gui(sku, 'ENTRADA', cantidad, None, fecha_devolucion, None, f"DEVOLUCIÓN SANTIAGO - {observaciones}" if observaciones else "DEVOLUCIÓN SANTIAGO")
-        
-        if exito:
-            cantidad_restante = cantidad
-            for prestamo in prestamos:
-                if cantidad_restante <= 0:
-                    break
-                    
-                id_prestamo, cantidad_prestada, nombre = prestamo
-                
-                if cantidad_restante >= cantidad_prestada:
-                    run_query(cursor, "UPDATE prestamos_activos SET estado = 'DEVUELTO', fecha_devolucion = ? WHERE id = ?", 
-                                 (fecha_devolucion, id_prestamo))
-                    cantidad_restante -= cantidad_prestada
-                else:
-                    run_query(cursor, "UPDATE prestamos_activos SET cantidad_prestada = cantidad_prestada - ? WHERE id = ?", 
-                                 (cantidad_restante, id_prestamo))
-                    cantidad_restante = 0
-            
-            conn.commit()
-            return True, f"Devolución registrada exitosamente: {cantidad} unidades de SKU {sku} desde Santiago."
+
+        # 1. Verificar stock asignado a SANTIAGO
+        if DB_TYPE == 'MYSQL':
+            sql_asig = "SELECT SUM(cantidad) FROM asignacion_moviles WHERE sku_producto = %s AND movil = 'SANTIAGO'"
         else:
-            return False, mensaje
-            
+            sql_asig = "SELECT SUM(cantidad) FROM asignacion_moviles WHERE sku_producto = ? AND movil = 'SANTIAGO'"
+        cursor.execute(sql_asig, (sku,))
+        res = cursor.fetchone()
+        stock_santiago = float(res[0]) if res and res[0] else 0.0
+
+        if stock_santiago < cantidad:
+            return False, f"Santiago solo tiene {stock_santiago} unidades asignadas de '{sku}'. No se puede devolver {cantidad}."
+
+        # 2. Descontar de asignacion_moviles SANTIAGO
+        nueva_asig = stock_santiago - cantidad
+        if DB_TYPE == 'MYSQL':
+            cursor.execute("DELETE FROM asignacion_moviles WHERE sku_producto = %s AND movil = 'SANTIAGO'", (sku,))
+            if nueva_asig > 0:
+                cursor.execute("INSERT INTO asignacion_moviles (sku_producto, movil, paquete, cantidad) VALUES (%s, 'SANTIAGO', NULL, %s)", (sku, nueva_asig))
+        else:
+            cursor.execute("DELETE FROM asignacion_moviles WHERE sku_producto = ? AND movil = 'SANTIAGO'", (sku,))
+            if nueva_asig > 0:
+                cursor.execute("INSERT INTO asignacion_moviles (sku_producto, movil, paquete, cantidad) VALUES (?, 'SANTIAGO', NULL, ?)", (sku, nueva_asig))
+
+        # 3. Sumar a Bodega Local
+        run_query(cursor, "UPDATE productos SET cantidad = cantidad + ? WHERE sku = ? AND ubicacion = 'BODEGA'", (cantidad, sku))
+
+        # 4. Registrar movimiento
+        obs_final = f"DEVOLUCIÓN SANTIAGO - {observaciones}" if observaciones else "DEVOLUCIÓN SANTIAGO"
+        run_query(cursor, """
+            INSERT INTO movimientos (sku_producto, tipo_movimiento, cantidad_afectada, movil_afectado, fecha_evento, observaciones)
+            VALUES (?, 'RETORNO_MOVIL', ?, 'SANTIAGO', ?, ?)
+        """, (sku, cantidad, fecha_evento, obs_final))
+
+        # 5. Registrar seriales nuevos en Bodega (si los hay)
+        if seriales_nuevos:
+            for serial in seriales_nuevos:
+                if not serial:
+                    continue
+                # Verificar si el serial ya existe
+                run_query(cursor, "SELECT id FROM series_registradas WHERE serial_number = ?", (serial,))
+                existe = cursor.fetchone()
+                if existe:
+                    # Actualizar ubicación a BODEGA
+                    run_query(cursor, "UPDATE series_registradas SET ubicacion = 'BODEGA' WHERE serial_number = ?", (serial,))
+                else:
+                    # Insertar nuevo serial
+                    run_query(cursor, """
+                        INSERT INTO series_registradas (sku_producto, serial_number, ubicacion, fecha_registro)
+                        VALUES (?, ?, 'BODEGA', ?)
+                    """, (sku, serial, fecha_evento))
+
+        conn.commit()
+        seriales_msg = f" ({len(seriales_nuevos)} seriales registrados)" if seriales_nuevos else ""
+        return True, f"Devolución registrada: {cantidad} unidades de '{sku}' desde Santiago a Bodega{seriales_msg}."
+
     except Exception as e:
-        return False, f"Error de base de datos: {e}"
+        if conn:
+            try: conn.rollback()
+            except: pass
+        return False, f"Error al registrar devolución: {e}"
     finally:
         if conn: close_connection(conn)
 

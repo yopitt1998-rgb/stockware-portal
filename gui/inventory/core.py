@@ -184,8 +184,8 @@ class InventoryTab:
             ("🔫 Salida Móvil Scanner", self.abrir_ventana_salida_movil_scanner, '#FF6F00'),
             ("❌ Eliminar Producto", self.abrir_ventana_eliminar, Styles.ACCENT_COLOR),
             ("🔄 Traslado", self.abrir_ventana_traslado, Styles.SECONDARY_COLOR),
-            ("📤 Transferencia Santiago", self.abrir_ventana_prestamo_bodega, '#607D8B'),
-            ("📥 Devolución Santiago", self.abrir_ventana_devolucion_santiago, '#795548'),
+            ("📤 Transferencia Santiago", self.abrir_ventana_prestamo_santiago_scanner, '#6f42c1'),
+            ("📥 Devolución Santiago", self.abrir_ventana_devolucion_santiago_scanner, '#fd7e14'),
             ("📋 Ver Préstamos", self.abrir_ventana_prestamos_activos, '#009688'),
             ("🚚 Gestionar Móviles", self.abrir_ventana_gestion_moviles, '#E91E63'),
             ("🧹 Limpieza Avanzada", self.mostrar_herramientas_limpieza, '#9C27B0')
@@ -1409,6 +1409,14 @@ class InventoryTab:
         except Exception as e:
             logger.error(f"Error opening santiago window: {e}")
             messagebox.showerror("Error", f"No se pudo abrir Santiago: {e}")
+
+    def abrir_ventana_devolucion_santiago_scanner(self):
+        """Abre ventana de devolución desde Santiago (seriales distintos permitidos)"""
+        try:
+            MobileOutputScannerWindow(self.main_app, mode='DEVOLUCION_SANTIAGO')
+        except Exception as e:
+            logger.error(f"Error opening devolucion santiago window: {e}")
+            messagebox.showerror("Error", f"No se pudo abrir Devolución Santiago: {e}")
 
     def abrir_ventana_gestion_abastos(self):
         """Abre ventana para gestionar (revisar/editar) abastos realizados"""
