@@ -1,0 +1,35 @@
+[SEARCH] Buscando .env en: c:\Users\johni\Documents\GestorInventario_MySQL\.env
+[OK] .env cargado exitosamente
+DB_TYPE: MYSQL
+
+--- RECENT CONSUMOS PENDIENTES (Mobile 200 focus) ---
+(300009, 'Movil 200', '4-3-42', datetime.date(2026, 2, 20), 'AUTO_APROBADO', 'Jorge Ibarra', datetime.datetime(2026, 2, 20, 14, 0, 32))
+(300008, 'Movil 200', '4-3-18', datetime.date(2026, 2, 20), 'AUTO_APROBADO', 'Jorge Ibarra', datetime.datetime(2026, 2, 20, 14, 0, 31))
+(300007, 'Movil 200', '4-2-41', datetime.date(2026, 2, 20), 'AUTO_APROBADO', 'Jorge Ibarra', datetime.datetime(2026, 2, 20, 14, 0, 30))
+(300006, 'Movil 200', '2-7-11', datetime.date(2026, 2, 20), 'AUTO_APROBADO', 'Jorge Ibarra', datetime.datetime(2026, 2, 20, 14, 0, 29))
+(300005, 'Movil 200', '2-7-07', datetime.date(2026, 2, 20), 'AUTO_APROBADO', 'Jorge Ibarra', datetime.datetime(2026, 2, 20, 14, 0, 28))
+(300004, 'Movil 200', '2-5-02', datetime.date(2026, 2, 20), 'AUTO_APROBADO', 'Jorge Ibarra', datetime.datetime(2026, 2, 20, 14, 0, 28))
+(300003, 'Movil 200', '1-8-40', datetime.date(2026, 2, 20), 'AUTO_APROBADO', 'Jorge Ibarra', datetime.datetime(2026, 2, 20, 14, 0, 27))
+(300002, 'Movil 200', '4-4-644', datetime.date(2026, 2, 20), 'AUTO_APROBADO', 'Jorge Ibarra', datetime.datetime(2026, 2, 20, 14, 0, 26))
+
+--- RECENT SERIES REGISTRADAS (Last 20) ---
+(360081, '4-4-646', '485754430E7821B5', datetime.datetime(2026, 2, 20, 0, 0), 'DISPONIBLE')
+(360080, '4-4-646', '485754430E76DFB5', datetime.datetime(2026, 2, 20, 0, 0), 'DISPONIBLE')
+(360079, '4-4-646', '485754430E71F9B5', datetime.datetime(2026, 2, 20, 0, 0), 'DISPONIBLE')
+(360078, '4-4-646', '485754430E78A9B5', datetime.datetime(2026, 2, 20, 0, 0), 'DISPONIBLE')
+(360077, '4-4-646', '485754430E7530B5', datetime.datetime(2026, 2, 20, 0, 0), 'DISPONIBLE')
+(360076, '4-4-646', 'F0A951975A3A', datetime.datetime(2026, 2, 20, 0, 0), 'DISPONIBLE')
+(360075, '4-4-646', '485754430E71D9B5', datetime.datetime(2026, 2, 20, 0, 0), 'DISPONIBLE')
+(360074, '4-4-646', '485754430E7661B5', datetime.datetime(2026, 2, 20, 0, 0), 'DISPONIBLE')
+(360073, '4-4-646', '485754430E7767B5', datetime.datetime(2026, 2, 20, 0, 0), 'DISPONIBLE')
+(360072, '4-4-646', '485754430E72A3B5', datetime.datetime(2026, 2, 20, 0, 0), 'DISPONIBLE')
+(360071, '4-4-646', '485754430E775DB5', datetime.datetime(2026, 2, 20, 0, 0), 'DISPONIBLE')
+(360070, '4-4-646', 'F0A95197001D', datetime.datetime(2026, 2, 20, 0, 0), 'DISPONIBLE')
+(360069, '4-4-646', '485754430E70E3B5', datetime.datetime(2026, 2, 20, 0, 0), 'DISPONIBLE')
+(360068, '4-4-646', '485754430E7A03B5', datetime.datetime(2026, 2, 20, 0, 0), 'DISPONIBLE')
+(360067, '4-4-646', '485754430E7119B5', datetime.datetime(2026, 2, 20, 0, 0), 'DISPONIBLE')
+(360066, '4-4-646', '485754430E7682B5', datetime.datetime(2026, 2, 20, 0, 0), 'DISPONIBLE')
+(360065, '4-4-646', '485754430E74D8B5', datetime.datetime(2026, 2, 20, 0, 0), 'DISPONIBLE')
+(360064, '4-4-646', '485754430E7289B5', datetime.datetime(2026, 2, 20, 0, 0), 'DISPONIBLE')
+(360063, '4-4-646', '485754430E7419B5', datetime.datetime(2026, 2, 20, 0, 0), 'DISPONIBLE')
+(360062, '4-4-646', '485754430E7098B5', datetime.datetime(2026, 2, 20, 0, 0), 'DISPONIBLE')

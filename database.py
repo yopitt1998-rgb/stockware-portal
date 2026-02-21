@@ -168,6 +168,20 @@ def inicializar_bd():
             )
         """)
         add_column_if_missing('asignacion_moviles', 'paquete', 'VARCHAR(50)')
+
+        # --- MIGRACIÓN: Corregir Índice Único en asignacion_moviles (MySQL) ---
+        if DB_TYPE == 'MYSQL':
+            try:
+                # Comprobar si existe el índice antiguo restrictivo
+                cursor.execute("SHOW INDEX FROM asignacion_moviles WHERE Key_name = 'sku_producto'")
+                idx_data = cursor.fetchall()
+                if idx_data and len(idx_data) < 3:
+                     logger.info("🔧 Migrando índice de asignacion_moviles para soportar múltiples paquetes...")
+                     cursor.execute("ALTER TABLE asignacion_moviles DROP INDEX sku_producto")
+                     cursor.execute("ALTER TABLE asignacion_moviles ADD UNIQUE KEY sku_movil_paquete (sku_producto, movil, paquete)")
+                     logger.info("✅ Índice migrado exitosamente.")
+            except Exception as e:
+                logger.warning(f"⚠️ Error en migración de índice asignacion_moviles: {e}")
         
         # 3. TABLA MOVIMIENTOS
         cursor.execute(f"""

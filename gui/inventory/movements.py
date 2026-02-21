@@ -792,6 +792,11 @@ class MobileReturnWindow:
             'stock_fisico_escaneado': {},
         }
         
+        try:
+             self.productos = obtener_todos_los_skus_para_movimiento()
+        except:
+             self.productos = PRODUCTOS_INICIALES
+
         self.construir_ui()
 
     def construir_ui(self):
@@ -1196,6 +1201,8 @@ class MobileReturnWindow:
         threading.Thread(target=self._procesar_async, daemon=True).start()
 
     def _procesar_async(self):
+        faltantes_relleno = []
+        paquete_objetivo = self.paquete_combo.get()
         exitos_consumo = 0
         exitos_retorno = 0
         errors = []

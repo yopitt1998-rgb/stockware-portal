@@ -16,9 +16,12 @@ logger = get_logger(__name__)
 
 
 class MobileOutputScannerWindow:
-    def __init__(self, master_app, mode='SALIDA_MOVIL'):
+    def __init__(self, master_app, mode='SALIDA_MOVIL', prefill_items=None, initial_movil=None, initial_package=None):
         self.master_app = master_app
-        self.mode = mode  # 'SALIDA_MOVIL', 'TRASLADO', 'PRESTAMO_SANTIAGO', 'DEVOLUCION_SANTIAGO'
+        self.mode = mode
+        self.prefill_items = prefill_items 
+        self.initial_movil = initial_movil
+        self.initial_package = initial_package
         self.window = tk.Toplevel(master_app.master)
         
         # Configurar título y colores según modo
@@ -55,6 +58,16 @@ class MobileOutputScannerWindow:
         self.create_interface()
         self.load_initial_data()
         
+        # Prefill if items provided
+        if self.prefill_items:
+            for item in self.prefill_items:
+                self.agregar_al_carrito(
+                    item.get('sku'), 
+                    item.get('nombre'), 
+                    item.get('cantidad', 1), 
+                    item.get('seriales', [])
+                )
+        
     def load_initial_data(self):
         def load():
             from database import obtener_nombres_moviles, obtener_todos_los_skus_para_movimiento
@@ -73,12 +86,14 @@ class MobileOutputScannerWindow:
             self.combo_movil['values'] = moviles
             self.productos_cache = cache
             
-            # Pre-seleccionar según modo
-            if self.mode == 'PRESTAMO_SANTIAGO':
+            # Pre-seleccionar según modo o parámetros iniciales
+            if self.initial_movil:
+                self.combo_movil.set(self.initial_movil)
+            elif self.mode == 'PRESTAMO_SANTIAGO':
                 self.combo_movil.set("SANTIAGO")
                 self.combo_movil.configure(state='disabled')
             elif self.mode == 'DEVOLUCION_SANTIAGO':
-                self.combo_movil.set("CHIRIQUI")  # Destino real de la devolución
+                self.combo_movil.set("CHIRIQUI")
                 self.combo_movil.configure(state='disabled')
             
         mostrar_cargando_async(self.window, load, on_loaded, self.window)
@@ -139,9 +154,14 @@ class MobileOutputScannerWindow:
             tk.Label(frame, text="Paquete:", bg=Styles.LIGHT_BG).pack(side='left', padx=(20, 5))
             self.lista_paquetes = list(PAQUETES_MATERIALES.keys()) + ["PERSONALIZADO"]
             self.combo_paquete = ttk.Combobox(frame, values=self.lista_paquetes, state='readonly', width=18, font=('Segoe UI', 10))
-            self.combo_paquete.set("PAQUETE A")
+            
+            start_paq = self.initial_package if self.initial_package and self.initial_package in self.lista_paquetes else "PAQUETE A"
+            self.combo_paquete.set(start_paq)
+            
             self.combo_paquete.pack(side='left', padx=5)
             self.combo_paquete.bind("<<ComboboxSelected>>", self.on_package_change)
+            # Forzar actualización inicial del panel de progreso si hay paquete
+            self.window.after(100, self.on_package_change)
 
     def crear_barra_scanner(self, parent):
         frame = tk.LabelFrame(parent, text="2. Escanear Productos", font=('Segoe UI', 10, 'bold'),
@@ -197,9 +217,10 @@ class MobileOutputScannerWindow:
                  bg='#6c757d', fg='white', font=('Segoe UI', 10, 'bold'),
                  relief='flat', padx=20, pady=10).pack(side='left')
                  
-        tk.Button(frame, text=f"💾 REGISTRAR", command=self.registrar_salida,
+        self.btn_registrar = tk.Button(frame, text=f"💾 REGISTRAR", command=self.registrar_salida,
                  bg=Styles.SUCCESS_COLOR, fg='white', font=('Segoe UI', 10, 'bold'),
-                 relief='flat', padx=20, pady=10).pack(side='right')
+                 relief='flat', padx=20, pady=10)
+        self.btn_registrar.pack(side='right')
 
     def crear_panel_progreso(self, parent):
         tk.Label(parent, text="📦 Progreso Paquete", font=('Segoe UI', 12, 'bold'),
@@ -282,14 +303,22 @@ class MobileOutputScannerWindow:
             origen_serial = False
             nombre_serial = None
             
-            # 1. Intentar buscar por SERIAL primero (Prioridad MAC)
             try:
-                sku_serial, existe = obtener_sku_por_serial(codigo)
+                sku_serial, existe, ubicacion_actual = obtener_sku_por_serial(codigo)
                 if existe:
+                    # VALIDACIÓN CRÍTICA: La serie debe estar en BODEGA para poder salir
+                    if ubicacion_actual and ubicacion_actual != 'BODEGA':
+                        messagebox.showerror("Ubicación Inválida", 
+                            f"El equipo con serial {codigo} ya está asignado a: {ubicacion_actual}\n\n"
+                            "No se puede realizar una salida de un equipo que no esté en BODEGA.", 
+                            parent=self.window)
+                        self.entry_scanner.focus_set()
+                        return
+                        
                     sku = sku_serial
                     origen_serial = True
                     nombre_serial = codigo
-                    logger.info(f"Auto-reconocimiento: Serial {codigo} -> SKU {sku}")
+                    logger.info(f"Auto-reconocimiento: Serial {codigo} -> SKU {sku} (Desde BODEGA)")
             except Exception as e:
                 logger.error(f"Error en auto-reconocimiento de serial: {e}")
 
@@ -304,7 +333,9 @@ class MobileOutputScannerWindow:
             
             if sku not in self.productos_cache:
                 messagebox.showwarning("No encontrado", f"Producto o Serial no encontrado: {codigo}\n(Asegúrese de que el producto esté en catálogo o la serie en BODEGA)", parent=self.window)
-                self.entry_scanner.focus() # Recuperar foco
+                self.window.lift()
+                self.entry_scanner.update()
+                self.entry_scanner.focus_set()
                 return
                 
             nombre = self.productos_cache[sku]['nombre']
@@ -493,6 +524,24 @@ class MobileOutputScannerWindow:
                 
             self.actualizar_panel_progreso()
 
+    def actualizar_tabla(self):
+        """Limpia y vuelve a llenar la tabla con los items del carrito."""
+        for i in self.tree.get_children():
+            self.tree.delete(i)
+        
+        # Insertar items en orden (el último escaneado queda arriba si insertamos en 0)
+        for item in self.items_carrito:
+            sku = item['sku']
+            nombre = item['nombre']
+            cantidad = item['cantidad']
+            seriales = item['seriales']
+            es_adicional = item.get('es_adicional', False)
+            
+            tipo_str = "📦 Paquete" if not es_adicional else "➕ Adicional"
+            series_str = ", ".join(seriales) if seriales else "—"
+            
+            self.tree.insert('', 0, values=(sku, nombre, cantidad, series_str, tipo_str))
+
     def registrar_salida(self):
         if not self.items_carrito:
             messagebox.showwarning("Vacío", "No hay items escaneados.")
@@ -518,114 +567,177 @@ class MobileOutputScannerWindow:
             action_name = "transferir a"
         else:
             action_name = "registrar salida a"
-        if not messagebox.askyesno("Confirmar", f"¿{action_name.capitalize()} {movil} ({len(self.items_carrito)} líneas)?"):
+        if not messagebox.askyesno("Confirmar", f"¿{action_name.capitalize()} {movil} ({len(self.items_carrito)} líneas)?", parent=self.window):
+            self.window.lift()
+            self.entry_scanner.focus_set()
             return
             
         items_to_process = self.items_carrito
         
         def process_background():
-            from database import registrar_movimiento_gui, actualizar_ubicacion_serial, registrar_devolucion_santiago
+            from database import registrar_movimiento_gui, actualizar_ubicacion_serial, registrar_devolucion_santiago, get_db_connection
 
+            exitosos_skus = [] # Lista de (sku, seriales) exitosos
             errores = []
             count = 0
-            
-            for item in items_to_process:
-                sku = item['sku']
-                cantidad = item['cantidad']
-                seriales = item['seriales']
+            conn = None
+            try:
+                conn = get_db_connection()
+                # Log del destino (para depuración del usuario)
+                db_info = getattr(conn, 'database', 'SQLite' if 'sqlite3' in str(type(conn)) else 'Cloud')
+                logger.info(f"💾 [TRANS] Conexión establecida a {db_info}")
                 
-                # A. TRANSFERENCIA A SANTIAGO — igual que SALIDA_MOVIL con movil='SANTIAGO'
-                if self.mode == 'PRESTAMO_SANTIAGO':
-                    if seriales:
-                        for serial in seriales:
+                cursor = conn.cursor()
+                
+                for item in items_to_process:
+                    sku = item['sku']
+                    cantidad = item['cantidad']
+                    seriales = item['seriales']
+                    
+                    # A. TRANSFERENCIA A SANTIAGO
+                    if self.mode == 'PRESTAMO_SANTIAGO':
+                        if seriales:
+                            for serial in seriales:
+                                exito, mensaje = registrar_movimiento_gui(
+                                    sku, 'SALIDA_MOVIL', 1, 'SANTIAGO',
+                                    fecha_evento=fecha,
+                                    paquete_asignado=None,
+                                    observaciones=f"Transferencia a Santiago",
+                                    existing_conn=conn
+                                )
+                                if exito:
+                                    actualizar_ubicacion_serial(serial, 'SANTIAGO', existing_conn=conn)
+                                    count += 1
+                                    exitosos_skus.append((sku, [serial]))
+                                else:
+                                    errores.append(f"{sku} ({serial}): {mensaje}")
+                        else:
                             exito, mensaje = registrar_movimiento_gui(
-                                sku, 'SALIDA_MOVIL', 1, 'SANTIAGO',
+                                sku, 'SALIDA_MOVIL', cantidad, 'SANTIAGO',
                                 fecha_evento=fecha,
                                 paquete_asignado=None,
-                                observaciones=f"Transferencia a Santiago"
+                                observaciones=f"Transferencia a Santiago",
+                                existing_conn=conn
                             )
                             if exito:
-                                actualizar_ubicacion_serial(serial, 'SANTIAGO')
                                 count += 1
+                                exitosos_skus.append((sku, []))
                             else:
-                                errores.append(f"{sku} ({serial}): {mensaje}")
-                    else:
-                        exito, mensaje = registrar_movimiento_gui(
-                            sku, 'SALIDA_MOVIL', cantidad, 'SANTIAGO',
-                            fecha_evento=fecha,
-                            paquete_asignado=None,
-                            observaciones=f"Transferencia a Santiago"
+                                errores.append(f"{sku}: {mensaje}")
+
+                    # B. DEVOLUCIÓN DE SANTIAGO
+                    elif self.mode == 'DEVOLUCION_SANTIAGO':
+                        exito, mensaje = registrar_devolucion_santiago(
+                            sku, cantidad, seriales, fecha,
+                            fecha, observaciones="Devolución desde Santiago",
+                            existing_conn=conn
                         )
                         if exito:
                             count += 1
+                            exitosos_skus.append((sku, seriales))
                         else:
                             errores.append(f"{sku}: {mensaje}")
 
-                # B. DEVOLUCIÓN DE SANTIAGO — entrada a Bodega Local con seriales nuevos
-                elif self.mode == 'DEVOLUCION_SANTIAGO':
-                    exito, mensaje = registrar_devolucion_santiago(
-                        sku, cantidad, seriales, fecha,
-                        observaciones="Devolución desde Santiago"
-                    )
-                    if exito:
-                        count += 1
-                    else:
-                        errores.append(f"{sku}: {mensaje}")
-
-                # B. TRASLADO O SALIDA MOVIL
-                else: 
-                    tipo_mov = 'TRASLADO' if self.mode == 'TRASLADO' else 'SALIDA_MOVIL'
-                    paquete_record = self.combo_paquete.get() if hasattr(self, 'combo_paquete') else None
-                    
-                    if seriales:
-                        # Equipos con serial
-                        for serial in seriales:
-                            exito, mensaje = registrar_movimiento_gui(
-                                sku, tipo_mov, 1, movil, 
-                                fecha_evento=fecha,
-                                paquete_asignado=paquete_record
-                            )
-                            
-                            if exito:
-                                # Actualizar ubicación del serial
-                                nueva_ubicacion = movil if self.mode == 'SALIDA_MOVIL' else f"TRASLADO_{movil}"
-                                actualizar_ubicacion_serial(serial, nueva_ubicacion)
-                                count += 1
-                            else:
-                                errores.append(f"{sku} ({serial}): {mensaje}")
-
-                    else:
-                        # Materiales sin serial
-                        exito, mensaje = registrar_movimiento_gui(
-                            sku, tipo_mov, cantidad, movil,
-                            fecha_evento=fecha,
-                            paquete_asignado=paquete_record
-                        )
+                    # C. TRASLADO O SALIDA MOVIL
+                    else: 
+                        tipo_mov = 'TRASLADO' if self.mode == 'TRASLADO' else 'SALIDA_MOVIL'
+                        paquete_record = self.combo_paquete.get() if hasattr(self, 'combo_paquete') else None
                         
-                        if exito:
-                            count += 1
+                        if seriales:
+                            for serial in seriales:
+                                exito, mensaje = registrar_movimiento_gui(
+                                    sku, tipo_mov, 1, movil, 
+                                    fecha_evento=fecha,
+                                    paquete_asignado=paquete_record,
+                                    existing_conn=conn
+                                )
+                                if exito:
+                                    nueva_ubicacion = movil if self.mode == 'SALIDA_MOVIL' else f"TRASLADO_{movil}"
+                                    actualizar_ubicacion_serial(serial, nueva_ubicacion, existing_conn=conn)
+                                    count += 1
+                                    exitosos_skus.append((sku, [serial]))
+                                else:
+                                    errores.append(f"{sku} ({serial}): {mensaje}")
+
                         else:
-                            errores.append(f"{sku}: {mensaje}")
-                            
-            return count, errores
+                            exito, mensaje = registrar_movimiento_gui(
+                                sku, tipo_mov, cantidad, movil,
+                                fecha_evento=fecha,
+                                paquete_asignado=paquete_record,
+                                existing_conn=conn
+                            )
+                            if exito:
+                                count += 1
+                                exitosos_skus.append((sku, []))
+                            else:
+                                errores.append(f"{sku}: {mensaje}")
+                
+                if conn: 
+                    conn.commit()
+            except Exception as e:
+                if conn: conn.rollback()
+                errores.append(f"Error crítico: {e}")
+                exitosos_skus = [] # Si el commit falla, nada fue exitoso
+            finally:
+                if conn: conn.close()
             
+            return count, errores, exitosos_skus
+                            
         def on_complete(result):
-            count, errores = result
+            # Rehabilitar botón
+            if hasattr(self, 'btn_registrar'):
+                self.btn_registrar.config(state='normal', text="💾 REGISTRAR")
+                
+            if not self.window.winfo_exists(): return
+            
+            count, errores, exitosos = result
+            
+            # Forzar foco y traer al frente
+            self.window.attributes("-topmost", True)
+            self.window.lift()
+            self.window.focus_force()
+            self.window.after(100, lambda: self.window.attributes("-topmost", False))
+            
             if errores:
                 msg = f"Se procesaron {count} items con {len(errores)} errores:\n\n" + "\n".join(errores[:5])
                 if len(errores) > 5: msg += "\n..."
-                messagebox.showwarning("Resultado parcial", msg, parent=self.window)
+                messagebox.showerror("Error en Registro", msg, parent=self.window)
             else:
-                messagebox.showinfo("Éxito", f"Operación completada exitosamente.\n{count} registros procesados.", parent=self.window)
-                # NO CERRAR VENTANA - LIMPIAR Y MANTENER EL FLUJO
-                self.items_carrito = []
-                for item in self.tree.get_children():
-                    self.tree.delete(item)
-                
-                # Reiniciar contadores visuales
-                self.items_completados = {sku: 0 for sku in self.paquete_base}
-                self.actualizar_panel_progreso()
-                
-                self.entry_scanner.focus()
-                
+                mostrar_mensaje_emergente(self.window, "Éxito", f"Operación completada exitosamente.\n{count} registros procesados.", "success")
+
+            # LIMPIEZA PARCIAL: Solo remover lo que se registró bien
+            for e_sku, e_seriales in exitosos:
+                # Buscar en el carrito y restar/remover
+                for item in list(self.items_carrito):
+                    if item['sku'] == e_sku:
+                        if not e_seriales: # Material sin serial
+                            self.items_carrito.remove(item)
+                            break
+                        else: # Equipo con serial
+                            for s in e_seriales:
+                                if s in item['seriales']:
+                                    item['seriales'].remove(s)
+                                    item['cantidad'] -= 1
+                            if item['cantidad'] <= 0:
+                                self.items_carrito.remove(item)
+                            break
+
+            self.actualizar_tabla()
+            self.actualizar_panel_progreso()
+            
+            # Recuperación agresiva de foco tras cerrar mensajes
+            def recover_focus():
+                if self.window.winfo_exists():
+                    self.window.lift()
+                    self.window.focus_force()
+                    self.entry_scanner.focus_set()
+            
+            self.window.after(500, recover_focus) # Dar tiempo a que se cierren popups
+                # Decisión: En éxito total, cerrar o limpiar. El usuario se quejó de que mandara atrás, 
+                # así que mejor quedarse pero con foco.
+        
+        # Desactivar botón para evitar doble clic
+        if hasattr(self, 'btn_registrar'):
+            self.btn_registrar.config(state='disabled', text="⏳ Procesando...")
+            
         mostrar_cargando_async(self.window, process_background, on_complete, self.window)

@@ -109,7 +109,15 @@ MATERIALES_COMPARTIDOS = [
     "1-2-16",   # FIBUNHILO (Fibra)
     "7-1-171",  # C_UTP_CAT6 (Cable UTP)
     "10-1-04",  # CONEC_RJ45 (Conectores)
-    "5-2-443"   # MOLDU (Moldura)
+    "5-2-443",  # MOLDU (Moldura)
+    "1-8-40",   # FAJILLA_8 (Zunchos)
+    "2-5-02",   # GRAPAS
+    "2-7-07",   # CALCAMONIA
+    "2-7-11",   # COLILLA
+    "4-3-42",   # TENSOR_FO
+    "4-3-18",   # CONEC_MECA
+    "4-2-41",   # TOALLAS
+    "1-4-61"    # PLACAS_F_O
 ]
 
 # Default initial package for logic compatibility

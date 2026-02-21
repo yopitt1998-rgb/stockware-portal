@@ -848,3 +848,282 @@ _tkinter.TclError: invalid command name ".!toplevel3.!notebook.!frame.!frame.!fr
 2026-02-14 15:43:44 | ERROR    | database             | ❌ Error SQL ejecución: 1146 (42S02): Table 'mysql.moviles' doesn't exist
 2026-02-14 15:43:44 | ERROR    | database             |    Query: SELECT nombre, conductor, ayudante FROM moviles
 2026-02-14 15:43:44 | ERROR    | database             |    Params: None
+2026-02-18 12:58:21 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\core.py", line 1543, in abrir_gestion_codigos
+    messagebox.showinfo("Gestión de Códigos",
+  File "C:\Python312\Lib\tkinter\messagebox.py", line 88, in showinfo
+    return _show(title, message, INFO, OK, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\messagebox.py", line 76, in _show
+    res = Message(**options).show()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\commondialog.py", line 45, in show
+    s = master.tk.call(self.command, *master._options(self.options))
+        ^^^^^^^^^
+AttributeError: 'InventoryTab' object has no attribute 'tk'
+
+2026-02-18 12:58:32 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\core.py", line 1543, in abrir_gestion_codigos
+    messagebox.showinfo("Gestión de Códigos",
+  File "C:\Python312\Lib\tkinter\messagebox.py", line 88, in showinfo
+    return _show(title, message, INFO, OK, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\messagebox.py", line 76, in _show
+    res = Message(**options).show()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\commondialog.py", line 45, in show
+    s = master.tk.call(self.command, *master._options(self.options))
+        ^^^^^^^^^
+AttributeError: 'InventoryTab' object has no attribute 'tk'
+
+2026-02-18 12:59:41 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\core.py", line 1543, in abrir_gestion_codigos
+    messagebox.showinfo("Gestión de Códigos",
+  File "C:\Python312\Lib\tkinter\messagebox.py", line 88, in showinfo
+    return _show(title, message, INFO, OK, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\messagebox.py", line 76, in _show
+    res = Message(**options).show()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\commondialog.py", line 45, in show
+    s = master.tk.call(self.command, *master._options(self.options))
+        ^^^^^^^^^
+AttributeError: 'InventoryTab' object has no attribute 'tk'
+
+2026-02-20 08:40:45 | ERROR    | utils.db_connector   | Error creando pool MySQL para test: 3024: 
+    The Read Operation timed out. As a consequence the current connection has been closed to avoid
+    any unstable behaviour, consider using the reconnect() option and continue with the current
+    session's workflow.
+    
+2026-02-20 08:40:45 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): 3024: 
+    The Read Operation timed out. As a consequence the current connection has been closed to avoid
+    any unstable behaviour, consider using the reconnect() option and continue with the current
+    session's workflow.
+    
+2026-02-20 10:55:31 | ERROR    | database             | Error loading tab Auditoría: unknown option "-weight"
+2026-02-20 10:55:39 | ERROR    | database             | Error loading tab Auditoría: unknown option "-weight"
+2026-02-20 12:03:28 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 34, in <lambda>
+    ventana.after(0, lambda: _finalizar_carga(ventana, frame_carga, callback_exito, datos))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 46, in _finalizar_carga
+    callback_exito(datos)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\mobile_output_scanner.py", line 639, in on_complete
+    count, errores = result
+    ^^^^^^^^^^^^^^
+TypeError: cannot unpack non-iterable NoneType object
+
+2026-02-20 12:05:02 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\abasto_scanner.py", line 108, in _on_mousewheel
+    canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+  File "C:\Python312\Lib\tkinter\__init__.py", line 2014, in yview_scroll
+    self.tk.call(self._w, 'yview', 'scroll', number, what)
+_tkinter.TclError: invalid command name ".!toplevel3.!notebook.!frame.!frame.!frame2.!canvas"
+
+2026-02-20 12:45:23 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-20 12:45:23 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-20 12:45:29 | ERROR    | database             | Error loading tab Auditoría: unexpected indent (audit.py, line 1500)
+2026-02-20 12:46:23 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-20 12:47:11 | ERROR    | database             | Error loading tab Auditoría: unexpected indent (audit.py, line 1500)
+2026-02-20 13:00:08 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-20 13:00:08 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-20 13:01:08 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-20 13:02:08 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-20 13:04:15 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-20 13:04:15 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-20 13:05:15 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-20 13:06:15 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-20 13:07:15 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-20 13:08:15 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-20 13:09:15 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-20 13:10:15 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-20 13:11:15 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-20 13:12:15 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-20 13:13:15 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-20 13:14:16 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-20 13:15:16 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-20 13:16:15 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-20 13:17:16 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-20 13:18:15 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-20 13:19:30 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-20 13:19:31 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-20 13:20:30 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-20 13:20:40 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1013, in mostrar_detalle_mac
+    listbox = tk.Listbox(list_frame, font=('Consolas', 10), relief='flat', highlightthickness=1, borderwidth=1 if Styles.DARK_MODE else 0)
+                                                                                                                  ^^^^^^^^^^^^^^^^
+AttributeError: type object 'Styles' has no attribute 'DARK_MODE'
+
+2026-02-20 13:21:01 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1013, in mostrar_detalle_mac
+    listbox = tk.Listbox(list_frame, font=('Consolas', 10), relief='flat', highlightthickness=1, borderwidth=1 if Styles.DARK_MODE else 0)
+                                                                                                                  ^^^^^^^^^^^^^^^^
+AttributeError: type object 'Styles' has no attribute 'DARK_MODE'
+
+2026-02-20 13:21:19 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1013, in mostrar_detalle_mac
+    listbox = tk.Listbox(list_frame, font=('Consolas', 10), relief='flat', highlightthickness=1, borderwidth=1 if Styles.DARK_MODE else 0)
+                                                                                                                  ^^^^^^^^^^^^^^^^
+AttributeError: type object 'Styles' has no attribute 'DARK_MODE'
+
+2026-02-20 13:21:30 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-20 13:22:32 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: 'list' object has no attribute 'replace'
+2026-02-21 08:14:45 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 34, in <lambda>
+    ventana.after(0, lambda: _finalizar_carga(ventana, frame_carga, callback_exito, datos))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 46, in _finalizar_carga
+    callback_exito(datos)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\mobile_output_scanner.py", line 639, in on_complete
+    count, errores = result
+    ^^^^^^^^^^^^^^
+TypeError: cannot unpack non-iterable NoneType object
+
+2026-02-21 08:21:08 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 34, in <lambda>
+    ventana.after(0, lambda: _finalizar_carga(ventana, frame_carga, callback_exito, datos))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 46, in _finalizar_carga
+    callback_exito(datos)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\mobile_output_scanner.py", line 639, in on_complete
+    count, errores = result
+    ^^^^^^^^^^^^^^
+TypeError: cannot unpack non-iterable NoneType object
+
+2026-02-21 08:26:18 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-02-21 08:26:18 | ERROR    | database             | Error al obtener todos los SKUs para movimiento: Failed getting connection; pool exhausted
+2026-02-21 08:41:46 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-02-21 08:41:46 | ERROR    | database             | Error al obtener todos los SKUs para movimiento: Failed getting connection; pool exhausted
+2026-02-21 08:43:20 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 34, in <lambda>
+    ventana.after(0, lambda: _finalizar_carga(ventana, frame_carga, callback_exito, datos))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 46, in _finalizar_carga
+    callback_exito(datos)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\mobile_output_scanner.py", line 668, in on_complete
+    self.actualizar_tabla()
+    ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'MobileOutputScannerWindow' object has no attribute 'actualizar_tabla'
+
+2026-02-21 09:16:22 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 34, in <lambda>
+    ventana.after(0, lambda: _finalizar_carga(ventana, frame_carga, callback_exito, datos))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 46, in _finalizar_carga
+    callback_exito(datos)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\mobile_output_scanner.py", line 700, in on_complete
+    self.items_carrito.remove(item)
+    ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'MobileOutputScannerWindow' object has no attribute 'actualizar_tabla'
+
+2026-02-21 09:35:25 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 34, in <lambda>
+    ventana.after(0, lambda: _finalizar_carga(ventana, frame_carga, callback_exito, datos))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 46, in _finalizar_carga
+    callback_exito(datos)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\mobile_output_scanner.py", line 703, in on_complete
+    self.actualizar_tabla()
+    ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'MobileOutputScannerWindow' object has no attribute 'actualizar_tabla'
+
+2026-02-21 12:44:27 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1183, in on_scan
+    self.update_fisico_ui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 987, in update_fisico_ui
+    gross_assigned = info.get(paquete_filtro, 0)
+                     ^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'get'
+
+2026-02-21 12:44:46 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1183, in on_scan
+    self.update_fisico_ui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 987, in update_fisico_ui
+    gross_assigned = info.get(paquete_filtro, 0)
+                     ^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'get'
+
+2026-02-21 12:45:10 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1183, in on_scan
+    self.update_fisico_ui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 987, in update_fisico_ui
+    gross_assigned = info.get(paquete_filtro, 0)
+                     ^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'get'
+

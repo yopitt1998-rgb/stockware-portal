@@ -42,7 +42,6 @@ InventoryTab = None
 SettingsTab = None
 AuditTab = None
 ProductsTab = None
-ProductsTab = None
 
 # =================================================================
 # 3. FUNCIONES DE EXPORTACIÓN
@@ -369,12 +368,12 @@ class ModernInventarioApp:
                 "btn_text": "Productos"
             },
 
-            "Auditoría": {
+            "Historial": {
                 "loaded": False,
                 "module": "gui.audit",
                 "class": "AuditTab",
                 "icon": "📋",
-                "btn_text": "Cuadre Terreno"
+                "btn_text": "Historial de Instalaciones"
             },
 
             "Configuración": {
@@ -479,9 +478,6 @@ class ModernInventarioApp:
                 widget.destroy()
                 
             # Instanciar clase dentro del frame placeholder
-            # Nota: Algunas clases requieren parámetros específicos
-            instance = None
-            # Instanciar clase dentro del frame placeholder
             instance = None
             
             # TABS ESTÁNDAR
@@ -500,7 +496,7 @@ class ModernInventarioApp:
             # Mapeos específicos legado
             if tab_name == "Dashboard": self.dashboard_tab = instance
             elif tab_name == "Inventario": self.inventory_tab = instance
-            elif tab_name == "Auditoría": self.audit_tab = instance
+            elif tab_name == "Historial": self.audit_tab = instance
             elif tab_name == "Productos": self.products_tab = instance
             elif tab_name == "Configuración": self.settings_tab = instance
             
@@ -603,10 +599,6 @@ def main():
     # Iniciar aplicación directamente
     iniciar_aplicacion_principal()
 
-    # (Selector eliminado para agilizar inicio)
-    # BranchSelectorWindow(selector_root, on_branch_selected)
-    # selector_root.mainloop()
-
 def iniciar_aplicacion_principal():
     """Inicia el flujo normal Login -> App, una vez configurada la sucursal"""
     root = tk.Tk()
@@ -645,14 +637,6 @@ def iniciar_aplicacion_principal():
         try:
             logger.info("[INIT] Iniciando aplicación principal")
             
-            # INICIAR PORTAL MÓVIL (en segundo plano)
-            # DESACTIVADO POR PETICIÓN: Solo usar portal Render
-            # try:
-            #     import web_server
-            #     portal_ip = web_server.start_server_thread()
-            #     logger.info(f"[WEB] PORTAL MOVIL ACTIVO: http://{portal_ip}:5000")
-            # except Exception as w:
-            #     logger.error(f"[WEB] No se pudo iniciar servidor web: {w}")
             logger.info("Local Web Server is disabled. Using Render Portal.")
             
             # Inicializar App principal (SIN importar módulos GUI pesados aún)

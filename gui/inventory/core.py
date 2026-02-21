@@ -15,8 +15,7 @@ from config import TIPOS_MOVIMIENTO, DATABASE_NAME, PRODUCTOS_CON_CODIGO_BARRA
 from database import (
     obtener_inventario, obtener_todos_los_skus_para_movimiento,
     anadir_producto, registrar_movimiento_gui, eliminar_producto,
-    obtener_ultima_salida_movil, obtener_asignacion_movil,
-    obtener_asignacion_movil_con_paquetes, registrar_prestamo_santiago,
+    obtener_asignacion_movil, registrar_prestamo_santiago,
     obtener_prestamos_activos, registrar_devolucion_santiago,
     obtener_historial_producto, limpiar_productos_duplicados,
     limpiar_duplicados_asignacion_moviles,
@@ -37,7 +36,7 @@ from ..mobile_output_scanner import MobileOutputScannerWindow  # NUEVO: Salida m
 from ..mobiles import MobilesManager
 from ..consumption import ConsumoTecnicoWindow
 from ..pdf_generator import generar_vale_despacho
-from database import obtener_configuracion, procesar_auditoria_consumo
+from database import obtener_configuracion
 from config import PRODUCTOS_INICIALES
 from .movements import (
     IndividualOutputWindow,
@@ -1546,12 +1545,12 @@ class InventoryTab:
                     "2. Doble click en el producto\n" +
                     "3. Escanea o escribe el código\n" +
                     "4. Guarda",
-                    parent=self)
+                    parent=self.master)
                 return
         
         # Si no existe la pestaña, mostrar mensaje
         messagebox.showwarning("Pestaña no disponible", 
-            "La pestaña de Productos no está disponible", parent=self)
+            "La pestaña de Productos no está disponible", parent=self.master)
     
     def mostrar_herramientas_limpieza(self):
         """Muestra ventana con herramientas avanzadas de limpieza"""

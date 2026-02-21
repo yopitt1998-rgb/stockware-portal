@@ -448,13 +448,13 @@
 
                 // 1. Items específicos del paquete seleccionado (que NO sean compartidos globales)
                 const itemsEspecificos = inventario.filter(item => {
-                    const pq = (item.paquete || 'NINGUNO').toUpperCase();
+                    const pq = (item.paquete || 'NINGUNO').trim().toUpperCase();
                     return pq === paqueteSeleccionado && !compartidosCheck.includes(item.sku);
                 });
 
                 // 2. Items Puente (PERSONALIZADO o NINGUNO) que se ven en A y B
                 const itemsPuente = inventario.filter(item => {
-                    const pq = (item.paquete || 'NINGUNO').toUpperCase();
+                    const pq = (item.paquete || 'NINGUNO').trim().toUpperCase();
                     return (pq === 'PERSONALIZADO' || pq === 'NINGUNO') &&
                         pq !== paqueteSeleccionado &&
                         !compartidosCheck.includes(item.sku);

@@ -54,14 +54,15 @@ def get_db_connection(target_db=None):
                 try:
                     _mysql_pools[db_name] = pooling.MySQLConnectionPool(
                         pool_name=f"pool_{db_name.replace('-', '_')}",
-                        pool_size=10, # Reduced from 32 to avoid server exhaustion
+                        pool_size=3, # Desktop app, single user
                         pool_reset_session=True,
                         host=MYSQL_HOST,
                         user=MYSQL_USER,
                         password=MYSQL_PASS,
                         database=db_name,
                         port=MYSQL_PORT,
-                        connect_timeout=10 # Fail after 10 seconds, don't hang
+                        connect_timeout=60, # Increased for slow cloud responses
+                        use_pure=True  # Avoid C extension issues
                     )
                 except mysql.connector.Error as pool_err:
                     logger.error(f"Error creando pool MySQL para {db_name}: {pool_err}")

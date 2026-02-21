@@ -107,11 +107,9 @@ TOOLTIPS = {
     "historial": "Ver historial completo de movimientos",
     "gestionar_abastos": "Ver y editar abastos registrados",
     
-    # Auditoría
-    "filtrar_audit": "Cargar consumos pendientes de auditoría",
-    "importar_excel_audit": "Importar Excel de producción para comparar",
-    "validar_audit": "Validar consumos seleccionados y descontar del inventario",
-    "limpiar_audit": "Eliminar todos los consumos pendientes",
+    # Historial de Instalaciones
+    "historial_instalaciones": "Ver historial de instalaciones y materiales reportados por los técnicos",
+    "filtrar_audit": "Cargar historial de instalaciones para el periodo seleccionado",
     
     # Reportes
     "exportar_excel": "Exportar datos a archivo Excel (Ctrl+E)",

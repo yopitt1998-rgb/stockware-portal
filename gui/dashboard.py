@@ -3,7 +3,6 @@ import threading
 
 from tkinter import ttk
 from .styles import Styles
-from .styles import Styles
 from .tooltips import create_tooltip, TOOLTIPS
 from database import obtener_estadisticas_reales, obtener_inventario, obtener_stock_actual_y_moviles, obtener_ultimos_movimientos
 import matplotlib.pyplot as plt
@@ -106,7 +105,7 @@ class DashboardTab:
             ("🔫 Abasto Scanner", lambda: self.main_app.perform_inventory_action('abrir_ventana_abasto_scanner'), '#00C853'),
             ("🔫 Salida Scanner", lambda: self.main_app.perform_inventory_action('abrir_ventana_salida_movil_scanner'), '#FF6F00'),
             ("🔄 Devolución / Entrada", lambda: self.main_app.perform_inventory_action('abrir_ventana_retorno_movil'), Styles.SUCCESS_COLOR),
-            ("📋 Auditoría de Terreno", lambda: self.main_app.switch_to_tab("Auditoría"), Styles.ACCENT_COLOR)
+            ("📋 Historial de Instalaciones", lambda: self.main_app.switch_to_tab("Historial"), Styles.ACCENT_COLOR)
         ]
         
         actions_frame = ttk.Frame(quick_actions_frame, style='Modern.TFrame')
@@ -119,7 +118,7 @@ class DashboardTab:
             btn.pack(side='left', padx=5, fill='x', expand=True)
             
             # Agregar tooltips
-            tooltip_keys = ["nuevo_abasto", "salida_movil", "retorno_movil", "auditoria_terreno"]
+            tooltip_keys = ["nuevo_abasto", "salida_movil", "retorno_movil", "historial_instalaciones"]
             if i < len(tooltip_keys):
                 create_tooltip(btn, TOOLTIPS.get(tooltip_keys[i], ""))
             
