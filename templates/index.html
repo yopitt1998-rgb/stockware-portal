@@ -436,12 +436,15 @@
 
             const paqueteSeleccionado = document.getElementById('paquete_select').value;
 
-            // Filtrar inventario de la móvil por el paquete seleccionado
-            const items = (window.INVENTARIO_MOVIL || []).filter(item =>
+            // Filtrar: materiales del paquete seleccionado + consumibles compartidos (paquete=NINGUNO)
+            const itemsPaquete = (window.INVENTARIO_MOVIL || []).filter(item =>
                 (item.paquete || 'NINGUNO') === paqueteSeleccionado
             );
+            const itemsCompartidos = (window.INVENTARIO_MOVIL || []).filter(item =>
+                (item.paquete || 'NINGUNO') === 'NINGUNO'
+            );
 
-            if (items.length === 0) {
+            if (itemsPaquete.length === 0 && itemsCompartidos.length === 0) {
                 container.style.display = 'none';
                 sectionTitle.style.display = 'none';
                 mensajeSinStock.style.display = 'block';
@@ -452,6 +455,9 @@
                 `;
                 return;
             }
+
+            // Combinar: primero los del paquete, luego los consumibles compartidos
+            const items = [...itemsPaquete, ...itemsCompartidos];
 
             mensajeSinStock.style.display = 'none';
             sectionTitle.style.display = 'block';

@@ -45,7 +45,8 @@ from config import (
     TIPOS_CONSUMO,
     TIPOS_ABASTO,
     PAQUETES_MATERIALES,
-    PRODUCTOS_INICIALES
+    PRODUCTOS_INICIALES,
+    MATERIALES_COMPARTIDOS
 )
 
 # =================================================================
@@ -292,16 +293,25 @@ def inicializar_bd():
                     logger.warning(f"⚠️ No se pudo crear índice {name} en {table}: {e}")
 
         # 10. TABLA SERIES REGISTRADAS (NUEVO)
-        cursor.execute(f"""
+        q_series = f"""
             CREATE TABLE IF NOT EXISTS series_registradas (
                 id {INT_TYPE} PRIMARY KEY {AUTOINC},
                 sku VARCHAR(50) NOT NULL,
                 serial_number VARCHAR(100) NOT NULL UNIQUE,
                 fecha_ingreso DATETIME DEFAULT CURRENT_TIMESTAMP,
                 estado VARCHAR(20) DEFAULT 'DISPONIBLE', -- DISPONIBLE, INSTALADO, BAJA
-                ubicacion VARCHAR(100) DEFAULT 'BODEGA'
+                ubicacion VARCHAR(100) DEFAULT 'BODEGA',
+                mac_number VARCHAR(100) UNIQUE -- NUEVO: Para separar MAC del Serial
             )
-        """)
+        """
+        cursor.execute(q_series)
+        add_column_if_missing('series_registradas', 'mac_number', 'VARCHAR(100)')
+        
+        # MySQL Session: Aumentar límite de GROUP_CONCAT para evitar truncamiento de series (61 -> ilimitado)
+        if DB_TYPE == 'MYSQL':
+            try:
+                cursor.execute("SET SESSION group_concat_max_len = 1000000")
+            except: pass
         add_mysql_index('idx_series_serial', 'series_registradas', 'serial_number')
         add_mysql_index('idx_series_sku', 'series_registradas', 'sku')
 
@@ -332,15 +342,26 @@ def inicializar_bd():
 
         # MIGRACIÓN AUTOMÁTICA DE MÓVILES (Asegurar que todos existan)
         from config import ALL_MOVILES
-        logger.info("⚙️ Verificando lista completa de móviles...")
-        for mv in ALL_MOVILES:
+        logger.info(f"⚙️ Verificando {len(ALL_MOVILES)} móviles...")
+        
+        if DB_TYPE == 'MYSQL':
+            # Preparar valores para inserción masiva
+            # MySQL: INSERT IGNORE INTO ... VALUES (%s, 1), (%s, 1), ...
+            placeholders = ", ".join(["(%s, 1)"] * len(ALL_MOVILES))
+            query = f"INSERT IGNORE INTO moviles (nombre, activo) VALUES {placeholders}"
             try:
-                # INSERT IGNORE (MySQL) o INSERT OR IGNORE (SQLite) para no fallar si ya existe
-                query = "INSERT IGNORE INTO moviles (nombre, activo) VALUES (%s, 1)" if DB_TYPE == 'MYSQL' else "INSERT OR IGNORE INTO moviles (nombre, activo) VALUES (?, 1)"
-                run_query(cursor, query, (mv,))
+                # Usar un timeout específico si es soportado, o confiar en el global
+                cursor.execute(query, tuple(ALL_MOVILES))
+                logger.info("✅ Migración de móviles completada.")
             except Exception as e:
-                # Si falla silenciosamente (ej. ya existe y no es ignore), seguimos
-                pass
+                logger.warning(f"⚠️ Error en migración masiva MySQL: {e}")
+                # Fallback uno a uno si la masiva falla o es lenta (opcional)
+        else:
+            # SQLite: INSERT OR IGNORE
+            for mv in ALL_MOVILES:
+                try:
+                    run_query(cursor, "INSERT OR IGNORE INTO moviles (nombre, activo) VALUES (?, 1)", (mv,))
+                except: pass
 
         conn.commit()
         return True
@@ -631,8 +652,12 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
         if not fecha_evento: 
              return False, "Error de Fecha: La fecha del evento es obligatoria."
         
-        if paquete_asignado == "NINGUNO":
-             paquete_asignado = None
+        if paquete_asignado in ("NINGUNO", "PERSONALIZADO"):
+             # Para efectos de la tabla asignacion_moviles, tratamos PERSONALIZADO como una entrada específica
+             # pero validamos que no se convierta en None si el usuario quiere trackearlo aparte.
+             # Si es NINGUNO, lo normalizamos a None para COALESCE(paquete, 'NINGUNO')
+             if paquete_asignado == "NINGUNO":
+                 paquete_asignado = None
         
         run_query(cursor, "SELECT cantidad, nombre, secuencia_vista FROM productos WHERE sku = ? AND ubicacion = 'BODEGA'", (sku,))
         resultado_bodega = cursor.fetchone()
@@ -652,14 +677,23 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
              # Si no se especifica paquete, asumimos 'NINGUNO' para la consulta
              pq_query = paquete_asignado if paquete_asignado else 'NINGUNO'
              
-             if DB_TYPE == 'MYSQL':
-                 sql_asig = "SELECT cantidad FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s"
+             # --- LÓGICA ESPECIAL PARA MATERIALES COMPARTIDOS ---
+             # Si es compartido, el "stock asignado" para validación es la suma de todos los paquetes
+             if sku in MATERIALES_COMPARTIDOS and tipo_movimiento in ('RETORNO_MOVIL', 'CONSUMO_MOVIL'):
+                if DB_TYPE == 'MYSQL':
+                    sql_asig = "SELECT SUM(cantidad) FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s"
+                else:
+                    sql_asig = "SELECT SUM(cantidad) FROM asignacion_moviles WHERE sku_producto = ? AND movil = ?"
+                cursor.execute(sql_asig, (sku, movil_afectado))
              else:
-                 sql_asig = "SELECT cantidad FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ?"
+                if DB_TYPE == 'MYSQL':
+                    sql_asig = "SELECT cantidad FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s"
+                else:
+                    sql_asig = "SELECT cantidad FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ?"
+                cursor.execute(sql_asig, (sku, movil_afectado, pq_query))
              
-             cursor.execute(sql_asig, (sku, movil_afectado, pq_query))
              asignacion_actual = cursor.fetchone()
-             stock_asignado = asignacion_actual[0] if asignacion_actual else 0
+             stock_asignado = float(asignacion_actual[0]) if asignacion_actual and asignacion_actual[0] is not None else 0
         
         cantidad_bodega_cambio = 0
         cantidad_asignacion_cambio = 0
@@ -733,32 +767,34 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
              cursor.execute(sql_sel, (sku, movil_afectado, pq_actual))
              resultado_asignacion = cursor.fetchone()
              
-             # Convertir Decimal a float para evitar error "unsupported operand type(s) for +: 'decimal.Decimal' and 'float'"
              valor_actual = 0.0
              if resultado_asignacion and resultado_asignacion[0] is not None:
                  valor_actual = float(resultado_asignacion[0])
-                 
-             asignacion_actual_total = valor_actual
+                  
+             nueva_cantidad_asignacion = valor_actual + cantidad_asignacion_cambio
              
-             # 2. Calcular nueva cantidad final
-             nueva_cantidad_asignacion = asignacion_actual_total + cantidad_asignacion_cambio
-             
-             # 3. Borrar registros existentes para este combo exacto (SKU/Movil/Paquete)
+             # 2. UPSERT: Atomic update or Delete+Insert
              if DB_TYPE == 'MYSQL':
-                 sql_del = "DELETE FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s"
-             else:
-                 sql_del = "DELETE FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ?"
-             
-             cursor.execute(sql_del, (sku, movil_afectado, pq_actual))
-             
-             # 4. Insertar NUEVO registro único si la cantidad es positiva
-             if nueva_cantidad_asignacion > 0:
-                 if DB_TYPE == 'MYSQL':
-                     sql_ins = "INSERT INTO asignacion_moviles (sku_producto, movil, paquete, cantidad) VALUES (%s, %s, %s, %s)"
+                 # Usar ON DUPLICATE KEY UPDATE para mayor robustez en MySQL
+                 sql_upsert = """
+                    INSERT INTO asignacion_moviles (sku_producto, movil, paquete, cantidad) 
+                    VALUES (%s, %s, %s, %s)
+                    ON DUPLICATE KEY UPDATE cantidad = VALUES(cantidad)
+                 """
+                 # Nota: Si nueva_cantidad es <= 0, podríamos borrar, pero por integridad es mejor dejarlo en 0 o borrarlo.
+                 if nueva_cantidad_asignacion > 0:
+                     cursor.execute(sql_upsert, (sku, movil_afectado, paquete_asignado, nueva_cantidad_asignacion))
                  else:
-                     sql_ins = "INSERT INTO asignacion_moviles (sku_producto, movil, paquete, cantidad) VALUES (?, ?, ?, ?)"
+                     sql_del = "DELETE FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s"
+                     cursor.execute(sql_del, (sku, movil_afectado, pq_actual))
+             else:
+                 # Standard SQLite approach: Delete then Insert
+                 sql_del = "DELETE FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ?"
+                 cursor.execute(sql_del, (sku, movil_afectado, pq_actual))
                  
-                 cursor.execute(sql_ins, (sku, movil_afectado, pq_actual, nueva_cantidad_asignacion))
+                 if nueva_cantidad_asignacion > 0:
+                     sql_ins = "INSERT INTO asignacion_moviles (sku_producto, movil, paquete, cantidad) VALUES (?, ?, ?, ?)"
+                     cursor.execute(sql_ins, (sku, movil_afectado, paquete_asignado, nueva_cantidad_asignacion))
 
         sql_mov = "INSERT INTO movimientos (sku_producto, tipo_movimiento, cantidad_afectada, movil_afectado, fecha_evento, paquete_asignado, observaciones, documento_referencia) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         run_query(cursor, sql_mov, (sku, tipo_movimiento, cantidad_afectada, movil_afectado, fecha_evento, paquete_asignado, observaciones, documento_referencia))
@@ -942,7 +978,7 @@ def registrar_devolucion_santiago(sku, cantidad, seriales_nuevos, fecha_evento, 
                 else:
                     # Insertar nuevo serial
                     run_query(cursor, """
-                        INSERT INTO series_registradas (sku_producto, serial_number, ubicacion, fecha_registro)
+                        INSERT INTO series_registradas (sku, serial_number, ubicacion, fecha_ingreso)
                         VALUES (?, ?, 'BODEGA', ?)
                     """, (sku, serial, fecha_evento))
 
@@ -1348,6 +1384,7 @@ def obtener_asignacion_movil_con_paquetes(movil):
                 "PAQUETE A": 0,
                 "PAQUETE B": 0,
                 "CARRO": 0,
+                "PERSONALIZADO": 0,
                 "SIN_PAQUETE": 0
             }
 
@@ -1370,15 +1407,15 @@ def obtener_asignacion_movil_con_paquetes(movil):
                     paquete_key = "SIN_PAQUETE"
                 else:
                     paquete_key = paquete
-
+                
                 # SALIDA suma material (entra al móvil)
                 if tipo == "SALIDA_MOVIL":
-                    saldos[paquete_key] += cantidad
+                    saldos[paquete_key] = saldos.get(paquete_key, 0) + cantidad
 
                 # RETORNO o CONSUMO restan material
                 elif tipo in ("RETORNO_MOVIL", "CONSUMO_MOVIL"):
-                    saldos[paquete_key] -= cantidad
-                    if saldos[paquete_key] < 0:
+                    saldos[paquete_key] = saldos.get(paquete_key, 0) - cantidad
+                    if saldos.get(paquete_key, 0) < 0:
                         saldos[paquete_key] = 0  # evitar negativos por errores del pasado
 
             # 5. Recalcular total real de paquetes
@@ -1410,6 +1447,14 @@ def obtener_asignacion_movil_con_paquetes(movil):
                 if saldos["SIN_PAQUETE"] < 0:
                     saldos["SIN_PAQUETE"] = 0
 
+            # --- LÓGICA DE MATERIALES COMPARTIDOS ---
+            # Si el SKU está en la lista de compartidos, forzamos que todos los paquetes muestren el total real
+            if sku in MATERIALES_COMPARTIDOS:
+                saldos["PAQUETE A"] = total_real
+                saldos["PAQUETE B"] = total_real
+                saldos["CARRO"] = total_real
+                saldos["SIN_PAQUETE"] = total_real
+
             # Guardar resultado final para ese SKU
             # Guardar resultado final para ese SKU
             resultado.append((
@@ -1419,7 +1464,8 @@ def obtener_asignacion_movil_con_paquetes(movil):
                 saldos["PAQUETE A"],
                 saldos["PAQUETE B"],
                 saldos["CARRO"],
-                saldos["SIN_PAQUETE"] # NUEVO CAMPO
+                saldos["SIN_PAQUETE"],
+                saldos["PERSONALIZADO"]
             ))
 
         return resultado
@@ -2031,21 +2077,33 @@ def eliminar_consumo_pendiente(id_consumo):
     finally:
         if conn: close_connection(conn)
 
-def obtener_consumos_pendientes(fecha_inicio=None, fecha_fin=None, estado='PENDIENTE', moviles_filtro=None, limite=None):
-    """Obtiene consumos reportados por móviles filtrando opcionalmente por rango de fechas y móviles específicos."""
+def obtener_consumos_pendientes(fecha_inicio=None, fecha_fin=None, estado=None, moviles_filtro=None, limite=None):
+    """
+    Obtiene consumos reportados por móviles filtrando opcionalmente por rango de fechas y móviles específicos.
+    estado: Si es None, busca 'PENDIENTE' y 'AUTO_APROBADO' (Petición usuario Móvil 200).
+    """
     conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
         
+        # Base query
         sql_query = """
             SELECT c.id, c.movil, c.sku, p.nombre, c.cantidad, c.tecnico_nombre, c.ticket, c.fecha, c.colilla, c.num_contrato, c.ayudante_nombre, c.seriales_usados
             FROM consumos_pendientes c
             LEFT JOIN productos p ON c.sku = p.sku AND p.ubicacion = 'BODEGA'
-            WHERE c.estado = ?
+            WHERE 1=1
         """
-        params = [estado]
+        params = []
         
+        # Filtro de estado optimizado
+        if estado:
+            sql_query += " AND c.estado = ?"
+            params.append(estado)
+        else:
+            # SI NO HAY ESTADO, MOSTRAR PENDIENTES Y AUTO_APROBADOS (Para ver lo "recién enviado")
+            sql_query += " AND c.estado IN ('PENDIENTE', 'AUTO_APROBADO')"
+
         # OPTIMIZADO: Filtrar por móviles en SQL en lugar de Python
         if moviles_filtro and len(moviles_filtro) > 0:
             placeholders = ','.join(['?' for _ in moviles_filtro])
@@ -2076,27 +2134,6 @@ def obtener_consumos_pendientes(fecha_inicio=None, fecha_fin=None, estado='PENDI
     finally:
         if conn: close_connection(conn)
 
-def actualizar_consumo_pendiente(id_consumo, tecnico, fecha, contrato, colilla, ayudante, movil):
-    """
-    Actualiza los detalles de un consumo pendiente (para edición en Auditoría).
-    """
-    conn = None
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        
-        run_query(cursor, """
-            UPDATE consumos_pendientes 
-            SET tecnico_nombre = ?, fecha = ?, num_contrato = ?, ticket = ?, colilla = ?, ayudante_nombre = ?, movil = ?
-            WHERE id = ?
-        """, (tecnico, fecha, contrato, contrato, colilla, ayudante, movil, id_consumo))
-        
-        conn.commit()
-        return True, "Actualizado correctamente."
-    except Exception as e:
-        return False, f"Error DB: {e}"
-    finally:
-        if conn: close_connection(conn)
 
 def obtener_detalles_moviles():
     """Retorna un diccionario {nombre_movil: {conductor, ayudante}}"""
@@ -2140,86 +2177,6 @@ def obtener_inventario_movil(movil):
     except Exception as e:
         logger.error(f"❌ Error al obtener inventario de {movil}: {e}")
         return {}
-    finally:
-        if conn: close_connection(conn)
-
-def procesar_auditoria_consumo(id_consumo, sku, cantidad, movil, fecha, ticket, observaciones):
-    """
-    Confirma un consumo pendiente: lo marca como AUDITADO y realiza el movimiento real.
-    Maneja lógica de 'AUTO_APROBADO' para evitar doble deducción.
-    """
-    conn = None
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        
-        # 1. Verificar estado actual del consumo pendiente
-        run_query(cursor, "SELECT estado FROM consumos_pendientes WHERE id = ?", (id_consumo,))
-        res = cursor.fetchone()
-        estado_actual = res[0] if res else 'PENDIENTE'
-        
-        exito = False
-        mensaje = ""
-
-        # 2. Si es 'AUTO_APROBADO', NO descontamos inventario (ya se hizo en el servidor)
-        if estado_actual == 'AUTO_APROBADO':
-             logger.info(f"Procesando auditoría AUTO_APROBADA para {sku}. Omitiendo deducción de stock.")
-             exito = True
-             mensaje = "Confirmado (Ya estaba descontado)"
-             
-        else:
-            # Lógica TRADICIONAL (PENDIENTE -> Descontar stock ahora)
-            # 1. Realizar movimiento real
-            exito, mensaje = registrar_movimiento_gui(
-                sku, 'CONSUMO_MOVIL', cantidad, movil, fecha, None, observaciones,
-                existing_conn=conn # Usar conexión existente
-            )
-        
-        if exito:
-            # 2. Marcar como auditado (o eliminar si prefieres limpiar)
-            # Por ahora mantenemos 'AUDITADO' para historial o 'eliminamos' según lógica original
-            # La lógica original hacía UPDATE a 'AUDITADO'.
-            # Sin embargo, gui/audit.py tiene una opción de 'eliminar_auditoria_completa' que borra 'PENDIENTE'.
-            # Si queremos que desaparezca de la lista de pendientes, deberíamos cambiar estado o borrarlo.
-            # Al parecer la GUI filtra por estado? No, carga todo 'consumos_pendientes'.
-            # Si cambiamos a 'AUDITADO', debemos asegurarnos que la GUI ya no lo muestre.
-            
-            # Revisando gui/audit.py -> carga todo.
-            # Vamos a ELIMINAR el registro para que salga de la lista, como se hace típicamente en estos flujos
-            # O cambiar a un estado final 'FINALIZADO' y filtrar en la query de carga.
-            
-            # Para mantener compatibilidad con la lógica anterior que hacía UPDATE:
-            run_query(cursor, "UPDATE consumos_pendientes SET estado = 'AUDITADO' WHERE id = ?", (id_consumo,))
-            
-            # ADICIONAL: Si la GUI muestra todo, esto seguirá apareciendo.
-            # Vamos a asumir que el usuario quiere que "desaparezca" de la lista de pendientes.
-            # Pero el código original hacía UPDATE. 
-            # CAMBIO: Vamos a ELIMINARLO de consumos_pendientes para limpiar la bandeja.
-            run_query(cursor, "DELETE FROM consumos_pendientes WHERE id = ?", (id_consumo,))
-            
-            conn.commit()
-            
-        return exito, mensaje
-
-    except Exception as e:
-        if conn: conn.rollback()
-        logger.error(f"Error procesando auditoría: {e}")
-        return False, f"Error: {e}"
-    finally:
-        if conn: close_connection(conn)
-
-def eliminar_auditoria_completa():
-    """Elimina todos los consumos pendientes de la tabla de auditoría."""
-    conn = None
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        run_query(cursor, "DELETE FROM consumos_pendientes WHERE estado = 'PENDIENTE'")
-        conn.commit()
-        return True, "Auditoría limpiada exitosamente."
-    except Exception as e:
-        if conn: conn.rollback()
-        return False, f"Error al limpiar auditoría: {e}"
     finally:
         if conn: close_connection(conn)
 
@@ -2513,41 +2470,36 @@ def eliminar_usuario(id_usuario):
 
 def verificar_serie_existe(serial, sku=None, ubicacion_requerida=None, estado_requerido=None):
     """
-    Verifica si una serie ya existe en la base de datos.
-    Si se proporciona SKU, verifica si existe para ese SKU.
-    ubicacion_requerida: Si se indica, la serie debe estar en esa ubicación (ej: 'BODEGA').
-    estado_requerido: Si se indica, la serie debe tener ese estado (ej: 'DISPONIBLE').
-    Retorna (True/False, Mensaje).
+    Verifica si una serie (Serial o MAC) ya existe en la base de datos.
     """
     conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # Primero verificar en la tabla de series
-        if DB_TYPE == 'MYSQL':
-            query = "SELECT sku, estado, ubicacion FROM series_registradas WHERE serial_number = %s"
-            params = (serial,)
-        else:
-            query = "SELECT sku, estado, ubicacion FROM series_registradas WHERE serial_number = ?"
-            params = (serial,)
+        ph = '%s' if DB_TYPE == 'MYSQL' else '?'
+        
+        # Buscar en serial_number O mac_number
+        query = f"SELECT sku, estado, ubicacion, serial_number, mac_number FROM series_registradas WHERE serial_number = {ph} OR mac_number = {ph}"
+        params = (serial, serial)
             
         cursor.execute(query, params)
         result = cursor.fetchone()
         
         if result:
-            sku_existente, estado, ubicacion = result
+            sku_existente, estado, ubicacion, s_found, m_found = result
+            tipo = "Serial" if s_found == serial else "MAC"
             
             # Validaciones adicionales para Salida
             if estado_requerido and estado != estado_requerido:
-                return True, f"La serie '{serial}' no está DISPONIBLE (Estado actual: {estado})"
+                return True, f"La {tipo} '{serial}' no está DISPONIBLE (Estado actual: {estado})"
             
             if ubicacion_requerida and ubicacion != ubicacion_requerida:
-                return True, f"La serie '{serial}' no está en {ubicacion_requerida} (Ubicación actual: {ubicacion})"
+                return True, f"La {tipo} '{serial}' no está en {ubicacion_requerida} (Ubicación actual: {ubicacion})"
                 
-            return True, f"La serie '{serial}' ya existe (SKU: {sku_existente}, Estado: {estado}, Ubicación: {ubicacion})"
+            return True, f"La {tipo} '{serial}' ya existe (SKU: {sku_existente}, Estado: {estado}, Ubicación: {ubicacion})"
             
-        return False, "Serie no encontrada o disponible para registro nuevo."
+        return False, "Disponible"
 
     except Exception as e:
         logger.error(f"Error verificando serie: {e}")
@@ -2558,7 +2510,7 @@ def verificar_serie_existe(serial, sku=None, ubicacion_requerida=None, estado_re
 def registrar_series_bulk(series_data, fecha_ingreso=None):
     """
     Registra múltiples series en una transacción.
-    series_data: Lista de tuplas/objetos [(sku, serial, 'BODEGA'), ...]
+    series_data: Lista de dicts [{sku, serial, mac, ubicacion}, ...]
     fecha_ingreso: Opcional, fecha de registro (YYYY-MM-DD)
     """
     if not fecha_ingreso:
@@ -2569,28 +2521,26 @@ def registrar_series_bulk(series_data, fecha_ingreso=None):
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        sql = """
-            INSERT INTO series_registradas (sku, serial_number, estado, ubicacion, fecha_ingreso)
-            VALUES (?, ?, 'DISPONIBLE', ?, ?)
+        # MySQL y SQLite placeholders
+        ph = '%s' if DB_TYPE == 'MYSQL' else '?'
+        
+        sql = f"""
+            INSERT INTO series_registradas (sku, serial_number, mac_number, estado, ubicacion, fecha_ingreso)
+            VALUES ({ph}, {ph}, {ph}, 'DISPONIBLE', {ph}, {ph})
         """
         
-        if DB_TYPE == 'MYSQL':
-            sql = """
-                INSERT INTO series_registradas (sku, serial_number, estado, ubicacion, fecha_ingreso)
-                VALUES (%s, %s, 'DISPONIBLE', %s, %s)
-            """
-            
-        # Preparar datos (SKU, SERIAL, UBICACION, FECHA)
+        # Preparar datos (SKU, SERIAL, MAC, UBICACION, FECHA)
         data_to_insert = []
         for item in series_data:
-            data_to_insert.append((item['sku'], item['serial'], item['ubicacion'], fecha_ingreso))
+            mac = item.get('mac') # Puede ser None
+            data_to_insert.append((item['sku'], item['serial'], mac, item['ubicacion'], fecha_ingreso))
             
         cursor.executemany(sql, data_to_insert)
         conn.commit()
-        return True, f"{len(data_to_insert)} series registradas."
+        return True, f"{len(data_to_insert)} items registrados correctamente."
         
     except sqlite3.IntegrityError as e:
-        return False, f"Error de integridad (posible duplicado): {e}"
+        return False, f"Error de integridad (posible duplicado de Serial o MAC): {e}"
     except Exception as e:
         if conn: conn.rollback()
         return False, f"Error al registrar series: {e}"
@@ -2604,6 +2554,7 @@ def registrar_series_bulk(series_data, fecha_ingreso=None):
 def obtener_info_serial(serial_number):
     """
     Busca un serial en series_registradas y retorna su SKU y ubicación.
+    Busca en serial_number Y mac_number para soportar escaneo por MAC.
     Retorna: (sku, ubicacion) o (None, None) si no se encuentra
     """
     conn = None
@@ -2611,13 +2562,17 @@ def obtener_info_serial(serial_number):
         conn = get_db_connection()
         cursor = conn.cursor()
         
+        serial_clean = str(serial_number).strip().upper()
+        
+        # Buscar en serial_number O mac_number (para soportar MACs)
         sql = """
             SELECT sku, ubicacion
             FROM series_registradas
-            WHERE serial_number = ?
+            WHERE UPPER(serial_number) = ? OR UPPER(mac_number) = ?
+            LIMIT 1
         """
         
-        run_query(cursor, sql, (serial_number,))
+        run_query(cursor, sql, (serial_clean, serial_clean))
         result = cursor.fetchone()
         
         if result:
@@ -2629,6 +2584,7 @@ def obtener_info_serial(serial_number):
         return None, None
     finally:
         if conn: close_connection(conn)
+
 
 
 def actualizar_ubicacion_serial(serial_number, nueva_ubicacion, existing_conn=None):
@@ -2894,9 +2850,9 @@ def obtener_sku_por_codigo_barra(codigo_barra):
 def obtener_sku_por_serial(serial):
     """
     Busca el SKU asociado a un número de serie (MAC, etc) en la tabla series_registradas.
-    Retorna (sku, existe)
+    Retorna (sku, existe, ubicacion)
     """
-    if not serial: return None, False
+    if not serial: return None, False, None
     
     conn = None
     try:
@@ -2906,18 +2862,19 @@ def obtener_sku_por_serial(serial):
         # Reemplazos básicos para evitar errores de scanner
         serial_clean = str(serial).strip().upper().replace("'", "-")
         
-        sql = "SELECT sku FROM series_registradas WHERE serial_number = ? LIMIT 1"
-        run_query(cursor, sql, (serial_clean,))
+        # Búsqueda insensible a mayúsculas: busca en serial_number O mac_number
+        sql = "SELECT sku, ubicacion FROM series_registradas WHERE UPPER(serial_number) = UPPER(?) OR UPPER(mac_number) = UPPER(?) LIMIT 1"
+        run_query(cursor, sql, (serial_clean, serial_clean))
         result = cursor.fetchone()
         
         if result:
-            return result[0], True
+            return result[0], True, result[1]
             
-        return None, False
+        return None, False, None
 
     except Exception as e:
         logger.error(f"❌ Error en obtener_sku_por_serial: {e}")
-        return None, False
+        return None, False, None
     finally:
         if conn: close_connection(conn)
 
@@ -3023,10 +2980,10 @@ def buscar_producto_por_mac(mac_address):
         
         # Buscar en tabla series_registradas
         run_query(cursor, """
-            SELECT s.sku, p.nombre, s.ubicacion, s.mac
+            SELECT s.sku, p.nombre, s.ubicacion, s.mac_number
             FROM series_registradas s
             JOIN productos p ON s.sku = p.sku
-            WHERE UPPER(TRIM(s.mac)) = ? AND s.estado = 'activo'
+            WHERE UPPER(TRIM(s.mac_number)) = ? AND s.estado = 'DISPONIBLE'
             LIMIT 1
         """, (mac,))
         
@@ -3034,7 +2991,7 @@ def buscar_producto_por_mac(mac_address):
         if not resultado:
             return None
             
-        sku, nombre, ubicacion, serial_mac = resultado
+        sku, nombre, ubicacion, mac_number = resultado
         
         # Verificar que esté en BODEGA
         if ubicacion != 'BODEGA':
@@ -3044,7 +3001,7 @@ def buscar_producto_por_mac(mac_address):
         return {
             'sku': sku,
             'nombre': nombre,
-            'serial_mac': serial_mac,
+            'serial_mac': mac_number,
             'ubicacion': ubicacion,
             'tiene_seriales': True,
             'es_mac': True  # Flag para identificar que fue búsqueda por MAC
