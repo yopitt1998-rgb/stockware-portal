@@ -103,6 +103,15 @@ PAQUETES_MATERIALES = {
     ]
 }
 
+# Materiales que se comparten entre paquetes (ej: fibra, cables bulk)
+# No se dividen, sino que muestran el total disponible en el móvil en todos los paquetes.
+MATERIALES_COMPARTIDOS = [
+    "1-2-16",   # FIBUNHILO (Fibra)
+    "7-1-171",  # C_UTP_CAT6 (Cable UTP)
+    "10-1-04",  # CONEC_RJ45 (Conectores)
+    "5-2-443"   # MOLDU (Moldura)
+]
+
 # Default initial package for logic compatibility
 PAQUETE_INSTALACION = dict(PAQUETES_MATERIALES["PAQUETE A"])
 

@@ -11,7 +11,7 @@ from database import (
 )
 import threading
 import json
-from config import DB_TYPE, PAQUETES_MATERIALES
+from config import DB_TYPE, PAQUETES_MATERIALES, MATERIALES_COMPARTIDOS
 
 # Mapeo SKU → Nombre Excel (para mostrar nombres cortos en portal)
 SKU_TO_EXCEL_NAME = {
@@ -107,6 +107,7 @@ def index():
                                  details_moviles=json.dumps(details_moviles if 'details_moviles' in locals() else {}),
                                  sku_to_excel_name=json.dumps(SKU_TO_EXCEL_NAME),
                                  paquetes=json.dumps(PAQUETES_MATERIALES),
+                                 materiales_compartidos=json.dumps(MATERIALES_COMPARTIDOS),
                                  db_status=status,
                                  db_engine=engine,
                                  error_detail=error_detail,

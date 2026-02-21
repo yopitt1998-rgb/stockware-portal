@@ -659,6 +659,11 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
              if paquete_asignado == "NINGUNO":
                  paquete_asignado = None
         
+        # --- LÓGICA DE NORMALIZACIÓN PARA MATERIALES COMPARTIDOS ---
+        from config import MATERIALES_COMPARTIDOS
+        if sku in MATERIALES_COMPARTIDOS:
+             paquete_asignado = None # Forzar global para materiales que se comparten
+        
         run_query(cursor, "SELECT cantidad, nombre, secuencia_vista FROM productos WHERE sku = ? AND ubicacion = 'BODEGA'", (sku,))
         resultado_bodega = cursor.fetchone()
         
