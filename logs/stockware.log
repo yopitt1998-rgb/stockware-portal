@@ -3030,3 +3030,34 @@ AttributeError: 'NoneType' object has no attribute 'get'
 2026-02-21 12:52:31 | INFO     | gui.mobile_output_scanner | Item agregado: 2-7-07 x30
 2026-02-21 12:52:41 | INFO     | gui.mobile_output_scanner | Item agregado: 1-8-40 x60
 2026-02-21 12:52:45 | INFO     | gui.mobile_output_scanner | 💾 [TRANS] Conexión establecida a test
+2026-02-21 14:57:58 | INFO     | __main__             | Inicializando app_inventario...
+2026-02-21 14:57:59 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-02-21 14:58:04 | INFO     | database             | 🔧 Migrando índice de asignacion_moviles para soportar múltiples paquetes...
+2026-02-21 14:58:05 | INFO     | database             | ✅ Índice migrado exitosamente.
+2026-02-21 14:58:09 | INFO     | database             | ⚙️ Verificando 11 móviles...
+2026-02-21 14:58:10 | INFO     | database             | ✅ Migración de móviles completada.
+2026-02-21 14:58:11 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-02-21 14:58:11 | INFO     | database             | Bootstrap Start
+2026-02-21 14:58:11 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-02-21 14:58:11 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-02-21 14:58:11 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-02-21 14:58:12 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-02-21 14:58:15 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-02-21 14:58:38 | INFO     | database             | Lazy loading tab: Inventario...
+2026-02-21 14:58:40 | INFO     | database             | Tab Inventario loaded successfully.
+2026-02-21 14:58:40 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-02-21 14:58:47 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-02-21 14:59:27 | INFO     | gui.mobile_output_scanner | Item agregado: 2-7-07 x30
+2026-02-21 15:00:11 | INFO     | gui.mobile_output_scanner | Item agregado: 1-8-40 x60
+2026-02-21 15:00:15 | INFO     | gui.mobile_output_scanner | 💾 [TRANS] Conexión establecida a test
+2026-02-21 15:03:13 | INFO     | gui.inventory.movements | ✅ Auditado: 2-7-07 -> Qty: 30 (Material)
+2026-02-21 15:03:35 | INFO     | gui.inventory.movements | ✅ Auditado: 1-8-40 -> Qty: 60 (Material)
+2026-02-21 15:03:56 | INFO     | gui.inventory.movements | ✅ Auditado: 4-3-18 -> Qty: 16 (Material)
+2026-02-21 15:08:30 | INFO     | gui.mobile_output_scanner | Item agregado: U4-4-633 x1
+2026-02-21 15:08:30 | INFO     | gui.mobile_output_scanner | Item agregado: 2-7-11 x14
+2026-02-21 15:08:30 | INFO     | gui.mobile_output_scanner | Item agregado: 2-5-02 x30
+2026-02-21 15:08:30 | INFO     | gui.mobile_output_scanner | Item agregado: 4-3-42 x60
+2026-02-21 15:08:30 | INFO     | gui.mobile_output_scanner | Item agregado: 4-2-41 x14
+2026-02-21 15:08:30 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x5
+2026-02-21 15:08:30 | INFO     | gui.mobile_output_scanner | Item agregado: 1-4-61 x10
+2026-02-21 15:08:31 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A

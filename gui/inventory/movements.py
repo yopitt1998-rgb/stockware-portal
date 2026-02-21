@@ -1201,6 +1201,11 @@ class MobileReturnWindow:
         threading.Thread(target=self._procesar_async, daemon=True).start()
 
     def _procesar_async(self):
+        # UI Feedback inmediato
+        try:
+            self.btn_procesar.config(state='disabled', text="⌛ Procesando Transacción...")
+        except: pass
+
         faltantes_relleno = []
         paquete_objetivo = self.paquete_combo.get()
         exitos_consumo = 0
@@ -1233,10 +1238,11 @@ class MobileReturnWindow:
         if faltantes_msg: discrepancias_msg += "\n⚠️ FALTANTES:" + faltantes_msg
         if sobrantes_msg: discrepancias_msg += "\n\n✅ SOBRANTES:" + sobrantes_msg
             
+        movil = self.session_data['movil']
+            
         try:
             conn = get_db_connection()
             fecha_evento = self.entry_fecha.get()
-            movil = self.session_data['movil']
             
             # 1. Procesar CONSUMOS
             for sku, qty in self.session_data['consumo_verificado'].items():
@@ -1268,14 +1274,24 @@ class MobileReturnWindow:
                      else: 
                          errors.append(f"Retorno {sku}: {msg}")
             
-            # 3. Actualizar Seriales Individualmente
+            # 3. Actualizar Seriales de forma masiva (Optimización)
+            all_serials_to_return = []
             for key, seriales_list in self.session_data.items():
                 if key.startswith("_seriales_"):
-                    for serial in seriales_list:
-                        try:
-                            actualizar_ubicacion_serial(serial, 'BODEGA', existing_conn=conn)
-                        except Exception as e:
-                            logger.error(f"Error actualizando serial {serial}: {e}")
+                    all_serials_to_return.extend(seriales_list)
+            
+            if all_serials_to_return:
+                try:
+                    placeholders = ', '.join(['?'] * len(all_serials_to_return))
+                    sql_bulk = f"UPDATE series_registradas SET ubicacion = 'BODEGA' WHERE serial_number IN ({placeholders})"
+                    run_query(cursor, sql_bulk, all_serials_to_return)
+                    logger.info(f"✅ {len(all_serials_to_return)} seriales retornados a BODEGA.")
+                except Exception as e:
+                    logger.error(f"Error en retorno masivo de seriales: {e}")
+                    # Fallback uno a uno si falla el masivo por algun limite de DB
+                    for serial in all_serials_to_return:
+                        try: actualizar_ubicacion_serial(serial, 'BODEGA', existing_conn=conn)
+                        except: pass
 
             conn.commit()
         except Exception as e:
@@ -1296,11 +1312,13 @@ class MobileReturnWindow:
         summary = f"Proceso Completado.\n\nConsumos: {exitos_consumo}\nRetornos: {exitos_retorno}"
         if errors: summary += "\n\nErrores:\n" + "\n".join(errors[:5])
         
-        def final_feedback():
+        def final_ui_feedback():
+            # Restaurar botón
+            self.btn_procesar.config(state='normal', text="✅ Finalizar Historial y Retorno")
+            
             if discrepancias_msg:
                 msg_final = f"Auditoría Finalizada con Discrepancias:\n{discrepancias_msg}\n\n¿Desea procesar el retorno de lo contado?"
                 if not messagebox.askyesno("Confirmar Resultado", msg_final, parent=self.ventana):
-                     self.btn_procesar.config(state='normal', text="✅ Finalizar Historial y Retorno")
                      return
             else:
                 messagebox.showinfo("Resultado", summary, parent=self.ventana)
@@ -1348,20 +1366,20 @@ class MobileReturnWindow:
                 for sku_s, qty_s in standard_items:
                     actual_q = current_map.get(sku_s, 0)
                     if actual_q < qty_s:
-                        # Buscar nombre
-                        nom_s = "Item"
-                        for p in PRODUCTOS_INICIALES:
-                            if p[1] == sku_s: nom_s = p[0]; break
-                            
+                        nombre_s = "Desconocido"
+                        for p_nom, p_sku, _ in self.productos:
+                            if p_sku == sku_s:
+                                nombre_s = p_nom
+                                break
                         relleno_list.append({
                             'sku': sku_s,
-                            'nombre': nom_s,
+                            'nombre': nombre_s,
                             'cantidad': qty_s - actual_q,
                             'seriales': []
                         })
                 
                 if relleno_list:
-                    if messagebox.askyesno("Rellenar Paquete", f"El {paquete_objetivo} tiene faltantes.\n¿Desea abrir la ventana de Salida para RELLENAR lo que falta?", parent=self.ventana):
+                    if messagebox.askyesno("Rellenar Paquete", f"El {paquete_objetivo} aún no está completo.\n¿Desea abrir la ventana de Salida para completarlo?", parent=self.ventana):
                         self.ventana.destroy()
                         from ..mobile_output_scanner import MobileOutputScannerWindow
                         MobileOutputScannerWindow(self.master_app, mode='SALIDA_MOVIL', 
@@ -1370,10 +1388,15 @@ class MobileReturnWindow:
                                                   initial_package=paquete_objetivo)
                         return
 
-            self.ventana.destroy()
+            # Si no hubo transición, mostrar mensaje final si hubo éxito rotundo
+            if exitos_consumo + exitos_retorno > 0 and not errors:
+                 messagebox.showinfo("Éxito", "Operación finalizada correctamente.", parent=self.ventana)
+                 self.ventana.destroy()
+
             if self.on_close_callback: self.on_close_callback()
 
-        self.ventana.after(0, final_feedback)
+        # Enviar feedback a UI thread
+        self.ventana.after(0, final_ui_feedback)
 
 
 class ConciliacionPaquetesWindow:
