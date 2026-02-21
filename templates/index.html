@@ -428,137 +428,148 @@
         };
 
         // ── Renderizar lista filtrada por paquete seleccionado ───────────
+        // ── Renderizar lista filtrada por paquete seleccionado ───────────
         function renderizarInventario() {
-            const container = document.getElementById('material_list_container');
-            const mensajeSinStock = document.getElementById('mensaje_sin_stock');
-            const sectionTitle = document.getElementById('section_materiales');
+            try {
+                const container = document.getElementById('material_list_container');
+                const mensajeSinStock = document.getElementById('mensaje_sin_stock');
+                const sectionTitle = document.getElementById('section_materiales');
 
-            container.innerHTML = '';
+                if (!container) return;
+                container.innerHTML = '';
 
-            const paqueteSeleccionado = document.getElementById('paquete_select').value;
+                const selectPaquete = document.getElementById('paquete_select');
+                const paqueteSeleccionado = selectPaquete ? selectPaquete.value : 'PAQUETE A';
 
-            // --- LÓGICA DE AGREGACIÓN Y PUENTE (PERSONALIZADO) ---
+                const inventario = window.INVENTARIO_MOVIL || [];
+                const compartidosCheck = window.MATERIALES_COMPARTIDOS || [];
 
-            // 1. Identificar items que son específicos del paquete seleccionado (No compartidos, No personalizados)
-            const itemsEspecificos = (window.INVENTARIO_MOVIL || []).filter(item =>
-                (item.paquete || 'NINGUNO') === paqueteSeleccionado && !MATERIALES_COMPARTIDOS.includes(item.sku)
-            );
+                // --- LÓGICA DE AGREGACIÓN Y PUENTE (PERSONALIZADO) ---
 
-            // 2. Identificar items "PUENTE" (Personalizado/Ninguno) que no sean SKUs compartidos (pues esos se agregan aparte)
-            const itemsPuente = (window.INVENTARIO_MOVIL || []).filter(item =>
-                ['PERSONALIZADO', 'NINGUNO'].includes(item.paquete || 'NINGUNO') &&
-                (item.paquete || 'NINGUNO') !== paqueteSeleccionado &&
-                !MATERIALES_COMPARTIDOS.includes(item.sku)
-            );
+                // 1. Items específicos del paquete (No compartidos)
+                const itemsEspecificos = inventario.filter(item => {
+                    const pq = (item.paquete || 'NINGUNO').toUpperCase();
+                    return pq === paqueteSeleccionado.toUpperCase() && !compartidosCheck.includes(item.sku);
+                });
 
-            // 3. AGREGAR Materiales Compartidos (Suma global del móvil)
-            const mapCompartidos = {};
-            (window.INVENTARIO_MOVIL || []).forEach(item => {
-                if (MATERIALES_COMPARTIDOS.includes(item.sku)) {
-                    if (!mapCompartidos[item.sku]) {
-                        mapCompartidos[item.sku] = { ...item, paquete: 'COMPARTIDO', cantidad_total: 0, seriales: [] };
-                    }
-                    mapCompartidos[item.sku].cantidad_total += item.cantidad_total;
-                    if (item.seriales) {
-                        mapCompartidos[item.sku].seriales = [...new Set([...mapCompartidos[item.sku].seriales, ...item.seriales])];
-                    }
-                }
-            });
-            const itemsCompartidos = Object.values(mapCompartidos);
+                // 2. Items Puente (Personalizado/Ninguno que no sean del paquete actual)
+                const itemsPuente = inventario.filter(item => {
+                    const pq = (item.paquete || 'NINGUNO').toUpperCase();
+                    return (pq === 'PERSONALIZADO' || pq === 'NINGUNO') &&
+                        pq !== paqueteSeleccionado.toUpperCase() &&
+                        !compartidosCheck.includes(item.sku);
+                });
 
-            // Combinar: Específicos + Puente (Shared) + Compartidos (Agregados)
-            const items = [...itemsEspecificos, ...itemsPuente, ...itemsCompartidos];
-
-            if (items.length === 0) {
-                container.style.display = 'none';
-                sectionTitle.style.display = 'none';
-                mensajeSinStock.style.display = 'block';
-                mensajeSinStock.innerHTML = `
-                    <div style="font-size:32px;margin-bottom:8px;">📭</div>
-                    <p style="font-weight:bold;margin:0;">Sin materiales de ${paqueteSeleccionado}</p>
-                    <p style="font-size:13px;margin-top:5px;color:#888;">Esta móvil no tiene materiales asignados para este paquete</p>
-                `;
-                return;
-            }
-
-            mensajeSinStock.style.display = 'none';
-            sectionTitle.style.display = 'block';
-            sectionTitle.textContent = `📦 Materiales del ${paqueteSeleccionado}`;
-            container.style.display = 'block';
-
-            items.forEach(item => {
-                const nombreCorto = SKU_TO_EXCEL_NAME[item.sku] || item.nombre;
-                const disponibles = item.tiene_series ? (item.seriales ? item.seriales.length : 0) : item.cantidad_total;
-
-                const row = document.createElement('div');
-                row.className = 'material-item';
-                row.id = `row_${item.sku}`;
-                if (disponibles === 0) row.classList.add('disabled');
-
-                // Info del material
-                const infoDiv = document.createElement('div');
-                infoDiv.className = 'material-info';
-                infoDiv.innerHTML = `
-                    <span class="material-name">${nombreCorto}</span>
-                    <span class="material-sku">SKU: ${item.sku}</span>
-                    <span class="badge-disponible" style="background:${disponibles > 0 ? '#3498db' : '#e74c3c'}; color:white; padding:3px 8px; border-radius:10px; font-size:11px; margin-left:8px; display:inline-block;">
-                        🚚 ${disponibles} en móvil
-                    </span>
-                `;
-                row.appendChild(infoDiv);
-
-                // Input / Botón
-                const inputContainer = document.createElement('div');
-                inputContainer.style.cssText = 'display:flex; align-items:center;';
-
-                if (item.tiene_series) {
-                    const btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.id = `btn_${item.sku}`;
-                    btn.className = 'btn-seleccionar-series';
-                    btn.textContent = disponibles > 0 ? 'Seleccionar' : 'Sin stock';
-                    btn.disabled = disponibles === 0;
-                    btn.onclick = () => abrirModalSeriales(item.sku, nombreCorto, item.seriales || []);
-                    btn.style.cssText = `padding:10px 20px; background:${disponibles > 0 ? '#27ae60' : '#ccc'}; color:white; border:none; border-radius:6px; font-size:13px; font-weight:bold; cursor:${disponibles > 0 ? 'pointer' : 'not-allowed'};`;
-                    inputContainer.appendChild(btn);
-
-                    const hiddenInput = document.createElement('input');
-                    hiddenInput.type = 'hidden';
-                    hiddenInput.name = `qty_${item.sku}`;
-                    hiddenInput.id = `input_${item.sku}`;
-                    hiddenInput.className = 'sku-input';
-                    hiddenInput.dataset.sku = item.sku;
-                    hiddenInput.dataset.name = nombreCorto;
-                    hiddenInput.value = '0';
-                    inputContainer.appendChild(hiddenInput);
-
-                } else {
-                    const input = document.createElement('input');
-                    input.type = 'number';
-                    input.name = `qty_${item.sku}`;
-                    input.id = `input_${item.sku}`;
-                    input.className = 'material-qty sku-input';
-                    input.dataset.sku = item.sku;
-                    input.dataset.name = nombreCorto;
-                    input.min = '0';
-                    input.max = disponibles.toString();
-                    input.placeholder = '0';
-                    input.disabled = disponibles === 0;
-
-                    input.addEventListener('input', function () {
-                        const val = parseInt(this.value) || 0;
-                        if (val > disponibles) {
-                            this.value = disponibles;
-                            this.style.borderColor = 'red';
-                            setTimeout(() => this.style.borderColor = '#ddd', 500);
+                // 3. Agregados (Compartidos Globales)
+                const mapCompartidos = {};
+                inventario.forEach(item => {
+                    if (compartidosCheck.includes(item.sku)) {
+                        if (!mapCompartidos[item.sku]) {
+                            mapCompartidos[item.sku] = JSON.parse(JSON.stringify(item));
+                            mapCompartidos[item.sku].paquete = 'COMPARTIDO';
+                            mapCompartidos[item.sku].cantidad_total = 0;
+                            mapCompartidos[item.sku].seriales = [];
                         }
-                    });
-                    inputContainer.appendChild(input);
+                        mapCompartidos[item.sku].cantidad_total += (parseFloat(item.cantidad_total) || 0);
+                        if (item.seriales && Array.isArray(item.seriales)) {
+                            item.seriales.forEach(s => {
+                                if (!mapCompartidos[item.sku].seriales.includes(s)) {
+                                    mapCompartidos[item.sku].seriales.push(s);
+                                }
+                            });
+                        }
+                    }
+                });
+                const itemsCompartidos = Object.values(mapCompartidos);
+
+                // Combinación: Propios + Puente + Compartidos
+                const items = itemsEspecificos.concat(itemsPuente).concat(itemsCompartidos);
+
+                if (items.length === 0) {
+                    container.style.display = 'none';
+                    sectionTitle.style.display = 'none';
+                    mensajeSinStock.style.display = 'block';
+                    mensajeSinStock.innerHTML = `
+                        <div style="font-size:32px;margin-bottom:8px;">📭</div>
+                        <p style="font-weight:bold;margin:0;">Sin materiales disponibles</p>
+                        <p style="font-size:13px;margin-top:5px;color:#888;">Este móvil no tiene materiales en ${paqueteSeleccionado} o Personalizado</p>
+                    `;
+                    return;
                 }
 
-                row.appendChild(inputContainer);
-                container.appendChild(row);
-            });
+                mensajeSinStock.style.display = 'none';
+                sectionTitle.style.display = 'block';
+                sectionTitle.textContent = `📦 Materiales del ${paqueteSeleccionado}`;
+                container.style.display = 'block';
+
+                items.forEach(item => {
+                    const nombreCorto = SKU_TO_EXCEL_NAME[item.sku] || item.nombre;
+                    const disponibles = item.tiene_series ? (item.seriales ? item.seriales.length : 0) : item.cantidad_total;
+
+                    const row = document.createElement('div');
+                    row.className = 'material-item';
+                    row.id = `row_${item.sku}`;
+                    if (disponibles === 0) row.classList.add('disabled');
+
+                    row.innerHTML = `
+                        <div class="material-info">
+                            <span class="material-name">${nombreCorto}</span>
+                            <span class="material-sku">SKU: ${item.sku}</span>
+                            <span class="badge-disponible" style="background:${disponibles > 0 ? '#3498db' : '#e74c3c'}; color:white; padding:3px 8px; border-radius:10px; font-size:11px; margin-left:8px; display:inline-block;">
+                                🚚 ${disponibles} en móvil
+                            </span>
+                        </div>
+                    `;
+
+                    const inputContainer = document.createElement('div');
+                    inputContainer.style.cssText = 'display:flex; align-items:center;';
+
+                    if (item.tiene_series) {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.id = `btn_${item.sku}`;
+                        btn.className = 'btn-seleccionar-series';
+                        btn.textContent = disponibles > 0 ? 'Seleccionar' : 'Sin stock';
+                        btn.disabled = disponibles === 0;
+                        btn.onclick = () => abrirModalSeriales(item.sku, nombreCorto, item.seriales || []);
+                        btn.style.cssText = `padding:10px 20px; background:${disponibles > 0 ? '#27ae60' : '#ccc'}; color:white; border:none; border-radius:6px; font-size:13px; font-weight:bold; cursor:${disponibles > 0 ? 'pointer' : 'not-allowed'};`;
+                        inputContainer.appendChild(btn);
+
+                        const hiddenInput = document.createElement('input');
+                        hiddenInput.type = 'hidden';
+                        hiddenInput.name = `qty_${item.sku}`;
+                        hiddenInput.id = `input_${item.sku}`;
+                        hiddenInput.className = 'sku-input';
+                        hiddenInput.value = '0';
+                        inputContainer.appendChild(hiddenInput);
+                    } else {
+                        const input = document.createElement('input');
+                        input.type = 'number';
+                        input.name = `qty_${item.sku}`;
+                        input.id = `input_${item.sku}`;
+                        input.className = 'material-qty sku-input';
+                        input.dataset.sku = item.sku;
+                        input.dataset.name = nombreCorto;
+                        input.min = '0';
+                        input.max = disponibles.toString();
+                        input.placeholder = '0';
+                        input.disabled = disponibles === 0;
+                        input.addEventListener('input', function () {
+                            const val = parseInt(this.value) || 0;
+                            if (val > disponibles) {
+                                this.value = disponibles;
+                                this.style.borderColor = 'red';
+                                setTimeout(() => this.style.borderColor = '#ddd', 500);
+                            }
+                        });
+                        inputContainer.appendChild(input);
+                    }
+                    row.appendChild(inputContainer);
+                    container.appendChild(row);
+                });
+            } catch (err) {
+                console.error("Error en renderizado:", err);
+            }
         }
 
 
@@ -627,13 +638,13 @@
             window.SERIALES_SELECCIONADOS[currentModalSKU] = seleccionados;
 
             // Actualizar input oculto con cantidad
-            const input = document.getElementById(`input_${currentModalSKU}`);
+            const input = document.getElementById(`input_${currentModalSKU} `);
             if (input) {
                 input.value = seleccionados.length;
             }
 
             // Actualizar badge y botón en la fila
-            const row = document.getElementById(`row_${currentModalSKU}`);
+            const row = document.getElementById(`row_${currentModalSKU} `);
             const badge = row?.querySelector('.badge-disponible');
             if (badge && currentModalSeriales) {
                 const restantes = currentModalSeriales.length - seleccionados.length;
@@ -772,7 +783,7 @@
 
             // Validate Match
             if (code !== currentTargetSku) {
-                alert(`❌ Código incorrecto. Esperado: ${currentTargetSku}, Leído: ${code}`);
+                alert(`❌ Código incorrecto.Esperado: ${currentTargetSku}, Leído: ${code} `);
                 modalInput.value = '';
                 return;
             }
