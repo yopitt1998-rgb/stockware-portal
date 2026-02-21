@@ -439,24 +439,24 @@
                 container.innerHTML = '';
 
                 const selectPaquete = document.getElementById('paquete_select');
-                const paqueteSeleccionado = selectPaquete ? selectPaquete.value : 'PAQUETE A';
+                const paqueteSeleccionado = (selectPaquete ? selectPaquete.value : 'PAQUETE A').toUpperCase();
 
                 const inventario = window.INVENTARIO_MOVIL || [];
-                const compartidosCheck = window.MATERIALES_COMPARTIDOS || [];
+                const compartidosCheck = (typeof MATERIALES_COMPARTIDOS !== 'undefined') ? MATERIALES_COMPARTIDOS : [];
 
-                // --- LÓGICA DE AGREGACIÓN Y PUENTE (PERSONALIZADO) ---
+                // --- LÓGICA DE AGREGACIÓN Y PUENTE (PERSONALIZADO/NINGUNO) ---
 
-                // 1. Items específicos del paquete (No compartidos)
+                // 1. Items específicos del paquete seleccionado (que NO sean compartidos globales)
                 const itemsEspecificos = inventario.filter(item => {
                     const pq = (item.paquete || 'NINGUNO').toUpperCase();
-                    return pq === paqueteSeleccionado.toUpperCase() && !compartidosCheck.includes(item.sku);
+                    return pq === paqueteSeleccionado && !compartidosCheck.includes(item.sku);
                 });
 
-                // 2. Items Puente (Personalizado/Ninguno que no sean del paquete actual)
+                // 2. Items Puente (PERSONALIZADO o NINGUNO) que se ven en A y B
                 const itemsPuente = inventario.filter(item => {
                     const pq = (item.paquete || 'NINGUNO').toUpperCase();
                     return (pq === 'PERSONALIZADO' || pq === 'NINGUNO') &&
-                        pq !== paqueteSeleccionado.toUpperCase() &&
+                        pq !== paqueteSeleccionado &&
                         !compartidosCheck.includes(item.sku);
                 });
 
