@@ -1160,13 +1160,28 @@ class MobileReturnWindow:
 
         # Procesar Hallazgo
         if sku_found:
-            # Incrementar contador físico
-            self.session_data['stock_fisico_escaneado'][sku_found] = self.session_data['stock_fisico_escaneado'].get(sku_found, 0) + 1
+            # Si es material (no serial), pedir cantidad
+            qty_scanned = 1
+            if not is_serial:
+                from tkinter import simpledialog
+                # Buscar nombre para el prompt
+                nombre_p = self._prod_name_map.get(sku_found, "Material")
+                qty = simpledialog.askinteger("Cantidad Real", f"Producto: {nombre_p}\nSKU: {sku_found}\n\n¿Qué cantidad física está contando?", 
+                                               parent=self.ventana, minvalue=0)
+                if qty is None: return # Cancelado
+                qty_scanned = qty
+            
+            # Actualizar contador físico
+            if is_serial:
+                self.session_data['stock_fisico_escaneado'][sku_found] = self.session_data['stock_fisico_escaneado'].get(sku_found, 0) + 1
+            else:
+                # Los materiales se sobrescriben con la cantidad real contada/ingresada
+                self.session_data['stock_fisico_escaneado'][sku_found] = qty_scanned
             
             self.entry_scan.config(bg='#d4edda')
             self.ventana.after(200, lambda: self.entry_scan.config(bg='#e8f0fe'))
             self.update_fisico_ui()
-            logger.info(f"✅ Escaneado: {code} -> SKU {sku_found} ({'Serial' if is_serial else 'Material'})")
+            logger.info(f"✅ Auditado: {sku_found} -> Qty: {qty_scanned} ({'Serial' if is_serial else 'Material'})")
         else:
             # No se encontró de ninguna forma
             self.entry_scan.config(bg='#f8d7da')
@@ -1187,22 +1202,29 @@ class MobileReturnWindow:
         reutilizar_items = []
         conn = None
         
-        # Identificar faltantes para posible rellenado
-        faltantes_relleno = [] # {sku, nombre, cantidad}
-        paquete_objetivo = self.paquete_combo.get()
+        # 0. Verificar discrepancias antes de empezar
+        faltantes_msg = ""
+        sobrantes_msg = ""
         
-        # 0. Verificar discrepancias antes de empezar (opcional, pero el usuario pidió alerta)
-        discrepancias_msg = ""
         for i in self.tree_fisico.get_children():
             v = self.tree_fisico.item(i, 'values')
             sku_c, nom_c, exp_c, sca_c, st_c = v
             exp_c = int(exp_c); sca_c = int(sca_c)
+            
             if sca_c < exp_c:
-                discrepancias_msg += f"\n- {nom_c}: Faltan {exp_c - sca_c}"
+                faltantes_msg += f"\n- {nom_c}: Faltan {exp_c - sca_c}"
+                faltantes_relleno.append({
+                    'sku': sku_c,
+                    'nombre': nom_c,
+                    'cantidad': exp_c - sca_c,
+                    'seriales': []
+                })
+            elif sca_c > exp_c:
+                sobrantes_msg += f"\n- {nom_c}: Sobran {sca_c - exp_c}"
         
-        if discrepancias_msg:
-            # Aquí podríamos abortar o advertir. El usuario dijo: "el sistema lo debe aceptar mandando la alerta que falta"
-            pass 
+        discrepancias_msg = ""
+        if faltantes_msg: discrepancias_msg += "\n⚠️ FALTANTES:" + faltantes_msg
+        if sobrantes_msg: discrepancias_msg += "\n\n✅ SOBRANTES:" + sobrantes_msg
             
         try:
             conn = get_db_connection()
@@ -1269,9 +1291,23 @@ class MobileReturnWindow:
         
         def final_feedback():
             if discrepancias_msg:
-                messagebox.showwarning("Discrepancias Detectadas", f"Se procesó el retorno con los siguientes faltantes:{discrepancias_msg}", parent=self.ventana)
+                msg_final = f"Auditoría Finalizada con Discrepancias:\n{discrepancias_msg}\n\n¿Desea procesar el retorno de lo contado?"
+                if not messagebox.askyesno("Confirmar Resultado", msg_final, parent=self.ventana):
+                     self.btn_procesar.config(state='normal', text="✅ Finalizar Historial y Retorno")
+                     return
             else:
                 messagebox.showinfo("Resultado", summary, parent=self.ventana)
+            
+            # Opción de Rellenar Faltantes (Prioridad)
+            if faltantes_relleno:
+                if messagebox.askyesno("Rellenar Faltantes", "¿Desea abrir la ventana de Salida para RELLENAR los faltantes detectados?", parent=self.ventana):
+                    self.ventana.destroy()
+                    from ..mobile_output_scanner import MobileOutputScannerWindow
+                    MobileOutputScannerWindow(self.master_app, mode='SALIDA_MOVIL', 
+                                              prefill_items=faltantes_relleno,
+                                              initial_movil=movil,
+                                              initial_package=paquete_objetivo)
+                    return
             
             # Opción 1: Reutilizar lo devuelto
             if exitos_retorno > 0 and not errors:
