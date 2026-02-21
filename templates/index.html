@@ -436,18 +436,21 @@
 
             const paqueteSeleccionado = document.getElementById('paquete_select').value;
 
-            // --- LÓGICA DE AGREGACIÓN PARA MATERIALES COMPARTIDOS ---
-            // 1. Identificar items que no son compartidos y pertenecen al paquete
-            const itemsPaquete = (window.INVENTARIO_MOVIL || []).filter(item =>
+            // --- LÓGICA DE AGREGACIÓN Y PUENTE (PERSONALIZADO) ---
+
+            // 1. Identificar items que son específicos del paquete seleccionado (No compartidos, No personalizados)
+            const itemsEspecificos = (window.INVENTARIO_MOVIL || []).filter(item =>
                 (item.paquete || 'NINGUNO') === paqueteSeleccionado && !MATERIALES_COMPARTIDOS.includes(item.sku)
             );
 
-            // 2. Identificar items en NINGUNO (que no sean compartidos tampoco, aunque usualmente lo son)
-            const itemsNinguno = (window.INVENTARIO_MOVIL || []).filter(item =>
-                (item.paquete || 'NINGUNO') === 'NINGUNO' && !MATERIALES_COMPARTIDOS.includes(item.sku)
+            // 2. Identificar items "PUENTE" (Personalizado/Ninguno) que no sean SKUs compartidos (pues esos se agregan aparte)
+            const itemsPuente = (window.INVENTARIO_MOVIL || []).filter(item =>
+                ['PERSONALIZADO', 'NINGUNO'].includes(item.paquete || 'NINGUNO') &&
+                (item.paquete || 'NINGUNO') !== paqueteSeleccionado &&
+                !MATERIALES_COMPARTIDOS.includes(item.sku)
             );
 
-            // 3. AGREGAR Materiales Compartidos (Suma de todos los paquetes del móvil)
+            // 3. AGREGAR Materiales Compartidos (Suma global del móvil)
             const mapCompartidos = {};
             (window.INVENTARIO_MOVIL || []).forEach(item => {
                 if (MATERIALES_COMPARTIDOS.includes(item.sku)) {
@@ -462,8 +465,8 @@
             });
             const itemsCompartidos = Object.values(mapCompartidos);
 
-            // Combinar: Paquete Actual + NINGUNO + Compartidos (Globales)
-            const items = [...itemsPaquete, ...itemsNinguno, ...itemsCompartidos];
+            // Combinar: Específicos + Puente (Shared) + Compartidos (Agregados)
+            const items = [...itemsEspecificos, ...itemsPuente, ...itemsCompartidos];
 
             if (items.length === 0) {
                 container.style.display = 'none';
