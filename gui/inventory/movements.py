@@ -965,9 +965,20 @@ class MobileReturnWindow:
         
         paquete_filtro = self.paquete_combo.get() # "TODOS", "PAQUETE A", etc.
 
+        # Mapeo global de nombres para items extra
+        if not hasattr(self, '_prod_name_map'):
+            try:
+                self._prod_name_map = {p[1]: p[0] for p in obtener_todos_los_skus_para_movimiento()}
+            except:
+                self._prod_name_map = {}
+
         for sku in all_skus:
-            info = self.session_data['stock_teorico'].get(sku, {'name': 'Material Extra', 'total': 0})
-            name = info['name']
+            info = self.session_data['stock_teorico'].get(sku)
+            if info:
+                name = info['name']
+            else:
+                # Buscar en catálogo global si no está en el móvil
+                name = self._prod_name_map.get(sku, "Material Extra (No Asignado)")
             
             # Cantidad esperada según filtro
             if paquete_filtro == "TODOS":
@@ -1115,11 +1126,10 @@ class MobileReturnWindow:
         sku_serial, ubicacion = obtener_info_serial(code)
         if sku_serial:
             if ubicacion != movil:
-                # Si el serial está en otro lado, dar warning visual pero no procesar
-                self.entry_scan.config(bg='#fff3cd')
-                self.ventana.after(1000, lambda: self.entry_scan.config(bg='#e8f0fe'))
-                logger.warning(f"⚠️ Serial '{code}' pertenece a {ubicacion}, no a {movil}")
-                return
+                # El usuario quiere poder retornar cosas aunque la BD diga que están en otro lado.
+                # Permitimos la captura pero con un color de advertencia (amarillo/naranja).
+                logger.warning(f"⚠️ Serial '{code}' registrado en {ubicacion}, pero se está retornando desde {movil}")
+                self.entry_scan.config(bg='#ffeeba') # Color aviso
             
             sku_found = sku_serial
             is_serial = True
@@ -1138,10 +1148,14 @@ class MobileReturnWindow:
             if mapped_sku:
                 sku_found = mapped_sku
 
-        # 3. Intentar como SKU Directo
+        # 3. Intentar como SKU Directo (Incluso si no está en stock_teorico)
         if not sku_found:
-             # Si el código escaneado coincide directamente con un SKU en el stock teórico o catálogo
-             if code in self.session_data['stock_teorico']:
+             # Si el código es un SKU válido en el sistema (aunque no esté asignado al móvil)
+             if not hasattr(self, '_prod_name_map'):
+                 try: self._prod_name_map = {p[1]: p[0] for p in obtener_todos_los_skus_para_movimiento()}
+                 except: self._prod_name_map = {}
+             
+             if code in self._prod_name_map:
                  sku_found = code
 
         # Procesar Hallazgo

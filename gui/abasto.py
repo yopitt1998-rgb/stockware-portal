@@ -51,6 +51,12 @@ class SerialCaptureDialog:
         self.entry_serie.bind('<Return>', self.procesar_serie)
         self.entry_serie.focus_set()
         
+        self.lbl_help = tk.Label(self.top, text="💡 Escanee el SERIAL del equipo", 
+                                font=('Segoe UI', 9, 'italic'), fg='#666')
+        self.lbl_help.pack()
+        
+        self.pending_serial = None # Para el flujo Serial -> MAC
+        
         # Frame con listbox y scrollbar
         list_frame = tk.Frame(self.top)
         list_frame.pack(pady=10, padx=20, fill='both', expand=True)
@@ -93,41 +99,30 @@ class SerialCaptureDialog:
         self.top.wait_window()
         
     def procesar_serie(self, event):
-        serial = self.entry_serie.get().strip().upper()
-        if not serial: return
+        val = self.entry_serie.get().strip().upper()
+        if not val: return
         
-        # 1. Check duplicates in current session
-        if serial in self.series_capturadas:
-             messagebox.showwarning("Duplicado", f"La serie '{serial}' ya fue escaneada en esta sesión.", parent=self.top)
-             self.entry_serie.delete(0, tk.END)
-             return
-
-        # 2. Check DB
-        if self.allow_existing:
-            # Para Salida: Debe existir, estar DISPONIBLE y en BODEGA
-            exists, msg = verificar_serie_existe(serial, ubicacion_requerida='BODEGA', estado_requerido='DISPONIBLE')
-            if not exists or "no está" in msg or "no encontrada" in msg:
-                messagebox.showerror("Error de Serie", msg, parent=self.top)
-                self.entry_serie.delete(0, tk.END)
-                return
-        else:
-            # Para Abasto: NO debe existir
-            exists, msg = verificar_serie_existe(serial)
-            if exists:
-                messagebox.showerror("Error", msg, parent=self.top)
-                self.entry_serie.delete(0, tk.END)
-                return
+        # El usuario solicitó que SOLO se capture el SERIAL para equipos en Abasto.
+        # Se elimina la lógica de requires_mac que obligaba a pedir MAC después del Serial.
+        
+        exists, msg = verificar_serie_existe(val)
+        if exists:
+            messagebox.showerror("Error", f"El Serial/MAC '{val}' ya existe en el sistema.\n{msg}", parent=self.top)
+            self.entry_serie.delete(0, tk.END)
+            return
             
-        # Add OK
-        self.series_capturadas.append(serial)
-        self.listbox.insert(tk.END, f"{len(self.series_capturadas)}. {serial}")
+        # Guardar como serial simple (la MAC será None por defecto en Abasto)
+        self.series_capturadas.append({'serial': val, 'mac': None})
+        self.listbox.insert(tk.END, f"{len(self.series_capturadas)}. {val}")
         self.update_progress()
         self.entry_serie.delete(0, tk.END)
         
-        # Ya NO cerramos automáticamente, el usuario debe confirmar
+        # Auto-confirmar si ya llegó al límite (opcional pero ayuda a la velocidad)
+        if len(self.series_capturadas) >= self.cantidad_total:
+             self.confirmar()
         
     def update_progress(self):
-        self.lbl_progress.config(text=f"Series Capturadas: {len(self.series_capturadas)} / {self.cantidad_total}")
+        self.lbl_progress.config(text=f"Equipos Capturados: {len(self.series_capturadas)} / {self.cantidad_total}")
     
     def eliminar_serie_seleccionada(self):
         """Elimina la serie seleccionada de la lista"""
@@ -275,9 +270,9 @@ class AbastoWindow:
         self.obs_entry.pack(side='left', padx=5)
         
         # Botón Guardar
-        btn_save = tk.Button(form_frame, text="💾 Guardar Abasto", command=self.guardar_abasto,
+        self.btn_save = tk.Button(form_frame, text="💾 Guardar Abasto", command=self.guardar_abasto,
                            bg=Styles.SUCCESS_COLOR, fg='white', font=('Segoe UI', 10, 'bold'), relief='flat', padx=15, pady=5)
-        btn_save.pack(side='right', padx=20)
+        self.btn_save.pack(side='right', padx=20)
         
         # --- SECCIÓN DE ESCÁNER (NUEVO) ---
         scan_frame = tk.Frame(self.tab_register, bg='#E8EAF6', padx=10, pady=5, relief='groove', bd=1)
@@ -520,9 +515,14 @@ class AbastoWindow:
             return
             
         confirm = messagebox.askyesno("Confirmar Abasto", 
-                                    f"Se registrará el abasto '{ref}' con {len(items_to_save)} items.\n\n¿Desea continuar?")
+                                    f"Se registrará el abasto '{ref}' con {len(items_to_save)} items.\n\n¿Desea continuar?",
+                                    parent=self.window)
         if not confirm:
             return
+
+        # Protección: Desactivar botón para evitar duplicados por doble clic
+        self.btn_save.config(state='disabled', text="⏳ Guardando...")
+        self.window.update_idletasks() # Forzar actualización UI
             
         success_count = 0
         errors = []
@@ -540,9 +540,14 @@ class AbastoWindow:
                         "error")
                     return
                 
-                # Agregar series a la lista global
-                for s in self.series_capturadas[sku]:
-                    series_globales.append({'sku': sku, 'serial': s, 'ubicacion': 'BODEGA'})
+                # Agregar series a la lista global con soporte para MAC
+                for item in self.series_capturadas[sku]:
+                    series_globales.append({
+                        'sku': sku, 
+                        'serial': item['serial'], 
+                        'mac': item.get('mac'),
+                        'ubicacion': 'BODEGA'
+                    })
 
         # 2. Fase de Guardado
         for sku, qty in items_to_save:
@@ -564,6 +569,8 @@ class AbastoWindow:
         if errors:
             msg_res = f"Se registraron {success_count} items.\nErrores:\n" + "\n".join(errors)
             mostrar_mensaje_emergente(self.window, "Resultado Parcial", msg_res, "warning")
+            self.btn_save.config(state='normal', text="💾 Guardar Abasto")
+            self.window.lift() # Asegurar que esté al frente
         else:
             mostrar_mensaje_emergente(self.window, "Éxito", "Abasto registrado correctamente.", "success")
             # Limpiar entradas
@@ -579,6 +586,9 @@ class AbastoWindow:
             for sku, btn in self.scan_buttons.items():
                 btn.config(bg=Styles.INFO_COLOR, fg='white', text='🔍 Escanear Series')
                 
+            # Rehabilitar botón
+            self.btn_save.config(state='normal', text="💾 Guardar Abasto")
+            
             # Actualizar historial
             self.load_history()
             
@@ -709,11 +719,14 @@ class AbastoDetailWindow:
             fecha_inicio = self.fecha
             fecha_fin = self.fecha
 
-        # Obtener todas las series para esta fecha y referencia
+        # Obtener todas las series para esta fecha y referencia (Incluyendo MAC)
         sql_series = """
             SELECT 
                 sr.sku,
-                GROUP_CONCAT(sr.serial_number ORDER BY sr.serial_number SEPARATOR '|') as series
+                GROUP_CONCAT(
+                    CONCAT(sr.serial_number, COALESCE(CONCAT(' (MAC:', sr.mac_number, ')'), '')) 
+                    ORDER BY sr.serial_number SEPARATOR '|'
+                ) as series
             FROM series_registradas sr
             WHERE sr.sku IN (
                 SELECT sku_producto 
@@ -726,6 +739,11 @@ class AbastoDetailWindow:
             GROUP BY sr.sku
         """
         
+        # MySQL Session: Aumentar límite de GROUP_CONCAT para esta vista
+        try:
+            cursor.execute("SET SESSION group_concat_max_len = 1000000")
+        except: pass
+
         try:
             run_query(cursor, sql_series, (self.fecha, self.referencia, fecha_inicio, fecha_fin))
             # Guardar series en el diccionario (separadas por |)
