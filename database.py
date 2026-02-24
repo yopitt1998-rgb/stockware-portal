@@ -320,6 +320,7 @@ def inicializar_bd():
         """
         cursor.execute(q_series)
         add_column_if_missing('series_registradas', 'mac_number', 'VARCHAR(100)')
+        add_column_if_missing('series_registradas', 'paquete', 'VARCHAR(50)')
         
         # MySQL Session: Aumentar límite de GROUP_CONCAT para evitar truncamiento de series (61 -> ilimitado)
         if DB_TYPE == 'MYSQL':
@@ -673,11 +674,7 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
              if paquete_asignado == "NINGUNO":
                  paquete_asignado = None
         
-        # --- LÓGICA DE NORMALIZACIÓN PARA MATERIALES COMPARTIDOS ---
-        from config import MATERIALES_COMPARTIDOS
         paquete_para_stock = paquete_asignado # El que usaremos para descontar de asignacion_moviles
-        if sku in MATERIALES_COMPARTIDOS:
-             paquete_para_stock = "PERSONALIZADO" # Forzar cubo compartido para materiales
         
         run_query(cursor, "SELECT cantidad, nombre, secuencia_vista FROM productos WHERE sku = ? AND ubicacion = 'BODEGA'", (sku,))
         resultado_bodega = cursor.fetchone()
@@ -697,20 +694,11 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
              # Si no se especifica paquete, asumimos 'NINGUNO' para la consulta
              pq_query = paquete_asignado if paquete_asignado else 'NINGUNO'
              
-             # --- LÓGICA ESPECIAL PARA MATERIALES COMPARTIDOS ---
-             # Si es compartido, el "stock asignado" para validación es la suma de todos los paquetes
-             if sku in MATERIALES_COMPARTIDOS and tipo_movimiento in ('RETORNO_MOVIL', 'CONSUMO_MOVIL'):
-                if DB_TYPE == 'MYSQL':
-                    sql_asig = "SELECT SUM(cantidad) FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s"
-                else:
-                    sql_asig = "SELECT SUM(cantidad) FROM asignacion_moviles WHERE sku_producto = ? AND movil = ?"
-                cursor.execute(sql_asig, (sku, movil_afectado))
+             if DB_TYPE == 'MYSQL':
+                 sql_asig = "SELECT cantidad FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s"
              else:
-                if DB_TYPE == 'MYSQL':
-                    sql_asig = "SELECT cantidad FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s"
-                else:
-                    sql_asig = "SELECT cantidad FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ?"
-                cursor.execute(sql_asig, (sku, movil_afectado, pq_query))
+                 sql_asig = "SELECT cantidad FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ?"
+             cursor.execute(sql_asig, (sku, movil_afectado, pq_query))
              
              asignacion_actual = cursor.fetchone()
              stock_asignado = float(asignacion_actual[0]) if asignacion_actual and asignacion_actual[0] is not None else 0
@@ -829,7 +817,8 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
                 AND fecha_recordatorio = ? AND completado = 0
             """, (movil_afectado, paquete_asignado, tipo_recordatorio, fecha_evento))
         
-        conn.commit()
+        if should_close:
+            conn.commit()
         
         if tipo_movimiento == TIPO_MOVIMIENTO_DESCARTE:
             mensaje_final = f"✅ Descarte registrado para SKU {sku} ({cantidad_afectada} unidades)."
@@ -1467,13 +1456,6 @@ def obtener_asignacion_movil_con_paquetes(movil):
                 if saldos["SIN_PAQUETE"] < 0:
                     saldos["SIN_PAQUETE"] = 0
 
-            # --- LÓGICA DE MATERIALES COMPARTIDOS ---
-            # Si el SKU está en la lista de compartidos, forzamos que todos los paquetes muestren el total real
-            if sku in MATERIALES_COMPARTIDOS:
-                saldos["PAQUETE A"] = total_real
-                saldos["PAQUETE B"] = total_real
-                saldos["CARRO"] = total_real
-                saldos["SIN_PAQUETE"] = total_real
 
             # Guardar resultado final para ese SKU
             # Guardar resultado final para ese SKU
@@ -2293,15 +2275,20 @@ def obtener_moviles(solo_activos=True):
         if conn: close_connection(conn)
 
 def obtener_nombres_moviles(solo_activos=True):
-    """Retorna una LISTA de STRINGS con los nombres de los móviles (para compatibilidad con comboboxes)."""
-    # En Desktop: Consultar DB
-    # En Cloud: Usar configuración estática para ver TODOS los móviles (David y Santiago)
-    if not HAS_TK: # Asumimos 'Cloud Mode' si no hay tkinter (o podríamos usar otra bandera)
-        from config import ALL_MOVILES
-        return ALL_MOVILES
-        
-    moviles = obtener_moviles(solo_activos)
-    return [m[0] for m in moviles]
+    """
+    Retorna una LISTA de STRINGS con los nombres de los móviles.
+    Tenta obtenerlos de la base de datos, con fallback a la configuración estática.
+    """
+    try:
+        moviles = obtener_moviles(solo_activos)
+        if moviles:
+            return [m[0] for m in moviles]
+    except Exception as e:
+        logger.warning(f"Error consultando móviles de DB, usando fallback: {e}")
+    
+    # Fallback si la DB falla o está vacía (común en despliegues iniciales Cloud)
+    from config import ALL_MOVILES
+    return ALL_MOVILES
 
 def editar_movil(nombre_actual, nuevo_nombre, nueva_patente, nuevo_conductor, nuevo_ayudante):
     """Edita los datos de un móvil."""
@@ -2607,7 +2594,7 @@ def obtener_info_serial(serial_number):
 
 
 
-def actualizar_ubicacion_serial(serial_number, nueva_ubicacion, existing_conn=None):
+def actualizar_ubicacion_serial(serial_number, nueva_ubicacion, paquete=None, existing_conn=None):
     """
     Actualiza la ubicación de un serial específico.
     Retorna: (exito: bool, mensaje: str)
@@ -2626,11 +2613,11 @@ def actualizar_ubicacion_serial(serial_number, nueva_ubicacion, existing_conn=No
         
         sql = """
             UPDATE series_registradas
-            SET ubicacion = ?
+            SET ubicacion = ?, paquete = ?
             WHERE serial_number = ?
         """
         
-        run_query(cursor, sql, (nueva_ubicacion, serial_number))
+        run_query(cursor, sql, (nueva_ubicacion, paquete, serial_number))
         
         if should_close:
             conn.commit()
@@ -3144,29 +3131,42 @@ def registrar_abasto_batch(items_abasto, fecha_evento, numero_abasto=None):
             
             # Registrar seriales si aplica
             if seriales:
-                for serial in seriales:
+                for ser_item in seriales:
                     try:
+                        # Extraer serial y mac dependiendo del formato (dict o str)
+                        if isinstance(ser_item, dict):
+                            serial_val = ser_item.get('serial')
+                            mac_val = ser_item.get('mac')
+                        else:
+                            serial_val = str(ser_item)
+                            mac_val = None
+                        
+                        if not serial_val:
+                            continue
+
                         # Verificar si el serial ya existe
                         run_query(cursor, """
                             SELECT COUNT(*) FROM series_registradas 
                             WHERE serial_number = ?
-                        """, (serial,))
+                        """, (serial_val,))
                         
                         if cursor.fetchone()[0] > 0:
                             conn.rollback()
-                            return False, f"El serial '{serial}' ya está registrado en el sistema"
+                            return False, f"El serial '{serial_val}' ya está registrado en el sistema"
                         
-                        # Insertar serial
+                        # Insertar serial con soporte para MAC
                         run_query(cursor, """
                             INSERT INTO series_registradas 
-                            (sku, serial_number, estado, ubicacion, fecha_ingreso)
-                            VALUES (?, ?, 'DISPONIBLE', 'BODEGA', ?)
-                        """, (sku, serial, fecha_evento))
+                            (sku, serial_number, mac_number, estado, ubicacion, fecha_ingreso)
+                            VALUES (?, ?, ?, 'DISPONIBLE', 'BODEGA', ?)
+                        """, (sku, serial_val, mac_val, fecha_evento))
                         
                     except Exception as e:
-                        conn.rollback()
-                        logger.error(f"Error registrando serial {serial}: {e}")
-                        return False, f"Error registrando serial '{serial}': {e}"
+                        if conn: conn.rollback()
+                        # Ensure ser_item is printable and not causing further issues
+                        err_detail = str(ser_item)
+                        logger.error(f"Error registrando serial {err_detail}: {e}")
+                        return False, f"Error registrando serial {err_detail}: {e}"
             
             total_unidades += cantidad
         
@@ -3188,6 +3188,80 @@ def registrar_abasto_batch(items_abasto, fecha_evento, numero_abasto=None):
             close_connection(conn)
 
 
-def obtener_nombres_moviles():
-    """Retorna la lista de todos los móviles disponibles (Bodega y Santiago)"""
-    return MOVILES_DISPONIBLES + MOVILES_SANTIAGO
+
+
+def resetear_stock_movil(movil, paquete):
+    """
+    Elimina la asignación de un móvil para un paquete específico o para TODO.
+    """
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        ph = '%s' if DB_TYPE == 'MYSQL' else '?'
+        
+        # Caso 1: Resetear TODO el móvil
+        if paquete == 'TODOS':
+            sql_check = f"SELECT SUM(cantidad) FROM asignacion_moviles WHERE movil = {ph}"
+            cursor.execute(sql_check, (movil,))
+            res = cursor.fetchone()
+            total_items = res[0] if res and res[0] else 0
+            
+            if total_items == 0:
+                # Verificar si hay series huérfanas antes de decir que está vacío
+                sql_check_series = f"SELECT COUNT(*) FROM series_registradas WHERE ubicacion = {ph}"
+                cursor.execute(sql_check_series, (movil,))
+                if cursor.fetchone()[0] == 0:
+                    return True, f"El {movil} ya está completamente vacío."
+                
+            sql_del = f"DELETE FROM asignacion_moviles WHERE movil = {ph}"
+            cursor.execute(sql_del, (movil,))
+            
+            # --- NUEVO: Resetear Series (Equipos) ---
+            sql_reset_series = f"UPDATE series_registradas SET ubicacion = 'BODEGA', estado = 'DISPONIBLE' WHERE ubicacion = {ph}"
+            cursor.execute(sql_reset_series, (movil,))
+            
+            observacion = "Limpieza TOTAL del móvil (PIN 0440)"
+        
+        # Caso 2: Resetear un paquete específico
+        else:
+            sql_check = f"SELECT SUM(cantidad) FROM asignacion_moviles WHERE movil = {ph} AND COALESCE(paquete, 'NINGUNO') = {ph}"
+            cursor.execute(sql_check, (movil, paquete))
+            res = cursor.fetchone()
+            total_items = res[0] if res and res[0] else 0
+            
+            # Obtener SKUs del paquete para limpiar series asociadas
+            from config import PAQUETES_MATERIALES
+            skus_paquete = [sku for sku, cant in PAQUETES_MATERIALES.get(paquete, [])]
+            
+            if total_items == 0 and not skus_paquete:
+                return True, f"El {movil} ya está vacío para el {paquete}."
+                
+            sql_del = f"DELETE FROM asignacion_moviles WHERE movil = {ph} AND COALESCE(paquete, 'NINGUNO') = {ph}"
+            cursor.execute(sql_del, (movil, paquete))
+
+            # --- NUEVO: Resetear Series correspondientes al paquete ---
+            # Ahora usamos la columna 'paquete' para mayor precisión
+            sql_reset_series = f"UPDATE series_registradas SET ubicacion = 'BODEGA', estado = 'DISPONIBLE', paquete = NULL WHERE ubicacion = {ph} AND paquete = {ph}"
+            cursor.execute(sql_reset_series, (movil, paquete))
+            
+            observacion = f"Limpieza de {paquete} (PIN 0440)"
+        
+        # Registrar movimiento de 'LIMPIEZA'
+        sql_mov = """
+            INSERT INTO movimientos (sku_producto, tipo_movimiento, cantidad_afectada, movil_afectado, 
+                                   paquete_asignado, fecha_evento, observaciones)
+            VALUES ('N/A', 'LIMPIEZA_MOVIL', ?, ?, ?, CURRENT_DATE, ?)
+        """
+        run_query(cursor, sql_mov, (total_items, movil, paquete, observacion))
+        
+        conn.commit()
+        logger.info(f"🧹 Móvil {movil} ({paquete}) limpiado: {total_items} unidades eliminadas.")
+        return True, f"Se ha limpiado el {movil} ({paquete}) correctamente. Se eliminaron registros de {total_items} unidades."
+        
+    except Exception as e:
+        if conn: conn.rollback()
+        logger.error(f"Error al resetear stock de móvil: {e}")
+        return False, f"Error al resetear stock: {e}"
+    finally:
+        if conn: close_connection(conn)

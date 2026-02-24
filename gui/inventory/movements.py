@@ -106,10 +106,19 @@ class IndividualOutputWindow:
         scrollbar.pack(side="right", fill="y")
         
         def on_mousewheel(event):
-            canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+            try:
+                if canvas.winfo_exists():
+                    canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+            except tk.TclError:
+                pass
         
-        canvas.bind("<MouseWheel>", on_mousewheel)
-        frame_productos.bind("<MouseWheel>", on_mousewheel)
+        def _bind_mousewheel_recursive(widget):
+            widget.bind("<MouseWheel>", on_mousewheel)
+            for child in widget.winfo_children():
+                _bind_mousewheel_recursive(child)
+        
+        _bind_mousewheel_recursive(canvas)
+        _bind_mousewheel_recursive(frame_productos)
         
         self.entry_vars = {} 
         
@@ -297,31 +306,21 @@ class MobileOutputWindow:
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
         
-        # Mousewheel global
+        # Mousewheel local pattern (Recursive)
         def on_mousewheel(event):
             try:
                 if canvas.winfo_exists():
                     canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
-            except Exception:
+            except tk.TclError:
                 pass
 
-        def _bind_mouse(event):
-            canvas.bind_all("<MouseWheel>", on_mousewheel)
-        
-        def _unbind_mouse(event):
-            canvas.unbind_all("<MouseWheel>")
+        def _bind_mousewheel_recursive(widget):
+            widget.bind("<MouseWheel>", on_mousewheel)
+            for child in widget.winfo_children():
+                _bind_mousewheel_recursive(child)
 
-        self.ventana.bind("<Enter>", _bind_mouse)
-        self.ventana.bind("<Leave>", _unbind_mouse)
-        
-        def _cleanup_binds():
-            try:
-                canvas.unbind_all("<MouseWheel>")
-            except:
-                pass
-            self.ventana.destroy()
-            
-        self.ventana.protocol("WM_DELETE_WINDOW", _cleanup_binds)
+        _bind_mousewheel_recursive(canvas)
+        _bind_mousewheel_recursive(scrollable_frame)
 
         # Frame de selectores
         frame_selector = tk.Frame(scrollable_frame, padx=10, pady=10, bg='#F8BBD0')
@@ -632,7 +631,7 @@ class MobileOutputWindow:
                 continue
             
             for serial in seriales_list:
-                exito_ser, mensaje_ser = actualizar_ubicacion_serial(serial, movil)
+                exito_ser, mensaje_ser = actualizar_ubicacion_serial(serial, movil, paquete=paquete)
                 if exito_ser: exitos += 1
                 else: 
                     errores += 1
@@ -1283,7 +1282,7 @@ class MobileReturnWindow:
             if all_serials_to_return:
                 try:
                     placeholders = ', '.join(['?'] * len(all_serials_to_return))
-                    sql_bulk = f"UPDATE series_registradas SET ubicacion = 'BODEGA' WHERE serial_number IN ({placeholders})"
+                    sql_bulk = f"UPDATE series_registradas SET ubicacion = 'BODEGA', paquete = NULL WHERE serial_number IN ({placeholders})"
                     run_query(cursor, sql_bulk, all_serials_to_return)
                     logger.info(f"✅ {len(all_serials_to_return)} seriales retornados a BODEGA.")
                 except Exception as e:
@@ -1316,16 +1315,22 @@ class MobileReturnWindow:
             # Restaurar botón
             self.btn_procesar.config(state='normal', text="✅ Finalizar Historial y Retorno")
             
+            # Feedback inicial
+            if errors:
+                messagebox.showwarning("Proceso con Errores", summary, parent=self.ventana)
+            else:
+                if not discrepancias_msg:
+                    messagebox.showinfo("Resultado", summary, parent=self.ventana)
+            
+            # 1. Discrepancias en la Auditoría (Faltantes contra lo que el sistema creía que tenían)
             if discrepancias_msg:
-                msg_final = f"Auditoría Finalizada con Discrepancias:\n{discrepancias_msg}\n\n¿Desea procesar el retorno de lo contado?"
+                msg_final = f"Auditoría Finalizada con Discrepancias:\n{discrepancias_msg}\n\n¿Desea procesar el retorno de lo contado y luego ver opciones de relleno?"
                 if not messagebox.askyesno("Confirmar Resultado", msg_final, parent=self.ventana):
                      return
-            else:
-                messagebox.showinfo("Resultado", summary, parent=self.ventana)
-            
-            # Opción de Rellenar Faltantes (Prioridad)
+
+            # 2. Opción de Rellenar Faltantes (Lo que no se encontró en la auditoría física)
             if faltantes_relleno:
-                if messagebox.askyesno("Rellenar Faltantes", "¿Desea abrir la ventana de Salida para RELLENAR los faltantes detectados?", parent=self.ventana):
+                if messagebox.askyesno("Rellenar Faltantes", "¿Desea abrir la ventana de Salida para RELLENAR los faltantes detectados en la auditoría?", parent=self.ventana):
                     self.ventana.destroy()
                     from ..mobile_output_scanner import MobileOutputScannerWindow
                     MobileOutputScannerWindow(self.master_app, mode='SALIDA_MOVIL', 
@@ -1333,10 +1338,10 @@ class MobileReturnWindow:
                                               initial_movil=movil,
                                               initial_package=paquete_objetivo)
                     return
-            
-            # Opción 1: Reutilizar lo devuelto
-            if exitos_retorno > 0 and not errors:
-                if messagebox.askyesno("Reutilizar", "¿Desea reutilizar estos equipos/materiales para una nueva SALIDA?", parent=self.ventana):
+
+            # 3. Opción de Reutilizar lo devuelto (Equipos que volvieron y queremos asignar a otro paquete o móvil)
+            if exitos_retorno > 0:
+                if messagebox.askyesno("Reutilizar", "¿Desea reutilizar estos equipos/materiales para una nueva SALIDA inmediata?", parent=self.ventana):
                     self.ventana.destroy()
                     from ..mobile_output_scanner import MobileOutputScannerWindow
                     MobileOutputScannerWindow(self.master_app, mode='SALIDA_MOVIL', 
@@ -1345,22 +1350,21 @@ class MobileReturnWindow:
                                               initial_package=paquete_objetivo)
                     return
             
-            # Opción 2: Rellenar el paquete (si se seleccionó uno específico)
-            if paquete_objetivo != "TODOS" and not errors:
-                # Calcular faltantes reales contra el estándar
-                from config import PAQUETES_MATERIALES
-                standard_items = PAQUETES_MATERIALES.get(paquete_objetivo, [])
+            # 4. Opción de Rellenar el paquete estándar (si no está completo)
+            # Intentamos detectar si algún paquete (A o B) está incompleto si no se seleccionó uno
+            paquetes_a_revisar = [paquete_objetivo] if paquete_objetivo != "TODOS" else ["PAQUETE A", "PAQUETE B"]
+            
+            # Obtener stock actual del móvil tras el commit para ver qué falta
+            actual_stock_post = obtener_asignacion_movil_con_paquetes(movil)
+            from config import PAQUETES_MATERIALES
+            
+            for paq_test in paquetes_a_revisar:
+                standard_items = PAQUETES_MATERIALES.get(paq_test, [])
+                if not standard_items: continue
                 
-                # Obtener stock actual del móvil tras el commit
-                actual_stock_post = obtener_asignacion_movil_con_paquetes(movil)
-                # Convertir a dict para fácil acceso: sku -> qty_in_package
-                current_map = {}
-                for item_p in actual_stock_post:
-                    # (nombre, sku, total, paq_a, paq_b, carro, sin_paquete, personalizado)
-                    sku_p = item_p[1]
-                    # Mapear paquete_objetivo a índice
-                    idx = {"PAQUETE A": 3, "PAQUETE B": 4, "CARRO": 5, "PERSONALIZADO": 7, "NINGUNO": 6}.get(paquete_objetivo, 2)
-                    current_map[sku_p] = item_p[idx]
+                # Mapear paq_test a índice
+                idx = {"PAQUETE A": 3, "PAQUETE B": 4, "CARRO": 5, "PERSONALIZADO": 7, "NINGUNO": 6}.get(paq_test, 2)
+                current_map = {item_p[1]: item_p[idx] for item_p in actual_stock_post}
 
                 relleno_list = []
                 for sku_s, qty_s in standard_items:
@@ -1379,17 +1383,17 @@ class MobileReturnWindow:
                         })
                 
                 if relleno_list:
-                    if messagebox.askyesno("Rellenar Paquete", f"El {paquete_objetivo} aún no está completo.\n¿Desea abrir la ventana de Salida para completarlo?", parent=self.ventana):
+                    if messagebox.askyesno("Rellenar Paquete", f"El {paq_test} aún no está completo.\n¿Desea abrir la ventana de Salida para completarlo?", parent=self.ventana):
                         self.ventana.destroy()
                         from ..mobile_output_scanner import MobileOutputScannerWindow
                         MobileOutputScannerWindow(self.master_app, mode='SALIDA_MOVIL', 
                                                   prefill_items=relleno_list,
                                                   initial_movil=movil,
-                                                  initial_package=paquete_objetivo)
+                                                  initial_package=paq_test)
                         return
 
-            # Si no hubo transición, mostrar mensaje final si hubo éxito rotundo
-            if exitos_consumo + exitos_retorno > 0 and not errors:
+            # Si llegamos aquí y no hubo errores críticos, cerramos
+            if not errors:
                  messagebox.showinfo("Éxito", "Operación finalizada correctamente.", parent=self.ventana)
                  self.ventana.destroy()
 
@@ -1452,9 +1456,19 @@ class ConciliacionPaquetesWindow:
         scrollbar.pack(side="right", fill="y")
         
         def on_mousewheel(event):
-            canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
-        canvas.bind("<MouseWheel>", on_mousewheel)
-        self.frame_productos.bind("<MouseWheel>", on_mousewheel)
+            try:
+                if canvas.winfo_exists():
+                    canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+            except tk.TclError:
+                pass
+        
+        def _bind_mousewheel_recursive(widget):
+            widget.bind("<MouseWheel>", on_mousewheel)
+            for child in widget.winfo_children():
+                _bind_mousewheel_recursive(child)
+        
+        _bind_mousewheel_recursive(canvas)
+        _bind_mousewheel_recursive(self.frame_productos)
         
         self.movil_combo.bind("<<ComboboxSelected>>", self.cargar_productos_movil)
         self.paquete_combo.bind("<<ComboboxSelected>>", self.cargar_productos_movil)
