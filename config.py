@@ -106,8 +106,9 @@ PAQUETES_MATERIALES = {
 # Materiales que se comparten entre paquetes (ej: fibra, cables bulk)
 # No se dividen, sino que muestran el total disponible en el móvil en todos los paquetes.
 MATERIALES_COMPARTIDOS = [
-    "5-2-443",  # MOLDU (Moldura)
+    "1-2-16",   # FIBUNHILO (Fibra óptica)
     "2-5-03",   # G_C_PARED6 (Clip de pared)
+    "5-2-443",  # MOLDU (Moldura)
     "10-1-04",  # CONEC_RJ45 (Conectores)
     "7-1-171"   # C_UTP_CAT6 (Cable UTP)
 ]

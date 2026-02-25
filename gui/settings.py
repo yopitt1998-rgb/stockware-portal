@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
-from database import obtener_configuracion, guardar_configuracion, crear_respaldo_bd, limpiar_base_datos
+from database import obtener_configuracion, guardar_configuracion, crear_respaldo_bd, limpiar_base_datos, resetear_stock_movil
 from .styles import Styles
 from .utils import mostrar_mensaje_emergente
 from datetime import datetime
@@ -191,6 +191,20 @@ class SettingsTab(tk.Frame):
                  bg='#c0392b', fg='white', font=('Segoe UI', 10, 'bold'),
                  relief='flat', padx=20, pady=8, cursor='hand2').pack(side='right')
 
+        # --- SECCIÓN DE LIMPIEZA DE MÓVIL (NUEVO) ---
+        tk.Label(inner_content, text="🧹 LIMPIAR STOCK DE MÓVIL", 
+                font=('Segoe UI', 13, 'bold'), bg='#f8f9fa', fg='#00796B').pack(pady=(30, 10), anchor='w')
+        
+        mobile_cleanup_frame = tk.Frame(inner_content, bg='#E0F2F1', padx=20, pady=20, highlightthickness=1, highlightbackground='#B2DFDB')
+        mobile_cleanup_frame.pack(fill='x')
+        
+        tk.Label(mobile_cleanup_frame, text="Elimina todo el stock asignado a un móvil y paquete específico.\nIdeal para resetear inventarios de técnicos.", 
+                font=('Segoe UI', 9), bg='#E0F2F1', justify='left').pack(side='left', fill='x', expand=True)
+        
+        tk.Button(mobile_cleanup_frame, text="🧹 Limpiar Móvil", command=self.limpiar_movil_dialogo,
+                 bg='#00796B', fg='white', font=('Segoe UI', 10, 'bold'),
+                 relief='flat', padx=20, pady=8, cursor='hand2').pack(side='right')
+
 
     def seleccionar_logo(self):
         filename = filedialog.askopenfilename(
@@ -315,4 +329,63 @@ class SettingsTab(tk.Frame):
             "Por favor, cierre y vuelva a abrir la aplicación para que los cambios surtan efecto.",
             parent=self
         )
+
+    def limpiar_movil_dialogo(self):
+        """Maneja el reset de stock de un móvil con PIN y selección."""
+        # 1. Pedir PIN de seguridad
+        from tkinter import simpledialog
+        pin = simpledialog.askstring("Seguridad", "Ingrese el PIN de seguridad (0440):", 
+                                   show='*', parent=self)
+        
+        if pin != "0440":
+            if pin is not None:
+                mostrar_mensaje_emergente(self, "Error", "PIN incorrecto.", "error")
+            return
+            
+        # 2. Diálogo de selección
+        from config import ALL_MOVILES
+        
+        selection_win = tk.Toplevel(self)
+        selection_win.title("Seleccionar Móvil y Paquete")
+        selection_win.geometry("400x320")
+        selection_win.resizable(False, False)
+        selection_win.transient(self)
+        selection_win.grab_set()
+        selection_win.configure(bg='#f8f9fa')
+        
+        tk.Label(selection_win, text="🧹 Resetear Stock", font=('Segoe UI', 14, 'bold'), 
+                 bg='#f8f9fa', fg='#00796B').pack(pady=20)
+        
+        # Selección de Móvil
+        tk.Label(selection_win, text="Seleccione el Móvil:", bg='#f8f9fa').pack(anchor='w', padx=40)
+        movil_var = tk.StringVar(value=ALL_MOVILES[0] if ALL_MOVILES else "")
+        combo_movil = ttk.Combobox(selection_win, textvariable=movil_var, values=ALL_MOVILES, state='readonly', width=35)
+        combo_movil.pack(pady=5, padx=40)
+        
+        # Selección de Paquete
+        tk.Label(selection_win, text="Seleccione el Paquete:", bg='#f8f9fa').pack(anchor='w', padx=40, pady=(10, 0))
+        paquete_var = tk.StringVar(value="TODOS")
+        combo_paquete = ttk.Combobox(selection_win, textvariable=paquete_var, 
+                                     values=["PAQUETE A", "PAQUETE B", "PERSONALIZADO", "CARRO", "NINGUNO", "TODOS"], 
+                                     state='readonly', width=35)
+        combo_paquete.pack(pady=5, padx=40)
+        
+        def ejecutar_limpieza():
+            movil = movil_var.get()
+            paquete = paquete_var.get()
+            
+            if not movil or not paquete:
+                return
+                
+            if messagebox.askyesno("Confirmar", f"¿Realmente desea ELIMINAR todo el stock de {movil} en el {paquete}?", parent=selection_win):
+                exito, mensaje = resetear_stock_movil(movil, paquete)
+                if exito:
+                    mostrar_mensaje_emergente(self, "Éxito", mensaje, "success")
+                    selection_win.destroy()
+                else:
+                    mostrar_mensaje_emergente(self, "Error", mensaje, "error")
+        
+        tk.Button(selection_win, text="🚀 Ejecutar Limpieza", command=ejecutar_limpieza,
+                 bg='#00796B', fg='white', font=('Segoe UI', 10, 'bold'),
+                 relief='flat', padx=20, pady=10).pack(pady=30)
 

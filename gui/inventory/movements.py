@@ -873,6 +873,15 @@ class MobileReturnWindow:
         bottom_panel = tk.Frame(self.ventana, bg='#f8f9fa', height=60)
         bottom_panel.pack(fill='x', side='bottom')
         
+        self.btn_autorelleno = tk.Button(bottom_panel, text="🚀 Auto-Rellenar Faltantes", 
+                               bg='#e67e22', fg='white', font=('Segoe UI', 12, 'bold'),
+                               state='disabled', padx=20, pady=10, command=self.auto_rellenar)
+        self.btn_autorelleno.pack(side='left', padx=20, pady=10)
+        
+        self.lbl_faltantes_count = tk.Label(bottom_panel, text="", fg='#c0392b', 
+                                            font=('Segoe UI', 10, 'bold'), bg='#f8f9fa')
+        self.lbl_faltantes_count.pack(side='left', padx=5)
+        
         self.btn_procesar = tk.Button(bottom_panel, text="✅ Finalizar Historial y Retorno", 
                                bg=Styles.SUCCESS_COLOR, fg='white', font=('Segoe UI', 12, 'bold'),
                                state='disabled', padx=20, pady=10, command=self.finalizar)
@@ -1017,7 +1026,25 @@ class MobileReturnWindow:
             
             self.tree_fisico.insert('', 'end', values=(sku, name, expected, scanned, state), tags=(tag,))
         
-        if self.session_data['stock_fisico_escaneado']: self.btn_procesar.config(state='normal')
+        if self.session_data['stock_fisico_escaneado']: 
+            self.btn_procesar.config(state='normal')
+            # Verificar si hay faltantes para habilitar el botón de auto-relleno
+            faltantes_count = 0
+            for i in self.tree_fisico.get_children():
+                v = self.tree_fisico.item(i, 'values')
+                try:
+                    exp_c = int(v[2]); sca_c = int(v[3])
+                    if sca_c < exp_c:
+                        faltantes_count += (exp_c - sca_c)
+                except: pass
+            
+            if faltantes_count > 0:
+                self.btn_autorelleno.config(state='normal', 
+                    text=f"🚀 Auto-Rellenar Faltantes ({faltantes_count} items)")
+                self.lbl_faltantes_count.config(text=f"⚠️ {faltantes_count} items faltan")
+            else:
+                self.btn_autorelleno.config(state='disabled', text="🚀 Auto-Rellenar Faltantes")
+                self.lbl_faltantes_count.config(text="✅ Sin faltantes")
 
     def mostrar_detalle_mac(self, event):
         """Muestra una ventana pequeña con las MACs registradas para el SKU seleccionado"""
@@ -1401,6 +1428,54 @@ class MobileReturnWindow:
 
         # Enviar feedback a UI thread
         self.ventana.after(0, final_ui_feedback)
+
+    def auto_rellenar(self):
+        """Abre la ventana de Salida pre-rellena con los items faltantes detectados en la auditoría,
+        SIN necesidad de finalizar primero."""
+        movil = self.session_data.get('movil')
+        paquete_objetivo = self.paquete_combo.get() if hasattr(self, 'paquete_combo') else 'PAQUETE A'
+        
+        if not movil:
+            from tkinter import messagebox
+            messagebox.showerror("Error", "Debe seleccionar un móvil primero.", parent=self.ventana)
+            return
+        
+        # Recopilar faltantes desde la tabla
+        faltantes_relleno = []
+        for i in self.tree_fisico.get_children():
+            v = self.tree_fisico.item(i, 'values')
+            sku_c, nom_c = v[0], v[1]
+            try:
+                exp_c = int(v[2]); sca_c = int(v[3])
+                if sca_c < exp_c:
+                    faltantes_relleno.append({
+                        'sku': sku_c,
+                        'nombre': nom_c,
+                        'cantidad': exp_c - sca_c,
+                        'seriales': []
+                    })
+            except: pass
+        
+        if not faltantes_relleno:
+            from tkinter import messagebox
+            messagebox.showinfo("Sin Faltantes", "No se detectan faltantes en la auditoría actual. Escanea items para comparar.", parent=self.ventana)
+            return
+        
+        from tkinter import messagebox
+        resumen = "\n".join([f"  • {f['nombre']}: faltan {f['cantidad']}" for f in faltantes_relleno[:10]])
+        if not messagebox.askyesno("Abrir Salida para Rellenar", 
+                                   f"Se detectaron {len(faltantes_relleno)} productos con faltantes:\n\n{resumen}\n\n"
+                                   f"¿Abrir Salida a {movil} para rellenar estos items?",
+                                   parent=self.ventana):
+            return
+        
+        self.ventana.destroy()
+        from ..mobile_output_scanner import MobileOutputScannerWindow
+        MobileOutputScannerWindow(self.master_app, mode='SALIDA_MOVIL',
+                                  prefill_items=faltantes_relleno,
+                                  initial_movil=movil,
+                                  initial_package=paquete_objetivo if paquete_objetivo != 'TODOS' else 'PAQUETE A')
+
 
 
 class ConciliacionPaquetesWindow:

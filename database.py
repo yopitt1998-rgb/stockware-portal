@@ -691,17 +691,30 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
         
         stock_asignado = 0
         if movil_afectado and tipo_movimiento in ('SALIDA_MOVIL', 'RETORNO_MOVIL', 'CONSUMO_MOVIL'):
-             # Si no se especifica paquete, asumimos 'NINGUNO' para la consulta
-             pq_query = paquete_asignado if paquete_asignado else 'NINGUNO'
-             
-             if DB_TYPE == 'MYSQL':
-                 sql_asig = "SELECT cantidad FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s"
+             # Para CONSUMO_MOVIL desde el portal web: buscar stock TOTAL en el móvil
+             # (sin filtrar por paquete), ya que el consumo reduce del total disponible.
+             # Para SALIDA_MOVIL / RETORNO_MOVIL sí importa el paquete específico.
+             if tipo_movimiento == 'CONSUMO_MOVIL':
+                 # Suma total del SKU en el móvil, independiente del paquete
+                 if DB_TYPE == 'MYSQL':
+                     sql_asig = "SELECT COALESCE(SUM(cantidad), 0) FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s"
+                 else:
+                     sql_asig = "SELECT COALESCE(SUM(cantidad), 0) FROM asignacion_moviles WHERE sku_producto = ? AND movil = ?"
+                 cursor.execute(sql_asig, (sku, movil_afectado))
+                 asignacion_actual = cursor.fetchone()
+                 stock_asignado = float(asignacion_actual[0]) if asignacion_actual and asignacion_actual[0] is not None else 0
              else:
-                 sql_asig = "SELECT cantidad FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ?"
-             cursor.execute(sql_asig, (sku, movil_afectado, pq_query))
-             
-             asignacion_actual = cursor.fetchone()
-             stock_asignado = float(asignacion_actual[0]) if asignacion_actual and asignacion_actual[0] is not None else 0
+                 # Si no se especifica paquete, asumimos 'NINGUNO' para la consulta
+                 pq_query = paquete_asignado if paquete_asignado else 'NINGUNO'
+                 
+                 if DB_TYPE == 'MYSQL':
+                     sql_asig = "SELECT cantidad FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s"
+                 else:
+                     sql_asig = "SELECT cantidad FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ?"
+                 cursor.execute(sql_asig, (sku, movil_afectado, pq_query))
+                 
+                 asignacion_actual = cursor.fetchone()
+                 stock_asignado = float(asignacion_actual[0]) if asignacion_actual and asignacion_actual[0] is not None else 0
         
         cantidad_bodega_cambio = 0
         cantidad_asignacion_cambio = 0
@@ -764,45 +777,80 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
 
         # LOGICA CORREGIDA Y ROBUSTA PARA ASIGNACION MOVILES (POR PAQUETE)
         if movil_afectado and cantidad_asignacion_cambio != 0:
-             pq_actual = paquete_para_stock if paquete_para_stock else 'NINGUNO'
              
-             # 1. Obtener suma total actual para ese paquete específico
-             if DB_TYPE == 'MYSQL':
-                 sql_sel = "SELECT SUM(cantidad) FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s"
-             else:
-                 sql_sel = "SELECT SUM(cantidad) FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ?"
-             
-             cursor.execute(sql_sel, (sku, movil_afectado, pq_actual))
-             resultado_asignacion = cursor.fetchone()
-             
-             valor_actual = 0.0
-             if resultado_asignacion and resultado_asignacion[0] is not None:
-                 valor_actual = float(resultado_asignacion[0])
-                  
-             nueva_cantidad_asignacion = valor_actual + cantidad_asignacion_cambio
-             
-             # 2. UPSERT: Atomic update or Delete+Insert
-             if DB_TYPE == 'MYSQL':
-                 # Usar ON DUPLICATE KEY UPDATE para mayor robustez en MySQL
-                 sql_upsert = """
-                    INSERT INTO asignacion_moviles (sku_producto, movil, paquete, cantidad) 
-                    VALUES (%s, %s, %s, %s)
-                    ON DUPLICATE KEY UPDATE cantidad = VALUES(cantidad)
-                 """
-                 # Nota: Si nueva_cantidad es <= 0, podríamos borrar, pero por integridad es mejor dejarlo en 0 o borrarlo.
-                 if nueva_cantidad_asignacion > 0:
-                     cursor.execute(sql_upsert, (sku, movil_afectado, paquete_para_stock, nueva_cantidad_asignacion))
+             # Para CONSUMO_MOVIL: deducir del paquete que realmente tiene stock
+             # (no del paquete etiqueta que envía el portal, que puede ser distinto)
+             if tipo_movimiento == 'CONSUMO_MOVIL' and cantidad_asignacion_cambio < 0:
+                 # Obtener todas las filas con stock para este SKU en este móvil
+                 if DB_TYPE == 'MYSQL':
+                     sql_rows = "SELECT COALESCE(paquete, 'NINGUNO'), cantidad FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND cantidad > 0 ORDER BY cantidad DESC"
                  else:
-                     sql_del = "DELETE FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s"
-                     cursor.execute(sql_del, (sku, movil_afectado, pq_actual))
-             else:
-                 # Standard SQLite approach: Delete then Insert
-                 sql_del = "DELETE FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ?"
-                 cursor.execute(sql_del, (sku, movil_afectado, pq_actual))
+                     sql_rows = "SELECT COALESCE(paquete, 'NINGUNO'), cantidad FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND cantidad > 0 ORDER BY cantidad DESC"
+                 cursor.execute(sql_rows, (sku, movil_afectado))
+                 filas_con_stock = cursor.fetchall()
                  
-                 if nueva_cantidad_asignacion > 0:
-                     sql_ins = "INSERT INTO asignacion_moviles (sku_producto, movil, paquete, cantidad) VALUES (?, ?, ?, ?)"
-                     cursor.execute(sql_ins, (sku, movil_afectado, paquete_para_stock, nueva_cantidad_asignacion))
+                 pendiente_descontar = abs(cantidad_asignacion_cambio)
+                 for fila_pq, fila_qty in filas_con_stock:
+                     if pendiente_descontar <= 0:
+                         break
+                     descontar_de_fila = min(fila_qty, pendiente_descontar)
+                     nueva_qty_fila = fila_qty - descontar_de_fila
+                     pendiente_descontar -= descontar_de_fila
+                     
+                     if DB_TYPE == 'MYSQL':
+                         if nueva_qty_fila > 0:
+                             cursor.execute("UPDATE asignacion_moviles SET cantidad = %s WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s",
+                                            (nueva_qty_fila, sku, movil_afectado, fila_pq))
+                         else:
+                             cursor.execute("DELETE FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s",
+                                            (sku, movil_afectado, fila_pq))
+                     else:
+                         if nueva_qty_fila > 0:
+                             cursor.execute("UPDATE asignacion_moviles SET cantidad = ? WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ?",
+                                            (nueva_qty_fila, sku, movil_afectado, fila_pq))
+                         else:
+                             cursor.execute("DELETE FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ?",
+                                            (sku, movil_afectado, fila_pq))
+             else:
+                 pq_actual = paquete_para_stock if paquete_para_stock else 'NINGUNO'
+                 
+                 # 1. Obtener suma total actual para ese paquete específico
+                 if DB_TYPE == 'MYSQL':
+                     sql_sel = "SELECT SUM(cantidad) FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s"
+                 else:
+                     sql_sel = "SELECT SUM(cantidad) FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ?"
+                 
+                 cursor.execute(sql_sel, (sku, movil_afectado, pq_actual))
+                 resultado_asignacion = cursor.fetchone()
+                 
+                 valor_actual = 0.0
+                 if resultado_asignacion and resultado_asignacion[0] is not None:
+                     valor_actual = float(resultado_asignacion[0])
+                      
+                 nueva_cantidad_asignacion = valor_actual + cantidad_asignacion_cambio
+                 
+                 # 2. UPSERT: Atomic update or Delete+Insert
+                 if DB_TYPE == 'MYSQL':
+                     # Usar ON DUPLICATE KEY UPDATE para mayor robustez en MySQL
+                     sql_upsert = """
+                        INSERT INTO asignacion_moviles (sku_producto, movil, paquete, cantidad) 
+                        VALUES (%s, %s, %s, %s)
+                        ON DUPLICATE KEY UPDATE cantidad = VALUES(cantidad)
+                     """
+                     # Nota: Usamos pq_actual para evitar problemas con NULLs en índices UNIQUE de MySQL
+                     if nueva_cantidad_asignacion > 0:
+                         cursor.execute(sql_upsert, (sku, movil_afectado, pq_actual, nueva_cantidad_asignacion))
+                     else:
+                         sql_del = "DELETE FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s"
+                         cursor.execute(sql_del, (sku, movil_afectado, pq_actual))
+                 else:
+                     # Standard SQLite approach: Delete then Insert
+                     sql_del = "DELETE FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ?"
+                     cursor.execute(sql_del, (sku, movil_afectado, pq_actual))
+                     
+                     if nueva_cantidad_asignacion > 0:
+                         sql_ins = "INSERT INTO asignacion_moviles (sku_producto, movil, paquete, cantidad) VALUES (?, ?, ?, ?)"
+                         cursor.execute(sql_ins, (sku, movil_afectado, pq_actual, nueva_cantidad_asignacion))
 
         sql_mov = "INSERT INTO movimientos (sku_producto, tipo_movimiento, cantidad_afectada, movil_afectado, fecha_evento, paquete_asignado, observaciones, documento_referencia) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         run_query(cursor, sql_mov, (sku, tipo_movimiento, cantidad_afectada, movil_afectado, fecha_evento, paquete_asignado, observaciones, documento_referencia))

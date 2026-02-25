@@ -241,11 +241,12 @@ def debug_asignaciones():
 @app.route('/api/inventario/<movil>')
 def get_inventario_movil(movil):
     """
-    API para obtener inventario del técnico con seriales disponibles
-    Retorna JSON con inventario actual del móvil
+    API para obtener inventario del técnico con seriales disponibles.
+    Retorna JSON con inventario actual del móvil.
+    Los MATERIALES_COMPARTIDOS aparecen en AMBOS paquetes (A y B).
     """
     from database import get_db_connection, run_query
-    from config import PRODUCTOS_CON_CODIGO_BARRA
+    from config import PRODUCTOS_CON_CODIGO_BARRA, MATERIALES_COMPARTIDOS
     
     try:
         # Detectar DB correcta (Chiriquí o Santiago)
@@ -257,49 +258,82 @@ def get_inventario_movil(movil):
         conn = get_db_connection(target_db=target_db)
         cursor = conn.cursor()
         
-        # Obtener asignación del móvil - INCLUYENDO PAQUETE
-        # Usamos subconsulta para obtener nombre sin depender de ubicacion=BODEGA
+        # Obtener TODAS las asignaciones del móvil (agrupadas para evitar duplicados por NULLs)
         sql_asignacion = """
             SELECT (SELECT p2.nombre FROM productos p2 WHERE p2.sku = a.sku_producto LIMIT 1) as nombre,
-                   a.sku_producto, a.cantidad, COALESCE(a.paquete, 'NINGUNO') as paquete
+                   a.sku_producto, SUM(a.cantidad) as total, COALESCE(a.paquete, 'NINGUNO') as paquete
             FROM asignacion_moviles a
             WHERE a.movil = ?
             AND a.cantidad > 0
+            GROUP BY a.sku_producto, COALESCE(a.paquete, 'NINGUNO')
         """
         run_query(cursor, sql_asignacion, (movil,))
-        asignacion = cursor.fetchall()
+        asignacion_rows = cursor.fetchall()
         
+        # Agrupar por SKU para poder calcular totales de compartidos
+        # Estructura: {sku: {paquete: cantidad, ...}}
+        por_sku = {}
+        nombres_sku = {}
+        for nombre, sku, cantidad, paquete in asignacion_rows:
+            nombres_sku[sku] = nombre
+            if sku not in por_sku:
+                por_sku[sku] = {}
+            por_sku[sku][paquete] = por_sku[sku].get(paquete, 0) + cantidad
+
+        # Construir inventario final
+        # REGLA: paquete A → solo A, paquete B → solo B, COMPARTIDO o PERSONALIZADO → en ambos A y B
         inventario = []
-        for nombre, sku, cantidad, paquete in asignacion:
-            if sku in PRODUCTOS_CON_CODIGO_BARRA:
-                # Obtener seriales disponibles (ubicacion = movil)
-                sql_series = """
-                    SELECT serial_number
-                    FROM series_registradas
-                    WHERE sku = ?
-                    AND ubicacion = ?
-                    ORDER BY serial_number
-                """
-                run_query(cursor, sql_series, (sku, movil))
-                seriales = [row[0] for row in cursor.fetchall()]
+        paquetes_principales = ['PAQUETE A', 'PAQUETE B']
+        
+        skus_procesados = set()
+        
+        for nombre, sku, cantidad, paquete in asignacion_rows:
+            nombre_final = nombres_sku.get(sku, nombre or sku)
+            es_compartido = sku in MATERIALES_COMPARTIDOS
+            es_personalizado = (paquete == 'PERSONALIZADO')
+            
+            if es_compartido or es_personalizado:
+                # Compartidos y PERSONALIZADO: mostrar total en AMBOS paquetes principales, solo una vez por SKU
+                if sku in skus_procesados:
+                    continue
+                skus_procesados.add(sku)
                 
-                inventario.append({
-                    "sku": sku,
-                    "nombre": nombre,
-                    "paquete": paquete,
-                    "seriales": seriales,
-                    "cantidad_total": len(seriales),
-                    "tiene_series": True
-                })
+                # Calcular total general para este SKU
+                total_combinado = sum(por_sku[sku].values())
+                
+                if sku in PRODUCTOS_CON_CODIGO_BARRA:
+                    sql_series = "SELECT serial_number FROM series_registradas WHERE sku = ? AND ubicacion = ? ORDER BY serial_number"
+                    run_query(cursor, sql_series, (sku, movil))
+                    seriales = [row[0] for row in cursor.fetchall()]
+                    for pq in paquetes_principales:
+                        inventario.append({
+                            "sku": sku, "nombre": nombre_final, "paquete": pq,
+                            "seriales": seriales, "cantidad_total": len(seriales),
+                            "tiene_series": True, "compartido": True
+                        })
+                else:
+                    for pq in paquetes_principales:
+                        inventario.append({
+                            "sku": sku, "nombre": nombre_final, "paquete": pq,
+                            "cantidad_total": total_combinado,
+                            "tiene_series": False, "compartido": True
+                        })
             else:
-                # Productos sin serie
-                inventario.append({
-                    "sku": sku,
-                    "nombre": nombre,
-                    "paquete": paquete,
-                    "cantidad_total": cantidad,
-                    "tiene_series": False
-                })
+                # PAQUETE A o B: aparece SOLO en su paquete asignado
+                if sku in PRODUCTOS_CON_CODIGO_BARRA:
+                    sql_series = "SELECT serial_number FROM series_registradas WHERE sku = ? AND ubicacion = ? ORDER BY serial_number"
+                    run_query(cursor, sql_series, (sku, movil))
+                    seriales = [row[0] for row in cursor.fetchall()]
+                    inventario.append({
+                        "sku": sku, "nombre": nombre_final, "paquete": paquete,
+                        "seriales": seriales, "cantidad_total": len(seriales),
+                        "tiene_series": True, "compartido": False
+                    })
+                else:
+                    inventario.append({
+                        "sku": sku, "nombre": nombre_final, "paquete": paquete,
+                        "cantidad_total": cantidad, "tiene_series": False, "compartido": False
+                    })
         
         conn.close()
         return jsonify({
@@ -314,6 +348,7 @@ def get_inventario_movil(movil):
             "movil": movil,
             "inventario": []
         }), 500
+
 
 @app.route('/debug')
 def debug():
