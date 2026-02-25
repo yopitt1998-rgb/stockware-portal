@@ -540,6 +540,7 @@
                         hiddenInput.name = `qty_${item.sku}`;
                         hiddenInput.id = `input_${item.sku}`;
                         hiddenInput.className = 'sku-input';
+                        hiddenInput.dataset.sku = item.sku; // ADICIONADO: Para que se reconozca al enviar
                         hiddenInput.value = '0';
                         inputContainer.appendChild(hiddenInput);
                     } else {
@@ -637,14 +638,14 @@
             // Guardar selección con llave simple por SKU
             window.SERIALES_SELECCIONADOS[currentModalSKU] = seleccionados;
 
-            // Actualizar input oculto con cantidad
-            const input = document.getElementById(`input_${currentModalSKU} `);
+            // Actualizar input oculto con cantidad (CORREGIDO: quitado espacio extra)
+            const input = document.getElementById(`input_${currentModalSKU}`);
             if (input) {
                 input.value = seleccionados.length;
             }
 
-            // Actualizar badge y botón en la fila
-            const row = document.getElementById(`row_${currentModalSKU} `);
+            // Actualizar badge y botón en la fila (CORREGIDO: quitado espacio extra)
+            const row = document.getElementById(`row_${currentModalSKU}`);
             const badge = row?.querySelector('.badge-disponible');
             if (badge && currentModalSeriales) {
                 const restantes = currentModalSeriales.length - seleccionados.length;
