@@ -44,17 +44,17 @@ ALL_MOVILES = MOVILES_DISPONIBLES + MOVILES_SANTIAGO
 # DETALLES DE MÓVILES (Fallback para Cloud cuando no hay tabla 'moviles')
 # Formato: "Nombre Movil": {"conductor": "Nombre", "ayudante": "Nombre", "patente": "Patente"}
 MOVILES_DETAILS_FALLBACK = {
-    "Movil 200": {"conductor": "", "ayudante": "", "patente": ""},
-    "Movil 201": {"conductor": "", "ayudante": "", "patente": ""},
-    "Movil 202": {"conductor": "", "ayudante": "", "patente": ""},
-    "Movil 203": {"conductor": "", "ayudante": "", "patente": ""},
-    "Movil 204": {"conductor": "", "ayudante": "", "patente": ""},
-    "Movil 205": {"conductor": "", "ayudante": "", "patente": ""},
-    "Movil 206": {"conductor": "", "ayudante": "", "patente": ""},
-    "Movil 207": {"conductor": "", "ayudante": "", "patente": ""},
-    "Movil 208": {"conductor": "", "ayudante": "", "patente": ""},
-    "Movil 209": {"conductor": "", "ayudante": "", "patente": ""},
-    "Movil 210": {"conductor": "", "ayudante": "", "patente": ""}
+    "Movil 200": {"conductor": "Conductor 200", "ayudante": "Ayudante 200", "patente": "P-200"},
+    "Movil 201": {"conductor": "Conductor 201", "ayudante": "Ayudante 201", "patente": "P-201"},
+    "Movil 202": {"conductor": "Conductor 202", "ayudante": "Ayudante 202", "patente": "P-202"},
+    "Movil 203": {"conductor": "Conductor 203", "ayudante": "Ayudante 203", "patente": "P-203"},
+    "Movil 204": {"conductor": "Conductor 204", "ayudante": "Ayudante 204", "patente": "P-204"},
+    "Movil 205": {"conductor": "Conductor 205", "ayudante": "Ayudante 205", "patente": "P-205"},
+    "Movil 206": {"conductor": "Conductor 206", "ayudante": "Ayudante 206", "patente": "P-206"},
+    "Movil 207": {"conductor": "Conductor 207", "ayudante": "Ayudante 207", "patente": "P-207"},
+    "Movil 208": {"conductor": "Conductor 208", "ayudante": "Ayudante 208", "patente": "P-208"},
+    "Movil 209": {"conductor": "Conductor 209", "ayudante": "Ayudante 209", "patente": "P-209"},
+    "Movil 210": {"conductor": "Conductor 210", "ayudante": "Ayudante 210", "patente": "P-210"}
 }
 UBICACION_DESCARTE = "DESCARTE"
 TIPO_MOVIMIENTO_DESCARTE = "DESCARTE" 
