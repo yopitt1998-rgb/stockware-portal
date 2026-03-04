@@ -145,6 +145,7 @@ def inicializar_bd():
                 marca VARCHAR(100) DEFAULT 'N/A',
                 fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
                 secuencia_vista VARCHAR(20),
+                sucursal VARCHAR(50) DEFAULT 'CHIRIQUI',
                 UNIQUE (sku, ubicacion, sucursal)
             )
         """
@@ -159,21 +160,24 @@ def inicializar_bd():
         
         # MIGRACIÓN: Asegurar que filas existentes tengan sucursal
         try:
-            cursor.execute("UPDATE productos SET sucursal = 'CHIRIQUI' WHERE sucursal IS NULL")
+            run_query(cursor, "UPDATE productos SET sucursal = 'CHIRIQUI' WHERE sucursal IS NULL")
         except: pass
-        add_column_if_missing('productos', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'")
 
         # MIGRACIÓN: Corregir UNIQUE KEY en productos (MySQL)
         if DB_TYPE == 'MYSQL':
             try:
-                cursor.execute("SHOW INDEX FROM productos WHERE Key_name = 'sku'")
+                # Comprobar si el índice existe bajo el nombre 'sku' o 'sku_ubic_suc'
+                cursor.execute("SHOW INDEX FROM productos WHERE Key_name IN ('sku', 'sku_ubic_suc')")
                 idx_data = cursor.fetchall()
-                if idx_data and len(idx_data) < 3: # El antiguo era solo (sku, ubicacion)
+                # Si es el antiguo (2 columnas) o no tiene el formato correcto
+                if idx_data and len(idx_data) < 3: 
                      logger.info("🔧 Migrando índice de productos para incluir sucursal...")
-                     cursor.execute("ALTER TABLE productos DROP INDEX sku")
+                     try: cursor.execute("ALTER TABLE productos DROP INDEX sku")
+                     except: pass
+                     try: cursor.execute("ALTER TABLE productos DROP INDEX sku_ubic_suc")
+                     except: pass
                      cursor.execute("ALTER TABLE productos ADD UNIQUE KEY sku_ubic_suc (sku, ubicacion, sucursal)")
             except: pass
-        add_column_if_missing('productos', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'") # Aislamiento
         
         # 2. TABLA ASIGNACION_MOVILES
         cursor.execute(f"""
@@ -326,23 +330,24 @@ def inicializar_bd():
                 else:
                     logger.warning(f"⚠️ No se pudo crear índice {name} en {table}: {e}")
 
-        # 10. TABLA SERIES REGISTRADAS (NUEVO)
         q_series = f"""
             CREATE TABLE IF NOT EXISTS series_registradas (
                 id {INT_TYPE} PRIMARY KEY {AUTOINC},
                 sku VARCHAR(50) NOT NULL,
-                serial_number VARCHAR(100) NOT NULL UNIQUE,
+                serial_number VARCHAR(100) NOT NULL,
+                mac_number VARCHAR(100),
                 fecha_ingreso DATETIME DEFAULT CURRENT_TIMESTAMP,
                 estado VARCHAR(20) DEFAULT 'DISPONIBLE', -- DISPONIBLE, INSTALADO, BAJA
                 ubicacion VARCHAR(100) DEFAULT 'BODEGA',
-                mac_number VARCHAR(100) UNIQUE -- NUEVO: Para separar MAC del Serial
+                paquete VARCHAR(50),
+                sucursal VARCHAR(50) DEFAULT 'CHIRIQUI',
+                UNIQUE (serial_number, mac_number, sucursal)
             )
         """
         cursor.execute(q_series)
         add_column_if_missing('series_registradas', 'paquete', 'VARCHAR(50)')
-        add_column_if_missing('series_registradas', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'") # Aislamiento
-        run_query(cursor, "UPDATE series_registradas SET sucursal = 'CHIRIQUI' WHERE sucursal IS NULL")
         add_column_if_missing('series_registradas', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'")
+        run_query(cursor, "UPDATE series_registradas SET sucursal = 'CHIRIQUI' WHERE sucursal IS NULL")
 
         # MIGRACIÓN: Corregir UNIQUE KEY en series_registradas (MySQL)
         if DB_TYPE == 'MYSQL':

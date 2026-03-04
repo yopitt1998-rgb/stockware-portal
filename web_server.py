@@ -8,7 +8,8 @@ from database import (
     obtener_nombres_moviles, 
     obtener_todos_los_skus_para_movimiento,
     obtener_detalles_moviles,
-    registrar_consumo_directo
+    registrar_consumo_directo,
+    inicializar_bd
 )
 import threading
 import json
@@ -52,6 +53,14 @@ if getattr(sys, 'frozen', False):
 else:
     # Estamos corriendo como script normal
     app = Flask(__name__)
+
+# INICIALIZACIÓN DE BASE DE DATOS (MIGRACIONES)
+try:
+    print("🔧 Verificando esquema de base de datos...")
+    inicializar_bd()
+    print("✅ Base de Datos inicializada correctamente.")
+except Exception as e:
+    print(f"⚠️ Error inicializando BD: {e}")
 
 @app.route('/')
 def index():
