@@ -203,6 +203,11 @@ def inicializar_bd():
         """)
         add_column_if_missing('asignacion_moviles', 'paquete', 'VARCHAR(50)')
         add_column_if_missing('asignacion_moviles', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'")
+        
+        # MIGRACIÓN: Asegurar que filas existentes tengan sucursal
+        try:
+            run_query(cursor, "UPDATE asignacion_moviles SET sucursal = 'CHIRIQUI' WHERE sucursal IS NULL")
+        except: pass
 
         # --- MIGRACIÓN: Corregir Índice Único en asignacion_moviles (MySQL) ---
         if DB_TYPE == 'MYSQL':
@@ -299,6 +304,8 @@ def inicializar_bd():
         """)
         add_column_if_missing('moviles', 'ayudante', 'VARCHAR(255)')
         
+        # 9. TABLA CONSUMOS PENDIENTES (Portal Móvil)
+        cursor.execute(f"""
             CREATE TABLE IF NOT EXISTS consumos_pendientes (
                 id {INT_TYPE} PRIMARY KEY {AUTOINC},
                 movil VARCHAR(100) NOT NULL,
