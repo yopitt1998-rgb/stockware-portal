@@ -149,7 +149,17 @@ def inicializar_bd():
                 UNIQUE (sku, ubicacion, sucursal)
             )
         """
-        cursor.execute(q_prod)
+        try:
+            cursor.execute(q_prod)
+        except Exception as e:
+            # Si falla (posiblemente por UNIQUE con columna inexistente), intentamos crearla básica
+            logger.info("🔧 Re-intentando creación de tabla productos...")
+            try:
+                cursor.execute(f"CREATE TABLE IF NOT EXISTS productos (id {INT_TYPE} {AUTOINC} PRIMARY KEY, sku VARCHAR(50) NOT NULL, ubicacion VARCHAR(50) NOT NULL)")
+            except: pass
+        
+        # Primero añadimos la columna para que el resto sea posible
+        add_column_if_missing('productos', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'")
         add_column_if_missing('productos', 'minimo_stock', 'INTEGER', 10)
         add_column_if_missing('productos', 'categoria', 'VARCHAR(100)', "'General'")
         add_column_if_missing('productos', 'marca', 'VARCHAR(100)', "'N/A'")
@@ -187,10 +197,12 @@ def inicializar_bd():
                 movil VARCHAR(100) NOT NULL,
                 paquete VARCHAR(50),
                 cantidad INTEGER NOT NULL DEFAULT 0,
-                UNIQUE (sku_producto, movil, paquete)
+                sucursal VARCHAR(50) DEFAULT 'CHIRIQUI',
+                UNIQUE (sku_producto, movil, paquete, sucursal)
             )
         """)
         add_column_if_missing('asignacion_moviles', 'paquete', 'VARCHAR(50)')
+        add_column_if_missing('asignacion_moviles', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'")
 
         # --- MIGRACIÓN: Corregir Índice Único en asignacion_moviles (MySQL) ---
         if DB_TYPE == 'MYSQL':
@@ -206,7 +218,6 @@ def inicializar_bd():
             except Exception as e:
                 logger.warning(f"⚠️ Error en migración de índice asignacion_moviles: {e}")
         
-        # 3. TABLA MOVIMIENTOS
         cursor.execute(f"""
             CREATE TABLE IF NOT EXISTS movimientos (
                 id {INT_TYPE} PRIMARY KEY {AUTOINC},
@@ -218,13 +229,14 @@ def inicializar_bd():
                 fecha_evento DATE,
                 paquete_asignado VARCHAR(50),
                 documento_referencia {LONGTEXT},
-                observaciones {LONGTEXT}
+                observaciones {LONGTEXT},
+                sucursal VARCHAR(50) DEFAULT 'CHIRIQUI'
             )
         """)
         add_column_if_missing('movimientos', 'movil_afectado', 'VARCHAR(100)')
         add_column_if_missing('movimientos', 'paquete_asignado', 'VARCHAR(50)')
         add_column_if_missing('movimientos', 'documento_referencia', LONGTEXT)
-        add_column_if_missing('movimientos', 'sucursal', 'VARCHAR(50)') # Nueva: Para aislamiento
+        add_column_if_missing('movimientos', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'") # Nueva: Para aislamiento
         
         # 4. TABLA PRESTAMOS
         cursor.execute(f"""
@@ -287,8 +299,6 @@ def inicializar_bd():
         """)
         add_column_if_missing('moviles', 'ayudante', 'VARCHAR(255)')
         
-        # 9. TABLA CONSUMOS PENDIENTES (Portal Móvil)
-        cursor.execute(f"""
             CREATE TABLE IF NOT EXISTS consumos_pendientes (
                 id {INT_TYPE} PRIMARY KEY {AUTOINC},
                 movil VARCHAR(100) NOT NULL,
@@ -301,13 +311,15 @@ def inicializar_bd():
                 num_contrato VARCHAR(255),
                 fecha DATE,
                 estado VARCHAR(20) DEFAULT 'PENDIENTE',
-                fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP
+                fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+                sucursal VARCHAR(50) DEFAULT 'CHIRIQUI'
             )
         """)
         add_column_if_missing('consumos_pendientes', 'colilla', 'VARCHAR(255)')
         add_column_if_missing('consumos_pendientes', 'num_contrato', 'VARCHAR(255)')
         add_column_if_missing('consumos_pendientes', 'ayudante_nombre', 'VARCHAR(255)')
         add_column_if_missing('consumos_pendientes', 'seriales_usados', LONGTEXT)
+        add_column_if_missing('consumos_pendientes', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'")
 
         # Helper para añadir índices en MySQL (Defensivo)
         def add_mysql_index(name, table, cols):
@@ -330,21 +342,15 @@ def inicializar_bd():
                 else:
                     logger.warning(f"⚠️ No se pudo crear índice {name} en {table}: {e}")
 
-        q_series = f"""
-            CREATE TABLE IF NOT EXISTS series_registradas (
-                id {INT_TYPE} PRIMARY KEY {AUTOINC},
-                sku VARCHAR(50) NOT NULL,
-                serial_number VARCHAR(100) NOT NULL,
-                mac_number VARCHAR(100),
-                fecha_ingreso DATETIME DEFAULT CURRENT_TIMESTAMP,
-                estado VARCHAR(20) DEFAULT 'DISPONIBLE', -- DISPONIBLE, INSTALADO, BAJA
-                ubicacion VARCHAR(100) DEFAULT 'BODEGA',
-                paquete VARCHAR(50),
-                sucursal VARCHAR(50) DEFAULT 'CHIRIQUI',
-                UNIQUE (serial_number, mac_number, sucursal)
-            )
-        """
-        cursor.execute(q_series)
+        try:
+            cursor.execute(q_series)
+        except Exception as e:
+            logger.info("🔧 Re-intentando creación de tabla series_registradas...")
+            try:
+                cursor.execute(f"CREATE TABLE IF NOT EXISTS series_registradas (id {INT_TYPE} PRIMARY KEY {AUTOINC}, sku VARCHAR(50) NOT NULL, serial_number VARCHAR(100) NOT NULL)")
+            except: pass
+
+        add_column_if_missing('series_registradas', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'")
         add_column_if_missing('series_registradas', 'paquete', 'VARCHAR(50)')
         add_column_if_missing('series_registradas', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'")
         run_query(cursor, "UPDATE series_registradas SET sucursal = 'CHIRIQUI' WHERE sucursal IS NULL")

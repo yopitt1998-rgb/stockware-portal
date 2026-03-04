@@ -558,13 +558,13 @@ def registrar_bulk():
             
             # 3. Actualizar ubicación de series a CONSUMIDO (Redundante si registrar_movimiento lo hace, pero seguro)
             if seriales:
-                print(f"[WEB] Actualizando {len(seriales)} series a CONSUMIDO para {sku}")
+                print(f"[WEB] Actualizando {len(seriales)} series a CONSUMIDO para {sku} en {sucursal_ctx}")
                 for serial in seriales:
                     run_query(cursor, """
                         UPDATE series_registradas
                         SET ubicacion = 'CONSUMIDO'
-                        WHERE serial_number = ?
-                    """, (serial,))
+                        WHERE serial_number = ? AND sucursal = ?
+                    """, (serial, sucursal_ctx))
             
             exitos += 1
         
