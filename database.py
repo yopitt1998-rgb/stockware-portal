@@ -1910,31 +1910,36 @@ def obtener_stock_actual_y_moviles():
         conn = get_db_connection()
         cursor = conn.cursor()
         
+        # SUCURSAL CONTEXTO
+        import os
+        sucursal = 'SANTIAGO' if os.environ.get('SANTIAGO_DIRECT_MODE') == '1' else 'CHIRIQUI'
+
         # OPTIMIZADO: Consolidar 5 queries en 1 sola usando CTEs para mejor rendimiento
         if DB_TYPE == 'MYSQL':
-            sql_consolidada = """
+            sql_consolidada = f"""
                 WITH stock_bodega AS (
                     SELECT sku, SUM(cantidad) as cantidad
                     FROM productos 
-                    WHERE ubicacion = 'BODEGA'
+                    WHERE ubicacion = 'BODEGA' AND sucursal = '{sucursal}'
                     GROUP BY sku
                 ),
                 stock_moviles AS (
                     SELECT sku_producto, SUM(cantidad) as cantidad
-                    FROM asignacion_moviles 
+                    FROM asignacion_moviles am
+                    JOIN (SELECT sku FROM productos WHERE sucursal = '{sucursal}' GROUP BY sku) p ON am.sku_producto = p.sku
                     WHERE cantidad > 0
                     GROUP BY sku_producto
                 ),
                 consumo_total AS (
                     SELECT sku_producto, SUM(cantidad_afectada) as cantidad
                     FROM movimientos 
-                    WHERE tipo_movimiento IN ({})
+                    WHERE tipo_movimiento IN ({{}}) AND sucursal = '{sucursal}'
                     GROUP BY sku_producto
                 ),
                 abasto_total AS (
                     SELECT sku_producto, SUM(cantidad_afectada) as cantidad
                     FROM movimientos 
-                    WHERE tipo_movimiento IN ({})
+                    WHERE tipo_movimiento IN ({{}}) AND sucursal = '{sucursal}'
                     GROUP BY sku_producto
                 )
                 SELECT 
@@ -1950,7 +1955,7 @@ def obtener_stock_actual_y_moviles():
                 LEFT JOIN stock_moviles sm ON p.sku = sm.sku_producto
                 LEFT JOIN consumo_total ct ON p.sku = ct.sku_producto
                 LEFT JOIN abasto_total at ON p.sku = at.sku_producto
-                WHERE p.ubicacion = 'BODEGA'
+                WHERE p.ubicacion = 'BODEGA' AND p.sucursal = '{sucursal}'
                 ORDER BY p.secuencia_vista ASC
             """.format(
                 ','.join(['%s' for _ in TIPOS_CONSUMO]),
@@ -2025,33 +2030,32 @@ def obtener_estadisticas_reales():
         is_santiago = os.environ.get('SANTIAGO_DIRECT_MODE') == '1'
         sucursal_target = 'SANTIAGO' if is_santiago else 'CHIRIQUI'
         
-        # 1. Productos en Bodega (contar productos únicos en BODEGA)
-        # Nota: Asumimos que los productos en BODEGA se comparten o se filtran por sucursal si se añade la columna
+        # 1. Productos en Bodega (contar productos únicos en BODEGA de esta sucursal)
         run_query(cursor, """
             SELECT COUNT(DISTINCT sku) 
             FROM productos 
-            WHERE ubicacion = 'BODEGA' AND cantidad > 0
-        """)
+            WHERE ubicacion = 'BODEGA' AND cantidad > 0 AND sucursal = ?
+        """, (sucursal_target,))
         productos_bodega = cursor.fetchone()[0]
         
         # 2. Móviles Activos (contar móviles con productos asignados de esta sucursal)
         if is_santiago:
-            # En Santiago Directo, no hay asignación de móviles tradicional
             moviles_activos = 0
         else:
             run_query(cursor, """
                 SELECT COUNT(DISTINCT movil) 
-                FROM asignacion_moviles 
+                FROM asignacion_moviles am
+                JOIN (SELECT sku FROM productos WHERE sucursal = ? GROUP BY sku) p ON am.sku_producto = p.sku
                 WHERE cantidad > 0
-            """)
+            """, (sucursal_target,))
             moviles_activos = cursor.fetchone()[0]
         
-        # 3. Stock Total (suma de todo el stock en BODEGA)
+        # 3. Stock Total (suma de todo el stock en BODEGA de esta sucursal)
         run_query(cursor, """
             SELECT SUM(cantidad) 
             FROM productos 
-            WHERE ubicacion = 'BODEGA'
-        """)
+            WHERE ubicacion = 'BODEGA' AND sucursal = ?
+        """, (sucursal_target,))
         stock_total_result = cursor.fetchone()[0]
         stock_total = stock_total_result if stock_total_result else 0
         
@@ -2063,12 +2067,12 @@ def obtener_estadisticas_reales():
             run_query(cursor, "SELECT COUNT(*) FROM prestamos_activos WHERE estado = 'ACTIVO'")
             prestamos_activos = cursor.fetchone()[0]
         
-        # 5. Productos con Bajo Stock
+        # 5. Productos con Bajo Stock (en esta sucursal)
         run_query(cursor, """
             SELECT COUNT(*) 
             FROM productos 
-            WHERE ubicacion = 'BODEGA' AND cantidad < minimo_stock AND cantidad > 0
-        """)
+            WHERE ubicacion = 'BODEGA' AND cantidad < minimo_stock AND cantidad > 0 AND sucursal = ?
+        """, (sucursal_target,))
         bajo_stock = cursor.fetchone()[0]
         
         return {
