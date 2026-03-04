@@ -921,22 +921,15 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
                      # Standard SQLite approach: Delete then Insert
                      sql_del = "DELETE FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?"
                      cursor.execute(sql_del, (sku, movil_afectado, pq_actual, sucursal))
-                     
+
                      if nueva_cantidad_asignacion > 0:
                          sql_ins = "INSERT INTO asignacion_moviles (sku_producto, movil, paquete, cantidad, sucursal) VALUES (?, ?, ?, ?, ?)"
                          cursor.execute(sql_ins, (sku, movil_afectado, pq_actual, nueva_cantidad_asignacion, sucursal))
-                     
-                     if nueva_cantidad_asignacion > 0:
-                         sql_ins = "INSERT INTO asignacion_moviles (sku_producto, movil, paquete, cantidad) VALUES (?, ?, ?, ?)"
-                         cursor.execute(sql_ins, (sku, movil_afectado, pq_actual, nueva_cantidad_asignacion))
 
-        # SUCURSAL CONTEXTO
-        import os
-        sucursal = sucursal_context or ('SANTIAGO' if os.environ.get('SANTIAGO_DIRECT_MODE') == '1' else 'CHIRIQUI')
-
+        # REGISTRO DE MOVIMIENTO (BITÁCORA) - FILTRADO POR SUCURSAL
         sql_mov = "INSERT INTO movimientos (sku_producto, tipo_movimiento, cantidad_afectada, movil_afectado, fecha_evento, paquete_asignado, observaciones, documento_referencia, sucursal) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
         run_query(cursor, sql_mov, (sku, tipo_movimiento, cantidad_afectada, movil_afectado, fecha_evento, paquete_asignado, observaciones, documento_referencia, sucursal))
-        
+
         # Verificar si se debe marcar recordatorio como completado
         if tipo_movimiento in ['RETORNO_MOVIL', 'CONSUMO_MOVIL'] and movil_afectado and paquete_asignado in ['PAQUETE A', 'PAQUETE B']:
             tipo_recordatorio = 'RETORNO' if tipo_movimiento == 'RETORNO_MOVIL' else 'CONCILIACION'
@@ -2382,9 +2375,13 @@ def obtener_inventario_movil(movil):
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        sql = "SELECT sku_producto, SUM(cantidad) FROM asignacion_moviles WHERE movil = %s GROUP BY sku_producto" if DB_TYPE == 'MYSQL' else "SELECT sku_producto, SUM(cantidad) FROM asignacion_moviles WHERE movil = ? GROUP BY sku_producto"
+        # DETERMINAR FILTRO DE SUCURSAL
+        from config import MOVILES_SANTIAGO
+        suc_filter = 'SANTIAGO' if movil in MOVILES_SANTIAGO else 'CHIRIQUI'
+
+        sql = "SELECT sku_producto, SUM(cantidad) FROM asignacion_moviles WHERE movil = %s AND sucursal = %s GROUP BY sku_producto" if DB_TYPE == 'MYSQL' else "SELECT sku_producto, SUM(cantidad) FROM asignacion_moviles WHERE movil = ? AND sucursal = ? GROUP BY sku_producto"
             
-        run_query(cursor, sql, (movil,))
+        run_query(cursor, sql, (movil, suc_filter))
         resultados = cursor.fetchall()
         
         return {row[0]: row[1] for row in resultados if row[1] > 0}
