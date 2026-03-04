@@ -145,7 +145,7 @@ def inicializar_bd():
                 marca VARCHAR(100) DEFAULT 'N/A',
                 fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
                 secuencia_vista VARCHAR(20),
-                UNIQUE (sku, ubicacion)
+                UNIQUE (sku, ubicacion, sucursal)
             )
         """
         cursor.execute(q_prod)
@@ -155,6 +155,25 @@ def inicializar_bd():
         add_column_if_missing('productos', 'secuencia_vista', 'VARCHAR(20)')
         add_column_if_missing('productos', 'codigo_barra', 'VARCHAR(100)') # Código de barra individual (equipos)
         add_column_if_missing('productos', 'codigo_barra_maestro', 'VARCHAR(100)') # Código de barra maestro (SKU)
+        add_column_if_missing('productos', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'")
+        
+        # MIGRACIÓN: Asegurar que filas existentes tengan sucursal
+        try:
+            cursor.execute("UPDATE productos SET sucursal = 'CHIRIQUI' WHERE sucursal IS NULL")
+        except: pass
+        add_column_if_missing('productos', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'")
+
+        # MIGRACIÓN: Corregir UNIQUE KEY en productos (MySQL)
+        if DB_TYPE == 'MYSQL':
+            try:
+                cursor.execute("SHOW INDEX FROM productos WHERE Key_name = 'sku'")
+                idx_data = cursor.fetchall()
+                if idx_data and len(idx_data) < 3: # El antiguo era solo (sku, ubicacion)
+                     logger.info("🔧 Migrando índice de productos para incluir sucursal...")
+                     cursor.execute("ALTER TABLE productos DROP INDEX sku")
+                     cursor.execute("ALTER TABLE productos ADD UNIQUE KEY sku_ubic_suc (sku, ubicacion, sucursal)")
+            except: pass
+        add_column_if_missing('productos', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'") # Aislamiento
         
         # 2. TABLA ASIGNACION_MOVILES
         cursor.execute(f"""
@@ -320,8 +339,27 @@ def inicializar_bd():
             )
         """
         cursor.execute(q_series)
-        add_column_if_missing('series_registradas', 'mac_number', 'VARCHAR(100)')
         add_column_if_missing('series_registradas', 'paquete', 'VARCHAR(50)')
+        add_column_if_missing('series_registradas', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'") # Aislamiento
+        run_query(cursor, "UPDATE series_registradas SET sucursal = 'CHIRIQUI' WHERE sucursal IS NULL")
+        add_column_if_missing('series_registradas', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'")
+
+        # MIGRACIÓN: Corregir UNIQUE KEY en series_registradas (MySQL)
+        if DB_TYPE == 'MYSQL':
+            try:
+                # El serial_number antiguo era UNIQUE globalmente. Ahora debe ser por sucursal.
+                cursor.execute("SHOW CREATE TABLE series_registradas")
+                create_sql = cursor.fetchone()[1]
+                if 'UNIQUE KEY `serial_number` (`serial_number`)' in create_sql:
+                     logger.info("🔧 Migrando índice de series_registradas para incluir sucursal...")
+                     cursor.execute("ALTER TABLE series_registradas DROP INDEX serial_number")
+                     cursor.execute("ALTER TABLE series_registradas ADD UNIQUE KEY sn_sucursal (serial_number, sucursal)")
+                
+                if 'UNIQUE KEY `mac_number` (`mac_number`)' in create_sql:
+                     cursor.execute("ALTER TABLE series_registradas DROP INDEX mac_number")
+                     cursor.execute("ALTER TABLE series_registradas ADD UNIQUE KEY mac_sucursal (mac_number, sucursal)")
+            except: pass
+        add_column_if_missing('series_registradas', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'") # Aislamiento
         
         # MySQL Session: Aumentar límite de GROUP_CONCAT para evitar truncamiento de series (61 -> ilimitado)
         if DB_TYPE == 'MYSQL':
@@ -673,9 +711,21 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
              if paquete_asignado == "NINGUNO":
                  paquete_asignado = None
         
+        # SUCURSAL CONTEXTO INTELIGENTE
+        from config import MOVILES_SANTIAGO
+        sucursal = sucursal_context
+        if not sucursal:
+            if movil_afectado and movil_afectado in MOVILES_SANTIAGO:
+                sucursal = 'SANTIAGO'
+            elif movil_afectado:
+                sucursal = 'CHIRIQUI'
+            else:
+                import os
+                sucursal = 'SANTIAGO' if os.environ.get('SANTIAGO_DIRECT_MODE') == '1' else 'CHIRIQUI'
+
         paquete_para_stock = paquete_asignado # El que usaremos para descontar de asignacion_moviles
         
-        run_query(cursor, "SELECT cantidad, nombre, secuencia_vista FROM productos WHERE sku = ? AND ubicacion = 'BODEGA'", (sku,))
+        run_query(cursor, "SELECT cantidad, nombre, secuencia_vista FROM productos WHERE sku = ? AND ubicacion = 'BODEGA' AND sucursal = ?", (sku, sucursal))
         resultado_bodega = cursor.fetchone()
         
         if not resultado_bodega:
@@ -759,19 +809,19 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
             cantidad_bodega_cambio = -cantidad_afectada
 
         if cantidad_bodega_cambio != 0:
-            run_query(cursor, "UPDATE productos SET cantidad = cantidad + ? WHERE sku = ? AND ubicacion = 'BODEGA'", 
-                           (cantidad_bodega_cambio, sku))
+            run_query(cursor, "UPDATE productos SET cantidad = cantidad + ? WHERE sku = ? AND ubicacion = 'BODEGA' AND sucursal = ?", 
+                           (cantidad_bodega_cambio, sku, sucursal))
             
         if cantidad_descarte_cambio > 0:
             run_query(cursor, "SELECT sku FROM productos WHERE sku = ? AND ubicacion = ?", (sku, UBICACION_DESCARTE))
             descarte_existe = cursor.fetchone()
             
             if descarte_existe:
-                 run_query(cursor, "UPDATE productos SET cantidad = cantidad + ? WHERE sku = ? AND ubicacion = ?",
-                                (cantidad_descarte_cambio, sku, UBICACION_DESCARTE))
+                 run_query(cursor, "UPDATE productos SET cantidad = cantidad + ? WHERE sku = ? AND ubicacion = ? AND sucursal = ?",
+                                (cantidad_descarte_cambio, sku, UBICACION_DESCARTE, sucursal))
             else:
-                run_query(cursor, "INSERT INTO productos (nombre, sku, cantidad, ubicacion, secuencia_vista) VALUES (?, ?, ?, ?, ?)",
-                               (nombre_producto, sku, cantidad_descarte_cambio, UBICACION_DESCARTE, f'{secuencia_vista}z'))
+                run_query(cursor, "INSERT INTO productos (nombre, sku, cantidad, ubicacion, secuencia_vista, sucursal) VALUES (?, ?, ?, ?, ?, ?)",
+                               (nombre_producto, sku, cantidad_descarte_cambio, UBICACION_DESCARTE, f'{secuencia_vista}z', sucursal))
 
         # LOGICA CORREGIDA Y ROBUSTA PARA ASIGNACION MOVILES (POR PAQUETE)
         if movil_afectado and cantidad_asignacion_cambio != 0:
@@ -1332,14 +1382,17 @@ def obtener_todos_los_skus_para_movimiento(target_db=None, sucursal_context=None
         run_query(cursor, sql_unique_skus)
         all_products_raw = cursor.fetchall()
         
-        # Obtener stock en BODEGA para mostrar disponibilidad
+        import os
+        sucursal = sucursal_context or ('SANTIAGO' if os.environ.get('SANTIAGO_DIRECT_MODE') == '1' else 'CHIRIQUI')
+
+        # Obtenemos stock en BODEGA para mostrar disponibilidad, filtrado por sucursal
         sql_bodega_stock = """
             SELECT sku, SUM(cantidad) as total
             FROM productos
-            WHERE ubicacion = 'BODEGA'
+            WHERE ubicacion = 'BODEGA' AND sucursal = ?
             GROUP BY sku
         """
-        run_query(cursor, sql_bodega_stock)
+        run_query(cursor, sql_bodega_stock, (sucursal,))
         bodega_stock = {sku: cantidad for sku, cantidad in cursor.fetchall()}
         
         result = []
@@ -2658,21 +2711,24 @@ def registrar_series_bulk(series_data, fecha_ingreso=None, paquete=None):
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # MySQL y SQLite placeholders
-        ph = '%s' if DB_TYPE == 'MYSQL' else '?'
-        
         sql = f"""
-            INSERT INTO series_registradas (sku, serial_number, mac_number, estado, ubicacion, fecha_ingreso, paquete)
-            VALUES ({ph}, {ph}, {ph}, 'DISPONIBLE', {ph}, {ph}, {ph})
+            INSERT INTO series_registradas (sku, serial_number, mac_number, estado, ubicacion, fecha_ingreso, paquete, sucursal)
+            VALUES ({ph}, {ph}, {ph}, 'DISPONIBLE', {ph}, {ph}, {ph}, {ph})
         """
         
-        # Preparar datos (SKU, SERIAL, MAC, UBICACION, FECHA, PAQUETE)
+        # SUCURSAL CONTEXTO (Fallback)
+        import os
+        default_sucursal = 'SANTIAGO' if os.environ.get('SANTIAGO_DIRECT_MODE') == '1' else 'CHIRIQUI'
+
+        # Preparar datos (SKU, SERIAL, MAC, UBICACION, FECHA, PAQUETE, SUCURSAL)
         data_to_insert = []
         for item in series_data:
             mac = item.get('mac') # Puede ser None
+            # Priorizar sucursal del item, luego la global
+            item_sucursal = item.get('sucursal', default_sucursal)
             # Priorizar paquete del item, luego el global
             item_paquete = item.get('paquete', paquete)
-            data_to_insert.append((item['sku'], item['serial'], mac, item['ubicacion'], fecha_ingreso, item_paquete))
+            data_to_insert.append((item['sku'], item['serial'], mac, item['ubicacion'], fecha_ingreso, item_paquete, item_sucursal))
             
         cursor.executemany(sql, data_to_insert)
         conn.commit()
@@ -3251,7 +3307,8 @@ def registrar_abasto_batch(items_abasto, fecha_evento, numero_abasto=None):
                 cantidad_afectada=cantidad,
                 fecha_evento=fecha_evento,
                 documento_referencia=numero_abasto,
-                existing_conn=conn
+                existing_conn=conn,
+                sucursal_context=sucursal
             )
             
             if not exito:
@@ -3273,7 +3330,8 @@ def registrar_abasto_batch(items_abasto, fecha_evento, numero_abasto=None):
                             'sku': sku,
                             'serial': s_val,
                             'mac': m_val,
-                            'ubicacion': 'BODEGA'
+                            'ubicacion': 'BODEGA',
+                            'sucursal': sucursal
                         })
             
             total_unidades += cantidad
@@ -3427,19 +3485,23 @@ def registrar_consumo_directo(sku, cantidad, movil, tecnico, ayudante=None, tick
         
         from datetime import date
         if not fecha_evento: fecha_evento = date.today().isoformat()
-        
-        # 1. Verificar stock en BODEGA
-        run_query(cursor, "SELECT cantidad, nombre FROM productos WHERE sku = ? AND ubicacion = 'BODEGA'", (sku,))
+
+        # SUCURSAL CONTEXTO
+        import os
+        sucursal = sucursal_context or ('SANTIAGO' if os.environ.get('SANTIAGO_DIRECT_MODE') == '1' else 'CHIRIQUI')
+
+        # 1. Verificar stock en BODEGA (AISLADO)
+        run_query(cursor, "SELECT cantidad, nombre FROM productos WHERE sku = ? AND ubicacion = 'BODEGA' AND sucursal = ?", (sku, sucursal))
         res = cursor.fetchone()
         if not res:
-            return False, f"El producto {sku} no existe en Bodega."
+            return False, f"El producto {sku} no existe en Bodega {sucursal}."
         
         stock_actual, nombre_prod = res
         if stock_actual < cantidad:
-            return False, f"Stock insuficiente en Bodega Santiago ({stock_actual} disponibles)."
+            return False, f"Stock insuficiente en Bodega {sucursal} ({stock_actual} disponibles)."
             
         # 2. Restar de Bodega
-        run_query(cursor, "UPDATE productos SET cantidad = cantidad - ? WHERE sku = ? AND ubicacion = 'BODEGA'", (cantidad, sku))
+        run_query(cursor, "UPDATE productos SET cantidad = cantidad - ? WHERE sku = ? AND ubicacion = 'BODEGA' AND sucursal = ?", (cantidad, sku, sucursal))
         
         # 3. Registrar Movimiento
         tipo_mov = tipo_custom if tipo_custom else 'CONSUMO_DIRECTO'
@@ -3477,8 +3539,8 @@ def registrar_consumo_directo(sku, cantidad, movil, tecnico, ayudante=None, tick
                 
             for sn in seriales:
                 # Actualizar tanto por serial como por MAC por seguridad
-                run_query(cursor, "UPDATE series_registradas SET ubicacion = ?, estado = ? WHERE serial_number = ? OR mac_number = ?", 
-                          (new_loc, new_status, sn, sn))
+                run_query(cursor, "UPDATE series_registradas SET ubicacion = ?, estado = ? WHERE (serial_number = ? OR mac_number = ?) AND sucursal = ?", 
+                          (new_loc, new_status, sn, sn, sucursal))
                 
         conn.commit()
         return True, f"Consumo directo de {cantidad} {nombre_prod} registrado exitosamente."
@@ -3487,6 +3549,41 @@ def registrar_consumo_directo(sku, cantidad, movil, tecnico, ayudante=None, tick
         if conn: conn.rollback()
         logger.error(f"Error en registrar_consumo_directo: {e}")
         return False, str(e)
+    finally:
+        if conn: close_connection(conn)
+
+def verificar_seriales_bodega(seriales, sucursal_context='CHIRIQUI', target_db=None):
+    """
+    Verifica si una lista de seriales existe en la BODEGA de la sucursal especificada.
+    Retorna (True, None) si todos existen, o (False, mensaje) con los faltantes.
+    """
+    if not seriales: return True, None
+    conn = None
+    try:
+        conn = get_db_connection(target_db=target_db)
+        cursor = conn.cursor()
+        
+        sucursal = sucursal_context.upper()
+        faltantes = []
+        for sn in seriales:
+            clean_sn = sn.strip().upper()
+            sql = """
+                SELECT id FROM series_registradas 
+                WHERE (UPPER(serial_number) = ? OR UPPER(mac_number) = ?) 
+                AND ubicacion = 'BODEGA' 
+                AND sucursal = ?
+            """
+            run_query(cursor, sql, (clean_sn, clean_sn, sucursal))
+            if not cursor.fetchone():
+                faltantes.append(sn)
+        
+        if faltantes:
+            return False, f"Los siguientes seriales/MACs no están registrados en Bodega {sucursal}: {', '.join(faltantes)}"
+        
+        return True, None
+    except Exception as e:
+        logger.error(f"Error en verificar_seriales_bodega: {e}")
+        return False, f"Error de validación: {e}"
     finally:
         if conn: close_connection(conn)
 

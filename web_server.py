@@ -180,14 +180,25 @@ def registrar_santiago_post():
         ticket = data.get('contrato')
         fecha = data.get('fecha', date.today().isoformat())
 
+        from database import verificar_seriales_bodega
+        from config import MYSQL_DB_SANTIAGO
+
         for item in materiales:
             sku = item['sku']
             cantidad = item.get('cantidad', 1)
-            seriales = item.get('seriales', []) # Lista de SNs si es equipo
+            seriales = item.get('seriales', [])
             
-            # LÓGICA DE ENRUTAMIENTO POR MÓVIL
+            # 1. DETERMINAR CONTEXTO Y DB
             sucursal_ctx = 'SANTIAGO' if movil in MOVILES_SANTIAGO else 'CHIRIQUI'
+            target_db_ctx = MYSQL_DB_SANTIAGO if sucursal_ctx == 'SANTIAGO' else None
 
+            # 2. VALIDAR SERIALES/MACs (EQUIPOS)
+            if seriales:
+                ok_v, msg_v = verificar_seriales_bodega(seriales, sucursal_context=sucursal_ctx, target_db=target_db_ctx)
+                if not ok_v:
+                    return jsonify({"exito": False, "mensaje": msg_v})
+
+            # 3. REGISTRAR
             exito, msg = registrar_consumo_directo(
                 sku=sku,
                 cantidad=cantidad,
@@ -197,7 +208,7 @@ def registrar_santiago_post():
                 fecha_evento=fecha,
                 seriales=seriales,
                 observaciones=f"Consumo Web Santiago - Ticket {ticket}",
-                target_db=target_db,
+                target_db=target_db_ctx,
                 sucursal_context=sucursal_ctx
             )
             
