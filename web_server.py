@@ -132,14 +132,21 @@ def santiago():
         # Usamos la conexión de Santiago si está configurada
         target_db = MYSQL_DB_SANTIAGO if MYSQL_DB_SANTIAGO else None
         
-        # Reutilizar obtener_todos_los_skus_para_movimiento ya que filtra por BODEGA
-        raw_productos = obtener_todos_los_skus_para_movimiento(target_db=target_db, sucursal_context='SANTIAGO')
+        # Obtenemos el stock actual de la BD
+        raw_stock = obtener_todos_los_skus_para_movimiento(target_db=target_db, sucursal_context='SANTIAGO')
+        stock_map = {sku: cantidad for _, sku, cantidad in raw_stock}
         
-        for nombre_largo, sku, cantidad in raw_productos:
-            nombre_excel = SKU_TO_EXCEL_NAME.get(sku, nombre_largo)
+        # Traemos la lista maestra de config para asegurar que salgan todos (incluso con stock 0)
+        from config import PRODUCTOS_INICIALES
+        
+        for name_excel, sku, _ in PRODUCTOS_INICIALES:
+            # Evitar mostrar el router 4-4-654 si anteriormente se pidió filtrar, 
+            # pero el usuario ahora pide "toda la lista", así que lo dejamos si está en la maestra.
+            cantidad = stock_map.get(sku, 0)
             es_equipo = sku in PRODUCTOS_CON_CODIGO_BARRA
+            
             productos_santiago.append({
-                "nombre": nombre_excel,
+                "nombre": name_excel,
                 "sku": sku,
                 "stock": cantidad,
                 "es_equipo": es_equipo
