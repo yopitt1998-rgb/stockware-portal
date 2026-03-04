@@ -374,16 +374,19 @@ def get_inventario_movil(movil):
         conn = get_db_connection(target_db=target_db)
         cursor = conn.cursor()
         
-        # Obtener TODAS las asignaciones del móvil (agrupadas para evitar duplicados por NULLs)
+        # DETERMINAR FILTRO DE SUCURSAL
+        sucursal_ctx = 'SANTIAGO' if movil in MOVILES_SANTIAGO else 'CHIRIQUI'
+
+        # Obtener TODAS las asignaciones del móvil (FILTRADO POR SUCURSAL)
         sql_asignacion = """
-            SELECT (SELECT p2.nombre FROM productos p2 WHERE p2.sku = a.sku_producto LIMIT 1) as nombre,
+            SELECT (SELECT p2.nombre FROM productos p2 WHERE p2.sku = a.sku_producto AND p2.sucursal = ? LIMIT 1) as nombre,
                    a.sku_producto, SUM(a.cantidad) as total, COALESCE(a.paquete, 'NINGUNO') as paquete
             FROM asignacion_moviles a
-            WHERE a.movil = ?
+            WHERE a.movil = ? AND a.sucursal = ?
             AND a.cantidad > 0
             GROUP BY a.sku_producto, COALESCE(a.paquete, 'NINGUNO')
         """
-        run_query(cursor, sql_asignacion, (movil,))
+        run_query(cursor, sql_asignacion, (sucursal_ctx, movil, sucursal_ctx))
         asignacion_rows = cursor.fetchall()
         
         # Agrupar por SKU para poder calcular totales de compartidos
@@ -397,24 +400,21 @@ def get_inventario_movil(movil):
             por_sku[sku][paquete] = por_sku[sku].get(paquete, 0) + cantidad
 
         # Construir inventario final
-        # REGLA: Devolvemos los datos tal cual están en la BD. 
-        # El frontend (index.html) ya se encarga de agrupar y mostrar 
-        # los compartidos/personalizados en los paquetes correspondientes.
         inventario = []
         
         for nombre, sku, cantidad, paquete in asignacion_rows:
             nombre_final = nombres_sku.get(sku, nombre or sku)
             
             if sku in PRODUCTOS_CON_CODIGO_BARRA:
-                # FILTRO CRÍTICO: Buscar seriales SOLO de este paquete específico para este SKU
+                # FILTRO CRÍTICO: Buscar seriales SOLO de este paquete específico para este SKU y SUCURSAL
                 sql_series = """
                     SELECT serial_number 
                     FROM series_registradas 
-                    WHERE sku = ? AND ubicacion = ? AND COALESCE(paquete, 'NINGUNO') = ?
+                    WHERE sku = ? AND ubicacion = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?
                     ORDER BY serial_number
                 """
                 pq_query = paquete if paquete else 'NINGUNO'
-                run_query(cursor, sql_series, (sku, movil, pq_query))
+                run_query(cursor, sql_series, (sku, movil, pq_query, sucursal_ctx))
                 seriales = [row[0] for row in cursor.fetchall()]
                 
                 inventario.append({

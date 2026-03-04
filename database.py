@@ -218,8 +218,8 @@ def inicializar_bd():
                 if idx_data and len(idx_data) < 3:
                      logger.info("🔧 Migrando índice de asignacion_moviles para soportar múltiples paquetes...")
                      cursor.execute("ALTER TABLE asignacion_moviles DROP INDEX sku_producto")
-                     cursor.execute("ALTER TABLE asignacion_moviles ADD UNIQUE KEY sku_movil_paquete (sku_producto, movil, paquete)")
-                     logger.info("✅ Índice migrado exitosamente.")
+                     cursor.execute("ALTER TABLE asignacion_moviles ADD UNIQUE KEY sku_movil_paquete_suc (sku_producto, movil, paquete, sucursal)")
+                     logger.info("✅ Índice migrado exitosamente (con sucursal).")
             except Exception as e:
                 logger.warning(f"⚠️ Error en migración de índice asignacion_moviles: {e}")
         
@@ -242,6 +242,11 @@ def inicializar_bd():
         add_column_if_missing('movimientos', 'paquete_asignado', 'VARCHAR(50)')
         add_column_if_missing('movimientos', 'documento_referencia', LONGTEXT)
         add_column_if_missing('movimientos', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'") # Nueva: Para aislamiento
+        
+        # MIGRACIÓN: Asegurar que filas existentes tengan sucursal
+        try:
+            run_query(cursor, "UPDATE movimientos SET sucursal = 'CHIRIQUI' WHERE sucursal IS NULL")
+        except: pass
         
         # 4. TABLA PRESTAMOS
         cursor.execute(f"""
@@ -864,28 +869,28 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
                      
                      if DB_TYPE == 'MYSQL':
                          if nueva_qty_fila > 0:
-                             cursor.execute("UPDATE asignacion_moviles SET cantidad = %s WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s",
-                                            (nueva_qty_fila, sku, movil_afectado, fila_pq))
+                             cursor.execute("UPDATE asignacion_moviles SET cantidad = %s WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s AND sucursal = %s",
+                                            (nueva_qty_fila, sku, movil_afectado, fila_pq, sucursal_active))
                          else:
-                             cursor.execute("DELETE FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s",
-                                            (sku, movil_afectado, fila_pq))
+                             cursor.execute("DELETE FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s AND sucursal = %s",
+                                            (sku, movil_afectado, fila_pq, sucursal_active))
                      else:
                          if nueva_qty_fila > 0:
-                             cursor.execute("UPDATE asignacion_moviles SET cantidad = ? WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ?",
-                                            (nueva_qty_fila, sku, movil_afectado, fila_pq))
+                             cursor.execute("UPDATE asignacion_moviles SET cantidad = ? WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?",
+                                            (nueva_qty_fila, sku, movil_afectado, fila_pq, sucursal_active))
                          else:
-                             cursor.execute("DELETE FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ?",
-                                            (sku, movil_afectado, fila_pq))
+                             cursor.execute("DELETE FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?",
+                                            (sku, movil_afectado, fila_pq, sucursal_active))
              else:
                  pq_actual = paquete_para_stock if paquete_para_stock else 'NINGUNO'
                  
-                 # 1. Obtener suma total actual para ese paquete específico
+                 # 1. Obtener suma total actual para ese paquete específico (FILTRADO POR SUCURSAL)
                  if DB_TYPE == 'MYSQL':
-                     sql_sel = "SELECT SUM(cantidad) FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s"
+                     sql_sel = "SELECT SUM(cantidad) FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s AND sucursal = %s"
                  else:
-                     sql_sel = "SELECT SUM(cantidad) FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ?"
+                     sql_sel = "SELECT SUM(cantidad) FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?"
                  
-                 cursor.execute(sql_sel, (sku, movil_afectado, pq_actual))
+                 cursor.execute(sql_sel, (sku, movil_afectado, pq_actual, sucursal_active))
                  resultado_asignacion = cursor.fetchone()
                  
                  valor_actual = 0.0
@@ -896,18 +901,18 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
                  
                  # 2. UPSERT: Atomic update or Delete+Insert
                  if DB_TYPE == 'MYSQL':
-                     # Usar ON DUPLICATE KEY UPDATE para mayor robustez en MySQL
+                     # Usar ON DUPLICATE KEY UPDATE para mayor robustez en MySQL (incluyendo sucursal)
                      sql_upsert = """
-                        INSERT INTO asignacion_moviles (sku_producto, movil, paquete, cantidad) 
-                        VALUES (%s, %s, %s, %s)
+                        INSERT INTO asignacion_moviles (sku_producto, movil, paquete, cantidad, sucursal) 
+                        VALUES (%s, %s, %s, %s, %s)
                         ON DUPLICATE KEY UPDATE cantidad = VALUES(cantidad)
                      """
                      # Nota: Usamos pq_actual para evitar problemas con NULLs en índices UNIQUE de MySQL
                      if nueva_cantidad_asignacion > 0:
-                         cursor.execute(sql_upsert, (sku, movil_afectado, pq_actual, nueva_cantidad_asignacion))
+                         cursor.execute(sql_upsert, (sku, movil_afectado, pq_actual, nueva_cantidad_asignacion, sucursal_active))
                      else:
-                         sql_del = "DELETE FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s"
-                         cursor.execute(sql_del, (sku, movil_afectado, pq_actual))
+                         sql_del = "DELETE FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s AND sucursal = %s"
+                         cursor.execute(sql_del, (sku, movil_afectado, pq_actual, sucursal_active))
                  else:
                      # Standard SQLite approach: Delete then Insert
                      sql_del = "DELETE FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ?"
@@ -1488,16 +1493,20 @@ def obtener_asignacion_movil_con_paquetes(movil):
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # 1. Obtener productos asignados a ese móvil (AGREGADO: GROUP BY para evitar duplicados)
+        # DETERMINAR FILTRO DE SUCURSAL
+        import os
+        sucursal_target = 'SANTIAGO' if os.environ.get('SANTIAGO_DIRECT_MODE') == '1' else 'CHIRIQUI'
+
+        # 1. Obtener productos asignados a ese móvil (FILTRADO POR SUCURSAL)
         sql_total = """
             SELECT p.nombre, a.sku_producto, SUM(a.cantidad) as total
             FROM asignacion_moviles a
-            JOIN productos p ON a.sku_producto = p.sku
-            WHERE UPPER(TRIM(a.movil)) = UPPER(TRIM(?)) AND a.cantidad > 0
+            JOIN (SELECT sku, nombre, secuencia_vista FROM productos WHERE sucursal = ? GROUP BY sku, nombre, secuencia_vista) p ON a.sku_producto = p.sku
+            WHERE UPPER(TRIM(a.movil)) = UPPER(TRIM(?)) AND a.cantidad > 0 AND a.sucursal = ?
             GROUP BY a.sku_producto, p.nombre, p.secuencia_vista
             ORDER BY p.secuencia_vista ASC
         """
-        run_query(cursor, sql_total, (movil,))
+        run_query(cursor, sql_total, (sucursal_target, movil, sucursal_target))
         productos_asignados = cursor.fetchall()
 
         if not productos_asignados:
