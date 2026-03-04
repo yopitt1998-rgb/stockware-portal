@@ -7,11 +7,15 @@ from database import (
     registrar_consumo_pendiente, 
     obtener_nombres_moviles, 
     obtener_todos_los_skus_para_movimiento,
-    obtener_detalles_moviles
+    obtener_detalles_moviles,
+    registrar_consumo_directo
 )
 import threading
 import json
-from config import DB_TYPE, PAQUETES_MATERIALES, MATERIALES_COMPARTIDOS
+from config import (
+    DB_TYPE, PAQUETES_MATERIALES, MATERIALES_COMPARTIDOS, 
+    MOVILES_SANTIAGO, MYSQL_DB_SANTIAGO, PRODUCTOS_CON_CODIGO_BARRA
+)
 
 # Mapeo SKU → Nombre Excel (para mostrar nombres cortos en portal)
 SKU_TO_EXCEL_NAME = {
@@ -115,6 +119,91 @@ def index():
                                  count_p=count_p)
     except Exception as template_err:
         return f"<h1>⚠️ Error de Servidor</h1><p>Estado: {status}</p><p>Detalle: {error_detail}</p><p>Template: {str(template_err)}</p>"
+
+@app.route('/santiago')
+def santiago():
+    """Página principal del Portal Santiago (Consumo Directo)"""
+    status = "OK"
+    error_detail = ""
+    productos_santiago = []
+    
+    try:
+        # En Santiago Directo, obtenemos TODO el stock de BODEGA
+        # Usamos la conexión de Santiago si está configurada
+        target_db = MYSQL_DB_SANTIAGO if MYSQL_DB_SANTIAGO else None
+        
+        # Reutilizar obtener_todos_los_skus_para_movimiento ya que filtra por BODEGA
+        raw_productos = obtener_todos_los_skus_para_movimiento(target_db=target_db, sucursal_context='SANTIAGO')
+        
+        for nombre_largo, sku, cantidad in raw_productos:
+            nombre_excel = SKU_TO_EXCEL_NAME.get(sku, nombre_largo)
+            es_equipo = sku in PRODUCTOS_CON_CODIGO_BARRA
+            productos_santiago.append({
+                "nombre": nombre_excel,
+                "sku": sku,
+                "stock": cantidad,
+                "es_equipo": es_equipo
+            })
+            
+    except Exception as e:
+        status = "ERROR"
+        error_detail = str(e)
+        logger.error(f"Error cargando portal Santiago: {e}")
+
+    return render_template('santiago.html',
+                           hoy=date.today().isoformat(),
+                           moviles=MOVILES_SANTIAGO,
+                           productos=productos_santiago,
+                           sku_to_excel_name=json.dumps(SKU_TO_EXCEL_NAME),
+                           db_status=status,
+                           error_detail=error_detail)
+
+@app.route('/registrar_santiago', methods=['POST'])
+def registrar_santiago_post():
+    """Procesa el consumo directo desde el portal de Santiago"""
+    data = request.json
+    if not data:
+        return jsonify({"exito": False, "mensaje": "Sin datos"})
+
+    try:
+        exitos = 0
+        materiales = data.get('materiales', [])
+        movil = data.get('movil')
+        tecnico = data.get('tecnico')
+        ticket = data.get('contrato')
+        fecha = data.get('fecha', date.today().isoformat())
+
+        for item in materiales:
+            sku = item['sku']
+            cantidad = item.get('cantidad', 1)
+            seriales = item.get('seriales', []) # Lista de SNs si es equipo
+            
+            # LÓGICA DE ENRUTAMIENTO POR MÓVIL
+            sucursal_ctx = 'SANTIAGO' if movil in MOVILES_SANTIAGO else 'CHIRIQUI'
+
+            exito, msg = registrar_consumo_directo(
+                sku=sku,
+                cantidad=cantidad,
+                movil=movil,
+                tecnico=tecnico,
+                ticket=ticket,
+                fecha_evento=fecha,
+                seriales=seriales,
+                observaciones=f"Consumo Web Santiago - Ticket {ticket}",
+                target_db=target_db,
+                sucursal_context=sucursal_ctx
+            )
+            
+            if not exito:
+                raise Exception(f"Error en {sku}: {msg}")
+            
+            exitos += 1
+            
+        return jsonify({"exito": True, "mensaje": f"Consumo registrado exitosamente ({exitos} items)."})
+
+    except Exception as e:
+        logger.error(f"Error en registrar_santiago: {e}")
+        return jsonify({"exito": False, "mensaje": str(e)})
 
 @app.route('/debug/productos')
 def debug_productos():
@@ -370,9 +459,14 @@ def registrar_bulk():
         from config import MOVILES_SANTIAGO, MYSQL_DB_SANTIAGO
         movil = data.get('movil', '')
         
-        if movil in MOVILES_SANTIAGO and MYSQL_DB_SANTIAGO:
-            target_db = MYSQL_DB_SANTIAGO
-            print(f"[ROUTING] Redirigiendo bulk de {movil} a {target_db}")
+        if movil in MOVILES_SANTIAGO:
+            if MYSQL_DB_SANTIAGO:
+                target_db = MYSQL_DB_SANTIAGO
+            sucursal_ctx = 'SANTIAGO'
+        else:
+            sucursal_ctx = 'CHIRIQUI'
+
+        print(f"[ROUTING] Bulk de {movil} -> Sucursal: {sucursal_ctx} (DB: {target_db or 'Default'})")
             
         conn = get_db_connection(target_db=target_db)
         cursor = conn.cursor()
@@ -405,7 +499,8 @@ def registrar_bulk():
                     paquete_asignado=data.get('paquete'), # Pass package from web portal
                     observaciones=obs,
                     documento_referencia=data.get('contrato'),
-                    existing_conn=conn # Usar misma conexión
+                    existing_conn=conn, # Usar misma conexión
+                    sucursal_context=sucursal_ctx
                 )
                 
                 if not exito_mov:
@@ -460,11 +555,15 @@ def auditoria():
     """Página de Auditoría de Terreno y Retorno"""
     try:
         moviles = obtener_nombres_moviles()
+        details_moviles = obtener_detalles_moviles()
     except Exception:
         moviles = []
+        details_moviles = {}
+
     return render_template('auditoria.html',
                            hoy=date.today().isoformat(),
                            moviles=moviles,
+                           details_moviles=json.dumps(details_moviles),
                            sku_to_excel_name=json.dumps(SKU_TO_EXCEL_NAME))
 
 @app.route('/api/consumos_dia')

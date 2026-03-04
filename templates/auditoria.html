@@ -476,6 +476,7 @@
                     <option value="{{ m }}">{{ m }}</option>
                     {% endfor %}
                 </select>
+                <div id="lbl_tecnico" style="margin-top: 5px; font-weight: 600; color: #63b3ed; font-size: 13px;"></div>
             </div>
             <div class="filtro-group">
                 <label>Fecha</label>
@@ -548,8 +549,25 @@
 
     <script>
         const SKU_TO_EXCEL_NAME = {{ sku_to_excel_name | safe }};
+        const DETAILS_MOVILES = {{ details_moviles | safe }};
         let archivoExcel = null;
         let consumosActuales = [];
+
+        // ── Al seleccionar móvil ──────────────────────────────────────────
+        document.getElementById('filtro_movil').onchange = function () {
+            const movil = this.value;
+            const lbl = document.getElementById('lbl_tecnico');
+            if (!movil) {
+                lbl.innerText = '';
+                return;
+            }
+            const d = DETAILS_MOVILES[movil];
+            if (d && d.conductor) {
+                lbl.innerText = `👤 Conductor: ${d.conductor}`;
+            } else {
+                lbl.innerText = '👤 Sin técnico asignado';
+            }
+        };
 
         // ── Cargar consumos del día ────────────────────────────────────
         async function cargarConsumos() {

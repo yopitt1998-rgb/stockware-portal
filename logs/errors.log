@@ -1127,3 +1127,73 @@ Traceback (most recent call last):
                      ^^^^^^^^
 AttributeError: 'NoneType' object has no attribute 'get'
 
+2026-02-23 11:41:44 | ERROR    | database             | ❌ Error SQL ejecución: Failed processing format-parameters; Python 'dict' cannot be converted to a MySQL type
+2026-02-23 11:41:44 | ERROR    | database             |    Query: 
+                            SELECT COUNT(*) FROM series_registradas 
+                            WHERE serial_number = %s
+                        
+2026-02-23 11:41:44 | ERROR    | database             |    Params: ({'serial': '2150084158EGQ5000009', 'mac': None},)
+2026-02-23 11:41:44 | ERROR    | database             | Error registrando serial {'serial': '2150084158EGQ5000009', 'mac': None}: Failed processing format-parameters; Python 'dict' cannot be converted to a MySQL type
+2026-02-23 11:48:37 | ERROR    | database             | ❌ Error SQL ejecución: Failed processing format-parameters; Python 'dict' cannot be converted to a MySQL type
+2026-02-23 11:48:37 | ERROR    | database             |    Query: 
+                            SELECT COUNT(*) FROM series_registradas 
+                            WHERE serial_number = %s
+                        
+2026-02-23 11:48:37 | ERROR    | database             |    Params: ({'serial': '2150084158EGQ5000009', 'mac': None},)
+2026-02-23 11:48:37 | ERROR    | database             | Error registrando serial {'serial': '2150084158EGQ5000009', 'mac': None}: Failed processing format-parameters; Python 'dict' cannot be converted to a MySQL type
+2026-02-23 11:54:26 | ERROR    | database             | ❌ Error SQL ejecución: Failed processing format-parameters; Python 'dict' cannot be converted to a MySQL type
+2026-02-23 11:54:26 | ERROR    | database             |    Query: 
+                            SELECT COUNT(*) FROM series_registradas 
+                            WHERE serial_number = %s
+                        
+2026-02-23 11:54:26 | ERROR    | database             |    Params: ({'serial': '2150084158EGQ5000009', 'mac': None},)
+2026-02-23 11:54:26 | ERROR    | database             | Error registrando serial {'serial': '2150084158EGQ5000009', 'mac': None}: Failed processing format-parameters; Python 'dict' cannot be converted to a MySQL type
+2026-02-23 16:15:18 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\abasto_scanner.py", line 108, in _on_mousewheel
+    canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+  File "C:\Python312\Lib\tkinter\__init__.py", line 2014, in yview_scroll
+    self.tk.call(self._w, 'yview', 'scroll', number, what)
+_tkinter.TclError: invalid command name ".!toplevel.!notebook.!frame.!frame.!frame2.!canvas"
+
+2026-02-24 15:03:05 | ERROR    | gui.inventory.movements | Error en retorno masivo de seriales: name 'run_query' is not defined
+2026-02-24 15:04:37 | ERROR    | gui.inventory.movements | Error en retorno masivo de seriales: name 'run_query' is not defined
+2026-02-25 09:37:10 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-02-25 09:37:10 | ERROR    | database             | Error al obtener móviles: Failed getting connection; pool exhausted
+2026-02-25 09:37:10 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-02-25 09:37:10 | ERROR    | database             | Error al obtener todos los SKUs para movimiento: Failed getting connection; pool exhausted
+2026-02-25 10:16:05 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 899, in <lambda>
+    self.ventana.after(0, lambda: self._update_combo(ms))
+                                  ^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 902, in _update_combo
+    self.movil_combo['values'] = values
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1733, in __setitem__
+    self.configure({key: value})
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1722, in configure
+    return self._configure('configure', cnf, kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1712, in _configure
+    self.tk.call(_flatten((self._w, cmd)) + self._options(cnf))
+_tkinter.TclError: invalid command name ".!toplevel6.!frame2.!labelframe.!combobox"
+
+2026-03-04 10:20:41 | ERROR    | database             | Error loading tab Consumo Directo: cannot import name 'PRODUCTOS_CON_CODIGO_BARRA' from 'database' (c:\Users\johni\Documents\GestorInventario_MySQL\database.py)
+2026-03-04 10:23:01 | ERROR    | database             | Error loading tab Consumo Directo: cannot import name 'PRODUCTOS_CON_CODIGO_BARRA' from 'database' (c:\Users\johni\Documents\GestorInventario_MySQL\database.py)
+2026-03-04 11:17:51 | ERROR    | database             | Error loading tab Consumo Directo: cannot import name 'PRODUCTOS_CON_CODIGO_BARRA' from 'database' (c:\Users\johni\Documents\GestorInventario_MySQL\database.py)
+2026-03-04 11:17:53 | ERROR    | database             | Error loading tab Material Dañado: cannot import name 'PRODUCTOS_CON_CODIGO_BARRA' from 'database' (c:\Users\johni\Documents\GestorInventario_MySQL\database.py)
+2026-03-04 11:17:54 | ERROR    | database             | Error loading tab Consumo Directo: cannot import name 'PRODUCTOS_CON_CODIGO_BARRA' from 'database' (c:\Users\johni\Documents\GestorInventario_MySQL\database.py)
+2026-03-04 11:17:55 | ERROR    | database             | Error loading tab Material Dañado: cannot import name 'PRODUCTOS_CON_CODIGO_BARRA' from 'database' (c:\Users\johni\Documents\GestorInventario_MySQL\database.py)
+2026-03-04 11:18:22 | ERROR    | database             | Error loading tab Consumo Directo: cannot import name 'PRODUCTOS_CON_CODIGO_BARRA' from 'database' (c:\Users\johni\Documents\GestorInventario_MySQL\database.py)
+2026-03-04 11:18:26 | ERROR    | database             | Error loading tab Material Dañado: cannot import name 'PRODUCTOS_CON_CODIGO_BARRA' from 'database' (c:\Users\johni\Documents\GestorInventario_MySQL\database.py)
+2026-03-04 11:58:56 | ERROR    | database             | ❌ Error en obtener_estadisticas_reales: MySQL Connection not available
+2026-03-04 12:00:49 | ERROR    | database             | Error loading tab Auditoría Física: cannot import name 'PRODUCTOS_CON_CODIGO_BARRA' from 'database' (c:\Users\johni\Documents\GestorInventario_MySQL\database.py)

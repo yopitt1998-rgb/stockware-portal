@@ -11,13 +11,24 @@ else:
     application_path = os.path.dirname(os.path.abspath(__file__))
 
 # Cargar variables de entorno desde la ruta absoluta del .env
+# 1. Intentar cargar desde el directorio del ejecutable (prioridad para usuario)
 dotenv_path = os.path.join(application_path, '.env')
-print(f"[SEARCH] Buscando .env en: {dotenv_path}")
+
+# 2. Si no existe fuera, intentar cargar desde el directorio temporal de PyInstaller (_MEIPASS)
+internal_dotenv = ""
+if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+    internal_dotenv = os.path.join(sys._MEIPASS, '.env')
+
+# print(f"[SEARCH] Buscando .env en: {dotenv_path}")
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
-    print("[OK] .env cargado exitosamente")
+    # print("[OK] .env externo cargado exitosamente")
+elif internal_dotenv and os.path.exists(internal_dotenv):
+    load_dotenv(internal_dotenv)
+    # print("[OK] .env interno (empaquetado) cargado exitosamente")
 else:
-    print(f"[WARNING] Archivo .env no encontrado en: {dotenv_path}")
+    pass
+    # print(f"[WARNING] Archivo .env no encontrado en ninguna ubicación.")
 
 DATABASE_NAME = os.path.join(application_path, "inventario_sqlite.db")
 
@@ -37,8 +48,8 @@ MYSQL_PORT = int(os.getenv("MYSQL_PORT", 3306))
 BRANCH_NAME = os.getenv("CURRENT_BRANCH_NAME", "")
 
 
-MOVILES_DISPONIBLES = ["Movil 200", "Movil 201", "Movil 202", "Movil 203", "Movil 204", "Movil 205"]
-MOVILES_SANTIAGO = ["Movil 206", "Movil 207", "Movil 208", "Movil 209", "Movil 210"]
+MOVILES_DISPONIBLES = ["Movil 200", "Movil 201", "Movil 202", "Movil 203", "Movil 204", "Movil 205", "Movil 206"]
+MOVILES_SANTIAGO = ["Movil 207", "Movil 208", "Movil 209", "Movil 210"]
 ALL_MOVILES = MOVILES_DISPONIBLES + MOVILES_SANTIAGO
 
 # DETALLES DE MÓVILES (Fallback para Cloud cuando no hay tabla 'moviles')
@@ -106,11 +117,11 @@ PAQUETES_MATERIALES = {
 # Materiales que se comparten entre paquetes (ej: fibra, cables bulk)
 # No se dividen, sino que muestran el total disponible en el móvil en todos los paquetes.
 MATERIALES_COMPARTIDOS = [
-    "1-2-16",   # FIBUNHILO (Fibra óptica)
+    "1-2-16",   # FIBRA OPTICA SM 1 HILOS (Flat Drop)
+    "7-1-171",  # CABLE COBRE UTP CM CATEGORIA 6 (Azul)
     "2-5-03",   # G_C_PARED6 (Clip de pared)
     "5-2-443",  # MOLDU (Moldura)
-    "10-1-04",  # CONEC_RJ45 (Conectores)
-    "7-1-171"   # C_UTP_CAT6 (Cable UTP)
+    "10-1-04"   # CONEC_RJ45 (Conectores)
 ]
 
 # Default initial package for logic compatibility
@@ -243,7 +254,7 @@ def save_branch_preference(branch_code):
         data = {'branch': branch_code}
         with open(PREFS_FILE, 'w') as f:
             json.dump(data, f)
-        print(f"Preferencia de sucursal guardada: {branch_code}")
+        # print(f"Preferencia de sucursal guardada: {branch_code}")
     except Exception as e:
         print(f"Error guardando preferencias: {e}")
 

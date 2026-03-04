@@ -202,6 +202,11 @@ class ModernInventarioApp:
                 os.path.join(os.path.dirname(os.path.abspath(__file__)), "logo-StockWare.png")
             ]
             
+            # Si estamos en modo congelado (ejecutable), agregar ruta interna _MEIPASS
+            if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+                icon_paths.insert(0, os.path.join(sys._MEIPASS, "logo-StockWare.ico"))
+                icon_paths.insert(0, os.path.join(sys._MEIPASS, "logo-StockWare.png"))
+            
             icon_path = None
             for path in icon_paths:
                 if os.path.exists(path):
@@ -344,6 +349,9 @@ class ModernInventarioApp:
         self.main_notebook = ttk.Notebook(main_frame)
         self.main_notebook.grid(row=0, column=1, sticky='nsew', padx=20, pady=20)
         
+        # DETECTAR SI ESTAMOS EN MODO SANTIAGO DIRECTO
+        is_santiago_direct = os.environ.get('SANTIAGO_DIRECT_MODE') == '1'
+        
         # DICCIONARIO DE PESTAÑAS (Nombre -> {frame, loaded, module_path, class_name})
         self.tabs_data = {
             "Dashboard": {
@@ -352,49 +360,83 @@ class ModernInventarioApp:
                 "class": "DashboardTab",
                 "icon": "📊",
                 "btn_text": "Dashboard"
-            },
-            "Inventario": {
+            }
+        }
+
+        # REGLA DE NEGOCIO: Santiago usa un subconjunto de pestañas.
+        # Quitamos "Consumo" porque el usuario ahora prefiere que los técnicos usen la web.
+        if is_santiago_direct:
+            # Pestañas activas para Santiago
+            self.tabs_data["Material Dañado"] = {
+                "loaded": False,
+                "module": "gui.santiago_danados",
+                "class": "SantiagoDanadosTab",
+                "icon": "⚠️",
+                "btn_text": "Dañados"
+            }
+            self.tabs_data["Auditoría Física"] = {
+                "loaded": False,
+                "module": "gui.santiago_audit_phys",
+                "class": "SantiagoAuditPhysTab",
+                "icon": "🔫",
+                "btn_text": "Auditoría"
+            }
+            # Mantenemos "Inventario" en el diccionario pero NO lo agregaremos al notebook ni al sidebar
+            # Esto permite que perform_inventory_action (Abasto) funcione cargándolo en 'background'
+            self.tabs_data["Inventario"] = {
+                "loaded": False,
+                "module": "gui.inventory",
+                "class": "InventoryTab",
+                "icon": "📦",
+                "btn_text": "Inventario",
+                "hidden": True
+            }
+        else:
+            self.tabs_data["Inventario"] = {
                 "loaded": False,
                 "module": "gui.inventory",
                 "class": "InventoryTab",
                 "icon": "📦",
                 "btn_text": "Inventario"
-            },
-            "Productos": {
-                "loaded": False,
-                "module": "gui.products",
-                "class": "ProductsTab",
-                "icon": "🏷️",
-                "btn_text": "Productos"
-            },
+            }
 
-            "Historial": {
-                "loaded": False,
-                "module": "gui.audit",
-                "class": "AuditTab",
-                "icon": "📋",
-                "btn_text": "Historial de Instalaciones"
-            },
+        self.tabs_data["Productos"] = {
+            "loaded": False,
+            "module": "gui.products",
+            "class": "ProductsTab",
+            "icon": "🏷️",
+            "btn_text": "Productos"
+        }
+        
+        self.tabs_data["Historial"] = {
+            "loaded": False,
+            "module": "gui.audit",
+            "class": "AuditTab",
+            "icon": "📋",
+            "btn_text": "Historial" if is_santiago_direct else "Historial de Instalaciones"
+        }
 
-            "Configuración": {
+        # Configuración solo para David
+        if not is_santiago_direct:
+            self.tabs_data["Configuración"] = {
                 "loaded": False,
                 "module": "gui.settings",
                 "class": "SettingsTab",
                 "icon": "⚙️",
                 "btn_text": "Configuración"
-            },
-
-        }
+            }
         
-        # CREAR PLACEHOLDERS
+        # CREAR PLACEHOLDERS (Omitir los marcados como 'hidden')
         for name, data in self.tabs_data.items():
             frame = ttk.Frame(self.main_notebook)
-            self.main_notebook.add(frame, text=name)
-            data['frame'] = frame # Guardar referencia al frame contenedor
             
-            # Crear botón en sidebar
-            btn = self.create_nav_button(data['btn_text'], data['icon'], name)
-            self.nav_buttons[name] = btn
+            # Solo agregar al notebook y sidebar si NO es oculto
+            if not data.get('hidden'):
+                self.main_notebook.add(frame, text=name)
+                btn = self.create_nav_button(data['btn_text'], data['icon'], name)
+                self.nav_buttons[name] = btn
+            
+            data['frame'] = frame # Referencia al frame (aunque no esté en el notebook)
 
         # BIND EVENTO DE CAMBIO DE PESTAÑA
         self.main_notebook.bind("<<NotebookTabChanged>>", self.on_tab_changed)

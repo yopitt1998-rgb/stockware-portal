@@ -1375,10 +1375,8 @@ class InventoryTab:
     def abrir_ventana_salida_movil_scanner(self):
         """Abre ventana de salida a móvil por escaneo con paquete (NUEVO)"""
         try:
-            # Importación local para evitar ciclos y asegurar actualización
+            # Importación local para evitar ciclos
             import gui.mobile_output_scanner as mos
-            import importlib
-            importlib.reload(mos)
             
             # Verificar si existe la clase
             if not hasattr(mos, 'MobileOutputScannerWindow'):

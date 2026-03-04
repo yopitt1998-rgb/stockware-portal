@@ -1,0 +1,22 @@
+﻿[SEARCH] Buscando .env en: C:\Users\johni\Documents\GestorInventario_MySQL\.env
+[OK] .env cargado exitosamente
+Iniciando prueba de reproduccion...
+Limpiando datos para Movil 201...
+Asignando 1-8-40 (Material) a PAQUETE A...
+Resultado:  Movimiento SALIDA_MOVIL registrado para SKU 1-8-40 (10.0 unidades) a/desde el Movil 201 (Paq: PAQUETE A).
+Asignando 4-4-644 (Equipo) a PAQUETE A...
+Resultado:  Movimiento SALIDA_MOVIL registrado para SKU 4-4-644 (1.0 unidades) a/desde el Movil 201 (Paq: PAQUETE A).
+
+Consultando asignacion con paquetes...
+
+SKU: 1-8-40 (TIE 8" FAJILLA PLASTICA 8")
+  Total Real: 10
+  En PAQUETE A: 10
+  En PAQUETE B: 10
+  RESULTADO: El material asignado a A aparece en B! (BUG CONFIRMADO)
+
+SKU: 4-4-644 (ONT HUAWEI EchoLife EG8145V5 2PLAY @ + TELF. + WIFI)
+  Total Real: 1
+  En PAQUETE A: 1
+  En PAQUETE B: 0
+  RESULTADO: El equipo solo aparece en A. (OK)

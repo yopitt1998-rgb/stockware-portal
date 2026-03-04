@@ -28,9 +28,14 @@ def sync_assignments():
         rows = cursor_sqlite.fetchall()
         # Add None for package
         local_assignments = [(r[0], r[1], None, r[2]) for r in rows]
+    # 1.5 Get Local Mobiles Metadata
+    print("Reading Mobiles from Local SQLite...")
+    cursor_sqlite.execute("SELECT nombre, patente, conductor, ayudante, activo FROM moviles")
+    local_moviles_data = cursor_sqlite.fetchall()
+    
     conn_sqlite.close()
     
-    print(f"Found {len(local_assignments)} assignments in local DB.")
+    print(f"Found {len(local_assignments)} assignments and {len(local_moviles_data)} mobiles in local DB.")
     
     # 2. Push to Cloud MySQL
     print("Writing to Cloud MySQL...")
@@ -42,6 +47,26 @@ def sync_assignments():
     except:
         pass
         
+    # 2.1 Sync Mobiles Table Metadata
+    print("Syncing Mobile Metadata (Technicians) to Cloud...")
+    for m_nombre, m_patente, m_conductor, m_ayudante, m_activo in local_moviles_data:
+        try:
+            # Check if exists in cloud
+            cursor_mysql.execute("SELECT nombre FROM moviles WHERE nombre = %s", (m_nombre,))
+            if cursor_mysql.fetchone():
+                # Update
+                update_m_sql = "UPDATE moviles SET patente = %s, conductor = %s, ayudante = %s, activo = %s WHERE nombre = %s"
+                cursor_mysql.execute(update_m_sql, (m_patente, m_conductor, m_ayudante, m_activo, m_nombre))
+            else:
+                # Insert
+                insert_m_sql = "INSERT INTO moviles (nombre, patente, conductor, ayudante, activo) VALUES (%s, %s, %s, %s, %s)"
+                cursor_mysql.execute(insert_m_sql, (m_nombre, m_patente, m_conductor, m_ayudante, m_activo))
+        except Exception as e:
+            print(f"Error syncing mobile metadata for {m_nombre}: {e}")
+    
+    conn_mysql.commit()
+    print(f"  Synced {len(local_moviles_data)} mobiles.")
+
     synced = 0
     errors = 0
     

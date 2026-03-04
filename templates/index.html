@@ -313,6 +313,8 @@
                     <option value="{{ movil }}">{{ movil }}</option>
                     {% endfor %}
                 </select>
+                <div id="lbl_tecnico"
+                    style="margin-top: 5px; font-weight: bold; color: var(--accent); font-size: 13px;"></div>
             </div>
 
             <div class="form-group" id="group_paquete" style="display:none;">
@@ -321,6 +323,9 @@
                 <select name="paquete" id="paquete_select">
                     <option value="PAQUETE A">PAQUETE A</option>
                     <option value="PAQUETE B">PAQUETE B</option>
+                    <option value="PERSONALIZADO">PERSONALIZADO</option>
+                    <option value="NINGUNO">NINGUNO</option>
+                    <option value="CARRO">CARRO</option>
                 </select>
             </div>
 
@@ -386,9 +391,13 @@
             // Auto-completar conductor/ayudante
             try {
                 const d = DETAILS_MOVILES[movil];
+                const lblTecnico = document.getElementById('lbl_tecnico');
                 if (d) {
                     document.getElementById('tecnico').value = d.conductor || '';
                     document.getElementById('ayudante').value = d.ayudante || '';
+                    if (lblTecnico) lblTecnico.innerText = d.conductor ? `👤 Conductor: ${d.conductor}` : '👤 Sin conductor asignado';
+                } else {
+                    if (lblTecnico) lblTecnico.innerText = '';
                 }
             } catch (e) { console.error('Autocompletado:', e); }
 
@@ -482,8 +491,8 @@
                 });
                 const itemsCompartidos = Object.values(mapCompartidos);
 
-                // Combinación: Propios + Puente + Compartidos
-                const items = itemsEspecificos.concat(itemsPuente).concat(itemsCompartidos);
+                // Combinación: Propios + Compartidos (Eliminamos itemsPuente para evitar filtración no deseada)
+                const items = itemsEspecificos.concat(itemsCompartidos);
 
                 if (items.length === 0) {
                     container.style.display = 'none';
@@ -722,9 +731,13 @@
 
                 alert.style.display = 'block';
                 if (data.exito) {
-                    alert.className = 'alert alert-success'; alert.innerText = '✅ Reporte enviado'; e.target.reset();
-                    document.querySelectorAll('.material-item').forEach(r => r.classList.remove('disabled'));
-                    document.querySelectorAll('input').forEach(i => i.disabled = false);
+                    alert.className = 'alert alert-success';
+                    alert.innerText = '✅ Reporte enviado correctamente. Actualizando...';
+                    e.target.reset();
+                    // Auto-refrescar tras 2 segundos para limpiar todo y fetch nuevo stock
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
                 } else {
                     alert.className = 'alert alert-error'; alert.innerText = '❌ Error: ' + data.mensaje;
                 }

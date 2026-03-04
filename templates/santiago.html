@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockWare Santiago - Consumo Directo</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #e67e22;
+            --success: #27ae60;
+            --bg: #f5f6fa;
+            --dark: #2f3640;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            margin: 0;
+            padding: 0;
+            color: var(--dark);
+        }
+
+        .header {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .header p {
+            margin: 5px 0 0;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 0 15px 100px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .section-title {
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dfe6e9;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .search-box {
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .material-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            border-bottom: 1px solid #f1f2f6;
+        }
+
+        .material-info {
+            flex: 1;
+        }
+
+        .material-name {
+            font-weight: bold;
+            font-size: 16px;
+            display: block;
+        }
+
+        .material-sku {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        .stock-badge {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: #e1f5fe;
+            color: #039be5;
+            margin-top: 4px;
+            display: inline-block;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .qty-input {
+            width: 70px !important;
+            text-align: center;
+            padding: 8px !important;
+        }
+
+        .scan-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .footer-action {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            padding: 15px;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+
+        .submit-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+            width: 100%;
+            max-width: 570px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Modal Scanner */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .scan-anim {
+            font-size: 50px;
+            margin-bottom: 20px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .alert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            z-index: 2000;
+            display: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .alert-success { background: #2ecc71; }
+        .alert-error { background: #e74c3c; }
+
+    </style>
+</head>
+<body>
+
+    <div id="alert" class="alert"></div>
+
+    <div class="header">
+        <h1>🚀 StockWare Santiago</h1>
+        <p>Sistema de Consumo Directo de Bodega</p>
+    </div>
+
+    <!-- Scanner Modal -->
+    <div class="modal" id="scanModal">
+        <div class="modal-content">
+            <div class="scan-anim">🔍</div>
+            <h2 id="scanTitle">Escaneando Equipo</h2>
+            <p id="scanSub" style="color: #666; font-size: 14px;">Coloque el cursor en el cuadro y escanee el MAC/Serial</p>
+            <input type="text" id="scanInput" style="margin-top: 15px; text-align: center; border: 2px solid var(--accent); font-size: 20px;">
+            <div style="margin-top: 25px; display: flex; gap: 10px;">
+                <button onclick="confirmScan()" style="flex: 1; background: var(--success); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold;">AGREGAR</button>
+                <button onclick="closeScanner()" style="flex: 1; background: #eee; border: none; padding: 12px; border-radius: 8px;">CERRAR</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <div class="card">
+            <div class="section-title">👤 Datos del Servicio</div>
+            <div class="form-group">
+                <label>Móvil:</label>
+                <select id="movil" required>
+                    <option value="">-- Seleccionar Móvil --</option>
+                    {% for m in moviles %}
+                    <option value="{{ m }}">{{ m }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Técnico:</label>
+                <input type="text" id="tecnico" placeholder="Nombre completo" required>
+            </div>
+            <div class="form-group">
+                <label>N° Ticket / Contrato:</label>
+                <input type="text" id="contrato" placeholder="Ej: P-12345" required>
+            </div>
+        </div>
+
+        <div class="search-box">
+             <label>🔍 Buscar Material / Equipo:</label>
+             <input type="text" id="search" placeholder="Escriba nombre o SKU..." oninput="filterMaterials()">
+        </div>
+
+        <div class="card" style="padding: 0;">
+            <div id="material-list">
+                {% for p in productos %}
+                <div class="material-item" data-sku="{{ p.sku }}" data-name="{{ p.nombre.lower() }}">
+                    <div class="material-info">
+                        <span class="material-name">{{ p.nombre }}</span>
+                        <span class="material-sku">{{ p.sku }}</span>
+                        <span class="stock-badge">📦 Bodega: {{ p.stock }}</span>
+                    </div>
+                    <div class="actions">
+                        {% if p.es_equipo %}
+                        <button class="scan-btn" onclick="openScanner('{{ p.sku }}', '{{ p.nombre }}')">📡 ESCANEAR</button>
+                        <div id="badge-{{ p.sku }}" style="display:none; color: var(--success); font-weight: bold; font-size: 12px;">✅ OK</div>
+                        {% else %}
+                        <input type="number" class="qty-input" data-sku="{{ p.sku }}" min="0" placeholder="0" onchange="validateQty(this, {{ p.stock }})">
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer-action">
+        <button class="submit-btn" onclick="submitReport()">📤 ENVIAR CONSUMO</button>
+    </div>
+
+    <script>
+        const CART = {}; // {sku: {cantidad: X, seriales: []}}
+
+        function showAlert(msg, type='success') {
+            const el = document.getElementById('alert');
+            el.innerText = msg;
+            el.className = `alert alert-${type}`;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 4000);
+        }
+
+        function filterMaterials() {
+            const query = document.getElementById('search').value.toLowerCase();
+            const items = document.querySelectorAll('.material-item');
+            items.forEach(item => {
+                const text = item.getAttribute('data-name') + ' ' + item.getAttribute('data-sku').toLowerCase();
+                item.style.display = text.includes(query) ? 'flex' : 'none';
+            });
+        }
+
+        function validateQty(input, max) {
+            const val = parseInt(input.value) || 0;
+            if (val < 0) input.value = 0;
+            if (val > max) {
+                if (confirm(`Solo hay ${max} en bodega. ¿Desea reportar ${val}?`)) {
+                    // OK
+                } else {
+                    input.value = max;
+                }
+            }
+            const sku = input.getAttribute('data-sku');
+            if (val > 0) {
+                CART[sku] = { cantidad: val };
+            } else {
+                delete CART[sku];
+            }
+        }
+
+        let scanActiveSku = null;
+
+        function openScanner(sku, name) {
+            scanActiveSku = sku;
+            document.getElementById('scanTitle').innerText = name;
+            document.getElementById('scanModal').classList.add('active');
+            document.getElementById('scanInput').value = '';
+            document.getElementById('scanInput').focus();
+        }
+
+        function closeScanner() {
+            document.getElementById('scanModal').classList.remove('active');
+            scanActiveSku = null;
+        }
+
+        function confirmScan() {
+            const sn = document.getElementById('scanInput').value.trim().toUpperCase();
+            if (!sn) return;
+
+            if (!CART[scanActiveSku]) CART[scanActiveSku] = { cantidad: 0, seriales: [] };
+            
+            if (!CART[scanActiveSku].seriales.includes(sn)) {
+                CART[scanActiveSku].seriales.push(sn);
+                CART[scanActiveSku].cantidad = CART[scanActiveSku].seriales.length;
+                document.getElementById(`badge-${scanActiveSku}`).innerText = `✅ ${CART[scanActiveSku].cantidad} ESCANEADOS`;
+                document.getElementById(`badge-${scanActiveSku}`).style.display = 'block';
+                showAlert(`Serial ${sn} agregado.`);
+            } else {
+                showAlert(`El serial ${sn} ya está en la lista.`, 'error');
+            }
+            
+            closeScanner();
+        }
+
+        document.getElementById('scanInput').onkeydown = (e) => {
+            if (e.key === 'Enter') confirmScan();
+        };
+
+        async function submitReport() {
+            const movil = document.getElementById('movil').value;
+            const tecnico = document.getElementById('tecnico').value.trim();
+            const contrato = document.getElementById('contrato').value.trim();
+
+            if (!movil || !tecnico || !contrato) {
+                showAlert("Complete todos los datos del servicio.", "error");
+                return;
+            }
+
+            const materiales = [];
+            for (const sku in CART) {
+                materiales.push({
+                    sku: sku,
+                    cantidad: CART[sku].cantidad,
+                    seriales: CART[sku].seriales || []
+                });
+            }
+
+            if (materiales.length === 0) {
+                showAlert("No ha marcado ningún consumo.", "error");
+                return;
+            }
+
+            try {
+                const btn = document.querySelector('.submit-btn');
+                btn.disabled = true;
+                btn.innerText = "⏳ ENVIANDO...";
+
+                const res = await fetch('/registrar_santiago', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        movil, tecnico, contrato,
+                        materiales,
+                        fecha: new Date().toISOString().split('T')[0]
+                    })
+                });
+
+                const data = await res.json();
+                if (data.exito) {
+                    showAlert("✅ CONSUMO REGISTRADO EXITOSAMENTE");
+                    setTimeout(() => window.location.reload(), 2000);
+                } else {
+                    showAlert("❌ ERROR: " + data.mensaje, "error");
+                    btn.disabled = false;
+                    btn.innerText = "📤 ENVIAR CONSUMO";
+                }
+            } catch (e) {
+                showAlert("❌ Error de red", "error");
+                btn.disabled = false;
+                btn.innerText = "📤 ENVIAR CONSUMO";
+            }
+        }
+    </script>
+</body>
+</html>

@@ -99,22 +99,31 @@ class DashboardTab:
         
         ttk.Label(quick_actions_frame, text="ACCIONES RÁPIDAS:", style='Subtitle.TLabel').pack(anchor='w', pady=(0, 10))
         
-        # Se asume que main_app tiene estos métodos (o el inventory tab)
-        # Nota: Idealmente moveremos estos métodos a gui/inventory.py y accederemos a traves de main_app.inventory_tab
-        quick_actions = [
-            ("🔫 Abasto Scanner", lambda: self.main_app.perform_inventory_action('abrir_ventana_abasto_scanner'), '#00C853'),
-            ("🔫 Salida Scanner", lambda: self.main_app.perform_inventory_action('abrir_ventana_salida_movil_scanner'), '#FF6F00'),
-            ("🔄 Devolución / Entrada", lambda: self.main_app.perform_inventory_action('abrir_ventana_retorno_movil'), Styles.SUCCESS_COLOR),
-            ("📋 Historial de Instalaciones", lambda: self.main_app.switch_to_tab("Historial"), Styles.ACCENT_COLOR)
-        ]
+        # DETECTAR MODO SANTIAGO
+        import os
+        is_santiago = os.environ.get('SANTIAGO_DIRECT_MODE') == '1'
+
+        if is_santiago:
+            quick_actions = [
+                ("🔫 Abasto Scanner", lambda: self.main_app.perform_inventory_action('abrir_ventana_abasto_scanner'), '#00C853'),
+                ("⚠️ Reportar Daño", lambda: self.main_app.switch_to_tab("Material Dañado"), '#c0392b'),
+                ("🔫 Auditoría Física", lambda: self.main_app.switch_to_tab("Auditoría Física"), '#607D8B')
+            ]
+        else:
+            quick_actions = [
+                ("🔫 Abasto Scanner", lambda: self.main_app.perform_inventory_action('abrir_ventana_abasto_scanner'), '#00C853'),
+                ("🔫 Salida Scanner", lambda: self.main_app.perform_inventory_action('abrir_ventana_salida_movil_scanner'), '#FF6F00'),
+                ("🔄 Devolución / Entrada", lambda: self.main_app.perform_inventory_action('abrir_ventana_retorno_movil'), Styles.SUCCESS_COLOR),
+                ("📋 Historial de Instalaciones", lambda: self.main_app.switch_to_tab("Historial"), Styles.ACCENT_COLOR)
+            ]
         
         actions_frame = ttk.Frame(quick_actions_frame, style='Modern.TFrame')
         actions_frame.pack(fill='x')
         
         for i, (text, command, color) in enumerate(quick_actions):
             btn = tk.Button(actions_frame, text=text, command=command,
-                          bg=color, fg='white', font=('Segoe UI', 9 if i == 1 else 10, 'bold'),
-                          relief='flat', bd=0, padx=15 if i == 1 else 20, pady=12, cursor='hand2')
+                          bg=color, fg='white', font=('Segoe UI', 10, 'bold'),
+                          relief='flat', bd=0, padx=20, pady=12, cursor='hand2')
             btn.pack(side='left', padx=5, fill='x', expand=True)
             
             # Agregar tooltips

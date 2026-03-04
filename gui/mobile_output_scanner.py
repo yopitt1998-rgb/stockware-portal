@@ -239,6 +239,22 @@ class MobileOutputScannerWindow:
         
         self.frame_lista_progreso.bind("<Configure>", lambda e: self.canvas_progreso.configure(scrollregion=self.canvas_progreso.bbox("all")))
         
+        # Mousewheel local pattern (Recursive)
+        def on_mousewheel(event):
+            try:
+                if self.canvas_progreso.winfo_exists():
+                    self.canvas_progreso.yview_scroll(int(-1 * (event.delta / 120)), "units")
+            except tk.TclError:
+                pass
+
+        def _bind_mousewheel_recursive(widget):
+            widget.bind("<MouseWheel>", on_mousewheel)
+            for child in widget.winfo_children():
+                _bind_mousewheel_recursive(child)
+
+        _bind_mousewheel_recursive(self.canvas_progreso)
+        _bind_mousewheel_recursive(self.frame_lista_progreso)
+        
         self.actualizar_panel_progreso()
 
     def actualizar_panel_progreso(self):
@@ -574,114 +590,6 @@ class MobileOutputScannerWindow:
             
         items_to_process = self.items_carrito
         
-        def process_background():
-            from database import registrar_movimiento_gui, actualizar_ubicacion_serial, registrar_devolucion_santiago, get_db_connection
-
-            exitosos_skus = [] # Lista de (sku, seriales) exitosos
-            errores = []
-            count = 0
-            conn = None
-            try:
-                conn = get_db_connection()
-                # Log del destino (para depuración del usuario)
-                db_info = getattr(conn, 'database', 'SQLite' if 'sqlite3' in str(type(conn)) else 'Cloud')
-                logger.info(f"💾 [TRANS] Conexión establecida a {db_info}")
-                
-                cursor = conn.cursor()
-                
-                for item in items_to_process:
-                    sku = item['sku']
-                    cantidad = item['cantidad']
-                    seriales = item['seriales']
-                    
-                    # A. TRANSFERENCIA A SANTIAGO
-                    if self.mode == 'PRESTAMO_SANTIAGO':
-                        if seriales:
-                            for serial in seriales:
-                                exito, mensaje = registrar_movimiento_gui(
-                                    sku, 'SALIDA_MOVIL', 1, 'SANTIAGO',
-                                    fecha_evento=fecha,
-                                    paquete_asignado=None,
-                                    observaciones=f"Transferencia a Santiago",
-                                    existing_conn=conn
-                                )
-                                if exito:
-                                    actualizar_ubicacion_serial(serial, 'SANTIAGO', existing_conn=conn)
-                                    count += 1
-                                    exitosos_skus.append((sku, [serial]))
-                                else:
-                                    errores.append(f"{sku} ({serial}): {mensaje}")
-                        else:
-                            exito, mensaje = registrar_movimiento_gui(
-                                sku, 'SALIDA_MOVIL', cantidad, 'SANTIAGO',
-                                fecha_evento=fecha,
-                                paquete_asignado=None,
-                                observaciones=f"Transferencia a Santiago",
-                                existing_conn=conn
-                            )
-                            if exito:
-                                count += 1
-                                exitosos_skus.append((sku, []))
-                            else:
-                                errores.append(f"{sku}: {mensaje}")
-
-                    # B. DEVOLUCIÓN DE SANTIAGO
-                    elif self.mode == 'DEVOLUCION_SANTIAGO':
-                        exito, mensaje = registrar_devolucion_santiago(
-                            sku, cantidad, seriales, fecha,
-                            fecha, observaciones="Devolución desde Santiago",
-                            existing_conn=conn
-                        )
-                        if exito:
-                            count += 1
-                            exitosos_skus.append((sku, seriales))
-                        else:
-                            errores.append(f"{sku}: {mensaje}")
-
-                    # C. TRASLADO O SALIDA MOVIL
-                    else: 
-                        tipo_mov = 'TRASLADO' if self.mode == 'TRASLADO' else 'SALIDA_MOVIL'
-                        paquete_record = self.combo_paquete.get() if hasattr(self, 'combo_paquete') else None
-                        
-                        if seriales:
-                            for serial in seriales:
-                                exito, mensaje = registrar_movimiento_gui(
-                                    sku, tipo_mov, 1, movil, 
-                                    fecha_evento=fecha,
-                                    paquete_asignado=paquete_record,
-                                    existing_conn=conn
-                                )
-                                if exito:
-                                    nueva_ubicacion = movil if self.mode == 'SALIDA_MOVIL' else f"TRASLADO_{movil}"
-                                    actualizar_ubicacion_serial(serial, nueva_ubicacion, existing_conn=conn)
-                                    count += 1
-                                    exitosos_skus.append((sku, [serial]))
-                                else:
-                                    errores.append(f"{sku} ({serial}): {mensaje}")
-
-                        else:
-                            exito, mensaje = registrar_movimiento_gui(
-                                sku, tipo_mov, cantidad, movil,
-                                fecha_evento=fecha,
-                                paquete_asignado=paquete_record,
-                                existing_conn=conn
-                            )
-                            if exito:
-                                count += 1
-                                exitosos_skus.append((sku, []))
-                            else:
-                                errores.append(f"{sku}: {mensaje}")
-                
-                if conn: 
-                    conn.commit()
-            except Exception as e:
-                if conn: conn.rollback()
-                errores.append(f"Error crítico: {e}")
-                exitosos_skus = [] # Si el commit falla, nada fue exitoso
-            finally:
-                if conn: conn.close()
-            
-            return count, errores, exitosos_skus
                             
         def on_complete(result):
             # Rehabilitar botón

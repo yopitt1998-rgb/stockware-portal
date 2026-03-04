@@ -28,6 +28,7 @@ class AbastoScannerWindow:
         self.window = tk.Toplevel(self.master)
         self.window.title("📦 Gestión de Abastos (Escáner & Historial)")
         self.window.geometry("1000x800")
+        self.window.transient(self.master) # Mantener sobre a ventana principal
         try:
             self.window.state('zoomed')
         except:
@@ -103,11 +104,23 @@ class AbastoScannerWindow:
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
         
-        # Mousewheel support (local binding to canvas)
+        # Mousewheel support (local binding to canvas and scrollable frame)
         def _on_mousewheel(event):
-            canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+            try:
+                if canvas.winfo_exists():
+                    canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+            except tk.TclError:
+                pass
         
-        canvas.bind_all("<MouseWheel>", _on_mousewheel)
+        canvas.bind("<MouseWheel>", _on_mousewheel)
+        scrollable_frame.bind("<MouseWheel>", _on_mousewheel)
+        # Bind children as well to ensure it works anywhere in the frame
+        def _bind_mousewheel_recursive(widget):
+            widget.bind("<MouseWheel>", _on_mousewheel)
+            for child in widget.winfo_children():
+                _bind_mousewheel_recursive(child)
+        
+        _bind_mousewheel_recursive(scrollable_frame)
         
         # ========== CONTENIDO DEL ESCÁNER (DENTRO DEL SCROLL) ==========
         self.crear_barra_scanner(scrollable_frame)
@@ -208,6 +221,10 @@ class AbastoScannerWindow:
         # Botones izquierda
         tk.Button(frame_btns, text="Quitar Item", command=self.quitar_item,
                  bg='#ffc107', fg='black', padx=15, pady=8,
+                 font=('Segoe UI', 10)).pack(side='left', padx=5)
+        
+        tk.Button(frame_btns, text="✏️ Editar Item", command=self.editar_item,
+                 bg='#007bff', fg='white', padx=15, pady=8,
                  font=('Segoe UI', 10)).pack(side='left', padx=5)
         
         tk.Button(frame_btns, text="Limpiar Todo", command=self.limpiar_carrito,
@@ -327,6 +344,68 @@ class AbastoScannerWindow:
         # Actualizar totales
         self.actualizar_totales()
     
+    def editar_item(self):
+        """Edita la cantidad o seriales de un item en el carrito"""
+        seleccion = self.tabla_carrito.selection()
+        if not seleccion:
+            messagebox.showwarning("Selección", "Seleccione un item para editar")
+            return
+        
+        # Obtener índice
+        item_id = seleccion[0]
+        index = self.tabla_carrito.index(item_id)
+        item = self.items_carrito[index]
+        sku = item['sku']
+        nombre = item['nombre']
+        cantidad_original = item['cantidad']
+        
+        # Pedir nueva cantidad
+        from tkinter import simpledialog
+        cant_str = simpledialog.askstring("Editar Cantidad", 
+                                        f"Nueva cantidad para '{nombre}':", 
+                                        parent=self.window, initialvalue=str(cantidad_original))
+        
+        if not cant_str: return
+        
+        try:
+            nueva_cant = int(cant_str)
+            if nueva_cant <= 0: return
+        except:
+            return
+            
+        # Si requiere seriales, debemos re-capturarlos si la cantidad cambió
+        # (O incluso si es la misma pero quiere corregir)
+        seriales_finales = item['seriales']
+        
+        # Determinar si requiere seriales
+        from database import buscar_producto_por_codigo_barra_maestro
+        producto_info = buscar_producto_por_codigo_barra_maestro(sku)
+        tiene_seriales = producto_info['tiene_seriales'] if producto_info else False
+        
+        if tiene_seriales:
+            if nueva_cant != cantidad_original or messagebox.askyesno("Series", "¿Desea re-escanear las series?"):
+                # Abrir captura de series
+                dialog = SerialCaptureDialog(self.window, sku, nombre, nueva_cant)
+                if dialog.cancelado or len(dialog.series_capturadas) != nueva_cant:
+                    return
+                seriales_finales = dialog.series_capturadas
+        
+        # Actualizar datos
+        self.items_carrito[index]['cantidad'] = nueva_cant
+        self.items_carrito[index]['seriales'] = seriales_finales
+        
+        # Actualizar tabla
+        seriales_text = f"{len(seriales_finales)} seriales" if seriales_finales else "-"
+        self.tabla_carrito.item(item_id, values=(
+            sku,
+            nombre,
+            nueva_cant,
+            seriales_text
+        ))
+        
+        self.actualizar_totales()
+        self.label_status.config(text=f"✏️ Item {nombre} actualizado", fg=Styles.INFO_COLOR)
+
     def quitar_item(self):
         """Quita el item seleccionado del carrito"""
         seleccion = self.tabla_carrito.selection()
@@ -395,12 +474,16 @@ class AbastoScannerWindow:
         def on_complete(result):
             exito, mensaje = result
             if exito:
-                messagebox.showinfo("Éxito", mensaje)
+                messagebox.showinfo("Éxito", mensaje, parent=self.window)
                 self.limpiar_carrito()
                 self.label_status.config(text="✅ Abasto registrado exitosamente", fg='#28a745')
+                # Forzar que la ventana siga al frente y dar foco al escáner
+                self.window.lift()
+                self.entry_scanner.focus_set()
                 # Recargar historial si estamos en ese tab (o simplemente se refrescará al entrar)
                 self.load_history()
             else:
+                self.window.lift()
                 messagebox.showerror("Error", mensaje)
                 
         mostrar_cargando_async(self.window, guardar_func, on_complete, self.master_app)

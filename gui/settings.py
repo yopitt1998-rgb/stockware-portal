@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
-from database import obtener_configuracion, guardar_configuracion, crear_respaldo_bd, limpiar_base_datos, resetear_stock_movil
+from database import (obtener_configuracion, guardar_configuracion, crear_respaldo_bd, 
+                    limpiar_base_datos, resetear_stock_movil, eliminar_consumos_pendientes_por_movil)
 from .styles import Styles
 from .utils import mostrar_mensaje_emergente
 from datetime import datetime
@@ -205,6 +206,20 @@ class SettingsTab(tk.Frame):
                  bg='#00796B', fg='white', font=('Segoe UI', 10, 'bold'),
                  relief='flat', padx=20, pady=8, cursor='hand2').pack(side='right')
 
+        # --- SECCIÓN DE LIMPIEZA DE CONSUMOS (NUEVO) ---
+        tk.Label(inner_content, text="📋 LIMPIAR CONSUMOS PENDIENTES", 
+                font=('Segoe UI', 13, 'bold'), bg='#f8f9fa', fg='#607D8B').pack(pady=(30, 10), anchor='w')
+        
+        consumos_cleanup_frame = tk.Frame(inner_content, bg='#ECEFF1', padx=20, pady=20, highlightthickness=1, highlightbackground='#CFD8DC')
+        consumos_cleanup_frame.pack(fill='x')
+        
+        tk.Label(consumos_cleanup_frame, text="Elimina todos los reportes de consumo pendientes de un técnico.\nÚtil para corregir errores de carga masiva o duplicados.", 
+                font=('Segoe UI', 9), bg='#ECEFF1', justify='left').pack(side='left', fill='x', expand=True)
+        
+        tk.Button(consumos_cleanup_frame, text="📋 Limpiar Consumos", command=self.limpiar_consumos_dialogo,
+                 bg='#607D8B', fg='white', font=('Segoe UI', 10, 'bold'),
+                 relief='flat', padx=20, pady=8, cursor='hand2').pack(side='right')
+
 
     def seleccionar_logo(self):
         filename = filedialog.askopenfilename(
@@ -339,7 +354,7 @@ class SettingsTab(tk.Frame):
         
         if pin != "0440":
             if pin is not None:
-                mostrar_mensaje_emergente(self, "Error", "PIN incorrecto.", "error")
+                mostrar_mensaje_emergente(self.main_app.master, "Error", "PIN incorrecto.", "error")
             return
             
         # 2. Diálogo de selección
@@ -380,12 +395,63 @@ class SettingsTab(tk.Frame):
             if messagebox.askyesno("Confirmar", f"¿Realmente desea ELIMINAR todo el stock de {movil} en el {paquete}?", parent=selection_win):
                 exito, mensaje = resetear_stock_movil(movil, paquete)
                 if exito:
-                    mostrar_mensaje_emergente(self, "Éxito", mensaje, "success")
-                    selection_win.destroy()
+                    mostrar_mensaje_emergente(selection_win, "Éxito", mensaje, "success")
+                    # No destruir inmediatamente si queremos que vea el mensaje, 
+                    # pero el mensaje se auto-destruye en 3s.
+                    # Vamos a esperar un poco o dejar que el usuario lo cierre.
+                    selection_win.after(1000, selection_win.destroy) 
                 else:
-                    mostrar_mensaje_emergente(self, "Error", mensaje, "error")
+                    mostrar_mensaje_emergente(selection_win, "Error", mensaje, "error")
         
         tk.Button(selection_win, text="🚀 Ejecutar Limpieza", command=ejecutar_limpieza,
                  bg='#00796B', fg='white', font=('Segoe UI', 10, 'bold'),
                  relief='flat', padx=20, pady=10).pack(pady=30)
+
+    def limpiar_consumos_dialogo(self):
+        """Maneja la limpieza de consumos pendientes de un móvil con PIN."""
+        # 1. Pedir PIN de seguridad
+        from tkinter import simpledialog
+        pin = simpledialog.askstring("Seguridad", "Ingrese el PIN de seguridad (0440):", 
+                                   show='*', parent=self)
+        
+        if pin != "0440":
+            if pin is not None:
+                mostrar_mensaje_emergente(self.main_app.master, "Error", "PIN incorrecto.", "error")
+            return
+            
+        # 2. Diálogo de selección
+        from config import ALL_MOVILES
+        
+        selection_win = tk.Toplevel(self)
+        selection_win.title("Limpiar Consumos Pendientes")
+        selection_win.geometry("400x250")
+        selection_win.resizable(False, False)
+        selection_win.transient(self)
+        selection_win.grab_set()
+        selection_win.configure(bg='#f8f9fa')
+        
+        tk.Label(selection_win, text="📋 Limpiar Consumos", font=('Segoe UI', 14, 'bold'), 
+                 bg='#f8f9fa', fg='#607D8B').pack(pady=20)
+        
+        # Selección de Móvil
+        tk.Label(selection_win, text="Seleccione el Móvil:", bg='#f8f9fa').pack(anchor='w', padx=40)
+        movil_var = tk.StringVar(value=ALL_MOVILES[0] if ALL_MOVILES else "")
+        combo_movil = ttk.Combobox(selection_win, textvariable=movil_var, values=ALL_MOVILES, state='readonly', width=35)
+        combo_movil.pack(pady=5, padx=40)
+        
+        def ejecutar_limpieza():
+            movil = movil_var.get()
+            if not movil: return
+                
+            if messagebox.askyesno("Confirmar", f"¿Realmente desea ELIMINAR todos los consumos pendientes de {movil}?", parent=selection_win):
+                exito, mensaje = eliminar_consumos_pendientes_por_movil(movil)
+                if exito:
+                    mostrar_mensaje_emergente(selection_win, "Éxito", mensaje, "success")
+                    selection_win.after(1000, selection_win.destroy) 
+                else:
+                    mostrar_mensaje_emergente(selection_win, "Error", mensaje, "error")
+        
+        tk.Button(selection_win, text="🚀 Limpiar Consumos", command=ejecutar_limpieza,
+                 bg='#607D8B', fg='white', font=('Segoe UI', 10, 'bold'),
+                 relief='flat', padx=20, pady=10).pack(pady=20)
 

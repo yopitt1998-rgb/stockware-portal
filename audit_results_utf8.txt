@@ -1,0 +1,44 @@
+﻿[SEARCH] Buscando .env en: C:\Users\johni\Documents\GestorInventario_MySQL\.env
+[OK] .env cargado exitosamente
+
+=== AUDITORIA PARA Movil 200 ===
+Total asignado (tabla asignacion_moviles): 0
+Items con stock > 0: 0
+Movimientos registrados: 115
+
+=== AUDITORIA PARA Movil 201 ===
+Total asignado (tabla asignacion_moviles): 0
+Items con stock > 0: 0
+Movimientos registrados: 3
+
+=== AUDITORIA PARA Movil 202 ===
+Total asignado (tabla asignacion_moviles): 275
+Items con stock > 0: 13
+Movimientos registrados: 68
+Muestra de items:
+ - 4-4-644 (Paq: PAQUETE A): 6
+ - 4-4-654 (Paq: PAQUETE A): 1
+ - 4-4-656 (Paq: PAQUETE A): 4
+ - 4-4-647 (Paq: PAQUETE A): 2
+ - 4-4-646 (Paq: PAQUETE A): 2
+
+=== AUDITORIA PARA Movil 203 ===
+Total asignado (tabla asignacion_moviles): 0
+Items con stock > 0: 0
+Movimientos registrados: 36
+
+=== AUDITORIA PARA Movil 204 ===
+Total asignado (tabla asignacion_moviles): 0
+Items con stock > 0: 0
+Movimientos registrados: 61
+
+=== AUDITORIA PARA Movil 205 ===
+Total asignado (tabla asignacion_moviles): 21
+Items con stock > 0: 5
+Movimientos registrados: 96
+Muestra de items:
+ - 8-1-904 (Paq: PAQUETE A): 8
+ - 4-4-647 (Paq: PAQUETE A): 2
+ - 4-4-654 (Paq: PAQUETE A): 1
+ - 4-4-656 (Paq: PAQUETE A): 4
+ - 4-4-644 (Paq: PAQUETE A): 6

@@ -105,6 +105,12 @@ class SerialCaptureDialog:
         # El usuario solicitó que SOLO se capture el SERIAL para equipos en Abasto.
         # Se elimina la lógica de requires_mac que obligaba a pedir MAC después del Serial.
         
+        # Verificar si ya se escaneó en esta sesión
+        if any(s['serial'] == val for s in self.series_capturadas):
+            messagebox.showwarning("Duplicado", f"El Serial '{val}' ya ha sido escaneado en esta sesión.", parent=self.top)
+            self.entry_serie.delete(0, tk.END)
+            return
+            
         exists, msg = verificar_serie_existe(val)
         if exists:
             messagebox.showerror("Error", f"El Serial/MAC '{val}' ya existe en el sistema.\n{msg}", parent=self.top)
@@ -117,9 +123,9 @@ class SerialCaptureDialog:
         self.update_progress()
         self.entry_serie.delete(0, tk.END)
         
-        # Auto-confirmar si ya llegó al límite (opcional pero ayuda a la velocidad)
-        if len(self.series_capturadas) >= self.cantidad_total:
-             self.confirmar()
+        # Opción de auto-confirmar eliminada para evitar confusión ("me manda para atras")
+        # El usuario ahora debe presionar "Confirmar y Guardar" explícitamente.
+        pass
         
     def update_progress(self):
         self.lbl_progress.config(text=f"Equipos Capturados: {len(self.series_capturadas)} / {self.cantidad_total}")
@@ -136,8 +142,8 @@ class SerialCaptureDialog:
         
         # Reconstruir la lista visualmente
         self.listbox.delete(0, tk.END)
-        for i, serie in enumerate(self.series_capturadas, 1):
-            self.listbox.insert(tk.END, f"{i}. {serie}")
+        for i, serie_dict in enumerate(self.series_capturadas, 1):
+            self.listbox.insert(tk.END, f"{i}. {serie_dict['serial']}")
         
         self.update_progress()
         logger.info(f"🗑️ Serie eliminada: {serie_eliminada}")
@@ -365,50 +371,51 @@ class AbastoWindow:
             
             if not sku_encontrado:
                 logger.warning(f"Código no identificado: {raw_code}")
-                # messagebox.showwarning("Código No Encontrado", f"No se pudo identificar: {raw_code}", parent=self.window)
+                # Mostrar aviso al usuario para que sepa que no se encontró
+                messagebox.showwarning("No Encontrado", f"No se pudo identificar el producto con el código: {raw_code}", parent=self.window)
                 self.scan_entry.delete(0, tk.END)
                 return
-            if sku_encontrado:
-                # Encontrado!
-                nombre_prod = "Producto"
-                # Buscar nombre (visual)
-                for w in self.scrollable_frame.winfo_children():
-                    if isinstance(w, tk.Label) and w.cget("text") == sku_encontrado: 
-                        grid_info = w.grid_info()
-                        row = grid_info['row']
-                        col = grid_info['column']
-                        if col == 1: # Es la columna SKU
-                             # Buscar nombre en col 0
-                             for w2 in self.scrollable_frame.winfo_children():
-                                 if isinstance(w2, tk.Label) and w2.grid_info()['row'] == row and w2.grid_info()['column'] == 0:
-                                     nombre_prod = w2.cget("text")
-                                     break
-                        break
-                        
-                required_serials = sku_encontrado in PRODUCTOS_CON_CODIGO_BARRA
-                msg_qty = f"Producto: {nombre_prod}\nSKU: {sku_encontrado}\n\nIngrese cantidad a ingresar:"
-                if required_serials:
-                    msg_qty += "\n(Luego se pedirá escanear las series)"
 
-                from tkinter import simpledialog
-                # Usar parent=self.window para que sea modal sobre la ventana de abasto
-                qty = simpledialog.askinteger("Input Escáner", msg_qty, parent=self.window, minvalue=1)
-                
-                if qty:
-                    self.entry_vars[sku_encontrado].delete(0, tk.END)
-                    self.entry_vars[sku_encontrado].insert(0, str(qty))
+            # Encontrado!
+            nombre_prod = "Producto"
+            # Buscar nombre (visual)
+            for w in self.scrollable_frame.winfo_children():
+                if isinstance(w, tk.Label) and w.cget("text") == sku_encontrado: 
+                    grid_info = w.grid_info()
+                    row = grid_info['row']
+                    col = grid_info['column']
+                    if col == 1: # Es la columna SKU
+                         # Buscar nombre en col 0
+                         for w2 in self.scrollable_frame.winfo_children():
+                             if isinstance(w2, tk.Label) and w2.grid_info()['row'] == row and w2.grid_info()['column'] == 0:
+                                 nombre_prod = w2.cget("text")
+                                 break
+                    break
                     
-                    # Feedback visual
-                    self.entry_vars[sku_encontrado].config(bg='#e8f5e9')
-                    self.scan_entry.delete(0, tk.END)
+            required_serials = sku_encontrado in PRODUCTOS_CON_CODIGO_BARRA
+            msg_qty = f"Producto: {nombre_prod}\nSKU: {sku_encontrado}\n\nIngrese cantidad a ingresar:"
+            if required_serials:
+                msg_qty += "\n(Luego se pedirá escanear las series)"
 
-                    # Si tiene botón de series, activarlo automáticamente para capturar
-                    if sku_encontrado in self.scan_buttons:
-                        self.window.update_idletasks()
-                        self.scan_buttons[sku_encontrado].invoke() 
+            from tkinter import simpledialog
+            # Usar parent=self.window para que sea modal sobre la ventana de abasto
+            qty = simpledialog.askinteger("Input Escáner", msg_qty, parent=self.window, minvalue=1)
+            
+            if qty:
+                self.entry_vars[sku_encontrado].delete(0, tk.END)
+                self.entry_vars[sku_encontrado].insert(0, str(qty))
+                
+                # Feedback visual
+                self.entry_vars[sku_encontrado].config(bg='#e8f5e9')
+                self.scan_entry.delete(0, tk.END)
+
+                # Si tiene botón de series, activarlo automáticamente para capturar
+                if sku_encontrado in self.scan_buttons:
+                    self.window.update_idletasks()
+                    self.scan_buttons[sku_encontrado].invoke() 
             else:
-                 messagebox.showwarning("No encontrado", f"Producto no encontrado: {codigo_norm}\n(Original: {raw_code})", parent=self.window)
-                 self.scan_entry.select_range(0, tk.END)
+                 # Si el usuario cancela, limpiar el campo de escaneo para el siguiente
+                 self.scan_entry.delete(0, tk.END)
 
         self.scan_entry.bind('<Return>', procesar_scan)
         
@@ -520,80 +527,77 @@ class AbastoWindow:
         if not confirm:
             return
 
-        # Protección: Desactivar botón para evitar duplicados por doble clic
-        self.btn_save.config(state='disabled', text="⏳ Guardando...")
-        self.window.update_idletasks() # Forzar actualización UI
+        # Fase de Guardado
+        try:
+            self.btn_save.config(state='disabled', text="⏳ Guardando...")
+            self.window.update_idletasks() # Forzar actualización UI
             
-        success_count = 0
-        errors = []
-        series_globales = [] # (sku, serial, ubicacion)
-        
-        # 1. Fase de Validación de Series
-        # Verificar que todos los productos con código de barras tengan sus series capturadas
-        for sku, qty in items_to_save:
-            if sku in PRODUCTOS_CON_CODIGO_BARRA:
-                # Verificar si ya se capturaron las series
-                if sku not in self.series_capturadas or len(self.series_capturadas[sku]) != qty:
-                    mostrar_mensaje_emergente(self.window, "Error", 
-                        f"El producto {sku} requiere escaneo de series.\n\n"
-                        f"Por favor, ingrese la cantidad y presione Enter para escanear las series.", 
-                        "error")
-                    return
-                
-                # Agregar series a la lista global con soporte para MAC
-                for item in self.series_capturadas[sku]:
-                    series_globales.append({
-                        'sku': sku, 
-                        'serial': item['serial'], 
-                        'mac': item.get('mac'),
-                        'ubicacion': 'BODEGA'
-                    })
+            # --- VALIDACIÓN DE SERIES ---
+            for sku, qty in items_to_save:
+                if sku in PRODUCTOS_CON_CODIGO_BARRA:
+                    if sku not in self.series_capturadas or len(self.series_capturadas[sku]) != qty:
+                        mostrar_mensaje_emergente(self.window, "Error", 
+                            f"El producto {sku} requiere escaneo de series.\n\n"
+                            f"Por favor, ingrese la cantidad y presione Enter para escanear las series.", 
+                            "error")
+                        return
+                    
+                    for item in self.series_capturadas[sku]:
+                        series_globales.append({
+                            'sku': sku, 
+                            'serial': item['serial'], 
+                            'mac': item.get('mac'),
+                            'ubicacion': 'BODEGA'
+                        })
 
-        # 2. Fase de Guardado
-        for sku, qty in items_to_save:
-            ok, msg = registrar_movimiento_gui(
-                sku, 'ABASTO', qty, None, fecha, 
-                documento_referencia=ref, observaciones=obs
-            )
-            if ok:
-                success_count += 1
+            # --- REGISTRO DE MOVIMIENTOS ---
+            for sku, qty in items_to_save:
+                ok, msg = registrar_movimiento_gui(
+                    sku, 'ABASTO', qty, None, fecha, 
+                    documento_referencia=ref, observaciones=obs
+                )
+                if ok:
+                    success_count += 1
+                else:
+                    errors.append(f"{sku}: {msg}")
+            
+            # 3. Guardar Series
+            if series_globales and not errors:
+                # Los abastos iniciales no tienen paquete asignado (van a BODEGA)
+                ok_series, msg_series = registrar_series_bulk(series_globales, fecha_ingreso=fecha, paquete=None)
+                if not ok_series:
+                    errors.append(f"Error registrando series: {msg_series}")
+
+            if errors:
+                msg_res = f"Se registraron {success_count} items.\nErrores:\n" + "\n".join(errors)
+                mostrar_mensaje_emergente(self.window, "Resultado Parcial", msg_res, "warning")
             else:
-                errors.append(f"{sku}: {msg}")
-        
-        # 3. Guardar Series
-        if series_globales and not errors:
-            ok_series, msg_series = registrar_series_bulk(series_globales, fecha_ingreso=fecha)
-            if not ok_series:
-                errors.append(f"Error registrando series: {msg_series}")
-
-        if errors:
-            msg_res = f"Se registraron {success_count} items.\nErrores:\n" + "\n".join(errors)
-            mostrar_mensaje_emergente(self.window, "Resultado Parcial", msg_res, "warning")
-            self.btn_save.config(state='normal', text="💾 Guardar Abasto")
-            self.window.lift() # Asegurar que esté al frente
-        else:
-            mostrar_mensaje_emergente(self.window, "Éxito", "Abasto registrado correctamente.", "success")
-            # Limpiar entradas
-            self.ref_entry.delete(0, tk.END)
-            self.obs_entry.delete(0, tk.END)
-            for entry in self.entry_vars.values():
-                entry.delete(0, tk.END)
-            
-            # Limpiar series capturadas
-            self.series_capturadas = {}
-            
-            # Resetear botones de escaneo
-            for sku, btn in self.scan_buttons.items():
-                btn.config(bg=Styles.INFO_COLOR, fg='white', text='🔍 Escanear Series')
+                mostrar_mensaje_emergente(self.window, "Éxito", "Abasto registrado correctamente.", "success")
+                # Limpiar entradas
+                self.ref_entry.delete(0, tk.END)
+                self.obs_entry.delete(0, tk.END)
+                for entry in self.entry_vars.values():
+                    entry.delete(0, tk.END)
                 
-            # Rehabilitar botón
+                # Limpiar series capturadas
+                self.series_capturadas = {}
+                
+                # Resetear botones de escaneo
+                for sku, btn in self.scan_buttons.items():
+                    btn.config(bg=Styles.INFO_COLOR, fg='white', text='🔍 Escanear Series')
+                    
+                # Actualizar historial
+                self.load_history()
+                
+                # Recargar stocks en lista (visual feedback)
+                mostrar_cargando_async(self.scrollable_frame, obtener_todos_los_skus_para_movimiento, self.populate_products_list, self.window)
+
+        except Exception as e:
+            logger.error(f"Error fatal guardando abasto: {e}")
+            mostrar_mensaje_emergente(self.window, "Error Fatal", f"Ocurrió un error inesperado: {e}", "error")
+        finally:
+            # Rehabilitar botón SIEMPRE
             self.btn_save.config(state='normal', text="💾 Guardar Abasto")
-            
-            # Actualizar historial
-            self.load_history()
-            
-            # Recargar stocks en lista (visual feedback)
-            mostrar_cargando_async(self.scrollable_frame, obtener_todos_los_skus_para_movimiento, self.populate_products_list, self.window)
             
     def setup_history_tab(self):
         # Controls
@@ -644,16 +648,32 @@ class AbastoWindow:
         AbastoDetailWindow(self.window, fecha, ref, self.load_history)
 
 class AbastoDetailWindow:
-    def __init__(self, parent, fecha, referencia, callback_refresh):
-        self.top = tk.Toplevel(parent)
-        self.top.title(f"Detalle Abasto: {referencia}")
+    def __init__(self, master_window, fecha, ref, callback_refresh=None):
+        # --- PARCHE DE EMERGENCIA: RECARGA EN VIVO ---
+        # Si el usuario ya tenía la app abierta, necesitamos forzar que use el nuevo código de database.py
+        try:
+            import importlib
+            import database
+            import sys
+            importlib.reload(database)
+            # Actualizar la referencia en el módulo de escáner si está cargado
+            if 'gui.abasto_scanner' in sys.modules:
+                import gui.abasto_scanner
+                sys.modules['gui.abasto_scanner'].registrar_abasto_batch = database.registrar_abasto_batch
+            logger.info("⚡ PARCHE EN VIVO APLICADO: Funciones de base de datos actualizadas en memoria.")
+        except Exception as patch_err:
+            logger.error(f"Error en parche en vivo: {patch_err}")
+
+        self.master_window = master_window
+        self.top = tk.Toplevel(self.master_window)
+        self.top.title(f"Detalle Abasto: {ref}")
         
         # Maximizar ventana
         self.top.state('zoomed')  # Windows - pantalla completa
         self.top.grab_set()
         
         self.fecha = fecha
-        self.referencia = referencia
+        self.referencia = ref
         self.callback_refresh = callback_refresh
         
         # Diccionario para almacenar series por SKU
@@ -964,8 +984,9 @@ class AbastoDetailWindow:
                         dialog = SerialCaptureDialog(edit_win, sku, nombre_producto, cant)
                         
                         if not dialog.cancelado and len(dialog.series_capturadas) == cant:
-                            # Agregar series a la lista
-                            series_editadas.extend(dialog.series_capturadas)
+                            # Agregar series a la lista (Extraer solo el string del serial)
+                            nuevas_series = [s['serial'] for s in dialog.series_capturadas]
+                            series_editadas.extend(nuevas_series)
                             actualizar_listbox()
                             logger.info(f"✅ {cant} series agregadas")
                         

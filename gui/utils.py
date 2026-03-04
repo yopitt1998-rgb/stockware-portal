@@ -124,6 +124,10 @@ def mostrar_mensaje_emergente(master, titulo, mensaje, tipo="info"):
              bg='white', fg=color_texto, font=('Segoe UI', 9, 'bold'),
              relief='flat', bd=0, padx=15, pady=5).pack(anchor='e', pady=(15, 0))
 
+    # Asegurar visibilidad
+    ventana_mensaje.lift()
+    ventana_mensaje.focus_set()
+
     # Auto-cierre
     ventana_mensaje.after(3000, ventana_mensaje.destroy)
 

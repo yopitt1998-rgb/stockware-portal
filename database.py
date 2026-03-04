@@ -201,6 +201,7 @@ def inicializar_bd():
         add_column_if_missing('movimientos', 'movil_afectado', 'VARCHAR(100)')
         add_column_if_missing('movimientos', 'paquete_asignado', 'VARCHAR(50)')
         add_column_if_missing('movimientos', 'documento_referencia', LONGTEXT)
+        add_column_if_missing('movimientos', 'sucursal', 'VARCHAR(50)') # Nueva: Para aislamiento
         
         # 4. TABLA PRESTAMOS
         cursor.execute(f"""
@@ -628,11 +629,9 @@ def verificar_stock_disponible(sku, cantidad_requerida, ubicacion='BODEGA'):
     finally:
         if conn: close_connection(conn)
 
-def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afectado=None, fecha_evento=None, paquete_asignado=None, observaciones=None, documento_referencia=None, target_db_name=None, existing_conn=None):
+def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afectado=None, fecha_evento=None, paquete_asignado=None, observaciones=None, documento_referencia=None, target_db_name=None, existing_conn=None, sucursal_context=None):
     """
     Registra un movimiento, actualiza la cantidad en Bodega/Asignación y maneja la ubicación DESCARTE.
-    Permite especificar target_db_name para operar en otra base de datos.
-    Allows re-using existing_conn for bulk operations.
     """
     conn = None
     should_close = True
@@ -691,15 +690,14 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
         
         stock_asignado = 0
         if movil_afectado and tipo_movimiento in ('SALIDA_MOVIL', 'RETORNO_MOVIL', 'CONSUMO_MOVIL'):
-             # Para CONSUMO_MOVIL desde el portal web: buscar stock TOTAL en el móvil
-             # (sin filtrar por paquete), ya que el consumo reduce del total disponible.
-             # Para SALIDA_MOVIL / RETORNO_MOVIL sí importa el paquete específico.
-             if tipo_movimiento == 'CONSUMO_MOVIL':
+             # Para CONSUMO_MOVIL y RETORNO_MOVIL (Auditoría): buscar stock TOTAL en el móvil
+             # si no se especifica un paquete, ya que reduce/retorna del disponible.
+             if tipo_movimiento in ('CONSUMO_MOVIL', 'RETORNO_MOVIL') and not paquete_asignado:
                  # Suma total del SKU en el móvil, independiente del paquete
                  if DB_TYPE == 'MYSQL':
-                     sql_asig = "SELECT COALESCE(SUM(cantidad), 0) FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s"
+                     sql_asig = "SELECT COALESCE(SUM(cantidad), 0) FROM asignacion_moviles WHERE sku_producto = %s AND UPPER(TRIM(movil)) = UPPER(TRIM(%s))"
                  else:
-                     sql_asig = "SELECT COALESCE(SUM(cantidad), 0) FROM asignacion_moviles WHERE sku_producto = ? AND movil = ?"
+                     sql_asig = "SELECT COALESCE(SUM(cantidad), 0) FROM asignacion_moviles WHERE sku_producto = ? AND UPPER(TRIM(movil)) = UPPER(TRIM(?))"
                  cursor.execute(sql_asig, (sku, movil_afectado))
                  asignacion_actual = cursor.fetchone()
                  stock_asignado = float(asignacion_actual[0]) if asignacion_actual and asignacion_actual[0] is not None else 0
@@ -708,9 +706,9 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
                  pq_query = paquete_asignado if paquete_asignado else 'NINGUNO'
                  
                  if DB_TYPE == 'MYSQL':
-                     sql_asig = "SELECT cantidad FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s"
+                     sql_asig = "SELECT cantidad FROM asignacion_moviles WHERE sku_producto = %s AND UPPER(TRIM(movil)) = UPPER(TRIM(%s)) AND COALESCE(paquete, 'NINGUNO') = %s"
                  else:
-                     sql_asig = "SELECT cantidad FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ?"
+                     sql_asig = "SELECT cantidad FROM asignacion_moviles WHERE sku_producto = ? AND UPPER(TRIM(movil)) = UPPER(TRIM(?)) AND COALESCE(paquete, 'NINGUNO') = ?"
                  cursor.execute(sql_asig, (sku, movil_afectado, pq_query))
                  
                  asignacion_actual = cursor.fetchone()
@@ -778,9 +776,8 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
         # LOGICA CORREGIDA Y ROBUSTA PARA ASIGNACION MOVILES (POR PAQUETE)
         if movil_afectado and cantidad_asignacion_cambio != 0:
              
-             # Para CONSUMO_MOVIL: deducir del paquete que realmente tiene stock
-             # (no del paquete etiqueta que envía el portal, que puede ser distinto)
-             if tipo_movimiento == 'CONSUMO_MOVIL' and cantidad_asignacion_cambio < 0:
+             # Para CONSUMO_MOVIL y RETORNO_MOVIL (sin paquete específico): deducir del paquete que realmente tiene stock
+             if (tipo_movimiento in ('CONSUMO_MOVIL', 'RETORNO_MOVIL')) and cantidad_asignacion_cambio < 0 and not paquete_asignado:
                  # Obtener todas las filas con stock para este SKU en este móvil
                  if DB_TYPE == 'MYSQL':
                      sql_rows = "SELECT COALESCE(paquete, 'NINGUNO'), cantidad FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND cantidad > 0 ORDER BY cantidad DESC"
@@ -852,8 +849,12 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
                          sql_ins = "INSERT INTO asignacion_moviles (sku_producto, movil, paquete, cantidad) VALUES (?, ?, ?, ?)"
                          cursor.execute(sql_ins, (sku, movil_afectado, pq_actual, nueva_cantidad_asignacion))
 
-        sql_mov = "INSERT INTO movimientos (sku_producto, tipo_movimiento, cantidad_afectada, movil_afectado, fecha_evento, paquete_asignado, observaciones, documento_referencia) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-        run_query(cursor, sql_mov, (sku, tipo_movimiento, cantidad_afectada, movil_afectado, fecha_evento, paquete_asignado, observaciones, documento_referencia))
+        # SUCURSAL CONTEXTO
+        import os
+        sucursal = sucursal_context or ('SANTIAGO' if os.environ.get('SANTIAGO_DIRECT_MODE') == '1' else 'CHIRIQUI')
+
+        sql_mov = "INSERT INTO movimientos (sku_producto, tipo_movimiento, cantidad_afectada, movil_afectado, fecha_evento, paquete_asignado, observaciones, documento_referencia, sucursal) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        run_query(cursor, sql_mov, (sku, tipo_movimiento, cantidad_afectada, movil_afectado, fecha_evento, paquete_asignado, observaciones, documento_referencia, sucursal))
         
         # Verificar si se debe marcar recordatorio como completado
         if tipo_movimiento in ['RETORNO_MOVIL', 'CONSUMO_MOVIL'] and movil_afectado and paquete_asignado in ['PAQUETE A', 'PAQUETE B']:
@@ -877,16 +878,17 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
             movil_msg = f" a/desde el {movil_afectado}" if movil_afectado else ""
             paquete_msg = f" (Paq: {paquete_asignado})" if paquete_asignado else ""
             mensaje_final = f"✅ Movimiento {tipo_movimiento} registrado para SKU {sku} ({cantidad_afectada} unidades){movil_msg}{paquete_msg}."
-            
+        
         return True, mensaje_final
 
     except Exception as e:
-        if conn and should_close: conn.rollback() 
-        # If external connection, caller handles rollback
-        return False, f"Ocurrió un error al registrar el movimiento: {e}"
+        if conn and should_close:
+            conn.rollback()
+        logger.error(f"Error en registrar_movimiento_gui para SKU {sku}: {e}")
+        return False, f"Error en la base de datos: {str(e)}"
     finally:
         if conn and should_close:
-            conn.close()
+            close_connection(conn)
 
 
 # FUNCIONES PARA PRÉSTAMOS SANTIAGO
@@ -1030,13 +1032,13 @@ def registrar_devolucion_santiago(sku, cantidad, seriales_nuevos, fecha_evento, 
                 run_query(cursor, "SELECT id FROM series_registradas WHERE serial_number = ?", (serial,))
                 existe = cursor.fetchone()
                 if existe:
-                    # Actualizar ubicación a BODEGA
-                    run_query(cursor, "UPDATE series_registradas SET ubicacion = 'BODEGA' WHERE serial_number = ?", (serial,))
+                    # Actualizar ubicación a BODEGA y quitar paquete
+                    run_query(cursor, "UPDATE series_registradas SET ubicacion = 'BODEGA', paquete = NULL WHERE serial_number = ?", (serial,))
                 else:
                     # Insertar nuevo serial
                     run_query(cursor, """
-                        INSERT INTO series_registradas (sku, serial_number, ubicacion, fecha_ingreso)
-                        VALUES (?, ?, 'BODEGA', ?)
+                        INSERT INTO series_registradas (sku, serial_number, ubicacion, fecha_ingreso, paquete)
+                        VALUES (?, ?, 'BODEGA', ?, NULL)
                     """, (sku, serial, fecha_evento))
 
         conn.commit()
@@ -1312,14 +1314,13 @@ def obtener_inventario_para_exportar():
     finally:
         if conn: close_connection(conn)
 
-def obtener_todos_los_skus_para_movimiento():
+def obtener_todos_los_skus_para_movimiento(target_db=None, sucursal_context=None):
     """
-    Obtiene todos los SKUs y nombres únicos del inventario, y su cantidad en BODEGA (si existe), 
-    ordenados por secuencia de vista - CORREGIDO: SIN DUPLICADOS.
+    Obtiene todos los SKUs y nombres únicos del inventario, y su cantidad en BODEGA (si existe).
     """
     conn = None
     try:
-        conn = get_db_connection()
+        conn = get_db_connection(target_db=target_db)
         cursor = conn.cursor()
         
         # MODIFICADO: Obtener TODOS los productos únicos (no solo BODEGA)
@@ -1421,8 +1422,8 @@ def obtener_asignacion_movil_con_paquetes(movil):
             SELECT p.nombre, a.sku_producto, SUM(a.cantidad) as total
             FROM asignacion_moviles a
             JOIN productos p ON a.sku_producto = p.sku
-            WHERE a.movil = ? AND a.cantidad > 0
-            GROUP BY a.sku_producto, p.nombre, p.secuencia_vista  -- CORREGIDO: Agrupar para evitar duplicados
+            WHERE UPPER(TRIM(a.movil)) = UPPER(TRIM(?)) AND a.cantidad > 0
+            GROUP BY a.sku_producto, p.nombre, p.secuencia_vista
             ORDER BY p.secuencia_vista ASC
         """
         run_query(cursor, sql_total, (movil,))
@@ -1430,6 +1431,18 @@ def obtener_asignacion_movil_con_paquetes(movil):
 
         if not productos_asignados:
             return []
+
+        # --- NUEVO: Encontrar el punto de corte (última limpieza total) ---
+        # Solo procesamos movimientos posteriores a la última limpieza del móvil para evitar stock "fantasma"
+        sql_last_clean = """
+            SELECT MAX(id) FROM movimientos 
+            WHERE UPPER(TRIM(movil_afectado)) = UPPER(TRIM(?)) 
+            AND tipo_movimiento = 'LIMPIEZA_MOVIL' 
+            AND (paquete_asignado = 'TODOS' OR paquete_asignado IS NULL)
+        """
+        run_query(cursor, sql_last_clean, (movil,))
+        row_clean = cursor.fetchone()
+        last_cleaning_id = row_clean[0] if row_clean and row_clean[0] else 0
 
         resultado = []
 
@@ -1445,15 +1458,16 @@ def obtener_asignacion_movil_con_paquetes(movil):
                 "SIN_PAQUETE": 0
             }
 
-            # 3. Obtener TODOS los movimientos en orden real
+            # 3. Obtener movimientos posteriores a la limpieza en orden real
             sql_mov = """
                 SELECT tipo_movimiento, cantidad_afectada, paquete_asignado
                 FROM movimientos 
-                WHERE sku_producto = ? AND movil_afectado = ?
+                WHERE sku_producto = ? AND UPPER(TRIM(movil_afectado)) = UPPER(TRIM(?))
                 AND tipo_movimiento IN ('SALIDA_MOVIL','RETORNO_MOVIL','CONSUMO_MOVIL')
+                AND id > ?
                 ORDER BY fecha_movimiento ASC, id ASC
             """
-            run_query(cursor, sql_mov, (sku, movil))
+            run_query(cursor, sql_mov, (sku, movil, last_cleaning_id))
             movimientos = cursor.fetchall()
 
             # 4. Reprocesar EXACTAMENTE según los movimientos
@@ -1478,31 +1492,34 @@ def obtener_asignacion_movil_con_paquetes(movil):
             # 5. Recalcular total real de paquetes
             total_por_paquetes = sum(saldos.values())
 
-            # 6. Si no cuadra con asignacion_moviles, corregimos PERO SIN ALTERAR PAQUETES
+            # 6. Si no cuadra con asignacion_moviles, corregimos distribuyendo inteligentemente
+            # (Bugfix para cuando no hay historial completo de movimientos)
             if total_por_paquetes != total_real:
                 diferencia = total_real - total_por_paquetes
                 
-                # INTENTO DE ASIGNACIÓN INTELIGENTE (Bugfix para Cloud sin historial)
-                # Si hay diferencia (stock huérfano), intentamos asignarlo a su paquete correspondiente
+                # Intentamos llenar los paquetes según su capacidad teórica
                 from config import PAQUETES_MATERIALES
                 
-                # Extraer SKUs de cada paquete (ineficiente hacerlo en loop, pero seguro)
-                skus_a = set(item[0] for item in PAQUETES_MATERIALES.get("PAQUETE A", []))
-                skus_b = set(item[0] for item in PAQUETES_MATERIALES.get("PAQUETE B", []))
+                # Definir prioridades de llenado para la diferencia
+                prioridades = ["PAQUETE A", "PAQUETE B", "CARRO", "SIN_PAQUETE"]
                 
-                if sku in skus_a and sku not in skus_b:
-                    saldos["PAQUETE A"] += diferencia
-                elif sku in skus_b and sku not in skus_a:
-                    saldos["PAQUETE B"] += diferencia
-                elif sku in skus_a and sku in skus_b:
-                    # Si está en ambos, priorizamos A para asegurar visibilidad
-                    saldos["PAQUETE A"] += diferencia
-                else:
-                    # Si no está en ninguno, se queda con SIN_PAQUETE
-                    saldos["SIN_PAQUETE"] += diferencia
+                for p_key in prioridades:
+                    if diferencia == 0: break
                     
-                if saldos["SIN_PAQUETE"] < 0:
-                    saldos["SIN_PAQUETE"] = 0
+                    # Capacidad teórica del paquete para este SKU
+                    conf_paq = PAQUETES_MATERIALES.get(p_key, [])
+                    capacidad = next((cant for sku_p, cant in conf_paq if sku_p == sku), 0)
+                    
+                    if capacidad > 0:
+                        espacio_libre = capacidad - saldos.get(p_key, 0)
+                        if espacio_libre > 0:
+                            a_sumar = min(diferencia, espacio_libre)
+                            saldos[p_key] = saldos.get(p_key, 0) + a_sumar
+                            diferencia -= a_sumar
+                
+                # Si aún sobra diferencia (stock excedente), lo mandamos a SIN_PAQUETE
+                if diferencia != 0:
+                    saldos["SIN_PAQUETE"] = max(0, saldos.get("SIN_PAQUETE", 0) + diferencia)
 
 
             # Guardar resultado final para ese SKU
@@ -1627,6 +1644,11 @@ def obtener_abastos_resumen():
         conn = get_db_connection()
         cursor = conn.cursor()
         
+        # DETERMINAR FILTRO DE SUCURSAL
+        import os
+        is_santiago = os.environ.get('SANTIAGO_DIRECT_MODE') == '1'
+        sucursal_target = 'SANTIAGO' if is_santiago else 'CHIRIQUI'
+
         # Agrupar por fecha y documento de referencia (o "Sin Referencia" si es NULL)
         # Contar items y sumar total de unidades
         sql_query = """
@@ -1637,11 +1659,12 @@ def obtener_abastos_resumen():
                 SUM(cantidad_afectada) as total_unidades,
                 MAX(fecha_movimiento) as ultima_modificacion
             FROM movimientos
-            WHERE tipo_movimiento = 'ABASTO'
-            GROUP BY fecha_evento, documento_referencia
+            WHERE tipo_movimiento IN ('ABASTO', 'RETORNO_MOVIL', 'DEVOLUCION_SANTIAGO')
+            AND (sucursal = ? OR (sucursal IS NULL AND ? = 'CHIRIQUI'))
+            GROUP BY fecha_evento, documento_referencia, tipo_movimiento
             ORDER BY fecha_evento DESC, ultima_modificacion DESC
         """
-        run_query(cursor, sql_query)
+        run_query(cursor, sql_query, (sucursal_target, sucursal_target))
         return cursor.fetchall()
     except Exception as e:
         logger.error(f"Error al obtener resumen de abastos: {e}")
@@ -1656,6 +1679,11 @@ def obtener_detalle_abasto(fecha, referencia):
         conn = get_db_connection()
         cursor = conn.cursor()
         
+        # DETERMINAR FILTRO DE SUCURSAL
+        import os
+        is_santiago = os.environ.get('SANTIAGO_DIRECT_MODE') == '1'
+        sucursal_target = 'SANTIAGO' if is_santiago else 'CHIRIQUI'
+
         sql_query = """
             SELECT 
                 m.id,
@@ -1669,9 +1697,10 @@ def obtener_detalle_abasto(fecha, referencia):
             WHERE m.tipo_movimiento = 'ABASTO' 
             AND m.fecha_evento = ? 
             AND COALESCE(m.documento_referencia, 'Sin Referencia') = ?
+            AND (m.sucursal = ? OR (m.sucursal IS NULL AND ? = 'CHIRIQUI'))
             ORDER BY p.secuencia_vista ASC
         """
-        run_query(cursor, sql_query, (fecha, referencia))
+        run_query(cursor, sql_query, (fecha, referencia, sucursal_target, sucursal_target))
         return cursor.fetchall()
     except Exception as e:
         logger.error(f"Error al obtener detalle de abasto: {e}")
@@ -1933,7 +1962,13 @@ def obtener_estadisticas_reales():
         conn = get_db_connection()
         cursor = conn.cursor()
         
+        # DETERMINAR FILTRO DE SUCURSAL
+        import os
+        is_santiago = os.environ.get('SANTIAGO_DIRECT_MODE') == '1'
+        sucursal_target = 'SANTIAGO' if is_santiago else 'CHIRIQUI'
+        
         # 1. Productos en Bodega (contar productos únicos en BODEGA)
+        # Nota: Asumimos que los productos en BODEGA se comparten o se filtran por sucursal si se añade la columna
         run_query(cursor, """
             SELECT COUNT(DISTINCT sku) 
             FROM productos 
@@ -1941,13 +1976,17 @@ def obtener_estadisticas_reales():
         """)
         productos_bodega = cursor.fetchone()[0]
         
-        # 2. Móviles Activos (contar móviles con productos asignados)
-        run_query(cursor, """
-            SELECT COUNT(DISTINCT movil) 
-            FROM asignacion_moviles 
-            WHERE cantidad > 0
-        """)
-        moviles_activos = cursor.fetchone()[0]
+        # 2. Móviles Activos (contar móviles con productos asignados de esta sucursal)
+        if is_santiago:
+            # En Santiago Directo, no hay asignación de móviles tradicional
+            moviles_activos = 0
+        else:
+            run_query(cursor, """
+                SELECT COUNT(DISTINCT movil) 
+                FROM asignacion_moviles 
+                WHERE cantidad > 0
+            """)
+            moviles_activos = cursor.fetchone()[0]
         
         # 3. Stock Total (suma de todo el stock en BODEGA)
         run_query(cursor, """
@@ -1958,11 +1997,15 @@ def obtener_estadisticas_reales():
         stock_total_result = cursor.fetchone()[0]
         stock_total = stock_total_result if stock_total_result else 0
         
-        # 4. Préstamos Activos
-        run_query(cursor, "SELECT COUNT(*) FROM prestamos_activos WHERE estado = 'ACTIVO'")
-        prestamos_activos = cursor.fetchone()[0]
+        # 4. Préstamos Activos (Solo Santiago verá préstamos santiago)
+        if is_santiago:
+            run_query(cursor, "SELECT COUNT(*) FROM movimientos WHERE tipo_movimiento = 'PRESTAMO_SANTIAGO' AND sucursal = 'SANTIAGO'")
+            prestamos_activos = cursor.fetchone()[0]
+        else:
+            run_query(cursor, "SELECT COUNT(*) FROM prestamos_activos WHERE estado = 'ACTIVO'")
+            prestamos_activos = cursor.fetchone()[0]
         
-        # 5. Productos con Bajo Stock (Usando su propio minimo_stock - PUNTO 1)
+        # 5. Productos con Bajo Stock
         run_query(cursor, """
             SELECT COUNT(*) 
             FROM productos 
@@ -2127,6 +2170,23 @@ def eliminar_consumo_pendiente(id_consumo):
     finally:
         if conn: close_connection(conn)
 
+def eliminar_consumos_pendientes_por_movil(movil):
+    """Elimina todos los consumos pendientes de un móvil específico."""
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        # Usar LIKE o UPPER para mayor flexibilidad si es necesario
+        run_query(cursor, "DELETE FROM consumos_pendientes WHERE UPPER(movil) = UPPER(?)", (movil,))
+        conn.commit()
+        logger.info(f"🧹 Consumos pendientes eliminados para el móvil: {movil}")
+        return True, f"Consumos pendientes de {movil} eliminados."
+    except Exception as e:
+        logger.error(f"Error al eliminar consumos de {movil}: {e}")
+        return False, f"Error: {e}"
+    finally:
+        if conn: close_connection(conn)
+
 def obtener_consumos_pendientes(fecha_inicio=None, fecha_fin=None, estado=None, moviles_filtro=None, limite=None):
     """
     Obtiene consumos reportados por móviles filtrando opcionalmente por rango de fechas y móviles específicos.
@@ -2137,6 +2197,11 @@ def obtener_consumos_pendientes(fecha_inicio=None, fecha_fin=None, estado=None, 
         conn = get_db_connection()
         cursor = conn.cursor()
         
+        # DETERMINAR FILTRO DE SUCURSAL
+        from config import MOVILES_SANTIAGO, MOVILES_DISPONIBLES
+        import os
+        is_santiago = os.environ.get('SANTIAGO_DIRECT_MODE') == '1'
+        
         # Base query
         sql_query = """
             SELECT c.id, c.movil, c.sku, p.nombre, c.cantidad, c.tecnico_nombre, c.ticket, c.fecha, c.colilla, c.num_contrato, c.ayudante_nombre, c.seriales_usados
@@ -2144,7 +2209,15 @@ def obtener_consumos_pendientes(fecha_inicio=None, fecha_fin=None, estado=None, 
             LEFT JOIN productos p ON c.sku = p.sku AND p.ubicacion = 'BODEGA'
             WHERE 1=1
         """
-        params = []
+        
+        # AUTO-FILTRO POR SUCURSAL (Si no hay un filtro manual específico de móviles)
+        if not moviles_filtro or len(moviles_filtro) == 0:
+            target_moviles = MOVILES_SANTIAGO if is_santiago else MOVILES_DISPONIBLES
+            placeholders = ','.join(['?' for _ in target_moviles])
+            sql_query += f" AND c.movil IN ({placeholders})"
+            params = list(target_moviles)
+        else:
+            params = []
         
         # Filtro de estado optimizado
         if estado:
@@ -2242,6 +2315,11 @@ def obtener_ultimos_movimientos(limite=15):
         
         # Obtener movimientos según motor de base de datos (Optimizado para latencia y compatibilidad)
         
+        # DETERMINAR FILTRO DE SUCURSAL
+        import os
+        is_santiago = os.environ.get('SANTIAGO_DIRECT_MODE') == '1'
+        sucursal_target = 'SANTIAGO' if is_santiago else 'CHIRIQUI'
+
         if DB_TYPE == 'MYSQL':
             sql_query = """
                 SELECT 
@@ -2253,9 +2331,11 @@ def obtener_ultimos_movimientos(limite=15):
                     COALESCE(m.movil_afectado, '-') as detalle
                 FROM movimientos m
                 LEFT JOIN productos p ON m.sku_producto = p.sku AND p.ubicacion = 'BODEGA'
+                WHERE m.sucursal = %s OR (m.sucursal IS NULL AND %s = 'CHIRIQUI')
                 ORDER BY m.fecha_movimiento DESC
                 LIMIT %s
             """
+            cursor.execute(sql_query, (sucursal_target, sucursal_target, limite))
         else:
             sql_query = """
                 SELECT 
@@ -2267,11 +2347,12 @@ def obtener_ultimos_movimientos(limite=15):
                     COALESCE(m.movil_afectado, '-') as detalle
                 FROM movimientos m
                 LEFT JOIN productos p ON m.sku_producto = p.sku AND p.ubicacion = 'BODEGA'
+                WHERE m.sucursal = ? OR (m.sucursal IS NULL AND ? = 'CHIRIQUI')
                 ORDER BY m.fecha_movimiento DESC
                 LIMIT ?
             """
+            cursor.execute(sql_query, (sucursal_target, sucursal_target, limite))
         
-        cursor.execute(sql_query, (limite,))
         return cursor.fetchall()
         
     except Exception as e:
@@ -2562,11 +2643,12 @@ def verificar_serie_existe(serial, sku=None, ubicacion_requerida=None, estado_re
     finally:
         if conn: close_connection(conn)
 
-def registrar_series_bulk(series_data, fecha_ingreso=None):
+def registrar_series_bulk(series_data, fecha_ingreso=None, paquete=None):
     """
     Registra múltiples series en una transacción.
     series_data: Lista de dicts [{sku, serial, mac, ubicacion}, ...]
     fecha_ingreso: Opcional, fecha de registro (YYYY-MM-DD)
+    paquete: Opcional, paquete al que pertenecen (ej: PAQUETE A)
     """
     if not fecha_ingreso:
         fecha_ingreso = date.today().isoformat()
@@ -2580,15 +2662,17 @@ def registrar_series_bulk(series_data, fecha_ingreso=None):
         ph = '%s' if DB_TYPE == 'MYSQL' else '?'
         
         sql = f"""
-            INSERT INTO series_registradas (sku, serial_number, mac_number, estado, ubicacion, fecha_ingreso)
-            VALUES ({ph}, {ph}, {ph}, 'DISPONIBLE', {ph}, {ph})
+            INSERT INTO series_registradas (sku, serial_number, mac_number, estado, ubicacion, fecha_ingreso, paquete)
+            VALUES ({ph}, {ph}, {ph}, 'DISPONIBLE', {ph}, {ph}, {ph})
         """
         
-        # Preparar datos (SKU, SERIAL, MAC, UBICACION, FECHA)
+        # Preparar datos (SKU, SERIAL, MAC, UBICACION, FECHA, PAQUETE)
         data_to_insert = []
         for item in series_data:
             mac = item.get('mac') # Puede ser None
-            data_to_insert.append((item['sku'], item['serial'], mac, item['ubicacion'], fecha_ingreso))
+            # Priorizar paquete del item, luego el global
+            item_paquete = item.get('paquete', paquete)
+            data_to_insert.append((item['sku'], item['serial'], mac, item['ubicacion'], fecha_ingreso, item_paquete))
             
         cursor.executemany(sql, data_to_insert)
         conn.commit()
@@ -3129,14 +3213,6 @@ def actualizar_codigo_barra_maestro(sku, codigo_barra_maestro):
 def registrar_abasto_batch(items_abasto, fecha_evento, numero_abasto=None):
     """
     Registra múltiples items de abasto en una sola transacción.
-    
-    Args:
-        items_abasto: Lista de dicts [{'sku': '1-2-16', 'cantidad': 50, 'seriales': []}, ...]
-        fecha_evento: Fecha del abasto
-        numero_abasto: Número opcional del abasto
-    
-    Returns:
-        tuple (exito: bool, mensaje: str)
     """
     conn = None
     try:
@@ -3150,7 +3226,12 @@ def registrar_abasto_batch(items_abasto, fecha_evento, numero_abasto=None):
             cursor.execute("BEGIN IMMEDIATE")
         
         total_unidades = 0
+        series_globales = []
         
+        # SUCURSAL CONTEXTO
+        import os
+        sucursal = 'SANTIAGO' if os.environ.get('SANTIAGO_DIRECT_MODE') == '1' else 'CHIRIQUI'
+
         for item in items_abasto:
             sku = item['sku']
             cantidad = item['cantidad']
@@ -3159,71 +3240,54 @@ def registrar_abasto_batch(items_abasto, fecha_evento, numero_abasto=None):
             observacion = f"Abasto por escaneo"
             if numero_abasto:
                 observacion += f" #{numero_abasto}"
-            if seriales:
-                observacion += f" ({len(seriales)} equipos con seriales)"
             
-            # Registrar movimiento usando existing_conn
+            # 1. Registrar movimiento
+            # The original instruction snippet was a bit confusing, assuming the intent is to pass 'sucursal'
+            # to registrar_movimiento_gui if it supports it, or to directly insert if not.
+            # Given the existing call, we'll add 'sucursal' as a new argument.
             exito, msg = registrar_movimiento_gui(
                 sku=sku,
                 tipo_movimiento='ABASTO',
                 cantidad_afectada=cantidad,
                 fecha_evento=fecha_evento,
-                observaciones=observacion,
+                documento_referencia=numero_abasto,
                 existing_conn=conn
             )
             
             if not exito:
                 conn.rollback()
-                logger.error(f"Error registrando abasto para {sku}: {msg}")
                 return False, f"Error en {sku}: {msg}"
             
-            # Registrar seriales si aplica
+            # 2. Preparar seriales para registro masivo
             if seriales:
                 for ser_item in seriales:
-                    try:
-                        # Extraer serial y mac dependiendo del formato (dict o str)
-                        if isinstance(ser_item, dict):
-                            serial_val = ser_item.get('serial')
-                            mac_val = ser_item.get('mac')
-                        else:
-                            serial_val = str(ser_item)
-                            mac_val = None
-                        
-                        if not serial_val:
-                            continue
-
-                        # Verificar si el serial ya existe
-                        run_query(cursor, """
-                            SELECT COUNT(*) FROM series_registradas 
-                            WHERE serial_number = ?
-                        """, (serial_val,))
-                        
-                        if cursor.fetchone()[0] > 0:
-                            conn.rollback()
-                            return False, f"El serial '{serial_val}' ya está registrado en el sistema"
-                        
-                        # Insertar serial con soporte para MAC
-                        run_query(cursor, """
-                            INSERT INTO series_registradas 
-                            (sku, serial_number, mac_number, estado, ubicacion, fecha_ingreso)
-                            VALUES (?, ?, ?, 'DISPONIBLE', 'BODEGA', ?)
-                        """, (sku, serial_val, mac_val, fecha_evento))
-                        
-                    except Exception as e:
-                        if conn: conn.rollback()
-                        # Ensure ser_item is printable and not causing further issues
-                        err_detail = str(ser_item)
-                        logger.error(f"Error registrando serial {err_detail}: {e}")
-                        return False, f"Error registrando serial {err_detail}: {e}"
+                    if isinstance(ser_item, dict):
+                        s_val = ser_item.get('serial')
+                        m_val = ser_item.get('mac')
+                    else:
+                        s_val = str(ser_item)
+                        m_val = None
+                    
+                    if s_val:
+                        series_globales.append({
+                            'sku': sku,
+                            'serial': s_val,
+                            'mac': m_val,
+                            'ubicacion': 'BODEGA'
+                        })
             
             total_unidades += cantidad
         
-        # Commit de toda la transacción
+        # 3. Registrar todas las series (usando la función robusta que ya actualizamos)
+        if series_globales:
+            # Importante: Aquí 'paquete' es None porque es BODEGA inicial
+            ok_s, msg_s = registrar_series_bulk(series_globales, fecha_ingreso=fecha_evento, paquete=None)
+            if not ok_s:
+                conn.rollback()
+                return False, msg_s
+                
         conn.commit()
-        
-        mensaje_exito = f"Abasto registrado exitosamente: {len(items_abasto)} productos, {total_unidades} unidades totales"
-        logger.info(mensaje_exito)
-        return True, mensaje_exito
+        return True, f"Abasto registrado: {len(items_abasto)} productos, {total_unidades} unidades."
         
     except Exception as e:
         if conn:
@@ -3238,6 +3302,31 @@ def registrar_abasto_batch(items_abasto, fecha_evento, numero_abasto=None):
 
 
 
+def eliminar_consumos_pendientes_por_movil(movil):
+    """
+    Elimina todos los consumos pendientes asociados a un móvil específico.
+    """
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        ph = '%s' if DB_TYPE == 'MYSQL' else '?'
+        
+        # Eliminar consumos pendientes
+        sql_del = f"DELETE FROM consumos_pendientes WHERE UPPER(TRIM(movil)) = UPPER(TRIM({ph}))"
+        cursor.execute(sql_del, (movil,))
+        count = cursor.rowcount
+        
+        conn.commit()
+        logger.info(f"📋 Consumos pendientes eliminados para {movil}: {count} registros.")
+        return True, f"Se han eliminado {count} consumos pendientes para el {movil}."
+    except Exception as e:
+        if conn: conn.rollback()
+        logger.error(f"Error al eliminar consumos pendientes: {e}")
+        return False, f"Error al eliminar consumos: {e}"
+    finally:
+        if conn: close_connection(conn)
+
 def resetear_stock_movil(movil, paquete):
     """
     Elimina la asignación de un móvil para un paquete específico o para TODO.
@@ -3250,49 +3339,41 @@ def resetear_stock_movil(movil, paquete):
         
         # Caso 1: Resetear TODO el móvil
         if paquete == 'TODOS':
-            sql_check = f"SELECT SUM(cantidad) FROM asignacion_moviles WHERE movil = {ph}"
+            # Usar UPPER y TRIM para robustez en MySQL
+            sql_check = f"SELECT SUM(cantidad) FROM asignacion_moviles WHERE UPPER(TRIM(movil)) = UPPER(TRIM({ph}))"
             cursor.execute(sql_check, (movil,))
             res = cursor.fetchone()
             total_items = res[0] if res and res[0] else 0
             
-            if total_items == 0:
-                # Verificar si hay series huérfanas antes de decir que está vacío
-                sql_check_series = f"SELECT COUNT(*) FROM series_registradas WHERE ubicacion = {ph}"
-                cursor.execute(sql_check_series, (movil,))
-                if cursor.fetchone()[0] == 0:
-                    return True, f"El {movil} ya está completamente vacío."
-                
-            sql_del = f"DELETE FROM asignacion_moviles WHERE movil = {ph}"
+            sql_del = f"DELETE FROM asignacion_moviles WHERE UPPER(TRIM(movil)) = UPPER(TRIM({ph}))"
             cursor.execute(sql_del, (movil,))
             
-            # --- NUEVO: Resetear Series (Equipos) ---
-            sql_reset_series = f"UPDATE series_registradas SET ubicacion = 'BODEGA', estado = 'DISPONIBLE' WHERE ubicacion = {ph}"
+            # --- Resetear Series (Equipos) ---
+            sql_reset_series = f"UPDATE series_registradas SET ubicacion = 'BODEGA', estado = 'DISPONIBLE', paquete = NULL WHERE UPPER(TRIM(ubicacion)) = UPPER(TRIM({ph}))"
             cursor.execute(sql_reset_series, (movil,))
+
+            # --- Limpiar Consumos Pendientes (TOTAL) ---
+            sql_del_cons = f"DELETE FROM consumos_pendientes WHERE UPPER(TRIM(movil)) = UPPER(TRIM({ph}))"
+            cursor.execute(sql_del_cons, (movil,))
             
             observacion = "Limpieza TOTAL del móvil (PIN 0440)"
         
         # Caso 2: Resetear un paquete específico
         else:
-            sql_check = f"SELECT SUM(cantidad) FROM asignacion_moviles WHERE movil = {ph} AND COALESCE(paquete, 'NINGUNO') = {ph}"
+            sql_check = f"SELECT SUM(cantidad) FROM asignacion_moviles WHERE UPPER(TRIM(movil)) = UPPER(TRIM({ph})) AND COALESCE(paquete, 'NINGUNO') = {ph}"
             cursor.execute(sql_check, (movil, paquete))
             res = cursor.fetchone()
             total_items = res[0] if res and res[0] else 0
             
-            # Obtener SKUs del paquete para limpiar series asociadas
-            from config import PAQUETES_MATERIALES
-            skus_paquete = [sku for sku, cant in PAQUETES_MATERIALES.get(paquete, [])]
-            
-            if total_items == 0 and not skus_paquete:
-                return True, f"El {movil} ya está vacío para el {paquete}."
-                
-            sql_del = f"DELETE FROM asignacion_moviles WHERE movil = {ph} AND COALESCE(paquete, 'NINGUNO') = {ph}"
+            sql_del = f"DELETE FROM asignacion_moviles WHERE UPPER(TRIM(movil)) = UPPER(TRIM({ph})) AND COALESCE(paquete, 'NINGUNO') = {ph}"
             cursor.execute(sql_del, (movil, paquete))
 
-            # --- NUEVO: Resetear Series correspondientes al paquete ---
-            # Ahora usamos la columna 'paquete' para mayor precisión
-            sql_reset_series = f"UPDATE series_registradas SET ubicacion = 'BODEGA', estado = 'DISPONIBLE', paquete = NULL WHERE ubicacion = {ph} AND paquete = {ph}"
+            # --- Resetear Series correspondientes al paquete ---
+            sql_reset_series = f"UPDATE series_registradas SET ubicacion = 'BODEGA', estado = 'DISPONIBLE', paquete = NULL WHERE UPPER(TRIM(ubicacion)) = UPPER(TRIM({ph})) AND paquete = {ph}"
             cursor.execute(sql_reset_series, (movil, paquete))
             
+            # NOTA: No limpiamos consumos por paquete porque los consumos no tienen campo 'paquete' en la tabla consumos_pendientes originalmente.
+            # Pero enviamos un aviso si hay consumos.
             observacion = f"Limpieza de {paquete} (PIN 0440)"
         
         # Registrar movimiento de 'LIMPIEZA'
@@ -3304,8 +3385,8 @@ def resetear_stock_movil(movil, paquete):
         run_query(cursor, sql_mov, (total_items, movil, paquete, observacion))
         
         conn.commit()
-        logger.info(f"🧹 Móvil {movil} ({paquete}) limpiado: {total_items} unidades eliminadas.")
-        return True, f"Se ha limpiado el {movil} ({paquete}) correctamente. Se eliminaron registros de {total_items} unidades."
+        logger.info(f"🧹 Móvil {movil} ({paquete}) limpiado: {total_items} registros eliminados.")
+        return True, f"Se ha limpiado el {movil} ({paquete}) correctamente. Se eliminaron registros de {total_items} unidades de stock."
         
     except Exception as e:
         if conn: conn.rollback()
@@ -3313,3 +3394,99 @@ def resetear_stock_movil(movil, paquete):
         return False, f"Error al resetear stock: {e}"
     finally:
         if conn: close_connection(conn)
+
+def registrar_danado_directo(sku, cantidad, tecnico, observaciones=None, seriales=None):
+    """
+    Registra material o equipos DAÑADOS directamente de la bodega de Santiago.
+    Equivalente a un DESCARTE directo.
+    """
+    from config import UBICACION_DESCARTE, TIPO_MOVIMIENTO_DESCARTE
+    from datetime import date
+    
+    # Reutilizamos la lógica de consumo directo pero con tipo DESCARTE
+    # y sin necesidad de móvil (aunque podemos guardarlo en observaciones)
+    return registrar_consumo_directo(
+        sku=sku,
+        cantidad=cantidad,
+        movil='BODEGA',
+        tecnico=tecnico,
+        fecha_evento=date.today().isoformat(),
+        seriales=seriales,
+        observaciones=observaciones if observaciones else "Reporte de Material Dañado (Santiago)",
+        tipo_custom=TIPO_MOVIMIENTO_DESCARTE
+    )
+
+def registrar_consumo_directo(sku, cantidad, movil, tecnico, ayudante=None, ticket=None, colilla=None, fecha_evento=None, seriales=None, observaciones=None, tipo_custom=None, target_db=None, sucursal_context=None):
+    """
+    Registra un consumo directo desde BODEGA para la sucursal de Santiago.
+    """
+    conn = None
+    try:
+        conn = get_db_connection(target_db=target_db)
+        cursor = conn.cursor()
+        
+        from datetime import date
+        if not fecha_evento: fecha_evento = date.today().isoformat()
+        
+        # 1. Verificar stock en BODEGA
+        run_query(cursor, "SELECT cantidad, nombre FROM productos WHERE sku = ? AND ubicacion = 'BODEGA'", (sku,))
+        res = cursor.fetchone()
+        if not res:
+            return False, f"El producto {sku} no existe en Bodega."
+        
+        stock_actual, nombre_prod = res
+        if stock_actual < cantidad:
+            return False, f"Stock insuficiente en Bodega Santiago ({stock_actual} disponibles)."
+            
+        # 2. Restar de Bodega
+        run_query(cursor, "UPDATE productos SET cantidad = cantidad - ? WHERE sku = ? AND ubicacion = 'BODEGA'", (cantidad, sku))
+        
+        # 3. Registrar Movimiento
+        tipo_mov = tipo_custom if tipo_custom else 'CONSUMO_DIRECTO'
+        obs_mov = observaciones or f"Consumo Directo Santiago - Ticket: {ticket}"
+        
+        # SUCURSAL CONTEXTO
+        import os
+        sucursal = sucursal_context or ('SANTIAGO' if os.environ.get('SANTIAGO_DIRECT_MODE') == '1' else 'CHIRIQUI')
+
+        sql_mov = """
+            INSERT INTO movimientos (sku_producto, tipo_movimiento, cantidad_afectada, movil_afectado, 
+                                   fecha_evento, observaciones, documento_referencia, sucursal) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """
+        run_query(cursor, sql_mov, (sku, tipo_mov, cantidad, movil, fecha_evento, obs_mov, ticket, sucursal))
+        
+        # 4. Registrar en consumos_pendientes (Audit Trail)
+        seriales_json = json.dumps(seriales) if seriales else None
+        
+        # En consumos_pendientes, el ticket se guarda en 'ticket' y 'num_contrato'
+        run_query(cursor, """
+            INSERT INTO consumos_pendientes 
+            (movil, sku, cantidad, tecnico_nombre, ayudante_nombre, ticket, fecha, colilla, num_contrato, seriales_usados, estado)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'AUTO_APROBADO')
+        """, (movil, sku, cantidad, tecnico, ayudante or '', ticket, fecha_evento, colilla or '', ticket, seriales_json))
+        
+        # 5. Manejar Seriales
+        if seriales:
+            # Si es descarte, marcamos como tal, si no como consumido (Baja)
+            new_loc = 'CONSUMIDO'
+            new_status = 'BAJA'
+            if tipo_mov == 'DESCARTE':
+                new_loc = 'DESCARTE'
+                new_status = 'DESCARTE'
+                
+            for sn in seriales:
+                # Actualizar tanto por serial como por MAC por seguridad
+                run_query(cursor, "UPDATE series_registradas SET ubicacion = ?, estado = ? WHERE serial_number = ? OR mac_number = ?", 
+                          (new_loc, new_status, sn, sn))
+                
+        conn.commit()
+        return True, f"Consumo directo de {cantidad} {nombre_prod} registrado exitosamente."
+        
+    except Exception as e:
+        if conn: conn.rollback()
+        logger.error(f"Error en registrar_consumo_directo: {e}")
+        return False, str(e)
+    finally:
+        if conn: close_connection(conn)
+
