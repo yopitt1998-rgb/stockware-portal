@@ -781,7 +781,18 @@
         // ─── CAMERA SCANNER ─────────────────────────────────────────────
         async function startCamera() {
             try {
-                codeReader = new ZXing.BrowserMultiFormatReader();
+                // Configurar Hints para que ZXing pruebe formatos específicos (mejora rendimiento)
+                const hints = new Map();
+                hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
+                    ZXing.BarcodeFormat.CODE_128,
+                    ZXing.BarcodeFormat.CODE_39,
+                    ZXing.BarcodeFormat.EAN_13,
+                    ZXing.BarcodeFormat.QR_CODE,
+                    ZXing.BarcodeFormat.DATA_MATRIX
+                ]);
+                hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+
+                codeReader = new ZXing.BrowserMultiFormatReader(hints);
                 availableCameras = await codeReader.listVideoInputDevices();
 
                 if (availableCameras.length === 0) throw new Error('No cameras found');
@@ -807,25 +818,52 @@
             const deviceId = availableCameras[currentDeviceIndex].deviceId;
             isScanning = true;
             try {
-                await codeReader.decodeFromVideoDevice(deviceId, 'scanVideo', async (result, err) => {
+                // Forzar resolución HD y auto-focus si el dispositivo lo soporta
+                const constraints = {
+                    video: {
+                        deviceId: deviceId ? { exact: deviceId } : undefined,
+                        width: { min: 640, ideal: 1280, max: 1920 },
+                        height: { min: 480, ideal: 720, max: 1080 },
+                        focusMode: "continuous",
+                        advanced: [{ zoom: 2.0 }] // Zoom leve si está disponible para acercar el código
+                    }
+                };
+
+                await codeReader.decodeFromConstraints(constraints, 'scanVideo', async (result, err) => {
                     if (result && isScanning) {
-                        isScanning = false; // Debounce: pause until next openScanner
+                        isScanning = false; // Debounce
                         const text = result.getText();
-                        // Short pause so user sees the detected result
                         setTimeout(async () => {
                             await addSerial(text);
-                            // Flash video briefly
                             document.getElementById('scanVideo').style.filter = 'brightness(3)';
                             setTimeout(() => {
                                 document.getElementById('scanVideo').style.filter = '';
                                 isScanning = true;
-                            }, 1000); // 1 sec cooldown before scanning again
+                            }, 1000); // 1 sec cooldown
                         }, 100);
                     }
                 });
             } catch (e) {
                 console.warn('Reader error:', e);
-                showCameraFallback();
+                // Fallback a configuración básica si las constraints avanzadas fallan
+                try {
+                    await codeReader.decodeFromVideoDevice(deviceId, 'scanVideo', async (result, err) => {
+                        if (result && isScanning) {
+                            isScanning = false;
+                            const text = result.getText();
+                            setTimeout(async () => {
+                                await addSerial(text);
+                                document.getElementById('scanVideo').style.filter = 'brightness(3)';
+                                setTimeout(() => {
+                                    document.getElementById('scanVideo').style.filter = '';
+                                    isScanning = true;
+                                }, 1000);
+                            }, 100);
+                        }
+                    });
+                } catch (e2) {
+                    showCameraFallback();
+                }
             }
         }
 
