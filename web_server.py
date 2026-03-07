@@ -232,6 +232,62 @@ def registrar_santiago_post():
         logger.error(f"Error en registrar_santiago: {e}")
         return jsonify({"exito": False, "mensaje": str(e)})
 
+@app.route('/api/validar_serial')
+def api_validar_serial():
+    """Valida que un serial/MAC exista, esté en BODEGA y corresponda al SKU indicado."""
+    serial = request.args.get('serial', '').strip()
+    movil = request.args.get('movil', '').strip()
+    sku = request.args.get('sku', '').strip()
+    
+    if not serial or not movil or not sku:
+        return jsonify({"exito": False, "mensaje": "Falta serial, móvil o SKU de referencia."})
+        
+    conn = None
+    try:
+        from database import get_db_connection, run_query
+        from config import MOVILES_SANTIAGO, MYSQL_DB_SANTIAGO
+        
+        sucursal = 'SANTIAGO' if movil in MOVILES_SANTIAGO else 'CHIRIQUI'
+        target_db = MYSQL_DB_SANTIAGO if sucursal == 'SANTIAGO' else None
+        
+        conn = get_db_connection(target_db=target_db)
+        cursor = conn.cursor()
+        
+        clean_sn = serial.upper()
+        
+        # Verificar la existencia, ubicación y SKU
+        sql = """
+            SELECT sku, ubicacion, estado 
+            FROM series_registradas 
+            WHERE (UPPER(serial_number) = ? OR UPPER(mac_number) = ?)
+            AND sucursal = ?
+        """
+        run_query(cursor, sql, (clean_sn, clean_sn, sucursal))
+        result = cursor.fetchone()
+        
+        if not result:
+            return jsonify({"exito": False, "mensaje": f"El serial/MAC {clean_sn} no existe en nuestra base de datos."})
+            
+        db_sku, db_ubicacion, db_estado = result
+        
+        if db_ubicacion != 'BODEGA':
+            return jsonify({"exito": False, "mensaje": f"El equipo no está en BODEGA (Ubicación actual: {db_ubicacion})."})
+            
+        if db_sku != sku:
+            # Obtener nombre real para mensaje de error más claro si es posible
+            run_query(cursor, "SELECT nombre FROM productos WHERE sku = ?", (db_sku,))
+            n = cursor.fetchone()
+            nombre_err = n[0] if n else "Otro producto"
+            return jsonify({"exito": False, "mensaje": f"El serial corresponde a: {nombre_err} (SKU: {db_sku}), pero se esperaba este producto (SKU: {sku})."})
+            
+        return jsonify({"exito": True, "mensaje": "Validado"})
+        
+    except Exception as e:
+        return jsonify({"exito": False, "mensaje": f"Error verificando: {e}"})
+    finally:
+        if conn:
+            conn.close()
+
 @app.route('/debug/productos')
 def debug_productos():
     """Endpoint de diagnóstico para verificar productos en BD"""
@@ -527,7 +583,8 @@ def registrar_bulk():
                     observaciones=obs,
                     documento_referencia=data.get('contrato'),
                     existing_conn=conn, # Usar misma conexión
-                    sucursal_context=sucursal_ctx
+                    sucursal_context=sucursal_ctx,
+                    seriales=seriales # ← NUEVO: Pasar lista de seriales para observaciones
                 )
                 
                 if not exito_mov:
@@ -541,8 +598,8 @@ def registrar_bulk():
             # Esto permite que en la PC se vea el registro, pero marcado como ya procesado
             run_query(cursor, """
                 INSERT INTO consumos_pendientes 
-                (movil, sku, cantidad, tecnico_nombre, ayudante_nombre, ticket, fecha, colilla, num_contrato, seriales_usados, estado)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'AUTO_APROBADO')
+                (movil, sku, cantidad, tecnico_nombre, ayudante_nombre, ticket, fecha, colilla, num_contrato, seriales_usados, estado, paquete, sucursal)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'AUTO_APROBADO', ?, ?)
             """, (
                 data['movil'],
                 sku,
@@ -553,7 +610,9 @@ def registrar_bulk():
                 data['fecha'],
                 data['colilla'],
                 data['contrato'],  # num_contrato
-                seriales_json
+                seriales_json,
+                data.get('paquete', 'NINGUNO'),
+                sucursal_ctx
             ))
             
             # 3. Actualizar ubicación de series a CONSUMIDO (Redundante si registrar_movimiento lo hace, pero seguro)

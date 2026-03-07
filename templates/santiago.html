@@ -16,7 +16,9 @@
             --dark: #2f3640;
         }
 
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+        }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -34,8 +36,17 @@
             text-align: center;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
         }
-        .header h1 { margin: 0; font-size: 22px; }
-        .header p { margin: 5px 0 0; font-size: 13px; opacity: 0.8; }
+
+        .header h1 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .header p {
+            margin: 5px 0 0;
+            font-size: 13px;
+            opacity: 0.8;
+        }
 
         .container {
             max-width: 600px;
@@ -63,7 +74,9 @@
             font-size: 15px;
         }
 
-        .form-group { margin-bottom: 15px; }
+        .form-group {
+            margin-bottom: 15px;
+        }
 
         label {
             display: block;
@@ -72,7 +85,8 @@
             font-weight: 600;
         }
 
-        select, input {
+        select,
+        input {
             width: 100%;
             padding: 12px;
             border: 2px solid #dfe6e9;
@@ -80,7 +94,9 @@
             font-size: 16px;
             transition: border-color 0.2s;
         }
-        select:focus, input:focus {
+
+        select:focus,
+        input:focus {
             outline: none;
             border-color: var(--accent);
         }
@@ -93,9 +109,16 @@
             border-bottom: 1px solid #f1f2f6;
             gap: 10px;
         }
-        .material-item:last-child { border-bottom: none; }
 
-        .material-info { flex: 1; min-width: 0; }
+        .material-item:last-child {
+            border-bottom: none;
+        }
+
+        .material-info {
+            flex: 1;
+            min-width: 0;
+        }
+
         .material-name {
             font-weight: bold;
             font-size: 15px;
@@ -104,7 +127,12 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .material-sku { font-size: 12px; color: #7f8c8d; }
+
+        .material-sku {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
         .stock-badge {
             font-size: 11px;
             padding: 2px 8px;
@@ -115,7 +143,12 @@
             display: inline-block;
         }
 
-        .actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+        .actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-shrink: 0;
+        }
 
         .qty-input {
             width: 65px !important;
@@ -136,7 +169,10 @@
             white-space: nowrap;
             transition: background 0.2s;
         }
-        .scan-btn:active { background: #d35400; }
+
+        .scan-btn:active {
+            background: #d35400;
+        }
 
         .badge-ok {
             color: var(--success);
@@ -172,8 +208,15 @@
             box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
             transition: transform 0.1s;
         }
-        .submit-btn:active { transform: scale(0.98); }
-        .submit-btn:disabled { background: #95a5a6; cursor: default; }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        .submit-btn:disabled {
+            background: #95a5a6;
+            cursor: default;
+        }
 
         /* ─── ALERT ─── */
         .alert {
@@ -191,9 +234,18 @@
             text-align: center;
             max-width: 90vw;
         }
-        .alert-success { background: #2ecc71; }
-        .alert-error   { background: #e74c3c; }
-        .alert-info    { background: #3498db; }
+
+        .alert-success {
+            background: #2ecc71;
+        }
+
+        .alert-error {
+            background: #e74c3c;
+        }
+
+        .alert-info {
+            background: #3498db;
+        }
 
         /* ─── MODAL BASE ─── */
         .modal {
@@ -206,7 +258,10 @@
             align-items: flex-end;
             padding: 0;
         }
-        .modal.active { display: flex; }
+
+        .modal.active {
+            display: flex;
+        }
 
         .modal-content {
             background: white;
@@ -216,9 +271,15 @@
             overflow: hidden;
             animation: slideUp 0.25s ease;
         }
+
         @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to   { transform: translateY(0); }
+            from {
+                transform: translateY(100%);
+            }
+
+            to {
+                transform: translateY(0);
+            }
         }
 
         /* ─── MODAL HEADER ─── */
@@ -230,9 +291,15 @@
             justify-content: space-between;
             align-items: center;
         }
-        .modal-header h3 { margin: 0; font-size: 16px; flex: 1; }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 16px;
+            flex: 1;
+        }
+
         .modal-close {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             border: none;
             color: white;
             font-size: 20px;
@@ -246,7 +313,10 @@
         }
 
         /* ─── CAMERA VIEW ─── */
-        .camera-panel { position: relative; background: black; }
+        .camera-panel {
+            position: relative;
+            background: black;
+        }
 
         #scanVideo {
             width: 100%;
@@ -263,16 +333,18 @@
             justify-content: center;
             pointer-events: none;
         }
+
         .scan-frame {
             width: min(65vw, 240px);
             height: min(65vw, 240px);
-            border: 3px solid rgba(255,255,255,0.5);
+            border: 3px solid rgba(255, 255, 255, 0.5);
             border-radius: 16px;
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
         }
+
         /* Corner markers */
         .scan-frame::before,
         .scan-frame::after {
@@ -283,37 +355,58 @@
             border-color: var(--accent);
             border-style: solid;
         }
+
         .scan-frame::before {
-            top: -3px; left: -3px;
+            top: -3px;
+            left: -3px;
             border-width: 4px 0 0 4px;
             border-radius: 8px 0 0 0;
         }
+
         .scan-frame::after {
-            bottom: -3px; right: -3px;
+            bottom: -3px;
+            right: -3px;
             border-width: 0 4px 4px 0;
             border-radius: 0 0 8px 0;
         }
+
         /* Scan line animation */
         .scan-line {
             position: absolute;
-            left: 8px; right: 8px;
+            left: 8px;
+            right: 8px;
             height: 2px;
             background: linear-gradient(90deg, transparent, var(--accent), transparent);
             animation: scanAnim 2s ease-in-out infinite;
         }
+
         @keyframes scanAnim {
-            0%   { top: 10%;  opacity: 0; }
-            10%  { opacity: 1; }
-            90%  { opacity: 1; }
-            100% { top: 90%; opacity: 0; }
+            0% {
+                top: 10%;
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                top: 90%;
+                opacity: 0;
+            }
         }
 
         .camera-hint {
             position: absolute;
             bottom: 10px;
-            left: 0; right: 0;
+            left: 0;
+            right: 0;
             text-align: center;
-            color: rgba(255,255,255,0.85);
+            color: rgba(255, 255, 255, 0.85);
             font-size: 13px;
             text-shadow: 0 1px 3px black;
         }
@@ -326,9 +419,10 @@
             background: #1a252f;
             justify-content: center;
         }
+
         .cam-btn {
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             color: white;
             padding: 8px 16px;
             border-radius: 20px;
@@ -338,26 +432,34 @@
             align-items: center;
             gap: 6px;
         }
-        .cam-btn:active { background: rgba(255,255,255,0.3); }
+
+        .cam-btn:active {
+            background: rgba(255, 255, 255, 0.3);
+        }
 
         /* ─── MANUAL FALLBACK ─── */
         .manual-panel {
             padding: 15px 20px;
             display: none;
         }
-        .manual-panel.visible { display: block; }
+
+        .manual-panel.visible {
+            display: block;
+        }
 
         .manual-input-row {
             display: flex;
             gap: 10px;
             align-items: stretch;
         }
+
         .manual-input-row input {
             flex: 1;
             font-size: 18px;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
+
         .add-serial-btn {
             background: var(--success);
             color: white;
@@ -370,7 +472,10 @@
         }
 
         /* ─── SERIAL LIST ─── */
-        .serials-panel { padding: 0 20px 15px; }
+        .serials-panel {
+            padding: 0 20px 15px;
+        }
+
         .serials-title {
             font-size: 13px;
             color: #7f8c8d;
@@ -378,6 +483,7 @@
             display: flex;
             justify-content: space-between;
         }
+
         .serial-tag {
             display: inline-flex;
             align-items: center;
@@ -390,6 +496,7 @@
             margin: 3px 4px 3px 0;
             gap: 6px;
         }
+
         .serial-remove {
             background: none;
             border: none;
@@ -406,8 +513,15 @@
             text-align: center;
             display: none;
         }
-        .no-camera.visible { display: block; }
-        .no-camera p { color: #7f8c8d; margin-bottom: 15px; }
+
+        .no-camera.visible {
+            display: block;
+        }
+
+        .no-camera p {
+            color: #7f8c8d;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 
@@ -462,12 +576,8 @@
             <!-- Manual input (toggle or always-on fallback) -->
             <div class="manual-panel" id="manualPanel">
                 <div class="manual-input-row">
-                    <input type="text" id="scanInput"
-                        placeholder="MAC / Serial..."
-                        autocomplete="off"
-                        autocorrect="off"
-                        autocapitalize="characters"
-                        spellcheck="false">
+                    <input type="text" id="scanInput" placeholder="MAC / Serial..." autocomplete="off" autocorrect="off"
+                        autocapitalize="characters" spellcheck="false">
                     <button class="add-serial-btn" onclick="addManualSerial()">➕</button>
                 </div>
             </div>
@@ -483,8 +593,7 @@
 
             <!-- Done button -->
             <div style="padding: 10px 20px 20px;">
-                <button onclick="closeScanner()"
-                    style="width:100%; background:var(--primary); color:white; border:none;
+                <button onclick="closeScanner()" style="width:100%; background:var(--primary); color:white; border:none;
                            padding:14px; border-radius:10px; font-size:16px; font-weight:bold; cursor:pointer;">
                     ✅ Listo (cerrar)
                 </button>
@@ -533,8 +642,7 @@
                         </button>
                         <div id="badge-{{ p.sku }}" class="badge-ok" style="display:none;">✅ 0</div>
                         {% else %}
-                        <input type="number" class="qty-input" data-sku="{{ p.sku }}"
-                            min="0" placeholder="0"
+                        <input type="number" class="qty-input" data-sku="{{ p.sku }}" min="0" placeholder="0"
                             onchange="validateQty(this, {{ p.stock }})">
                         {% endif %}
                     </div>
@@ -588,7 +696,7 @@
         function renderSerials(sku) {
             const list = (CART[sku] && CART[sku].seriales) ? CART[sku].seriales : [];
             const container = document.getElementById('serialTags');
-            const countEl   = document.getElementById('serialCount');
+            const countEl = document.getElementById('serialCount');
             countEl.innerText = list.length;
             container.innerHTML = list.map((sn, i) => `
                 <span class="serial-tag">
@@ -617,14 +725,44 @@
             }
         }
 
-        function addSerial(sn) {
+        async function addSerial(sn) {
             sn = sn.trim().toUpperCase();
             if (!sn || !scanActiveSku) return false;
+
             if (!CART[scanActiveSku]) CART[scanActiveSku] = { cantidad: 0, seriales: [] };
             if (CART[scanActiveSku].seriales.includes(sn)) {
                 showAlert(`Serial ${sn} ya está en la lista.`, 'error');
                 return false;
             }
+
+            // --- VALIDACIÓN EN BASE DE DATOS ---
+            const movil = document.getElementById('movil').value;
+            if (!movil) {
+                showAlert('Por favor seleccione un Móvil antes de escanear equipos.', 'error');
+                return false;
+            }
+
+            try {
+                // Bloquear UI temporalmente
+                document.getElementById('scanInput').disabled = true;
+
+                const url = `/api/validar_serial?serial=${encodeURIComponent(sn)}&movil=${encodeURIComponent(movil)}&sku=${encodeURIComponent(scanActiveSku)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                document.getElementById('scanInput').disabled = false;
+
+                if (!data.exito) {
+                    showAlert(`❌ Error: ${data.mensaje}`, 'error');
+                    return false;
+                }
+            } catch (err) {
+                document.getElementById('scanInput').disabled = false;
+                showAlert('❌ Error de red al validar serial.', 'error');
+                return false;
+            }
+            // -----------------------------------
+
             CART[scanActiveSku].seriales.push(sn);
             CART[scanActiveSku].cantidad = CART[scanActiveSku].seriales.length;
             updateBadge(scanActiveSku);
@@ -633,9 +771,10 @@
             return true;
         }
 
-        function addManualSerial() {
+        async function addManualSerial() {
             const input = document.getElementById('scanInput');
-            if (addSerial(input.value)) input.value = '';
+            const result = await addSerial(input.value);
+            if (result) input.value = '';
             input.focus();
         }
 
@@ -668,23 +807,23 @@
             const deviceId = availableCameras[currentDeviceIndex].deviceId;
             isScanning = true;
             try {
-                await codeReader.decodeFromVideoDevice(deviceId, 'scanVideo', (result, err) => {
+                await codeReader.decodeFromVideoDevice(deviceId, 'scanVideo', async (result, err) => {
                     if (result && isScanning) {
                         isScanning = false; // Debounce: pause until next openScanner
                         const text = result.getText();
                         // Short pause so user sees the detected result
-                        setTimeout(() => {
-                            addSerial(text);
+                        setTimeout(async () => {
+                            await addSerial(text);
                             // Flash video briefly
                             document.getElementById('scanVideo').style.filter = 'brightness(3)';
                             setTimeout(() => {
                                 document.getElementById('scanVideo').style.filter = '';
                                 isScanning = true;
-                            }, 600);
+                            }, 1000); // 1 sec cooldown before scanning again
                         }, 100);
                     }
                 });
-            } catch(e) {
+            } catch (e) {
                 console.warn('Reader error:', e);
                 showCameraFallback();
             }
@@ -693,7 +832,7 @@
         function stopCamera() {
             isScanning = false;
             if (codeReader) {
-                try { codeReader.reset(); } catch(e) {}
+                try { codeReader.reset(); } catch (e) { }
                 codeReader = null;
             }
             const video = document.getElementById('scanVideo');
@@ -760,14 +899,14 @@
         });
 
         // Close modal on backdrop click
-        document.getElementById('scanModal').addEventListener('click', function(e) {
+        document.getElementById('scanModal').addEventListener('click', function (e) {
             if (e.target === this) closeScanner();
         });
 
         // ─── SUBMIT ─────────────────────────────────────────────────────
         async function submitReport() {
-            const movil    = document.getElementById('movil').value;
-            const tecnico  = document.getElementById('tecnico').value.trim();
+            const movil = document.getElementById('movil').value;
+            const tecnico = document.getElementById('tecnico').value.trim();
             const contrato = document.getElementById('contrato').value.trim();
 
             if (!movil || !tecnico || !contrato) {
