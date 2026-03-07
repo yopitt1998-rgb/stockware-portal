@@ -737,28 +737,30 @@ class InventoryTab:
                 ventana.entry_vars.clear()
                 productos_en_movil_origen.clear() # Clear previous data
                 
-                # Obtener productos del móvil origen (Aun sincrono, pero on-demand)
-                # TODO: Convertir esto a async si es lento tambien
-                productos_asignados = obtener_asignacion_movil(movil_origen)
-                if not productos_asignados:
-                    tk.Label(frame_productos, text="No hay productos asignados a este móvil", 
-                            font=('Segoe UI', 10), fg='red').grid(row=1, column=0, columnspan=4, padx=10, pady=10)
-                    return
-                
-                productos_en_movil_origen = productos_asignados # Store for scanner
-                
-                fila = 1
-                for nombre, sku, cantidad in productos_asignados:
-                    tk.Label(frame_productos, text=nombre, anchor='w', justify='left', font=('Segoe UI', 9)).grid(row=fila, column=0, padx=5, pady=2, sticky='ew')
-                    tk.Label(frame_productos, text=sku, anchor='center', font=('Segoe UI', 9)).grid(row=fila, column=1, padx=5, pady=2, sticky='ew')
-                    tk.Label(frame_productos, text=str(cantidad), anchor='center', font=('Segoe UI', 9), fg='blue').grid(row=fila, column=2, padx=5, pady=2, sticky='ew')
-                    entry = tk.Entry(frame_productos, width=8, font=('Segoe UI', 9))
-                    entry.grid(row=fila, column=3, padx=5, pady=2)
-                    ventana.entry_vars[sku] = entry # Store entry widget by SKU
-                    fila += 1
-                
-                frame_productos.update_idletasks()
-                canvas.config(scrollregion=canvas.bbox("all"))
+                def renderizar_productos(productos_asignados):
+                    nonlocal productos_en_movil_origen
+                    if not productos_asignados:
+                        tk.Label(frame_productos, text="No hay productos asignados a este móvil", 
+                                font=('Segoe UI', 10), fg='red').grid(row=1, column=0, columnspan=4, padx=10, pady=10)
+                        return
+                    
+                    productos_en_movil_origen = productos_asignados # Store for scanner
+                    
+                    fila = 1
+                    for nombre, sku, cantidad in productos_asignados:
+                        tk.Label(frame_productos, text=nombre, anchor='w', justify='left', font=('Segoe UI', 9)).grid(row=fila, column=0, padx=5, pady=2, sticky='ew')
+                        tk.Label(frame_productos, text=sku, anchor='center', font=('Segoe UI', 9)).grid(row=fila, column=1, padx=5, pady=2, sticky='ew')
+                        tk.Label(frame_productos, text=str(cantidad), anchor='center', font=('Segoe UI', 9), fg='blue').grid(row=fila, column=2, padx=5, pady=2, sticky='ew')
+                        entry = tk.Entry(frame_productos, width=8, font=('Segoe UI', 9))
+                        entry.grid(row=fila, column=3, padx=5, pady=2)
+                        ventana.entry_vars[sku] = entry # Store entry widget by SKU
+                        fila += 1
+                    
+                    frame_productos.update_idletasks()
+                    canvas.config(scrollregion=canvas.bbox("all"))
+
+                # Convertido a async para evitar bloqueos UI
+                self._mostrar_cargando_async(ventana, lambda: obtener_asignacion_movil(movil_origen), renderizar_productos)
             
             movil_origen_combo.bind("<<ComboboxSelected>>", cargar_productos_movil)
             frame_productos.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))

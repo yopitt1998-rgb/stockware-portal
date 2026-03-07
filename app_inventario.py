@@ -360,6 +360,13 @@ class ModernInventarioApp:
                 "class": "DashboardTab",
                 "icon": "📊",
                 "btn_text": "Dashboard"
+            },
+            "Material Dañado": {
+                "loaded": False,
+                "module": "gui.santiago_danados",
+                "class": "SantiagoDanadosTab",
+                "icon": "⚠️",
+                "btn_text": "Dañados"
             }
         }
 
@@ -367,13 +374,6 @@ class ModernInventarioApp:
         # Quitamos "Consumo" porque el usuario ahora prefiere que los técnicos usen la web.
         if is_santiago_direct:
             # Pestañas activas para Santiago
-            self.tabs_data["Material Dañado"] = {
-                "loaded": False,
-                "module": "gui.santiago_danados",
-                "class": "SantiagoDanadosTab",
-                "icon": "⚠️",
-                "btn_text": "Dañados"
-            }
             self.tabs_data["Auditoría Física"] = {
                 "loaded": False,
                 "module": "gui.santiago_audit_phys",
@@ -414,6 +414,14 @@ class ModernInventarioApp:
             "class": "AuditTab",
             "icon": "📋",
             "btn_text": "Historial" if is_santiago_direct else "Historial de Instalaciones"
+        }
+
+        self.tabs_data["Registro Global"] = {
+            "loaded": False,
+            "module": "gui.inventory.history_log",
+            "class": "HistoryLogTab",
+            "icon": "📜",
+            "btn_text": "Registro"
         }
 
         # Configuración solo para David
@@ -541,6 +549,7 @@ class ModernInventarioApp:
             elif tab_name == "Historial": self.audit_tab = instance
             elif tab_name == "Productos": self.products_tab = instance
             elif tab_name == "Configuración": self.settings_tab = instance
+            elif tab_name == "Registro Global": self.history_tab = instance
             
             data['loaded'] = True
             logger.info(f"Tab {tab_name} loaded successfully.")

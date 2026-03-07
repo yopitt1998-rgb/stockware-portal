@@ -49,8 +49,9 @@ BRANCH_NAME = os.getenv("CURRENT_BRANCH_NAME", "")
 
 
 MOVILES_DISPONIBLES = ["Movil 200", "Movil 201", "Movil 202", "Movil 203", "Movil 204", "Movil 205", "Movil 206"]
-MOVILES_SANTIAGO = ["Movil 207", "Movil 208", "Movil 209", "Movil 210"]
-ALL_MOVILES = MOVILES_DISPONIBLES + MOVILES_SANTIAGO
+# Santiago removido según solicitud del usuario
+MOVILES_SANTIAGO = []
+ALL_MOVILES = MOVILES_DISPONIBLES
 
 # DETALLES DE MÓVILES (Fallback para Cloud cuando no hay tabla 'moviles')
 # Formato: "Nombre Movil": {"conductor": "Nombre", "ayudante": "Nombre", "patente": "Patente"}
@@ -61,11 +62,7 @@ MOVILES_DETAILS_FALLBACK = {
     "Movil 203": {"conductor": "Tecnico 4", "ayudante": "Ayudante 203", "patente": "P-203"},
     "Movil 204": {"conductor": "Tecnico 5", "ayudante": "Ayudante 204", "patente": "P-204"},
     "Movil 205": {"conductor": "Tecnico 6", "ayudante": "Ayudante 205", "patente": "P-205"},
-    "Movil 206": {"conductor": "Tecnico 7", "ayudante": "Ayudante 206", "patente": "P-206"},
-    "Movil 207": {"conductor": "Tecnico 8", "ayudante": "Ayudante 207", "patente": "P-207"},
-    "Movil 208": {"conductor": "Tecnico 9", "ayudante": "Ayudante 208", "patente": "P-208"},
-    "Movil 209": {"conductor": "Tecnico 10", "ayudante": "Ayudante 209", "patente": "P-209"},
-    "Movil 210": {"conductor": "Tecnico 11", "ayudante": "Ayudante 210", "patente": "P-210"}
+    "Movil 206": {"conductor": "Tecnico 7", "ayudante": "Ayudante 206", "patente": "P-206"}
 }
 UBICACION_DESCARTE = "DESCARTE"
 TIPO_MOVIMIENTO_DESCARTE = "DESCARTE" 

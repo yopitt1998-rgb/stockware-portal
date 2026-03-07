@@ -1197,3 +1197,234 @@ _tkinter.TclError: invalid command name ".!toplevel6.!frame2.!labelframe.!combob
 2026-03-04 11:18:26 | ERROR    | database             | Error loading tab Material Dañado: cannot import name 'PRODUCTOS_CON_CODIGO_BARRA' from 'database' (c:\Users\johni\Documents\GestorInventario_MySQL\database.py)
 2026-03-04 11:58:56 | ERROR    | database             | ❌ Error en obtener_estadisticas_reales: MySQL Connection not available
 2026-03-04 12:00:49 | ERROR    | database             | Error loading tab Auditoría Física: cannot import name 'PRODUCTOS_CON_CODIGO_BARRA' from 'database' (c:\Users\johni\Documents\GestorInventario_MySQL\database.py)
+2026-03-05 06:52:40 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\mobile_output_scanner.py", line 651, in registrar_salida
+    mostrar_cargando_async(self.window, process_background, on_complete, self.window)
+                                        ^^^^^^^^^^^^^^^^^^
+NameError: name 'process_background' is not defined
+
+2026-03-05 08:05:13 | ERROR    | database             | Error en registrar_consumo_directo: name 'json' is not defined
+2026-03-05 09:33:07 | ERROR    | database             | Error en registrar_consumo_directo: name 'json' is not defined
+2026-03-05 11:33:04 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\mobile_output_scanner.py", line 651, in registrar_salida
+    mostrar_cargando_async(self.window, process_background, on_complete, self.window)
+                                        ^^^^^^^^^^^^^^^^^^
+NameError: name 'process_background' is not defined
+
+2026-03-05 12:04:15 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-05 12:04:15 | ERROR    | database             | Error al obtener resumen de abastos: Failed getting connection; pool exhausted
+2026-03-05 12:35:35 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\mobile_output_scanner.py", line 722, in registrar_salida
+    mostrar_cargando_async(self.window, process_background, on_complete, self.window)
+                                        ^^^^^^^^^^^^^^^^^^
+NameError: name 'process_background' is not defined
+
+2026-03-05 12:45:18 | ERROR    | gui.utils            | Error async: cannot import name 'registrar_salida_movil' from 'database' (c:\Users\johni\Documents\GestorInventario_MySQL\database.py)
+2026-03-05 12:45:18 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 39, in <lambda>
+    ventana.after(0, lambda: _manejar_error_carga(ventana, e))
+                                                           ^
+NameError: cannot access free variable 'e' where it is not associated with a value in enclosing scope
+
+2026-03-05 13:41:04 | ERROR    | gui.utils            | Error async: cannot import name 'registrar_salida_movil' from 'database' (c:\Users\johni\Documents\GestorInventario_MySQL\database.py)
+2026-03-05 13:42:22 | ERROR    | gui.utils            | Error async: cannot import name 'registrar_salida_movil' from 'database' (c:\Users\johni\Documents\GestorInventario_MySQL\database.py)
+2026-03-05 14:11:30 | ERROR    | database             | Error en registrar_danado_directo para equipos: Not all parameters were used in the SQL statement
+2026-03-06 09:28:19 | ERROR    | database             | Error en registrar_danado_directo para equipos: name 'sucursal_context' is not defined
+2026-03-06 09:38:31 | ERROR    | database             | Error en registrar_danado_directo para equipos: name 'sucursal_context' is not defined
+2026-03-06 12:43:20 | ERROR    | database             | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sku' in 'field list'
+2026-03-06 12:43:20 | ERROR    | database             |    Query: INSERT INTO asignacion_moviles (movil, sku, cantidad, paquete, sucursal) VALUES (%s, %s, %s, %s, %s)
+2026-03-06 12:43:20 | ERROR    | database             |    Params: ('MOVIL 201', 'SKU-A', 10, 'PAQUETE A', 'CHIRIQUI')
+2026-03-06 12:43:38 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-06 12:43:38 | ERROR    | database             | Error al obtener todos los SKUs para movimiento: Failed getting connection; pool exhausted
+2026-03-06 12:43:38 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-06 12:43:38 | ERROR    | database             | Error al obtener móviles: Failed getting connection; pool exhausted
+2026-03-06 12:54:04 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\audit.py", line 260, in <lambda>
+    self.after(0, lambda: self._aplicar_pendientes_ui(consumos))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\audit.py", line 278, in _aplicar_pendientes_ui
+    id_c, movil, sku, nombre, qty, tecnico, ticket, fecha, colilla, contrato, ayudante, seriales_usados = c
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: too many values to unpack (expected 12)
+
+2026-03-06 13:07:18 | ERROR    | database             | Error en registrar_danado_directo para equipos: name 'sucursal_context' is not defined
+2026-03-06 13:07:54 | ERROR    | database             | ❌ Error SQL ejecución: 1105 (HY000): 'CREATE TABLE ... SELECT' is not implemented yet
+2026-03-06 13:07:54 | ERROR    | database             |    Query: 
+            CREATE TEMPORARY TABLE temp_asignacion AS
+            SELECT movil, sku_producto, SUM(cantidad) as cantidad_total
+            FROM asignacion_moviles 
+            GROUP BY movil, sku_producto
+        
+2026-03-06 13:07:54 | ERROR    | database             |    Params: None
+2026-03-06 13:08:05 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\audit.py", line 260, in <lambda>
+    self.after(0, lambda: self._aplicar_pendientes_ui(consumos))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\audit.py", line 278, in _aplicar_pendientes_ui
+    id_c, movil, sku, nombre, qty, tecnico, ticket, fecha, colilla, contrato, ayudante, seriales_usados = c
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: too many values to unpack (expected 12)
+
+2026-03-06 13:08:46 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\audit.py", line 260, in <lambda>
+    self.after(0, lambda: self._aplicar_pendientes_ui(consumos))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\audit.py", line 278, in _aplicar_pendientes_ui
+    id_c, movil, sku, nombre, qty, tecnico, ticket, fecha, colilla, contrato, ayudante, seriales_usados = c
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: too many values to unpack (expected 12)
+
+2026-03-06 13:17:19 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:17:35 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:17:49 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:20:41 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:20:44 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:20:49 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:20:53 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:21:35 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:21:39 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:21:44 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:22:01 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:22:05 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:22:18 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:22:22 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:22:42 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:22:59 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 14:06:47 | ERROR    | database             | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'secuencia' in 'field list'
+2026-03-06 14:06:47 | ERROR    | database             |    Query: INSERT INTO productos (nombre, sku, cantidad, ubicacion, secuencia, sucursal) SELECT nombre, sku, 1, %s, '99z', %s FROM productos WHERE sku = %s LIMIT 1
+2026-03-06 14:06:47 | ERROR    | database             |    Params: ('DESCARTE', 'CHIRIQUI', '4-4-644')
+2026-03-06 14:06:47 | ERROR    | database             | Error en registrar_danado_directo para equipos: 1054 (42S22): Unknown column 'secuencia' in 'field list'
+2026-03-06 14:07:12 | ERROR    | database             | Error loading tab Registro Global: No module named 'gui.inventory.styles'
+2026-03-06 15:37:12 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-03-06 15:37:17 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-03-06 15:37:21 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
+2026-03-06 15:37:26 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-07 requiere serial: Not all parameters were used in the SQL statement
+2026-03-06 15:37:30 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-11 requiere serial: Not all parameters were used in the SQL statement
+2026-03-06 15:37:33 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-2-41 requiere serial: Not all parameters were used in the SQL statement
+2026-03-06 15:37:37 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-18 requiere serial: Not all parameters were used in the SQL statement
+2026-03-06 15:37:42 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-42 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 07:33:02 | ERROR    | database             | Error loading tab Registro Global: No module named 'gui.inventory.styles'
+2026-03-07 07:33:23 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 07:33:27 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 07:33:31 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 07:33:36 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-07 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 07:33:44 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-11 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 07:33:48 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-2-41 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 07:33:53 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-18 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 07:33:59 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-42 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 08:11:03 | ERROR    | database             | Error loading tab Registro Global: No module named 'gui.inventory.styles'
+2026-03-07 08:11:50 | ERROR    | database             | Error loading tab Registro Global: No module named 'gui.inventory.styles'
+2026-03-07 09:01:40 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:01:40 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:01:42 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:01:42 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:01:42 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:01:42 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:01:45 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:01:45 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:01:45 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:01:46 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:01:46 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:01:46 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:01:46 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:01:50 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:01:50 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:01:50 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:01:50 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:01:54 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:01:54 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:01:54 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:01:54 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:01:54 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:01:54 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:01:54 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:01:54 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:02:03 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:02:03 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:02:03 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:02:03 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:02:03 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:02:03 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:02:10 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:02:10 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:02:11 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:02:11 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:02:11 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:02:11 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:02:38 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:02:38 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:41:35 | ERROR    | database             | Error en buscar_equipo_global: unsupported format character '"' (0x22) at index 1
+2026-03-07 09:42:27 | ERROR    | database             | Error en buscar_equipo_global: unsupported format character '"' (0x22) at index 1
+2026-03-07 09:43:47 | ERROR    | database             | Error en buscar_equipo_global: unsupported format character '"' (0x22) at index 1
+2026-03-07 09:52:36 | ERROR    | database             | Error en buscar_equipo_global: unsupported format character '"' (0x22) at index 1
+2026-03-07 09:52:43 | ERROR    | database             | Error en buscar_equipo_global: unsupported format character '"' (0x22) at index 1
+2026-03-07 09:53:15 | ERROR    | database             | Error en buscar_equipo_global: unsupported format character '"' (0x22) at index 1
+2026-03-07 09:53:39 | ERROR    | database             | Error en buscar_equipo_global: unsupported format character '"' (0x22) at index 1
+2026-03-07 09:54:16 | ERROR    | database             | Error en buscar_equipo_global: unsupported format character '"' (0x22) at index 1
+2026-03-07 09:54:31 | ERROR    | database             | Error en buscar_equipo_global: unsupported format character '"' (0x22) at index 1
+2026-03-07 10:12:16 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 10:12:21 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 10:12:25 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 10:13:45 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 10:24:32 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | database             | [ERROR] obtener_detalles_serial: Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | database             | [ERROR] obtener_detalles_serial: Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | database             | [ERROR] obtener_detalles_serial: Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | database             | [ERROR] obtener_detalles_serial: Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | database             | [ERROR] obtener_detalles_serial: Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | database             | [ERROR] obtener_detalles_serial: Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | database             | [ERROR] obtener_detalles_serial: Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | database             | [ERROR] obtener_detalles_serial: Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | database             | [ERROR] obtener_detalles_serial: Failed getting connection; pool exhausted
+2026-03-07 10:38:46 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 10:38:46 | ERROR    | database             | Error al obtener todos los SKUs para movimiento: Failed getting connection; pool exhausted
+2026-03-07 10:39:17 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 10:39:27 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 10:39:31 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 10:39:36 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 10:51:05 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 10:51:10 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement

@@ -33,10 +33,11 @@ def mostrar_cargando_async(ventana, funcion_carga, callback_exito, master_app=No
             if ventana.winfo_exists():
                 ventana.after(0, lambda: _finalizar_carga(ventana, frame_carga, callback_exito, datos))
         except Exception as e:
-            logger.error(f"Error async: {e}")
+            exc = e  # Capture before except block closes (Python 3 deletes 'e' after block)
+            logger.error(f"Error async: {exc}")
             import traceback; traceback.print_exc()
             if ventana.winfo_exists():
-                ventana.after(0, lambda: _manejar_error_carga(ventana, e))
+                ventana.after(0, lambda err=exc: _manejar_error_carga(ventana, err))
 
     threading.Thread(target=run_thread, daemon=True).start()
 

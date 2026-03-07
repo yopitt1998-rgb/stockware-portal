@@ -68,40 +68,6 @@ class SettingsTab(tk.Frame):
         # Add padding to the inner content
         inner_content = tk.Frame(container, bg='#f8f9fa')
         inner_content.pack(fill='both', expand=True, padx=50, pady=30)
-        
-        # --- SECCIÓN DE SUCURSAL (NUEVO) ---
-        tk.Label(inner_content, text="📍 CONFIGURACIÓN DE SUCURSAL", 
-                font=('Segoe UI', 16, 'bold'), bg='#f8f9fa', fg=Styles.PRIMARY_COLOR).pack(pady=(0, 20), anchor='w')
-        
-        branch_frame = tk.Frame(inner_content, bg='white', padx=20, pady=20, highlightthickness=1, highlightbackground='#bdc3c7')
-        branch_frame.pack(fill='x', pady=(0, 30))
-        
-        tk.Label(branch_frame, text="Seleccione la ubicación de trabajo actual:", 
-                font=('Segoe UI', 10), bg='white').pack(anchor='w', pady=(0, 10))
-        
-        # Cargar preferencia actual
-        from config import load_branch_preference, save_branch_preference
-        self.current_branch = tk.StringVar(value=load_branch_preference())
-        
-        # Radio Buttons con estilo
-        modes_frame = tk.Frame(branch_frame, bg='white')
-        modes_frame.pack(fill='x')
-        
-        rb_chiriqui = tk.Radiobutton(modes_frame, text="CHIRIQUÍ (Bodega Principal)", variable=self.current_branch, 
-                                   value="CHIRIQUI", command=self.on_branch_change,
-                                   bg='white', font=('Segoe UI', 11), activebackground='white')
-        rb_chiriqui.pack(side='left', padx=(0, 20))
-        
-        rb_santiago = tk.Radiobutton(modes_frame, text="SANTIAGO (Sucursal)", variable=self.current_branch, 
-                                   value="SANTIAGO", command=self.on_branch_change,
-                                   bg='white', font=('Segoe UI', 11), activebackground='white')
-        rb_santiago.pack(side='left')
-        
-        tk.Label(branch_frame, text="ℹ️ El cambio requerirá reiniciar la aplicación.", 
-                font=('Segoe UI', 9, 'italic'), fg='#7f8c8d', bg='white').pack(anchor='w', pady=(10, 0))
-
-        # Divider
-        ttk.Separator(inner_content, orient='horizontal').pack(fill='x', pady=20)
 
         # Title
         tk.Label(inner_content, text="⚙️ DATOS DE LA EMPRESA", 
@@ -322,7 +288,6 @@ class SettingsTab(tk.Frame):
             return
         
         # Proceder con la limpieza
-        exito, mensaje = limpiar_base_datos()
         if exito:
             mostrar_mensaje_emergente(self, "Limpieza Completada", mensaje, "success")
             # Actualizar dashboard si existe
@@ -330,20 +295,6 @@ class SettingsTab(tk.Frame):
                 self.main_app.dashboard_tab.actualizar_metricas()
         else:
             mostrar_mensaje_emergente(self, "Error en Limpieza", mensaje, "error")
-
-    def on_branch_change(self):
-        """Maneja el cambio de sucursal"""
-        new_branch = self.current_branch.get()
-        from config import save_branch_preference
-        
-        save_branch_preference(new_branch)
-        
-        messagebox.showinfo(
-            "Reiniciar Aplicación", 
-            f"Se ha cambiado la ubicación a {new_branch}.\n\n" 
-            "Por favor, cierre y vuelva a abrir la aplicación para que los cambios surtan efecto.",
-            parent=self
-        )
 
     def limpiar_movil_dialogo(self):
         """Maneja el reset de stock de un móvil con PIN y selección."""

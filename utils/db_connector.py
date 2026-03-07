@@ -3,6 +3,7 @@ import mysql.connector
 from mysql.connector import pooling
 import os
 import sys
+from contextlib import contextmanager
 from utils.logger import get_logger
 from config import (
     DATABASE_NAME,
@@ -105,3 +106,25 @@ def close_connection(conn, cursor=None):
             conn.close()
     except Exception as e:
         logger.warning(f"Error cerrando conexión: {e}")
+
+@contextmanager
+def db_session(target_db=None):
+    """
+    Context manager para manejar el ciclo de vida de la conexión y cursor a la base de datos automatizando commit/rollback y finally.
+    Patrón de uso:
+        with db_session() as (conn, cursor):
+            run_query(cursor, "...")
+    """
+    conn = None
+    cursor = None
+    try:
+        conn = get_db_connection(target_db)
+        cursor = conn.cursor()
+        yield conn, cursor
+        conn.commit()
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        raise e
+    finally:
+        close_connection(conn, cursor)

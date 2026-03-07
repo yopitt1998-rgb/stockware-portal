@@ -270,12 +270,7 @@
     </div>
 
     <div class="logo">🚀 StockWare</div>
-    <div style="text-align:center; margin-bottom:10px;">
-        <a href="/auditoria"
-            style="display:inline-block; background:#2c3e50; color:#3498db; border:1px solid #3498db; padding:8px 20px; border-radius:8px; font-size:13px; font-weight:600; text-decoration:none;">
-            📋 Auditoría de Terreno y Retorno
-        </a>
-    </div>
+
     <div class="container">
         <h1>Reporte de Consumo</h1>
 
@@ -491,8 +486,8 @@
                 });
                 const itemsCompartidos = Object.values(mapCompartidos);
 
-                // Combinación: Propios + Compartidos (Eliminamos itemsPuente para evitar filtración no deseada)
-                const items = itemsEspecificos.concat(itemsCompartidos);
+                // Combinación: Propios + Compartidos + Puente (PERSONALIZADO/NINGUNO)
+                const items = itemsEspecificos.concat(itemsPuente).concat(itemsCompartidos);
 
                 if (items.length === 0) {
                     container.style.display = 'none';

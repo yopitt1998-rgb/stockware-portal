@@ -54,7 +54,7 @@ from config import (
 # =================================================================
 
 # Importar nueva gestión de conexiones
-from utils.db_connector import get_db_connection, close_connection
+from utils.db_connector import get_db_connection, close_connection, db_session
 
 
 
@@ -73,6 +73,7 @@ def run_query(cursor, query, params=None):
             cursor.execute(query, params)
         else:
             cursor.execute(query)
+        return cursor.rowcount
     except Exception as e:
         logger.error(f"❌ Error SQL ejecución: {e}")
         logger.error(f"   Query: {query}")
@@ -331,6 +332,7 @@ def inicializar_bd():
         add_column_if_missing('consumos_pendientes', 'num_contrato', 'VARCHAR(255)')
         add_column_if_missing('consumos_pendientes', 'ayudante_nombre', 'VARCHAR(255)')
         add_column_if_missing('consumos_pendientes', 'seriales_usados', LONGTEXT)
+        add_column_if_missing('consumos_pendientes', 'paquete', 'VARCHAR(50)', "'NINGUNO'")
         add_column_if_missing('consumos_pendientes', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'")
 
         # Helper para añadir índices en MySQL (Defensivo)
@@ -690,7 +692,7 @@ def verificar_stock_disponible(sku, cantidad_requerida, ubicacion='BODEGA'):
     finally:
         if conn: close_connection(conn)
 
-def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afectado=None, fecha_evento=None, paquete_asignado=None, observaciones=None, documento_referencia=None, target_db_name=None, existing_conn=None, sucursal_context=None):
+def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afectado=None, fecha_evento=None, paquete_asignado=None, observaciones=None, documento_referencia=None, target_db_name=None, existing_conn=None, sucursal_context=None, seriales=None):
     """
     Registra un movimiento, actualiza la cantidad en Bodega/Asignación y maneja la ubicación DESCARTE.
     """
@@ -711,6 +713,14 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
             
             if observaciones:
                 observaciones = validate_observaciones(observaciones)
+            
+            # Formatear seriales para observaciones si se proveen
+            if seriales:
+                seriales_str = ", ".join(seriales)
+                if observaciones:
+                    observaciones = f"{observaciones} | Series: {seriales_str}"
+                else:
+                    observaciones = f"Series: {seriales_str}"
                 
         except ValidationError as ve:
             logger.warning(f"Intento de movimiento inválido: {ve}")
@@ -769,22 +779,16 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
              
              if (tipo_movimiento in ('CONSUMO_MOVIL', 'RETORNO_MOVIL') and not paquete_asignado) or is_shared:
                  # Suma total del SKU en el móvil, independiente del paquete (FILTRADO POR SUCURSAL)
-                 if DB_TYPE == 'MYSQL':
-                     sql_asig = "SELECT COALESCE(SUM(cantidad), 0) FROM asignacion_moviles WHERE sku_producto = %s AND UPPER(TRIM(movil)) = UPPER(TRIM(%s)) AND sucursal = %s"
-                 else:
-                     sql_asig = "SELECT COALESCE(SUM(cantidad), 0) FROM asignacion_moviles WHERE sku_producto = ? AND UPPER(TRIM(movil)) = UPPER(TRIM(?)) AND sucursal = ?"
-                 cursor.execute(sql_asig, (sku, movil_afectado, sucursal))
+                 sql_asig = "SELECT COALESCE(SUM(cantidad), 0) FROM asignacion_moviles WHERE sku_producto = ? AND UPPER(TRIM(movil)) = UPPER(TRIM(?)) AND sucursal = ?"
+                 run_query(cursor, sql_asig, (sku, movil_afectado, sucursal))
                  asignacion_actual = cursor.fetchone()
                  stock_asignado = float(asignacion_actual[0]) if asignacion_actual and asignacion_actual[0] is not None else 0
              else:
                  # Si no se especifica paquete, asumimos 'NINGUNO' para la consulta
                  pq_query = paquete_asignado if paquete_asignado else 'NINGUNO'
                  
-                 if DB_TYPE == 'MYSQL':
-                     sql_asig = "SELECT cantidad FROM asignacion_moviles WHERE sku_producto = %s AND UPPER(TRIM(movil)) = UPPER(TRIM(%s)) AND COALESCE(paquete, 'NINGUNO') = %s AND sucursal = %s"
-                 else:
-                     sql_asig = "SELECT cantidad FROM asignacion_moviles WHERE sku_producto = ? AND UPPER(TRIM(movil)) = UPPER(TRIM(?)) AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?"
-                 cursor.execute(sql_asig, (sku, movil_afectado, pq_query, sucursal))
+                 sql_asig = "SELECT cantidad FROM asignacion_moviles WHERE sku_producto = ? AND UPPER(TRIM(movil)) = UPPER(TRIM(?)) AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?"
+                 run_query(cursor, sql_asig, (sku, movil_afectado, pq_query, sucursal))
                  
                  asignacion_actual = cursor.fetchone()
                  stock_asignado = float(asignacion_actual[0]) if asignacion_actual and asignacion_actual[0] is not None else 0
@@ -821,10 +825,15 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
             cantidad_asignacion_cambio = -cantidad_afectada
             
         elif tipo_movimiento == TIPO_MOVIMIENTO_DESCARTE: 
-            if stock_bodega_actual < cantidad_afectada:
-                return False, f"Stock insuficiente en Bodega para {nombre_producto}. Solo hay {stock_bodega_actual} unidades para descarte."
+            if movil_afectado:
+                if stock_asignado < cantidad_afectada:
+                    return False, f"Stock insuficiente en {movil_afectado} para descarte. Solo tiene {stock_asignado} unidades de {nombre_producto}."
+                cantidad_asignacion_cambio = -cantidad_afectada
+            else:
+                if stock_bodega_actual < cantidad_afectada:
+                    return False, f"Stock insuficiente en Bodega para {nombre_producto}. Solo hay {stock_bodega_actual} unidades para descarte."
+                cantidad_bodega_cambio = -cantidad_afectada
                 
-            cantidad_bodega_cambio = -cantidad_afectada
             cantidad_descarte_cambio = cantidad_afectada 
             
         elif tipo_movimiento == 'SALIDA':  # NUEVO: Salida individual desde bodega
@@ -834,11 +843,28 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
             cantidad_bodega_cambio = -cantidad_afectada
 
         if cantidad_bodega_cambio != 0:
-            run_query(cursor, "UPDATE productos SET cantidad = cantidad + ? WHERE sku = ? AND ubicacion = 'BODEGA' AND sucursal = ?", 
-                           (cantidad_bodega_cambio, sku, sucursal))
+            if cantidad_bodega_cambio < 0:
+                abs_cambio = abs(cantidad_bodega_cambio)
+                rc = run_query(cursor, "UPDATE productos SET cantidad = cantidad - ? WHERE sku = ? AND ubicacion = 'BODEGA' AND sucursal = ? AND cantidad >= ?", 
+                               (abs_cambio, sku, sucursal, abs_cambio))
+                if rc == 0:
+                     if not existing_conn: conn.rollback()
+                     return False, f"Error atómico: Stock insuficiente en Bodega para {nombre_producto}. Probablemente modificado por otra sesión."
+            else:
+                run_query(cursor, "UPDATE productos SET cantidad = cantidad + ? WHERE sku = ? AND ubicacion = 'BODEGA' AND sucursal = ?", 
+                               (cantidad_bodega_cambio, sku, sucursal))
             
         if cantidad_descarte_cambio > 0:
             run_query(cursor, "SELECT sku FROM productos WHERE sku = ? AND ubicacion = ? AND sucursal = ?", (sku, UBICACION_DESCARTE, sucursal))
+            
+        # 4. ACTUALIZAR ESTADO DE SERIES SI SE PROVEEN
+        if seriales and tipo_movimiento == 'CONSUMO_MOVIL':
+            for s in seriales:
+                run_query(cursor, """
+                    UPDATE series_registradas 
+                    SET estado = 'CONSUMIDO', ubicacion = 'CONSUMIDO'
+                    WHERE (serial_number = ? OR mac_number = ?) AND sucursal = ?
+                """, (s, s, sucursal))
             descarte_existe = cursor.fetchone()
             
             if descarte_existe:
@@ -856,11 +882,8 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
              is_shared = sku in MATERIALES_COMPARTIDOS
              if (tipo_movimiento in ('CONSUMO_MOVIL', 'RETORNO_MOVIL')) and cantidad_asignacion_cambio < 0 and (not paquete_asignado or is_shared):
                  # Obtener todas las filas con stock para este SKU en este móvil (FILTRADO POR SUCURSAL)
-                 if DB_TYPE == 'MYSQL':
-                     sql_rows = "SELECT COALESCE(paquete, 'NINGUNO'), cantidad FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND sucursal = %s AND cantidad > 0 ORDER BY cantidad DESC"
-                 else:
-                     sql_rows = "SELECT COALESCE(paquete, 'NINGUNO'), cantidad FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND sucursal = ? AND cantidad > 0 ORDER BY cantidad DESC"
-                 cursor.execute(sql_rows, (sku, movil_afectado, sucursal))
+                 sql_rows = "SELECT COALESCE(paquete, 'NINGUNO'), cantidad FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND sucursal = ? AND cantidad > 0 ORDER BY cantidad DESC"
+                 run_query(cursor, sql_rows, (sku, movil_afectado, sucursal))
                  filas_con_stock = cursor.fetchall()
                  
                  pendiente_descontar = abs(cantidad_asignacion_cambio)
@@ -871,30 +894,18 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
                      nueva_qty_fila = fila_qty - descontar_de_fila
                      pendiente_descontar -= descontar_de_fila
                      
-                     if DB_TYPE == 'MYSQL':
-                         if nueva_qty_fila > 0:
-                             cursor.execute("UPDATE asignacion_moviles SET cantidad = %s WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s AND sucursal = %s",
-                                            (nueva_qty_fila, sku, movil_afectado, fila_pq, sucursal))
-                         else:
-                             cursor.execute("DELETE FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s AND sucursal = %s",
-                                            (sku, movil_afectado, fila_pq, sucursal))
+                     if nueva_qty_fila > 0:
+                         run_query(cursor, "UPDATE asignacion_moviles SET cantidad = ? WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?",
+                                        (nueva_qty_fila, sku, movil_afectado, fila_pq, sucursal))
                      else:
-                         if nueva_qty_fila > 0:
-                             cursor.execute("UPDATE asignacion_moviles SET cantidad = ? WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?",
-                                            (nueva_qty_fila, sku, movil_afectado, fila_pq, sucursal))
-                         else:
-                             cursor.execute("DELETE FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?",
-                                            (sku, movil_afectado, fila_pq, sucursal))
+                         run_query(cursor, "DELETE FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?",
+                                        (sku, movil_afectado, fila_pq, sucursal))
              else:
                  pq_actual = paquete_para_stock if paquete_para_stock else 'NINGUNO'
                  
                  # 1. Obtener suma total actual para ese paquete específico (FILTRADO POR SUCURSAL)
-                 if DB_TYPE == 'MYSQL':
-                     sql_sel = "SELECT SUM(cantidad) FROM asignacion_moviles WHERE sku_producto = %s AND movil = %s AND COALESCE(paquete, 'NINGUNO') = %s AND sucursal = %s"
-                 else:
-                     sql_sel = "SELECT SUM(cantidad) FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?"
-                 
-                 cursor.execute(sql_sel, (sku, movil_afectado, pq_actual, sucursal))
+                 sql_sel = "SELECT SUM(cantidad) FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?"
+                 run_query(cursor, sql_sel, (sku, movil_afectado, pq_actual, sucursal))
                  resultado_asignacion = cursor.fetchone()
                  
                  valor_actual = 0.0
@@ -911,7 +922,7 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
                         VALUES (%s, %s, %s, %s, %s)
                         ON DUPLICATE KEY UPDATE cantidad = VALUES(cantidad)
                      """
-                     # Nota: Usamos pq_actual para evitar problemas con NULLs en índices UNIQUE de MySQL
+                     # IMPORTANTE: pq_actual ya está normalizado a 'NINGUNO' si era None o vacío
                      if nueva_cantidad_asignacion > 0:
                          cursor.execute(sql_upsert, (sku, movil_afectado, pq_actual, nueva_cantidad_asignacion, sucursal))
                      else:
@@ -920,11 +931,11 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
                  else:
                      # Standard SQLite approach: Delete then Insert
                      sql_del = "DELETE FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?"
-                     cursor.execute(sql_del, (sku, movil_afectado, pq_actual, sucursal))
-
+                     run_query(cursor, sql_del, (sku, movil_afectado, pq_actual, sucursal))
+ 
                      if nueva_cantidad_asignacion > 0:
                          sql_ins = "INSERT INTO asignacion_moviles (sku_producto, movil, paquete, cantidad, sucursal) VALUES (?, ?, ?, ?, ?)"
-                         cursor.execute(sql_ins, (sku, movil_afectado, pq_actual, nueva_cantidad_asignacion, sucursal))
+                         run_query(cursor, sql_ins, (sku, movil_afectado, pq_actual, nueva_cantidad_asignacion, sucursal))
 
         # REGISTRO DE MOVIMIENTO (BITÁCORA) - FILTRADO POR SUCURSAL
         sql_mov = "INSERT INTO movimientos (sku_producto, tipo_movimiento, cantidad_afectada, movil_afectado, fecha_evento, paquete_asignado, observaciones, documento_referencia, sucursal) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
@@ -1527,83 +1538,50 @@ def obtener_asignacion_movil_con_paquetes(movil):
 
         resultado = []
 
-        # 2. Para cada SKU reconstruimos el saldo REAL por paquete
+        # 2. Optimización N+1: Obtener todos los movimientos relevantes para el móvil de una sola vez
+        sql_todos_movs = """
+            SELECT sku_producto, tipo_movimiento, cantidad_afectada, paquete_asignado
+            FROM movimientos 
+            WHERE UPPER(TRIM(movil_afectado)) = UPPER(TRIM(?))
+            AND tipo_movimiento IN ('SALIDA_MOVIL','RETORNO_MOVIL','CONSUMO_MOVIL')
+            AND id > ?
+            ORDER BY fecha_movimiento ASC, id ASC
+        """
+        run_query(cursor, sql_todos_movs, (movil, last_cleaning_id))
+        todos_movimientos = cursor.fetchall()
+
+        # Agrupar movimientos por SKU
+        movimientos_por_sku = {}
+        for row in todos_movimientos:
+            s_sku = row[0]
+            if s_sku not in movimientos_por_sku:
+                movimientos_por_sku[s_sku] = []
+            movimientos_por_sku[s_sku].append((row[1], row[2], row[3]))
+
+        # 3. Procesar cada SKU
         for nombre, sku, total_real in productos_asignados:
-
-            # Inicializar los saldos exactos por paquete
-            saldos = {
-                "PAQUETE A": 0,
-                "PAQUETE B": 0,
-                "CARRO": 0,
-                "PERSONALIZADO": 0,
-                "SIN_PAQUETE": 0
-            }
-
-            # 3. Obtener movimientos posteriores a la limpieza en orden real
-            sql_mov = """
-                SELECT tipo_movimiento, cantidad_afectada, paquete_asignado
-                FROM movimientos 
-                WHERE sku_producto = ? AND UPPER(TRIM(movil_afectado)) = UPPER(TRIM(?))
-                AND tipo_movimiento IN ('SALIDA_MOVIL','RETORNO_MOVIL','CONSUMO_MOVIL')
-                AND id > ?
-                ORDER BY fecha_movimiento ASC, id ASC
+            
+            # Inicializar los saldos con lo que dice la tabla asignacion_moviles DIRECTAMENTE
+            # Esto evita que 'PAQUETE B' se muestre como 'PAQUETE A' por prioridades de relleno.
+            sql_pqs = """
+                SELECT COALESCE(paquete, 'SIN_PAQUETE'), SUM(cantidad) 
+                FROM asignacion_moviles 
+                WHERE sku_producto = ? AND UPPER(TRIM(movil)) = UPPER(TRIM(?)) AND sucursal = ?
+                GROUP BY paquete
             """
-            run_query(cursor, sql_mov, (sku, movil, last_cleaning_id))
-            movimientos = cursor.fetchall()
+            run_query(cursor, sql_pqs, (sku, movil, sucursal_target))
+            filas_pqs = cursor.fetchall()
+            
+            saldos = {
+                "PAQUETE A": 0, "PAQUETE B": 0, "CARRO": 0, 
+                "PERSONALIZADO": 0, "SIN_PAQUETE": 0
+            }
+            
+            for p_name, p_qty in filas_pqs:
+                p_key = p_name if p_name in saldos else "SIN_PAQUETE"
+                if p_name == "NINGUNO": p_key = "SIN_PAQUETE"
+                saldos[p_key] = p_qty
 
-            # 4. Reprocesar EXACTAMENTE según los movimientos
-            for tipo, cantidad, paquete in movimientos:
-
-                # Normalizar paquete
-                if paquete is None or paquete == "NINGUNO":
-                    paquete_key = "SIN_PAQUETE"
-                else:
-                    paquete_key = paquete
-                
-                # SALIDA suma material (entra al móvil)
-                if tipo == "SALIDA_MOVIL":
-                    saldos[paquete_key] = saldos.get(paquete_key, 0) + cantidad
-
-                # RETORNO o CONSUMO restan material
-                elif tipo in ("RETORNO_MOVIL", "CONSUMO_MOVIL"):
-                    saldos[paquete_key] = saldos.get(paquete_key, 0) - cantidad
-                    if saldos.get(paquete_key, 0) < 0:
-                        saldos[paquete_key] = 0  # evitar negativos por errores del pasado
-
-            # 5. Recalcular total real de paquetes
-            total_por_paquetes = sum(saldos.values())
-
-            # 6. Si no cuadra con asignacion_moviles, corregimos distribuyendo inteligentemente
-            # (Bugfix para cuando no hay historial completo de movimientos)
-            if total_por_paquetes != total_real:
-                diferencia = total_real - total_por_paquetes
-                
-                # Intentamos llenar los paquetes según su capacidad teórica
-                from config import PAQUETES_MATERIALES
-                
-                # Definir prioridades de llenado para la diferencia
-                prioridades = ["PAQUETE A", "PAQUETE B", "CARRO", "SIN_PAQUETE"]
-                
-                for p_key in prioridades:
-                    if diferencia == 0: break
-                    
-                    # Capacidad teórica del paquete para este SKU
-                    conf_paq = PAQUETES_MATERIALES.get(p_key, [])
-                    capacidad = next((cant for sku_p, cant in conf_paq if sku_p == sku), 0)
-                    
-                    if capacidad > 0:
-                        espacio_libre = capacidad - saldos.get(p_key, 0)
-                        if espacio_libre > 0:
-                            a_sumar = min(diferencia, espacio_libre)
-                            saldos[p_key] = saldos.get(p_key, 0) + a_sumar
-                            diferencia -= a_sumar
-                
-                # Si aún sobra diferencia (stock excedente), lo mandamos a SIN_PAQUETE
-                if diferencia != 0:
-                    saldos["SIN_PAQUETE"] = max(0, saldos.get("SIN_PAQUETE", 0) + diferencia)
-
-
-            # Guardar resultado final para ese SKU
             # Guardar resultado final para ese SKU
             resultado.append((
                 nombre,
@@ -2272,7 +2250,7 @@ def eliminar_consumos_pendientes_por_movil(movil):
     finally:
         if conn: close_connection(conn)
 
-def obtener_consumos_pendientes(fecha_inicio=None, fecha_fin=None, estado=None, moviles_filtro=None, limite=None):
+def obtener_consumos_pendientes(fecha_inicio=None, fecha_fin=None, estado=None, moviles_filtro=None, limite=None, paquete=None):
     """
     Obtiene consumos reportados por móviles filtrando opcionalmente por rango de fechas y móviles específicos.
     estado: Si es None, busca 'PENDIENTE' y 'AUTO_APROBADO' (Petición usuario Móvil 200).
@@ -2289,7 +2267,7 @@ def obtener_consumos_pendientes(fecha_inicio=None, fecha_fin=None, estado=None, 
         
         # Base query
         sql_query = """
-            SELECT c.id, c.movil, c.sku, p.nombre, c.cantidad, c.tecnico_nombre, c.ticket, c.fecha, c.colilla, c.num_contrato, c.ayudante_nombre, c.seriales_usados
+            SELECT c.id, c.movil, c.sku, p.nombre, c.cantidad, c.tecnico_nombre, c.ticket, c.fecha, c.colilla, c.num_contrato, c.ayudante_nombre, c.seriales_usados, c.paquete
             FROM consumos_pendientes c
             LEFT JOIN productos p ON c.sku = p.sku AND p.ubicacion = 'BODEGA'
             WHERE 1=1
@@ -2327,6 +2305,10 @@ def obtener_consumos_pendientes(fecha_inicio=None, fecha_fin=None, estado=None, 
         elif fecha_fin:
             sql_query += " AND c.fecha <= ?"
             params.append(fecha_fin)
+            
+        if paquete and paquete != 'TODOS':
+            sql_query += " AND COALESCE(UPPER(TRIM(c.paquete)), 'NINGUNO') = ?"
+            params.append(paquete.strip().upper())
             
         sql_query += " ORDER BY c.fecha_registro DESC"
         
@@ -2444,9 +2426,168 @@ def obtener_ultimos_movimientos(limite=15):
         
         return cursor.fetchall()
         
+    finally:
+        if conn: close_connection(conn)
+
+def obtener_historial_completo(limite=500, filtro_texto=None, sucursal_context=None):
+    """
+    Obtiene el historial completo de movimientos con filtros opcionales.
+    """
+    conn = None
+    try:
+        from config import CURRENT_CONTEXT
+        sucursal_target = sucursal_context or CURRENT_CONTEXT.get('BRANCH', 'CHIRIQUI')
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        sql = """
+            SELECT 
+                m.id,
+                m.fecha_movimiento,
+                m.tipo_movimiento,
+                COALESCE(p.nombre, m.sku_producto) as nombre,
+                m.cantidad_afectada,
+                COALESCE(m.movil_afectado, '-') as detalle,
+                COALESCE(m.observaciones, '') as obs
+            FROM movimientos m
+            LEFT JOIN productos p ON m.sku_producto = p.sku AND p.ubicacion = 'BODEGA'
+            WHERE (m.sucursal = ? OR (m.sucursal IS NULL AND ? = 'CHIRIQUI'))
+        """
+        params = [sucursal_target, sucursal_target]
+        
+        if filtro_texto:
+            sql += " AND (m.sku_producto LIKE ? OR m.tipo_movimiento LIKE ? OR m.movil_afectado LIKE ? OR m.observaciones LIKE ? OR m.documento_referencia LIKE ?)"
+            params.extend([f"%{filtro_texto}%"] * 5)
+            
+        sql += " ORDER BY m.fecha_movimiento DESC LIMIT ?"
+        params.append(limite)
+        
+        if DB_TYPE == 'MYSQL':
+            sql = sql.replace('?', '%s')
+            
+        run_query(cursor, sql, tuple(params))
+        return cursor.fetchall()
     except Exception as e:
-        logger.error(f"Error al obtener últimos movimientos: {e}")
+        logger.error(f"Error en obtener_historial_completo: {e}")
         return []
+    finally:
+        if conn: close_connection(conn)
+
+def buscar_equipo_global(termino, sucursal_context=None):
+    """
+    Busca un equipo por MAC o Serial y retorna su estado y ubicación actual.
+    """
+    conn = None
+    try:
+        from config import CURRENT_CONTEXT
+        sucursal_target = sucursal_context or CURRENT_CONTEXT.get('BRANCH', 'CHIRIQUI')
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        termino_clean = str(termino).strip().upper()
+        
+        sql = """
+            SELECT 
+                s.serial_number,
+                s.mac_number,
+                s.sku,
+                COALESCE(p.nombre, 'Equipo Desconocido') as nombre,
+                s.ubicacion,
+                s.estado,
+                s.paquete
+            FROM series_registradas s
+            LEFT JOIN productos p ON s.sku = p.sku AND p.ubicacion = 'BODEGA'
+            WHERE (UPPER(s.serial_number) = ? OR UPPER(s.mac_number) = ?)
+              AND (s.sucursal = ? OR (s.sucursal IS NULL AND ? = 'CHIRIQUI'))
+        """
+        
+        if DB_TYPE == 'MYSQL':
+            sql = sql.replace('?', '%s')
+            
+        run_query(cursor, sql, (termino_clean, termino_clean, sucursal_target, sucursal_target))
+        res = cursor.fetchone()
+        
+        if res:
+            res_list = list(res)
+            serial, mac, sku, nombre, ubicacion, estado, paquete = res_list
+            
+            # Intentar siempre buscar contrato y movil en consumos_pendientes (útil para saber de donde vino si fue retornado)
+            sql_c = """
+                SELECT movil, num_contrato 
+                FROM consumos_pendientes 
+                WHERE (seriales_usados LIKE ? OR seriales_usados LIKE ?)
+                  AND sucursal = ?
+                ORDER BY id DESC LIMIT 1
+            """
+            # Buscamos el serial o la mac dentro del JSON string
+            # Formato LIKE: %"SERIAL"%
+            pattern_s = f'%"{serial}"%' if serial else "%\"___NONE___\"%"
+            pattern_m = f'%"{mac}"%' if mac else "%\"___NONE___\"%"
+            
+            run_query(cursor, sql_c, (pattern_s, pattern_m, sucursal_target))
+            cons_extra = cursor.fetchone()
+            
+            if cons_extra:
+                movil_c, contrato_c = cons_extra
+                res_list.extend([movil_c, contrato_c])
+            else:
+                # PLAN B: Buscar en la tabla movimientos (en las observaciones)
+                # IMPORTANTE: Esto es para equipos ya consumidos que no se vincularon bien en consumos_pendientes
+                sql_m = """
+                    SELECT movil_afectado, documento_referencia 
+                    FROM movimientos 
+                    WHERE sku_producto = ? 
+                      AND observaciones LIKE ?
+                      AND tipo_movimiento = 'CONSUMO_MOVIL'
+                    ORDER BY id DESC LIMIT 1
+                """
+                pattern_obs = f"%{serial}%" if serial else "___NONE___"
+                run_query(cursor, sql_m, (sku, pattern_obs))
+                mov_extra = cursor.fetchone()
+                
+                if mov_extra:
+                    res_list.extend(list(mov_extra))
+                else:
+                    # PLAN C: Heurística por SKU y Paquete (Búsqueda más agresiva)
+                    contrato_hallado = None
+                    movil_hallado = None
+                    
+                    if paquete and paquete != 'NINGUNO':
+                        # Primero intentar en movimientos (Historial permanente)
+                        sql_h1 = """
+                            SELECT movil_afectado, documento_referencia 
+                            FROM movimientos 
+                            WHERE sku_producto = ? AND paquete_asignado = ? AND sucursal = ?
+                              AND tipo_movimiento = 'CONSUMO_MOVIL'
+                            ORDER BY id DESC LIMIT 1
+                        """
+                        run_query(cursor, sql_h1, (sku, paquete, sucursal_target))
+                        res_h1 = cursor.fetchone()
+                        if res_h1:
+                            movil_hallado, contrato_hallado = res_h1
+                        else:
+                            # Segundo intentar en consumos_pendientes (Reportes de App)
+                            sql_h2 = """
+                                SELECT movil, num_contrato 
+                                FROM consumos_pendientes 
+                                WHERE sku = ? AND paquete = ? AND sucursal = ?
+                                ORDER BY id DESC LIMIT 1
+                            """
+                            run_query(cursor, sql_h2, (sku, paquete, sucursal_target))
+                            res_h2 = cursor.fetchone()
+                            if res_h2:
+                                movil_hallado, contrato_hallado = res_h2
+                    
+                    res_list.extend([movil_hallado, contrato_hallado])
+                
+            return tuple(res_list)
+            
+        return None
+    except Exception as e:
+        logger.error(f"Error en buscar_equipo_global: {e}")
+        return None
     finally:
         if conn: close_connection(conn)
 
@@ -2477,6 +2618,9 @@ def obtener_moviles(solo_activos=True):
     """Obtiene la lista de móviles. Retorna lista de tuplas (nombre, patente, conductor, ayudante, activo)."""
     conn = None
     try:
+        from config import CURRENT_CONTEXT
+        moviles_permitidos = CURRENT_CONTEXT.get('MOVILES', [])
+        
         conn = get_db_connection()
         cursor = conn.cursor()
         query = "SELECT nombre, patente, conductor, ayudante, activo FROM moviles"
@@ -2485,28 +2629,42 @@ def obtener_moviles(solo_activos=True):
         query += " ORDER BY nombre ASC"
             
         run_query(cursor, query)
-        return cursor.fetchall()
+        rows = cursor.fetchall()
+        
+        if moviles_permitidos:
+            return [r for r in rows if r[0] in moviles_permitidos]
+        return rows
     except Exception as e:
         logger.error(f"Error al obtener móviles: {e}")
-        return []
+        # Fallback: Intentar obtener nombres si la consulta completa falla
+        try:
+            return [(m, '', '', '', 1) for m in obtener_nombres_moviles(solo_activos=solo_activos)]
+        except:
+            return []
     finally:
         if conn: close_connection(conn)
 
 def obtener_nombres_moviles(solo_activos=True):
     """
     Retorna una LISTA de STRINGS con los nombres de los móviles.
-    Tenta obtenerlos de la base de datos, con fallback a la configuración estática.
+    Tenta obtenerlos de la base de datos, pero los filtra para solo mostrar
+    los que pertenecen a la sucursal actual (según config).
     """
+    from config import CURRENT_CONTEXT
+    moviles_permitidos = CURRENT_CONTEXT.get('MOVILES', [])
+    
     try:
         moviles = obtener_moviles(solo_activos)
         if moviles:
-            return [m[0] for m in moviles]
+            # Filtrar por los permitidos de la sucursal activa
+            filtrados = [m[0] for m in moviles if m[0] in moviles_permitidos]
+            if filtrados:
+                return filtrados
     except Exception as e:
         logger.warning(f"Error consultando móviles de DB, usando fallback: {e}")
     
-    # Fallback si la DB falla o está vacía (común en despliegues iniciales Cloud)
-    from config import ALL_MOVILES
-    return ALL_MOVILES
+    # Fallback si la DB falla o está vacía
+    return moviles_permitidos
 
 def editar_movil(nombre_actual, nuevo_nombre, nueva_patente, nuevo_conductor, nuevo_ayudante):
     """Edita los datos de un móvil."""
@@ -2747,6 +2905,7 @@ def registrar_series_bulk(series_data, fecha_ingreso=None, paquete=None):
         conn = get_db_connection()
         cursor = conn.cursor()
         
+        ph = '%s' if DB_TYPE == 'MYSQL' else '?'
         sql = f"""
             INSERT INTO series_registradas (sku, serial_number, mac_number, estado, ubicacion, fecha_ingreso, paquete, sucursal)
             VALUES ({ph}, {ph}, {ph}, 'DISPONIBLE', {ph}, {ph}, {ph}, {ph})
@@ -2810,15 +2969,49 @@ def obtener_info_serial(serial_number):
             return result[0], result[1]
         return None, None
         
+    finally:
+        if conn: close_connection(conn)
+
+
+def obtener_detalles_serial(serial_number):
+    """
+    Retorna un diccionario con detalles del serial (sku, ubicacion, serial_number, mac_number).
+    """
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        serial_clean = str(serial_number).strip().upper()
+        
+        sql = """
+            SELECT sku, ubicacion, serial_number, mac_number
+            FROM series_registradas
+            WHERE UPPER(serial_number) = ? OR UPPER(mac_number) = ?
+            LIMIT 1
+        """
+        
+        run_query(cursor, sql, (serial_clean, serial_clean))
+        result = cursor.fetchone()
+        
+        if result:
+            return {
+                'sku': result[0],
+                'ubicacion': result[1],
+                'serial_number': result[2],
+                'mac_number': result[3]
+            }
+        return None
+        
     except Exception as e:
-        logger.error(f"[ERROR] obtener_info_serial: {e}")
-        return None, None
+        logger.error(f"[ERROR] obtener_detalles_serial: {e}")
+        return None
     finally:
         if conn: close_connection(conn)
 
 
 
-def actualizar_ubicacion_serial(serial_number, nueva_ubicacion, paquete=None, existing_conn=None):
+def actualizar_ubicacion_serial(serial_number, nueva_ubicacion, paquete=None, existing_conn=None, sucursal_context=None):
     """
     Actualiza la ubicación de un serial específico.
     Retorna: (exito: bool, mensaje: str)
@@ -2835,13 +3028,22 @@ def actualizar_ubicacion_serial(serial_number, nueva_ubicacion, paquete=None, ex
             conn = get_db_connection()
             cursor = conn.cursor()
         
+        # Resolver sucursal si no se proporciona
+        sucursal = sucursal_context
+        if not sucursal:
+            import os
+            sucursal = 'SANTIAGO' if os.environ.get('SANTIAGO_DIRECT_MODE') == '1' else 'CHIRIQUI'
+
+        # Normalizar paquete para persistencia y filtros
+        pq_norm = paquete if paquete else 'NINGUNO'
+
         sql = """
             UPDATE series_registradas
             SET ubicacion = ?, paquete = ?
-            WHERE serial_number = ?
+            WHERE (serial_number = ? OR mac_number = ?) AND sucursal = ?
         """
         
-        run_query(cursor, sql, (nueva_ubicacion, paquete, serial_number))
+        run_query(cursor, sql, (nueva_ubicacion, pq_norm, serial_number, serial_number, sucursal))
         
         if should_close:
             conn.commit()
@@ -2856,19 +3058,24 @@ def actualizar_ubicacion_serial(serial_number, nueva_ubicacion, paquete=None, ex
         if conn and should_close:
             close_connection(conn)
 
-def obtener_series_por_sku_y_ubicacion(sku, ubicacion):
+def obtener_series_por_sku_y_ubicacion(sku, ubicacion, paquete=None):
     """
-    Retorna una lista de seriales (MACs) para un SKU en una ubicación específica.
+    Retorna una lista de seriales (MACs) para un SKU en una ubicación específica,
+    opcionalmente filtrado por paquete.
     """
     conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # Manejo especial para ubicacion 'BODEGA' que puede ser NULL en algunos sistemas legacy, 
-        # pero aquí asumimos 'BODEGA' explícito.
+        sql = "SELECT serial_number FROM series_registradas WHERE sku = ? AND ubicacion = ? AND estado = 'DISPONIBLE'"
+        params = [sku, ubicacion]
         
-        run_query(cursor, "SELECT serial_number FROM series_registradas WHERE sku = ? AND ubicacion = ? AND estado = 'DISPONIBLE'", (sku, ubicacion))
+        if paquete and paquete != "TODOS":
+            sql += " AND (paquete = ? OR paquete IS NULL)" # Permitir NULL si no hay asignación estricta
+            params.append(paquete)
+            
+        run_query(cursor, sql, params)
         resultados = cursor.fetchall()
         
         return [r[0] for r in resultados]
@@ -3431,44 +3638,56 @@ def resetear_stock_movil(movil, paquete):
         cursor = conn.cursor()
         ph = '%s' if DB_TYPE == 'MYSQL' else '?'
         
+        from config import CURRENT_CONTEXT
+        sucursal_active = CURRENT_CONTEXT.get('BRANCH', 'CHIRIQUI')
+        
+        # Normalizar nombres para comparación robusta
+        movil_norm = movil.strip().upper()
+        paquete_norm = paquete.strip().upper()
+        
         # Caso 1: Resetear TODO el móvil
-        if paquete == 'TODOS':
-            # Usar UPPER y TRIM para robustez en MySQL
-            sql_check = f"SELECT SUM(cantidad) FROM asignacion_moviles WHERE UPPER(TRIM(movil)) = UPPER(TRIM({ph}))"
-            cursor.execute(sql_check, (movil,))
+        if paquete_norm == 'TODOS':
+            # 1. Contar items a eliminar
+            sql_check = f"SELECT SUM(cantidad) FROM asignacion_moviles WHERE UPPER(TRIM(movil)) = {ph} AND sucursal = {ph}"
+            cursor.execute(sql_check, (movil_norm, sucursal_active))
             res = cursor.fetchone()
             total_items = res[0] if res and res[0] else 0
             
-            sql_del = f"DELETE FROM asignacion_moviles WHERE UPPER(TRIM(movil)) = UPPER(TRIM({ph}))"
-            cursor.execute(sql_del, (movil,))
+            # 2. Eliminar asignaciones
+            sql_del = f"DELETE FROM asignacion_moviles WHERE UPPER(TRIM(movil)) = {ph} AND sucursal = {ph}"
+            cursor.execute(sql_del, (movil_norm, sucursal_active))
             
-            # --- Resetear Series (Equipos) ---
-            sql_reset_series = f"UPDATE series_registradas SET ubicacion = 'BODEGA', estado = 'DISPONIBLE', paquete = NULL WHERE UPPER(TRIM(ubicacion)) = UPPER(TRIM({ph}))"
-            cursor.execute(sql_reset_series, (movil,))
+            # 3. Resetear Series (Equipos) -> Volver a BODEGA y paquete NINGUNO
+            sql_reset_series = f"UPDATE series_registradas SET ubicacion = 'BODEGA', estado = 'DISPONIBLE', paquete = 'NINGUNO' WHERE UPPER(TRIM(ubicacion)) = {ph} AND sucursal = {ph}"
+            cursor.execute(sql_reset_series, (movil_norm, sucursal_active))
 
-            # --- Limpiar Consumos Pendientes (TOTAL) ---
-            sql_del_cons = f"DELETE FROM consumos_pendientes WHERE UPPER(TRIM(movil)) = UPPER(TRIM({ph}))"
-            cursor.execute(sql_del_cons, (movil,))
+            # 4. Limpiar Consumos Pendientes (TOTAL)
+            sql_del_cons = f"DELETE FROM consumos_pendientes WHERE UPPER(TRIM(movil)) = {ph} AND sucursal = {ph}"
+            cursor.execute(sql_del_cons, (movil_norm, sucursal_active))
             
-            observacion = "Limpieza TOTAL del móvil (PIN 0440)"
+            observacion = f"Limpieza TOTAL del móvil {movil_norm} (PIN 0440)"
         
         # Caso 2: Resetear un paquete específico
         else:
-            sql_check = f"SELECT SUM(cantidad) FROM asignacion_moviles WHERE UPPER(TRIM(movil)) = UPPER(TRIM({ph})) AND COALESCE(paquete, 'NINGUNO') = {ph}"
-            cursor.execute(sql_check, (movil, paquete))
+            # 1. Contar items
+            sql_check = f"SELECT SUM(cantidad) FROM asignacion_moviles WHERE UPPER(TRIM(movil)) = {ph} AND COALESCE(UPPER(TRIM(paquete)), 'NINGUNO') = {ph} AND sucursal = {ph}"
+            cursor.execute(sql_check, (movil_norm, paquete_norm, sucursal_active))
             res = cursor.fetchone()
             total_items = res[0] if res and res[0] else 0
             
-            sql_del = f"DELETE FROM asignacion_moviles WHERE UPPER(TRIM(movil)) = UPPER(TRIM({ph})) AND COALESCE(paquete, 'NINGUNO') = {ph}"
-            cursor.execute(sql_del, (movil, paquete))
+            # 2. Eliminar asignaciones del paquete
+            sql_del = f"DELETE FROM asignacion_moviles WHERE UPPER(TRIM(movil)) = {ph} AND COALESCE(UPPER(TRIM(paquete)), 'NINGUNO') = {ph} AND sucursal = {ph}"
+            cursor.execute(sql_del, (movil_norm, paquete_norm, sucursal_active))
 
-            # --- Resetear Series correspondientes al paquete ---
-            sql_reset_series = f"UPDATE series_registradas SET ubicacion = 'BODEGA', estado = 'DISPONIBLE', paquete = NULL WHERE UPPER(TRIM(ubicacion)) = UPPER(TRIM({ph})) AND paquete = {ph}"
-            cursor.execute(sql_reset_series, (movil, paquete))
+            # 3. Resetear Series correspondientes al paquete -> Volver a BODEGA y paquete NINGUNO
+            sql_reset_series = f"UPDATE series_registradas SET ubicacion = 'BODEGA', estado = 'DISPONIBLE', paquete = 'NINGUNO' WHERE UPPER(TRIM(ubicacion)) = {ph} AND COALESCE(UPPER(TRIM(paquete)), 'NINGUNO') = {ph} AND sucursal = {ph}"
+            cursor.execute(sql_reset_series, (movil_norm, paquete_norm, sucursal_active))
             
-            # NOTA: No limpiamos consumos por paquete porque los consumos no tienen campo 'paquete' en la tabla consumos_pendientes originalmente.
-            # Pero enviamos un aviso si hay consumos.
-            observacion = f"Limpieza de {paquete} (PIN 0440)"
+            # --- NUEVO: Limpiar Consumos Pendientes del paquete ---
+            sql_del_cons = f"DELETE FROM consumos_pendientes WHERE UPPER(TRIM(movil)) = {ph} AND COALESCE(UPPER(TRIM(paquete)), 'NINGUNO') = {ph} AND sucursal = {ph}"
+            cursor.execute(sql_del_cons, (movil_norm, paquete_norm, sucursal_active))
+            
+            observacion = f"Limpieza de {paquete_norm} en móvil {movil_norm} (PIN 0440)"
         
         # Registrar movimiento de 'LIMPIEZA'
         sql_mov = """
@@ -3489,26 +3708,121 @@ def resetear_stock_movil(movil, paquete):
     finally:
         if conn: close_connection(conn)
 
-def registrar_danado_directo(sku, cantidad, tecnico, observaciones=None, seriales=None):
+def registrar_danado_directo(sku, cantidad, tecnico, observaciones=None, seriales=None, sucursal_context=None):
     """
-    Registra material o equipos DAÑADOS directamente de la bodega de Santiago.
-    Equivalente a un DESCARTE directo.
+    Registra material o equipos DAÑADOS. 
+    Para equipo, detecta su ubicación automáticamente (Bodega o Móvil) y lo descarga.
+    Para material, lo descarga de BODEGA por defecto.
     """
     from config import UBICACION_DESCARTE, TIPO_MOVIMIENTO_DESCARTE
     from datetime import date
+    import os
+    import json
     
-    # Reutilizamos la lógica de consumo directo pero con tipo DESCARTE
-    # y sin necesidad de móvil (aunque podemos guardarlo en observaciones)
-    return registrar_consumo_directo(
-        sku=sku,
-        cantidad=cantidad,
-        movil='BODEGA',
-        tecnico=tecnico,
-        fecha_evento=date.today().isoformat(),
-        seriales=seriales,
-        observaciones=observaciones if observaciones else "Reporte de Material Dañado (Santiago)",
-        tipo_custom=TIPO_MOVIMIENTO_DESCARTE
-    )
+    if not seriales:
+        # Reutilizamos la lógica de consumo directo para materiales desde BODEGA
+        return registrar_consumo_directo(
+            sku=sku,
+            cantidad=cantidad,
+            movil='BODEGA',
+            tecnico=tecnico,
+            fecha_evento=date.today().isoformat(),
+            seriales=seriales,
+            observaciones=observaciones if observaciones else "Reporte de Material Dañado",
+            tipo_custom=TIPO_MOVIMIENTO_DESCARTE
+        )
+        
+    # Lógica para EQUIPOS (detectando ubicación en vivo)
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Determinar sucursal del contexto si es posible
+        from config import CURRENT_CONTEXT
+        sucursal = sucursal_context if sucursal_context else CURRENT_CONTEXT.get('BRANCH', 'CHIRIQUI')
+        fecha_evento = date.today().isoformat()
+        obs = observaciones if observaciones else "Reporte de Equipo Dañado"
+        
+        exitos = 0
+        errores = []
+        
+        for sn in seriales:
+            # 1. Obtener ubicación REAL y SKU del equipo
+            run_query(cursor, "SELECT ubicacion, sku, paquete FROM series_registradas WHERE (serial_number = ? OR mac_number = ?) AND sucursal = ?", (sn, sn, sucursal))
+            row = cursor.fetchone()
+            if not row:
+                errores.append(f"Serial/MAC {sn} no encontrado.")
+                continue
+                
+            loc_real = row[0]
+            sku_real = row[1]
+            pq_real = row[2] if row[2] else 'NINGUNO'
+            
+            # 2. Descontar del inventario lógico según ubicación
+            if loc_real == 'BODEGA':
+                # Descontar de la tabla 'productos'
+                run_query(cursor, "SELECT cantidad FROM productos WHERE sku = ? AND ubicacion = ? AND sucursal = ?", (sku_real, loc_real, sucursal))
+                prod_row = cursor.fetchone()
+                if prod_row:
+                    run_query(cursor, "UPDATE productos SET cantidad = cantidad - 1 WHERE sku = ? AND ubicacion = ? AND sucursal = ?", (sku_real, loc_real, sucursal))
+                else:
+                    logger.warning(f"Equipo {sn} en BODEGA pero no hay stock en tabla productos.")
+            else:
+                # Descontar de la tabla 'asignacion_moviles' (Móvil)
+                sql_asig = "SELECT cantidad FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?"
+                run_query(cursor, sql_asig, (sku_real, loc_real, pq_real, sucursal))
+                asig_row = cursor.fetchone()
+                
+                if asig_row:
+                    nueva_qty = max(0, float(asig_row[0]) - 1)
+                    if nueva_qty > 0:
+                        run_query(cursor, "UPDATE asignacion_moviles SET cantidad = ? WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?",
+                                       (nueva_qty, sku_real, loc_real, pq_real, sucursal))
+                    else:
+                        run_query(cursor, "DELETE FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?",
+                                       (sku_real, loc_real, pq_real, sucursal))
+                else:
+                    logger.warning(f"Equipo {sn} en {loc_real} pero no hay stock en tabla asignacion_moviles.")
+            
+            # Registrar Movimiento
+            run_query(cursor, """
+                INSERT INTO movimientos (sku_producto, tipo_movimiento, cantidad_afectada, movil_afectado, 
+                                       fecha_evento, observaciones, sucursal) 
+                VALUES (?, ?, 1, ?, ?, ?, ?)
+            """, (sku_real, TIPO_MOVIMIENTO_DESCARTE, loc_real, fecha_evento, f"{obs} [Desde: {loc_real}]", sucursal))
+            
+            # Actualizar la serie
+            run_query(cursor, "UPDATE series_registradas SET ubicacion = ?, estado = ? WHERE (serial_number = ? OR mac_number = ?) AND sucursal = ?",
+                        (UBICACION_DESCARTE, 'DESCARTE', sn, sn, sucursal))
+                        
+            # Asegurar que el inventario contable en DESCARTE se incremente
+            run_query(cursor, "SELECT sku FROM productos WHERE sku = ? AND ubicacion = ? AND sucursal = ?", (sku_real, UBICACION_DESCARTE, sucursal))
+            descarte_existe = cursor.fetchone()
+            if descarte_existe:
+                run_query(cursor, "UPDATE productos SET cantidad = cantidad + 1 WHERE sku = ? AND ubicacion = ? AND sucursal = ?", 
+                                (sku_real, UBICACION_DESCARTE, sucursal))
+            else:
+                # Corregido: 'secuencia' -> 'secuencia_vista'
+                run_query(cursor, "INSERT INTO productos (nombre, sku, cantidad, ubicacion, secuencia_vista, sucursal) SELECT nombre, sku, 1, ?, '99z', ? FROM productos WHERE sku = ? LIMIT 1", 
+                               (UBICACION_DESCARTE, sucursal, sku_real))
+            
+            exitos += 1
+            
+        conn.commit()
+        if exitos == 0:
+            return False, f"Ningún equipo procesado. Errores: {', '.join(errores)}"
+        elif errores:
+            return True, f"Parcialmente exitoso. Se dañaron {exitos} equipos. Errores: {', '.join(errores)}"
+            
+        return True, "Dañado(s) registrado(s) correctamente."
+        
+    except Exception as e:
+        if conn: conn.rollback()
+        logger.error(f"Error en registrar_danado_directo para equipos: {e}")
+        return False, str(e)
+    finally:
+        if conn: close_connection(conn)
 
 def registrar_consumo_directo(sku, cantidad, movil, tecnico, ayudante=None, ticket=None, colilla=None, fecha_evento=None, seriales=None, observaciones=None, tipo_custom=None, target_db=None, sucursal_context=None):
     """

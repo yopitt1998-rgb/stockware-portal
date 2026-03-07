@@ -4516,3 +4516,1474 @@ _tkinter.TclError: invalid command name ".!toplevel6.!frame2.!labelframe.!combob
 2026-03-04 14:22:40 | INFO     | database             | Tab Historial loaded successfully.
 2026-03-04 15:06:58 | INFO     | database             | Lazy loading tab: Inventario...
 2026-03-04 15:07:00 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-05 06:49:18 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-05 06:49:22 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-05 06:49:30 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-05 06:49:33 | INFO     | database             | ⚙️ Verificando 11 móviles...
+2026-03-05 06:49:34 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-05 06:49:35 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-05 06:49:35 | INFO     | database             | Bootstrap Start
+2026-03-05 06:49:35 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-05 06:49:35 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-05 06:49:35 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-05 06:49:38 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-05 06:49:47 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-05 06:50:07 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-05 06:50:08 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-05 06:50:18 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-05 06:50:24 | INFO     | database             | ⚙️ Verificando 11 móviles...
+2026-03-05 06:50:24 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-05 06:50:27 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-05 06:50:27 | INFO     | database             | Bootstrap Start
+2026-03-05 06:50:27 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-05 06:50:27 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-05 06:50:27 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-05 06:50:31 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-05 06:50:44 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-05 06:50:55 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-05 06:51:12 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-05 06:51:12 | INFO     | database             | Lazy loading tab: Productos...
+2026-03-05 06:51:14 | INFO     | database             | Tab Productos loaded successfully.
+2026-03-05 06:51:14 | INFO     | database             | Lazy loading tab: Configuración...
+2026-03-05 06:51:16 | INFO     | database             | Tab Configuración loaded successfully.
+2026-03-05 06:51:32 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-05 06:51:33 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-05 06:51:41 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-05 06:51:44 | INFO     | database             | ⚙️ Verificando 11 móviles...
+2026-03-05 06:51:44 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-05 06:51:45 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-05 06:51:45 | INFO     | database             | Bootstrap Start
+2026-03-05 06:51:45 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-05 06:51:45 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-05 06:51:45 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-05 06:51:47 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-05 06:51:50 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-05 06:52:09 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-05 06:52:11 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-05 06:52:12 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-03-05 06:52:25 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-03-05 06:52:35 | INFO     | gui.mobile_output_scanner | Item agregado: 2-5-02 x30
+2026-03-05 06:52:40 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\mobile_output_scanner.py", line 651, in registrar_salida
+    mostrar_cargando_async(self.window, process_background, on_complete, self.window)
+                                        ^^^^^^^^^^^^^^^^^^
+NameError: name 'process_background' is not defined
+
+2026-03-05 08:03:44 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-05 08:03:44 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-05 08:03:52 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-05 08:03:54 | INFO     | database             | ⚙️ Verificando 11 móviles...
+2026-03-05 08:03:55 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-05 08:03:56 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-05 08:03:56 | INFO     | database             | Bootstrap Start
+2026-03-05 08:03:56 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-05 08:03:56 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-05 08:03:56 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-05 08:03:57 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-05 08:03:59 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-05 08:04:11 | INFO     | database             | Lazy loading tab: Material Dañado...
+2026-03-05 08:04:13 | INFO     | database             | Tab Material Dañado loaded successfully.
+2026-03-05 08:04:14 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-05 08:04:16 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-05 08:04:16 | INFO     | database             | Lazy loading tab: Productos...
+2026-03-05 08:04:18 | INFO     | database             | Tab Productos loaded successfully.
+2026-03-05 08:05:13 | ERROR    | database             | Error en registrar_consumo_directo: name 'json' is not defined
+2026-03-05 09:04:38 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-05 09:04:38 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-05 09:04:46 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-05 09:04:49 | INFO     | database             | ⚙️ Verificando 11 móviles...
+2026-03-05 09:04:49 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-05 09:04:50 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-05 09:04:50 | INFO     | database             | Bootstrap Start
+2026-03-05 09:04:50 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-05 09:04:50 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-05 09:04:50 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-05 09:04:51 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-05 09:04:53 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-05 09:32:45 | INFO     | database             | Lazy loading tab: Material Dañado...
+2026-03-05 09:32:47 | INFO     | database             | Tab Material Dañado loaded successfully.
+2026-03-05 09:33:07 | ERROR    | database             | Error en registrar_consumo_directo: name 'json' is not defined
+2026-03-05 10:46:43 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-05 10:46:45 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-05 10:46:55 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-05 10:47:00 | INFO     | database             | ⚙️ Verificando 11 móviles...
+2026-03-05 10:47:00 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-05 10:47:02 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-05 10:47:02 | INFO     | database             | Bootstrap Start
+2026-03-05 10:47:02 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-05 10:47:02 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-05 10:47:02 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-05 10:47:04 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-05 10:47:09 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-05 10:52:33 | INFO     | database             | Lazy loading tab: Material Dañado...
+2026-03-05 10:52:35 | INFO     | database             | Tab Material Dañado loaded successfully.
+2026-03-05 11:18:16 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-05 11:18:16 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-05 11:18:25 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-05 11:18:28 | INFO     | database             | ⚙️ Verificando 11 móviles...
+2026-03-05 11:18:28 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-05 11:18:29 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-05 11:18:30 | INFO     | database             | Bootstrap Start
+2026-03-05 11:18:30 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-05 11:18:30 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-05 11:18:30 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-05 11:18:31 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-05 11:18:33 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-05 11:18:36 | INFO     | database             | Lazy loading tab: Material Dañado...
+2026-03-05 11:18:38 | INFO     | database             | Tab Material Dañado loaded successfully.
+2026-03-05 11:19:30 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-05 11:19:44 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-05 11:19:54 | INFO     | database             | Lazy loading tab: Configuración...
+2026-03-05 11:19:56 | INFO     | database             | Tab Configuración loaded successfully.
+2026-03-05 11:20:22 | INFO     | database             | 🧹 Móvil Movil 203 (PAQUETE A) limpiado: 78 registros eliminados.
+2026-03-05 11:20:58 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-03-05 11:21:07 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-03-05 11:21:36 | INFO     | gui.mobile_output_scanner | Item agregado: 2-5-02 x30
+2026-03-05 11:21:49 | INFO     | gui.mobile_output_scanner | Item agregado: 2-7-07 x30
+2026-03-05 11:22:00 | INFO     | gui.mobile_output_scanner | Item agregado: 1-8-40 x60
+2026-03-05 11:22:12 | INFO     | gui.mobile_output_scanner | Item agregado: 2-7-11 x7
+2026-03-05 11:24:26 | INFO     | gui.mobile_output_scanner | Item agregado: 4-2-41 x7
+2026-03-05 11:24:37 | INFO     | gui.mobile_output_scanner | Item agregado: 4-3-42 x60
+2026-03-05 11:24:48 | INFO     | gui.mobile_output_scanner | Item agregado: 4-3-18 x16
+2026-03-05 11:24:58 | INFO     | gui.mobile_output_scanner | Item agregado: 1-4-61 x5
+2026-03-05 11:25:07 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 48575443A8C6CAB3 -> SKU 4-4-654 (Desde BODEGA)
+2026-03-05 11:25:07 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-654 x1
+2026-03-05 11:25:18 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754430AB06EB5 -> SKU 4-4-646 (Desde BODEGA)
+2026-03-05 11:25:18 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-646 x1
+2026-03-05 11:25:24 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754430E71F9B5 -> SKU 4-4-646 (Desde BODEGA)
+2026-03-05 11:25:24 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-646 x1
+2026-03-05 11:25:49 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 2150084158EGR2000431 -> SKU 4-4-647 (Desde BODEGA)
+2026-03-05 11:25:49 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-647 x1
+2026-03-05 11:25:58 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 2150084158EGR1000010 -> SKU 4-4-647 (Desde BODEGA)
+2026-03-05 11:25:58 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-647 x1
+2026-03-05 11:26:23 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112704148 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-05 11:26:23 | INFO     | gui.mobile_output_scanner | Item agregado: 8-1-904 x1
+2026-03-05 11:26:25 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112708048 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-05 11:26:25 | INFO     | gui.mobile_output_scanner | Item agregado: 8-1-904 x1
+2026-03-05 11:26:28 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112707695 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-05 11:26:28 | INFO     | gui.mobile_output_scanner | Item agregado: 8-1-904 x1
+2026-03-05 11:26:30 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112706231 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-05 11:26:31 | INFO     | gui.mobile_output_scanner | Item agregado: 8-1-904 x1
+2026-03-05 11:27:10 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112720590 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-05 11:27:10 | INFO     | gui.mobile_output_scanner | Item agregado: 8-1-904 x1
+2026-03-05 11:27:12 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112721740 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-05 11:27:12 | INFO     | gui.mobile_output_scanner | Item agregado: 8-1-904 x1
+2026-03-05 11:27:14 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112718224 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-05 11:27:14 | INFO     | gui.mobile_output_scanner | Item agregado: 8-1-904 x1
+2026-03-05 11:27:17 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112722621 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-05 11:27:17 | INFO     | gui.mobile_output_scanner | Item agregado: 8-1-904 x1
+2026-03-05 11:27:31 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544372D6FEB3 -> SKU 4-4-656 (Desde BODEGA)
+2026-03-05 11:27:31 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-656 x1
+2026-03-05 11:27:41 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544372E581B3 -> SKU 4-4-656 (Desde BODEGA)
+2026-03-05 11:27:41 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-656 x1
+2026-03-05 11:27:55 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544372E400B3 -> SKU 4-4-656 (Desde BODEGA)
+2026-03-05 11:27:55 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-656 x1
+2026-03-05 11:28:05 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544372E72CB3 -> SKU 4-4-656 (Desde BODEGA)
+2026-03-05 11:28:05 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-656 x1
+2026-03-05 11:32:10 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432B2974AF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-05 11:32:10 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-03-05 11:32:17 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432B91FCAF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-05 11:32:17 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-03-05 11:32:25 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432874FEAF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-05 11:32:25 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-03-05 11:32:33 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 48575443019829AF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-05 11:32:33 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-03-05 11:32:41 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544328754DAF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-05 11:32:41 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-03-05 11:32:49 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432B2681AF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-05 11:32:49 | INFO     | gui.mobile_output_scanner | Item agregado: 4-4-644 x1
+2026-03-05 11:33:04 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\mobile_output_scanner.py", line 651, in registrar_salida
+    mostrar_cargando_async(self.window, process_background, on_complete, self.window)
+                                        ^^^^^^^^^^^^^^^^^^
+NameError: name 'process_background' is not defined
+
+2026-03-05 12:03:53 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-05 12:03:54 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-05 12:04:02 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-05 12:04:05 | INFO     | database             | ⚙️ Verificando 11 móviles...
+2026-03-05 12:04:06 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-05 12:04:07 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-05 12:04:07 | INFO     | database             | Bootstrap Start
+2026-03-05 12:04:07 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-05 12:04:07 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-05 12:04:07 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-05 12:04:08 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-05 12:04:10 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-05 12:04:13 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-05 12:04:14 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-05 12:04:15 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-05 12:04:15 | ERROR    | database             | Error al obtener resumen de abastos: Failed getting connection; pool exhausted
+2026-03-05 12:16:26 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-05 12:16:27 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-05 12:16:37 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-05 12:16:40 | INFO     | database             | ⚙️ Verificando 11 móviles...
+2026-03-05 12:16:40 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-05 12:16:41 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-05 12:16:42 | INFO     | database             | Bootstrap Start
+2026-03-05 12:16:42 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-05 12:16:42 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-05 12:16:42 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-05 12:16:44 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-05 12:16:49 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-05 12:16:58 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-05 12:17:00 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-05 12:19:43 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-647 -> Qty: 1 (Serial)
+2026-03-05 12:19:47 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-647 -> Qty: 1 (Serial)
+2026-03-05 12:20:04 | WARNING  | gui.inventory.movements | ❌ Código 'F0A95162C716' no reconocido en este móvil
+2026-03-05 12:20:08 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-646 -> Qty: 1 (Serial)
+2026-03-05 12:20:32 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-646 -> Qty: 1 (Serial)
+2026-03-05 12:21:25 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-05 12:21:29 | WARNING  | gui.inventory.movements | ❌ Código '2CD8AE04F5E3' no reconocido en este móvil
+2026-03-05 12:21:32 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-05 12:21:33 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-05 12:21:35 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-05 12:22:06 | WARNING  | gui.inventory.movements | ❌ Código '2CD8AE04F5E3' no reconocido en este móvil
+2026-03-05 12:22:10 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-05 12:22:17 | WARNING  | gui.inventory.movements | ❌ Código '2CD8AE04D8F6' no reconocido en este móvil
+2026-03-05 12:23:00 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-644 -> Qty: 1 (Serial)
+2026-03-05 12:23:09 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-644 -> Qty: 1 (Serial)
+2026-03-05 12:23:17 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-644 -> Qty: 1 (Serial)
+2026-03-05 12:23:24 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-654 -> Qty: 1 (Serial)
+2026-03-05 12:23:35 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-03-05 12:23:43 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-03-05 12:23:53 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-03-05 12:24:02 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-03-05 12:24:27 | INFO     | gui.inventory.movements | ✅ Auditado: 2-5-02 -> Qty: 26 (Material)
+2026-03-05 12:24:50 | INFO     | gui.inventory.movements | ✅ Auditado: 4-3-42 -> Qty: 43 (Material)
+2026-03-05 12:25:19 | INFO     | gui.inventory.movements | ✅ Auditado: 2-7-07 -> Qty: 17 (Material)
+2026-03-05 12:25:34 | INFO     | gui.inventory.movements | ✅ Auditado: 1-4-61 -> Qty: 2 (Material)
+2026-03-05 12:25:57 | INFO     | gui.inventory.movements | ✅ Auditado: 1-4-61 -> Qty: 2 (Material)
+2026-03-05 12:26:14 | INFO     | gui.inventory.movements | ✅ Auditado: 4-3-18 -> Qty: 12 (Material)
+2026-03-05 12:27:33 | INFO     | gui.inventory.movements | ✅ Auditado: 1-8-40 -> Qty: 38 (Material)
+2026-03-05 12:28:22 | INFO     | gui.inventory.movements | ✅ Auditado: 4-2-41 -> Qty: 6 (Material)
+2026-03-05 12:28:57 | INFO     | gui.inventory.movements | ✅ Auditado: 2-7-11 -> Qty: 3 (Material)
+2026-03-05 12:32:13 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-7-11 x4
+2026-03-05 12:32:13 | INFO     | gui.mobile_output_scanner | SKU 1-2-16 no encontrado en paquete base.
+2026-03-05 12:32:13 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-2-16 x1393
+2026-03-05 12:32:13 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-3-18 x4
+2026-03-05 12:32:13 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-8-40 x22
+2026-03-05 12:32:14 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-656 x2
+2026-03-05 12:32:14 | INFO     | gui.mobile_output_scanner | SKU 7-1-171 no encontrado en paquete base.
+2026-03-05 12:32:14 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 7-1-171 x217
+2026-03-05 12:32:14 | INFO     | gui.mobile_output_scanner | SKU 2-5-03 no encontrado en paquete base.
+2026-03-05 12:32:14 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-5-03 x115
+2026-03-05 12:32:14 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: U4-4-633 x1
+2026-03-05 12:32:14 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-903 x2
+2026-03-05 12:32:14 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-5-02 x4
+2026-03-05 12:32:14 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-2-41 x1
+2026-03-05 12:32:14 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-902 x2
+2026-03-05 12:32:14 | INFO     | gui.mobile_output_scanner | SKU 5-2-443 no encontrado en paquete base.
+2026-03-05 12:32:14 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 5-2-443 x2
+2026-03-05 12:32:14 | INFO     | gui.mobile_output_scanner | SKU 10-1-04 no encontrado en paquete base.
+2026-03-05 12:32:14 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 10-1-04 x6
+2026-03-05 12:32:15 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-904 x3
+2026-03-05 12:32:15 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-7-07 x13
+2026-03-05 12:32:15 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-3-42 x17
+2026-03-05 12:32:15 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-4-61 x3
+2026-03-05 12:32:15 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-03-05 12:35:35 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\mobile_output_scanner.py", line 722, in registrar_salida
+    mostrar_cargando_async(self.window, process_background, on_complete, self.window)
+                                        ^^^^^^^^^^^^^^^^^^
+NameError: name 'process_background' is not defined
+
+2026-03-05 12:40:42 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-05 12:40:43 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-05 12:40:51 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-05 12:40:54 | INFO     | database             | ⚙️ Verificando 11 móviles...
+2026-03-05 12:40:54 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-05 12:40:56 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-05 12:40:56 | INFO     | database             | Bootstrap Start
+2026-03-05 12:40:56 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-05 12:40:56 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-05 12:40:56 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-05 12:40:57 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-05 12:40:59 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-05 12:41:06 | INFO     | database             | Lazy loading tab: Material Dañado...
+2026-03-05 12:41:08 | INFO     | database             | Tab Material Dañado loaded successfully.
+2026-03-05 12:41:17 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-05 12:41:19 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-05 12:42:23 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-03-05 12:42:45 | INFO     | database             | Lazy loading tab: Configuración...
+2026-03-05 12:42:47 | INFO     | database             | Tab Configuración loaded successfully.
+2026-03-05 12:43:14 | INFO     | database             | 🧹 Móvil Movil 202 (PAQUETE A) limpiado: 162 registros eliminados.
+2026-03-05 12:43:42 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-03-05 12:44:02 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-5-02 x30
+2026-03-05 12:44:15 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-7-07 x30
+2026-03-05 12:44:31 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-8-40 x60
+2026-03-05 12:44:39 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-7-11 x7
+2026-03-05 12:44:48 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-3-42 x60
+2026-03-05 12:44:55 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-2-41 x7
+2026-03-05 12:45:04 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-3-18 x16
+2026-03-05 12:45:13 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-4-61 x16
+2026-03-05 12:45:18 | ERROR    | gui.utils            | Error async: cannot import name 'registrar_salida_movil' from 'database' (c:\Users\johni\Documents\GestorInventario_MySQL\database.py)
+2026-03-05 12:45:18 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 39, in <lambda>
+    ventana.after(0, lambda: _manejar_error_carga(ventana, e))
+                                                           ^
+NameError: cannot access free variable 'e' where it is not associated with a value in enclosing scope
+
+2026-03-05 12:58:14 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-05 13:40:14 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-05 13:40:14 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-05 13:40:22 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-05 13:40:25 | INFO     | database             | ⚙️ Verificando 11 móviles...
+2026-03-05 13:40:26 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-05 13:40:27 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-05 13:40:27 | INFO     | database             | Bootstrap Start
+2026-03-05 13:40:27 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-05 13:40:27 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-05 13:40:27 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-05 13:40:28 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-05 13:40:31 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-05 13:40:39 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-05 13:40:41 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-05 13:40:41 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-03-05 13:40:50 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-03-05 13:40:53 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-03-05 13:41:01 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-5-02 x30
+2026-03-05 13:41:04 | ERROR    | gui.utils            | Error async: cannot import name 'registrar_salida_movil' from 'database' (c:\Users\johni\Documents\GestorInventario_MySQL\database.py)
+2026-03-05 13:41:38 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-03-05 13:42:17 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-5-02 x30
+2026-03-05 13:42:22 | ERROR    | gui.utils            | Error async: cannot import name 'registrar_salida_movil' from 'database' (c:\Users\johni\Documents\GestorInventario_MySQL\database.py)
+2026-03-05 14:06:45 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-05 14:06:46 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-05 14:06:55 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-05 14:06:58 | INFO     | database             | ⚙️ Verificando 11 móviles...
+2026-03-05 14:06:58 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-05 14:06:59 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-05 14:06:59 | INFO     | database             | Bootstrap Start
+2026-03-05 14:06:59 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-05 14:06:59 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-05 14:06:59 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-05 14:07:03 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-05 14:07:05 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-05 14:07:46 | INFO     | database             | Lazy loading tab: Material Dañado...
+2026-03-05 14:07:48 | INFO     | database             | Tab Material Dañado loaded successfully.
+2026-03-05 14:08:18 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-05 14:08:21 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-05 14:10:44 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-05 14:10:45 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-05 14:10:53 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-05 14:10:56 | INFO     | database             | ⚙️ Verificando 11 móviles...
+2026-03-05 14:10:56 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-05 14:10:57 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-05 14:10:58 | INFO     | database             | Bootstrap Start
+2026-03-05 14:10:58 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-05 14:10:58 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-05 14:10:58 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-05 14:10:59 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-05 14:11:01 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-05 14:11:04 | INFO     | database             | Lazy loading tab: Material Dañado...
+2026-03-05 14:11:06 | INFO     | database             | Tab Material Dañado loaded successfully.
+2026-03-05 14:11:30 | ERROR    | database             | Error en registrar_danado_directo para equipos: Not all parameters were used in the SQL statement
+2026-03-05 14:11:58 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-05 14:12:00 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-05 14:12:01 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-03-05 14:12:24 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432B927CAF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-05 14:12:24 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-05 14:12:34 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544301B223AF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-05 14:12:34 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-05 14:24:30 | INFO     | database             | Lazy loading tab: Configuración...
+2026-03-05 14:24:32 | INFO     | database             | Tab Configuración loaded successfully.
+2026-03-05 14:24:52 | INFO     | database             | 🧹 Móvil Movil 206 (TODOS) limpiado: 3 registros eliminados.
+2026-03-05 14:25:03 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-05 14:25:04 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-05 14:25:12 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-05 14:25:15 | INFO     | database             | ⚙️ Verificando 11 móviles...
+2026-03-05 14:25:16 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-05 14:25:17 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-05 14:25:17 | INFO     | database             | Bootstrap Start
+2026-03-05 14:25:17 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-05 14:25:17 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-05 14:25:17 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-05 14:25:18 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-05 14:25:20 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-05 14:25:36 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-05 14:25:38 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-05 14:25:38 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-03-05 14:26:26 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544301B223AF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-05 14:26:26 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-05 14:26:33 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432B927CAF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-05 14:26:33 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-05 14:26:44 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-5-02 x1
+2026-03-05 14:35:56 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-05 14:37:50 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-05 14:37:50 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-05 14:37:58 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-05 14:38:01 | INFO     | database             | ⚙️ Verificando 7 móviles...
+2026-03-05 14:38:02 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-05 14:38:03 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-05 14:38:03 | INFO     | database             | Bootstrap Start
+2026-03-05 14:38:03 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-05 14:38:03 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-05 14:38:03 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-05 14:38:04 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-05 14:38:06 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-05 14:38:42 | INFO     | database             | Lazy loading tab: Configuración...
+2026-03-05 14:38:44 | INFO     | database             | Tab Configuración loaded successfully.
+2026-03-05 14:39:12 | INFO     | database             | 🧹 Móvil Movil 206 (TODOS) limpiado: 32 registros eliminados.
+2026-03-05 14:39:17 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-05 14:39:19 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-05 14:39:19 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-03-05 14:39:34 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432B927CAF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-05 14:39:34 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-05 14:39:44 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-7-07 x30
+2026-03-05 14:53:40 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-05 14:55:11 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-05 14:55:37 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-05 14:59:36 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-05 16:09:26 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-05 16:09:27 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-05 16:09:35 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-05 16:09:37 | INFO     | database             | ⚙️ Verificando 7 móviles...
+2026-03-05 16:09:38 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-05 16:09:39 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-05 16:09:39 | INFO     | database             | Bootstrap Start
+2026-03-05 16:09:39 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-05 16:09:39 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-05 16:09:39 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-05 16:09:40 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-05 16:09:42 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-05 16:09:45 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-05 16:09:47 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-05 16:09:48 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-03-05 16:10:01 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-5-02 x30
+2026-03-05 16:10:26 | INFO     | database             | Lazy loading tab: Configuración...
+2026-03-05 16:10:28 | INFO     | database             | Tab Configuración loaded successfully.
+2026-03-05 16:10:41 | INFO     | database             | 🧹 Móvil Movil 206 (TODOS) limpiado: 31 registros eliminados.
+2026-03-05 16:10:57 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432B927CAF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-05 16:10:57 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-05 16:13:50 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-06 09:14:50 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-06 09:14:52 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-06 09:15:00 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-06 09:15:03 | INFO     | database             | ⚙️ Verificando 7 móviles...
+2026-03-06 09:15:04 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-06 09:15:05 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-06 09:15:05 | INFO     | database             | Bootstrap Start
+2026-03-06 09:15:05 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-06 09:15:05 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-06 09:15:05 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-06 09:15:06 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-06 09:15:13 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-06 09:20:48 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-06 09:21:00 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-06 09:22:32 | WARNING  | gui.inventory.movements | ❌ Código '2CD8AE04E838' no reconocido en este móvil
+2026-03-06 09:22:38 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-06 09:22:40 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-06 09:22:42 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-06 09:22:45 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-06 09:22:48 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-06 09:23:18 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-06 09:23:24 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-06 09:23:29 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-06 09:23:47 | WARNING  | gui.inventory.movements | ❌ Código '2CD8AE04EFD3' no reconocido en este móvil
+2026-03-06 09:23:50 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-06 09:23:54 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-06 09:24:07 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-646 -> Qty: 1 (Serial)
+2026-03-06 09:24:27 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-654 -> Qty: 1 (Serial)
+2026-03-06 09:24:55 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-03-06 09:25:04 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-03-06 09:25:20 | WARNING  | gui.inventory.movements | ❌ Código 'F89522DC36CB' no reconocido en este móvil
+2026-03-06 09:25:24 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-03-06 09:25:35 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-03-06 09:25:51 | INFO     | gui.inventory.movements | ✅ Auditado: 4-3-42 -> Qty: 23 (Material)
+2026-03-06 09:26:11 | INFO     | gui.inventory.movements | ✅ Auditado: 2-5-02 -> Qty: 26 (Material)
+2026-03-06 09:26:33 | INFO     | gui.inventory.movements | ✅ Auditado: 2-7-07 -> Qty: 10 (Material)
+2026-03-06 09:27:42 | INFO     | database             | Lazy loading tab: Material Dañado...
+2026-03-06 09:27:44 | INFO     | database             | Tab Material Dañado loaded successfully.
+2026-03-06 09:28:19 | ERROR    | database             | Error en registrar_danado_directo para equipos: name 'sucursal_context' is not defined
+2026-03-06 09:29:38 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-644 -> Qty: 1 (Serial)
+2026-03-06 09:29:46 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-644 -> Qty: 1 (Serial)
+2026-03-06 09:38:31 | ERROR    | database             | Error en registrar_danado_directo para equipos: name 'sucursal_context' is not defined
+2026-03-06 09:41:09 | INFO     | gui.inventory.movements | ✅ Auditado: 1-4-61 -> Qty: 2 (Material)
+2026-03-06 09:41:28 | INFO     | gui.inventory.movements | ✅ Auditado: 4-3-18 -> Qty: 4 (Material)
+2026-03-06 09:41:49 | INFO     | gui.inventory.movements | ✅ Auditado: 1-8-40 -> Qty: 35 (Material)
+2026-03-06 09:42:09 | INFO     | gui.inventory.movements | ✅ Auditado: 4-2-41 -> Qty: 5 (Material)
+2026-03-06 09:43:49 | INFO     | gui.inventory.movements | ✅ Auditado: 2-5-02 -> Qty: 1 (Material)
+2026-03-06 09:44:15 | INFO     | gui.inventory.movements | ✅ Auditado: 2-7-11 -> Qty: 1 (Material)
+2026-03-06 09:44:37 | INFO     | gui.inventory.movements | ✅ Auditado: 2-5-02 -> Qty: 26 (Material)
+2026-03-06 09:55:02 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-8-40 x25
+2026-03-06 09:55:02 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-647 x2
+2026-03-06 09:55:02 | INFO     | gui.mobile_output_scanner | SKU 7-1-171 no encontrado en paquete base.
+2026-03-06 09:55:03 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 7-1-171 x246
+2026-03-06 09:55:03 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-2-41 x2
+2026-03-06 09:55:03 | INFO     | gui.mobile_output_scanner | SKU 1-2-16 no encontrado en paquete base.
+2026-03-06 09:55:03 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-2-16 x874
+2026-03-06 09:55:03 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-3-42 x37
+2026-03-06 09:55:03 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-3-18 x12
+2026-03-06 09:55:03 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-656 x2
+2026-03-06 09:55:03 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-904 x3
+2026-03-06 09:55:03 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-902 x2
+2026-03-06 09:55:03 | INFO     | gui.mobile_output_scanner | SKU 10-1-04 no encontrado en paquete base.
+2026-03-06 09:55:03 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 10-1-04 x5
+2026-03-06 09:55:03 | INFO     | gui.mobile_output_scanner | SKU 2-5-03 no encontrado en paquete base.
+2026-03-06 09:55:03 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-5-03 x20
+2026-03-06 09:55:03 | INFO     | gui.mobile_output_scanner | SKU 5-2-443 no encontrado en paquete base.
+2026-03-06 09:55:03 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 5-2-443 x4
+2026-03-06 09:55:03 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-5-02 x4
+2026-03-06 09:55:03 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: U4-4-633 x1
+2026-03-06 09:55:03 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-7-07 x20
+2026-03-06 09:55:03 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-646 x1
+2026-03-06 09:55:03 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-7-11 x6
+2026-03-06 09:55:03 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-4-61 x3
+2026-03-06 09:55:03 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-903 x2
+2026-03-06 09:55:03 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-03-06 10:04:40 | INFO     | database             | Lazy loading tab: Configuración...
+2026-03-06 10:04:42 | INFO     | database             | Tab Configuración loaded successfully.
+2026-03-06 10:05:00 | INFO     | database             | 🧹 Móvil Movil 201 (PAQUETE B) limpiado: 152 registros eliminados.
+2026-03-06 10:07:31 | INFO     | database             | 🧹 Móvil Movil 201 (PAQUETE B) limpiado: 0 registros eliminados.
+2026-03-06 10:49:45 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-06 10:49:54 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-06 10:49:57 | INFO     | database             | ⚙️ Verificando 7 móviles...
+2026-03-06 10:49:58 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-06 11:23:09 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-06 11:23:12 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-06 11:23:20 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-06 11:23:23 | INFO     | database             | ⚙️ Verificando 7 móviles...
+2026-03-06 11:23:24 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-06 11:23:25 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-06 11:23:25 | INFO     | database             | Bootstrap Start
+2026-03-06 11:23:25 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-06 11:23:25 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-06 11:23:25 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-06 11:23:27 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-06 11:23:32 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-06 11:23:44 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-06 11:23:56 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-06 11:23:57 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-03-06 11:24:11 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-03-06 11:25:32 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-4-61 x5
+2026-03-06 11:25:37 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-8-40 x60
+2026-03-06 11:25:42 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-5-02 x30
+2026-03-06 11:25:46 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-7-07 x30
+2026-03-06 11:25:49 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-7-11 x7
+2026-03-06 11:25:52 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-2-41 x7
+2026-03-06 11:25:55 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-3-18 x16
+2026-03-06 11:25:58 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-3-42 x60
+2026-03-06 11:29:10 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-06 11:29:18 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-06 11:29:21 | INFO     | database             | ⚙️ Verificando 7 móviles...
+2026-03-06 11:29:22 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-06 11:29:27 | INFO     | database             | 🧹 Móvil 201 (PAQUETE B) limpiado: 5 registros eliminados.
+2026-03-06 11:31:51 | INFO     | database             | Lazy loading tab: Configuración...
+2026-03-06 11:31:53 | INFO     | database             | Tab Configuración loaded successfully.
+2026-03-06 11:32:34 | INFO     | database             | 🧹 Móvil Movil 201 (PAQUETE B) limpiado: 215 registros eliminados.
+2026-03-06 12:28:08 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-06 12:28:17 | INFO     | database             | 🆕 Columna paquete añadida a consumos_pendientes
+2026-03-06 12:28:17 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-06 12:28:19 | INFO     | database             | ⚙️ Verificando 7 móviles...
+2026-03-06 12:28:20 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-06 12:43:13 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-06 12:43:17 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-06 12:43:18 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-06 12:43:20 | ERROR    | database             | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sku' in 'field list'
+2026-03-06 12:43:20 | ERROR    | database             |    Query: INSERT INTO asignacion_moviles (movil, sku, cantidad, paquete, sucursal) VALUES (%s, %s, %s, %s, %s)
+2026-03-06 12:43:20 | ERROR    | database             |    Params: ('MOVIL 201', 'SKU-A', 10, 'PAQUETE A', 'CHIRIQUI')
+2026-03-06 12:43:26 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-06 12:43:28 | INFO     | database             | ⚙️ Verificando 7 móviles...
+2026-03-06 12:43:29 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-06 12:43:30 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-06 12:43:30 | INFO     | database             | Bootstrap Start
+2026-03-06 12:43:30 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-06 12:43:30 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-06 12:43:30 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-06 12:43:32 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-06 12:43:33 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-06 12:43:36 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-06 12:43:38 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-06 12:43:38 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-06 12:43:38 | ERROR    | database             | Error al obtener todos los SKUs para movimiento: Failed getting connection; pool exhausted
+2026-03-06 12:43:38 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-06 12:43:38 | ERROR    | database             | Error al obtener móviles: Failed getting connection; pool exhausted
+2026-03-06 12:44:46 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-06 12:44:55 | INFO     | database             | 🧹 Móvil MOVIL 201 (PAQUETE A) limpiado: 176 registros eliminados.
+2026-03-06 12:54:01 | INFO     | database             | Lazy loading tab: Historial...
+2026-03-06 12:54:01 | INFO     | database             | Tab Historial loaded successfully.
+2026-03-06 12:54:02 | INFO     | database             | Lazy loading tab: Configuración...
+2026-03-06 12:54:04 | INFO     | database             | Tab Configuración loaded successfully.
+2026-03-06 12:54:04 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\audit.py", line 260, in <lambda>
+    self.after(0, lambda: self._aplicar_pendientes_ui(consumos))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\audit.py", line 278, in _aplicar_pendientes_ui
+    id_c, movil, sku, nombre, qty, tecnico, ticket, fecha, colilla, contrato, ayudante, seriales_usados = c
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: too many values to unpack (expected 12)
+
+2026-03-06 12:54:19 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-06 13:06:23 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-06 13:06:24 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-06 13:06:32 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-06 13:06:35 | INFO     | database             | ⚙️ Verificando 7 móviles...
+2026-03-06 13:06:35 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-06 13:06:36 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-06 13:06:37 | INFO     | database             | Bootstrap Start
+2026-03-06 13:06:37 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-06 13:06:37 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-06 13:06:37 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-06 13:06:38 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-06 13:06:39 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-06 13:07:01 | INFO     | database             | Lazy loading tab: Material Dañado...
+2026-03-06 13:07:02 | INFO     | database             | Tab Material Dañado loaded successfully.
+2026-03-06 13:07:18 | ERROR    | database             | Error en registrar_danado_directo para equipos: name 'sucursal_context' is not defined
+2026-03-06 13:07:32 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-06 13:07:34 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-06 13:07:51 | INFO     | database             | 🔍 Iniciando verificación y corrección de duplicados...
+2026-03-06 13:07:52 | INFO     | database             | 📦 Productos: No se encontraron productos duplicados
+2026-03-06 13:07:54 | INFO     | database             | Encontrados 21 SKUs duplicados en asignación móviles
+2026-03-06 13:07:54 | ERROR    | database             | ❌ Error SQL ejecución: 1105 (HY000): 'CREATE TABLE ... SELECT' is not implemented yet
+2026-03-06 13:07:54 | ERROR    | database             |    Query: 
+            CREATE TEMPORARY TABLE temp_asignacion AS
+            SELECT movil, sku_producto, SUM(cantidad) as cantidad_total
+            FROM asignacion_moviles 
+            GROUP BY movil, sku_producto
+        
+2026-03-06 13:07:54 | ERROR    | database             |    Params: None
+2026-03-06 13:07:55 | INFO     | database             | 🚚 Asignación Móviles: Error al limpiar duplicados de asignación: 1105 (HY000): 'CREATE TABLE ... SELECT' is not implemented yet
+2026-03-06 13:07:55 | INFO     | database             | ✅ Verificación completada.
+2026-03-06 13:08:03 | INFO     | database             | Lazy loading tab: Historial...
+2026-03-06 13:08:03 | INFO     | database             | Tab Historial loaded successfully.
+2026-03-06 13:08:05 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\audit.py", line 260, in <lambda>
+    self.after(0, lambda: self._aplicar_pendientes_ui(consumos))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\audit.py", line 278, in _aplicar_pendientes_ui
+    id_c, movil, sku, nombre, qty, tecnico, ticket, fecha, colilla, contrato, ayudante, seriales_usados = c
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: too many values to unpack (expected 12)
+
+2026-03-06 13:08:46 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\audit.py", line 260, in <lambda>
+    self.after(0, lambda: self._aplicar_pendientes_ui(consumos))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\audit.py", line 278, in _aplicar_pendientes_ui
+    id_c, movil, sku, nombre, qty, tecnico, ticket, fecha, colilla, contrato, ayudante, seriales_usados = c
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: too many values to unpack (expected 12)
+
+2026-03-06 13:08:49 | INFO     | database             | Lazy loading tab: Productos...
+2026-03-06 13:08:51 | INFO     | database             | Tab Productos loaded successfully.
+2026-03-06 13:10:45 | INFO     | database             | Lazy loading tab: Configuración...
+2026-03-06 13:10:47 | INFO     | database             | Tab Configuración loaded successfully.
+2026-03-06 13:11:05 | INFO     | database             | 📋 Consumos pendientes eliminados para Movil 201: 11 registros.
+2026-03-06 13:12:16 | INFO     | database             | 🧹 Móvil Movil 201 (TODOS) limpiado: 1278 registros eliminados.
+2026-03-06 13:12:31 | INFO     | database             | 🧹 Móvil Movil 200 (TODOS) limpiado: 5 registros eliminados.
+2026-03-06 13:12:46 | INFO     | database             | 📋 Consumos pendientes eliminados para Movil 200: 0 registros.
+2026-03-06 13:13:48 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-03-06 13:13:58 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-03-06 13:14:00 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PERSONALIZADO
+2026-03-06 13:14:25 | INFO     | gui.mobile_output_scanner | SKU 1-2-16 no encontrado en paquete base.
+2026-03-06 13:14:25 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-2-16 x786
+2026-03-06 13:14:40 | INFO     | gui.mobile_output_scanner | SKU 10-1-04 no encontrado en paquete base.
+2026-03-06 13:14:40 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 10-1-04 x5
+2026-03-06 13:14:49 | INFO     | gui.mobile_output_scanner | SKU 7-1-171 no encontrado en paquete base.
+2026-03-06 13:14:49 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 7-1-171 x246
+2026-03-06 13:15:01 | INFO     | gui.mobile_output_scanner | SKU 5-2-443 no encontrado en paquete base.
+2026-03-06 13:15:01 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 5-2-443 x3
+2026-03-06 13:16:39 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-03-06 13:16:43 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-4-61 x5
+2026-03-06 13:16:47 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-8-40 x60
+2026-03-06 13:16:50 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-5-02 x30
+2026-03-06 13:16:53 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-7-07 x30
+2026-03-06 13:16:55 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-7-11 x7
+2026-03-06 13:16:57 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-2-41 x7
+2026-03-06 13:16:59 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-3-18 x16
+2026-03-06 13:17:02 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-3-42 x60
+2026-03-06 13:17:18 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 2150084158EGR2000631 -> SKU 4-4-647 (Desde BODEGA)
+2026-03-06 13:17:19 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:17:34 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 2150084158EGQ4001248 -> SKU 4-4-647 (Desde BODEGA)
+2026-03-06 13:17:35 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:17:48 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112719819 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-06 13:17:49 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:20:39 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112720855 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-06 13:20:41 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:20:43 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112722031 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-06 13:20:44 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:20:47 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112721221 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-06 13:20:49 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:20:52 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112717872 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-06 13:20:53 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:21:18 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112720855 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-06 13:21:24 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112721221 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-06 13:21:29 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112717872 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-06 13:21:34 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112723968 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-06 13:21:35 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:21:38 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112723135 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-06 13:21:39 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:21:42 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112722828 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-06 13:21:44 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:22:00 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754430E71C7B5 -> SKU 4-4-646 (Desde BODEGA)
+2026-03-06 13:22:01 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:22:04 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754430AA7EFB5 -> SKU 4-4-646 (Desde BODEGA)
+2026-03-06 13:22:05 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:22:16 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial Z4EF21E03894 -> SKU 8-1-903 (Desde BODEGA)
+2026-03-06 13:22:18 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:22:21 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial Z4EF21E03887 -> SKU 8-1-903 (Desde BODEGA)
+2026-03-06 13:22:22 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:22:40 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ24050182609644 -> SKU 8-1-902 (Desde BODEGA)
+2026-03-06 13:22:42 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:22:57 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ24050182606202 -> SKU 8-1-902 (Desde BODEGA)
+2026-03-06 13:22:59 | ERROR    | gui.mobile_output_scanner | Error procesando escaneo: 'tuple' object has no attribute 'get'
+2026-03-06 13:24:49 | INFO     | gui.mobile_output_scanner | SKU 8-1-900 no encontrado en paquete base.
+2026-03-06 13:24:49 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-900 x7
+2026-03-06 13:38:16 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-06 13:38:16 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-06 13:38:24 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-06 13:38:27 | INFO     | database             | ⚙️ Verificando 7 móviles...
+2026-03-06 13:38:28 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-06 13:38:29 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-06 13:38:29 | INFO     | database             | Bootstrap Start
+2026-03-06 13:38:29 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-06 13:38:29 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-06 13:38:29 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-06 13:38:30 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-06 13:38:32 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-06 13:38:48 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-06 13:38:50 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-06 13:38:57 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-03-06 13:39:10 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-03-06 13:39:54 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432B93CFAF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-06 13:39:55 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-06 13:40:03 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432875F2AF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-06 13:40:06 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-06 13:40:12 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544301B81AAF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-06 13:40:17 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-06 13:40:32 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432B929CAF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-06 13:40:36 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-06 13:40:47 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544372DF57B3 -> SKU 4-4-656 (Desde BODEGA)
+2026-03-06 13:40:53 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-656 x1
+2026-03-06 13:40:55 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544372DDF4B3 -> SKU 4-4-656 (Desde BODEGA)
+2026-03-06 13:41:02 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-656 x1
+2026-03-06 13:41:07 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432B2375AF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-06 13:41:15 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-06 13:41:24 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754437CF5EDB3 -> SKU 4-4-656 (Desde BODEGA)
+2026-03-06 13:41:33 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-656 x1
+2026-03-06 13:41:42 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544372E095B3 -> SKU 4-4-656 (Desde BODEGA)
+2026-03-06 13:41:51 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-656 x1
+2026-03-06 13:41:56 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 48575443287673AF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-06 13:42:05 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-06 13:42:12 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 48575443A8BF18B3 -> SKU 4-4-654 (Desde BODEGA)
+2026-03-06 13:42:22 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-654 x1
+2026-03-06 13:46:08 | INFO     | database             | Lazy loading tab: Material Dañado...
+2026-03-06 13:46:10 | INFO     | database             | Tab Material Dañado loaded successfully.
+2026-03-06 14:04:03 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-06 14:04:04 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-06 14:04:12 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-06 14:04:15 | INFO     | database             | ⚙️ Verificando 7 móviles...
+2026-03-06 14:04:16 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-06 14:04:17 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-06 14:04:17 | INFO     | database             | Bootstrap Start
+2026-03-06 14:04:17 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-06 14:04:17 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-06 14:04:17 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-06 14:04:18 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-06 14:04:20 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-06 14:06:29 | INFO     | database             | Lazy loading tab: Material Dañado...
+2026-03-06 14:06:30 | INFO     | database             | Tab Material Dañado loaded successfully.
+2026-03-06 14:06:47 | WARNING  | database             | Equipo 485754432B22E2AF en CONSUMIDO pero no hay stock en tabla asignacion_moviles.
+2026-03-06 14:06:47 | ERROR    | database             | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'secuencia' in 'field list'
+2026-03-06 14:06:47 | ERROR    | database             |    Query: INSERT INTO productos (nombre, sku, cantidad, ubicacion, secuencia, sucursal) SELECT nombre, sku, 1, %s, '99z', %s FROM productos WHERE sku = %s LIMIT 1
+2026-03-06 14:06:47 | ERROR    | database             |    Params: ('DESCARTE', 'CHIRIQUI', '4-4-644')
+2026-03-06 14:06:47 | ERROR    | database             | Error en registrar_danado_directo para equipos: 1054 (42S22): Unknown column 'secuencia' in 'field list'
+2026-03-06 14:07:10 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-06 14:07:12 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-06 14:07:12 | INFO     | database             | Lazy loading tab: Registro Global...
+2026-03-06 14:07:12 | ERROR    | database             | Error loading tab Registro Global: No module named 'gui.inventory.styles'
+2026-03-06 14:08:26 | INFO     | database             | Lazy loading tab: Historial...
+2026-03-06 14:08:26 | INFO     | database             | Tab Historial loaded successfully.
+2026-03-06 14:09:00 | INFO     | database             | Lazy loading tab: Productos...
+2026-03-06 14:09:02 | INFO     | database             | Tab Productos loaded successfully.
+2026-03-06 14:09:05 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-03-06 14:14:31 | WARNING  | gui.inventory.movements | ❌ Código '1C73E2D786DA' no reconocido en este móvil
+2026-03-06 14:14:37 | WARNING  | gui.inventory.movements | ❌ Código '1C73E2D786DA' no reconocido en este móvil
+2026-03-06 14:14:52 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-06 14:14:54 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-06 14:14:56 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-06 14:15:00 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-06 14:15:03 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-06 14:15:15 | WARNING  | gui.inventory.movements | ⚠️ Serial 'F0A95161858C' registrado en BODEGA, pero se está retornando desde Movil 203
+2026-03-06 14:15:15 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-646 -> Qty: 1 (Serial)
+2026-03-06 14:15:20 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-646 -> Qty: 1 (Serial)
+2026-03-06 14:15:24 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-646 -> Qty: 1 (Serial)
+2026-03-06 14:15:46 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-647 -> Qty: 1 (Serial)
+2026-03-06 14:15:48 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-647 -> Qty: 1 (Serial)
+2026-03-06 14:16:08 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-03-06 14:16:12 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-03-06 14:16:30 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-03-06 14:16:39 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-03-06 14:16:56 | INFO     | gui.inventory.movements | ✅ Auditado: 2-5-02 -> Qty: 35 (Material)
+2026-03-06 14:17:12 | INFO     | gui.inventory.movements | ✅ Auditado: 2-7-07 -> Qty: 9 (Material)
+2026-03-06 14:17:22 | INFO     | gui.inventory.movements | ✅ Auditado: 4-3-42 -> Qty: 30 (Material)
+2026-03-06 14:17:36 | INFO     | gui.inventory.movements | ✅ Auditado: 7-1-171 -> Qty: 3 (Material)
+2026-03-06 14:17:48 | INFO     | gui.inventory.movements | ✅ Auditado: 4-3-18 -> Qty: 3 (Material)
+2026-03-06 14:18:00 | INFO     | gui.inventory.movements | ✅ Auditado: 1-8-40 -> Qty: 17 (Material)
+2026-03-06 14:18:14 | INFO     | gui.inventory.movements | ✅ Auditado: 1-4-61 -> Qty: 3 (Material)
+2026-03-06 14:22:52 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-7-07 x21
+2026-03-06 14:22:52 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-902 x2
+2026-03-06 14:22:52 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-904 x3
+2026-03-06 14:22:52 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-2-41 x7
+2026-03-06 14:22:52 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-3-42 x30
+2026-03-06 14:22:52 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-06 14:22:52 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-903 x2
+2026-03-06 14:22:52 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-8-40 x43
+2026-03-06 14:22:52 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-654 x1
+2026-03-06 14:22:52 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-656 x2
+2026-03-06 14:22:52 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-3-18 x13
+2026-03-06 14:22:52 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-7-11 x7
+2026-03-06 14:22:53 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: U4-4-633 x1
+2026-03-06 14:22:53 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-4-61 x2
+2026-03-06 14:22:53 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-03-06 14:29:29 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-5-02 x30
+2026-03-06 14:31:28 | INFO     | database             | Lazy loading tab: Configuración...
+2026-03-06 14:31:30 | INFO     | database             | Tab Configuración loaded successfully.
+2026-03-06 14:31:47 | INFO     | database             | 🧹 Móvil Movil 203 (PAQUETE B) limpiado: 279 registros eliminados.
+2026-03-06 15:26:16 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-06 15:26:17 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-06 15:26:25 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-06 15:26:28 | INFO     | database             | ⚙️ Verificando 7 móviles...
+2026-03-06 15:26:29 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-06 15:26:30 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-06 15:26:30 | INFO     | database             | Bootstrap Start
+2026-03-06 15:26:30 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-06 15:26:30 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-06 15:26:30 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-06 15:26:31 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-06 15:26:33 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-06 15:35:12 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-06 15:35:14 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-06 15:35:48 | INFO     | database             | Lazy loading tab: Configuración...
+2026-03-06 15:35:50 | INFO     | database             | Tab Configuración loaded successfully.
+2026-03-06 15:36:08 | INFO     | database             | 🧹 Móvil Movil 203 (PAQUETE B) limpiado: 0 registros eliminados.
+2026-03-06 15:36:48 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-03-06 15:36:57 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-03-06 15:37:12 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-03-06 15:37:13 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-4-61 x5
+2026-03-06 15:37:17 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-03-06 15:37:19 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-8-40 x60
+2026-03-06 15:37:21 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
+2026-03-06 15:37:23 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-5-02 x30
+2026-03-06 15:37:26 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-07 requiere serial: Not all parameters were used in the SQL statement
+2026-03-06 15:37:27 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-7-07 x30
+2026-03-06 15:37:30 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-11 requiere serial: Not all parameters were used in the SQL statement
+2026-03-06 15:37:31 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-7-11 x7
+2026-03-06 15:37:33 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-2-41 requiere serial: Not all parameters were used in the SQL statement
+2026-03-06 15:37:34 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-2-41 x7
+2026-03-06 15:37:37 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-18 requiere serial: Not all parameters were used in the SQL statement
+2026-03-06 15:37:38 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-3-18 x16
+2026-03-06 15:37:42 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-42 requiere serial: Not all parameters were used in the SQL statement
+2026-03-06 15:37:43 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-3-42 x60
+2026-03-06 15:44:02 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112717525 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-06 15:44:03 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-904 x1
+2026-03-06 15:44:05 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112723847 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-06 15:44:08 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-904 x1
+2026-03-06 15:44:14 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112723302 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-06 15:44:18 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-904 x1
+2026-03-06 15:44:21 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112723477 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-06 15:44:25 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-904 x1
+2026-03-06 15:44:29 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112703832 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-06 15:44:33 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-904 x1
+2026-03-06 15:46:10 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112705842 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-06 15:46:15 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-904 x1
+2026-03-06 15:46:17 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112705360 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-06 15:46:22 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-904 x1
+2026-03-06 15:46:24 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112716577 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-06 15:46:28 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-904 x1
+2026-03-06 15:46:43 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754430AB98AB5 -> SKU 4-4-646 (Desde BODEGA)
+2026-03-06 15:46:50 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-646 x1
+2026-03-06 15:46:55 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754430AA5C7B5 -> SKU 4-4-646 (Desde BODEGA)
+2026-03-06 15:47:02 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-646 x1
+2026-03-06 15:47:12 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 2150084158EGR1000191 -> SKU 4-4-647 (Desde BODEGA)
+2026-03-06 15:47:21 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-647 x1
+2026-03-06 15:47:27 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 2150084158EGR1000228 -> SKU 4-4-647 (Desde BODEGA)
+2026-03-06 15:47:37 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-647 x1
+2026-03-06 15:49:01 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': 'D8Ñ0CÑCFÑ05ÑEDÑ46', 'mac': None}
+2026-03-06 15:50:56 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ24050182608862 -> SKU 8-1-902 (Desde BODEGA)
+2026-03-06 15:51:18 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544372EBF3B3 -> SKU 4-4-656 (Desde BODEGA)
+2026-03-06 15:51:30 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-656 x1
+2026-03-06 15:51:34 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544372E5B7B3 -> SKU 4-4-656 (Desde BODEGA)
+2026-03-06 15:51:47 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-656 x1
+2026-03-06 15:51:51 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544372E033B3 -> SKU 4-4-656 (Desde BODEGA)
+2026-03-06 15:52:05 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-656 x1
+2026-03-06 15:52:09 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544372E7FAB3 -> SKU 4-4-656 (Desde BODEGA)
+2026-03-06 15:52:24 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-656 x1
+2026-03-06 15:52:45 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 48575443A8BF2AB3 -> SKU 4-4-654 (Desde BODEGA)
+2026-03-06 15:53:02 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-654 x1
+2026-03-06 15:54:12 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432B1E4CAF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-06 15:54:29 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-06 15:55:15 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544301ADA9AF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-06 15:55:34 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-06 15:56:11 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432876EBAF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-06 15:56:32 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-06 15:56:37 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544301A0C0AF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-06 15:56:58 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-06 15:57:03 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544301827DAF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-06 15:57:23 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-07 07:30:03 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-07 07:30:07 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 07:30:16 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-07 07:30:19 | INFO     | database             | ⚙️ Verificando 7 móviles...
+2026-03-07 07:30:19 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-07 07:30:21 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-07 07:30:21 | INFO     | database             | Bootstrap Start
+2026-03-07 07:30:21 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-07 07:30:21 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-07 07:30:21 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-07 07:30:23 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-07 07:30:35 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-07 07:32:38 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-07 07:32:53 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-07 07:32:53 | INFO     | database             | Lazy loading tab: Productos...
+2026-03-07 07:32:55 | INFO     | database             | Tab Productos loaded successfully.
+2026-03-07 07:33:01 | INFO     | database             | Lazy loading tab: Historial...
+2026-03-07 07:33:01 | INFO     | database             | Tab Historial loaded successfully.
+2026-03-07 07:33:02 | INFO     | database             | Lazy loading tab: Registro Global...
+2026-03-07 07:33:02 | ERROR    | database             | Error loading tab Registro Global: No module named 'gui.inventory.styles'
+2026-03-07 07:33:04 | INFO     | database             | Lazy loading tab: Material Dañado...
+2026-03-07 07:33:06 | INFO     | database             | Tab Material Dañado loaded successfully.
+2026-03-07 07:33:11 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-03-07 07:33:18 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-03-07 07:33:23 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 07:33:24 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-4-61 x5
+2026-03-07 07:33:27 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 07:33:29 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-8-40 x60
+2026-03-07 07:33:31 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 07:33:32 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-5-02 x30
+2026-03-07 07:33:36 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-07 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 07:33:37 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-7-07 x30
+2026-03-07 07:33:44 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-11 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 07:33:45 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-7-11 x7
+2026-03-07 07:33:48 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-2-41 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 07:33:49 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-2-41 x7
+2026-03-07 07:33:53 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-18 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 07:33:54 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-3-18 x16
+2026-03-07 07:33:59 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-42 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 07:34:00 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-3-42 x60
+2026-03-07 07:35:45 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754431F686AAF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-07 07:35:46 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-07 07:36:14 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544301BB54AF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-07 07:36:17 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-07 07:36:23 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432B9380AF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-07 07:36:28 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-07 07:36:32 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432B2CC7AF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-07 07:36:37 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-07 07:37:07 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432B19E5AF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-07 07:37:12 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-07 07:37:32 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544372E1FCB3 -> SKU 4-4-656 (Desde BODEGA)
+2026-03-07 07:37:38 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-656 x1
+2026-03-07 07:42:03 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432B29B6AF -> SKU 4-4-644 (Desde BODEGA)
+2026-03-07 07:42:09 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-07 07:42:26 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial Z4EF21E03245 -> SKU 8-1-903 (Desde BODEGA)
+2026-03-07 07:42:34 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-903 x1
+2026-03-07 07:42:38 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial Z4EF21E02141 -> SKU 8-1-903 (Desde BODEGA)
+2026-03-07 07:42:47 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-903 x1
+2026-03-07 07:42:52 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 2150084158EGR1000707 -> SKU 4-4-647 (Desde BODEGA)
+2026-03-07 07:43:03 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-647 x1
+2026-03-07 07:44:06 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 2150084158EGQ4001167 -> SKU 4-4-647 (Desde BODEGA)
+2026-03-07 07:44:18 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-647 x1
+2026-03-07 07:44:27 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544372E315B3 -> SKU 4-4-656 (Desde BODEGA)
+2026-03-07 07:44:41 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-656 x1
+2026-03-07 07:44:46 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 48575443A8BDE9B3 -> SKU 4-4-654 (Desde BODEGA)
+2026-03-07 07:45:01 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-654 x1
+2026-03-07 07:45:06 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544372E401B3 -> SKU 4-4-656 (Desde BODEGA)
+2026-03-07 07:45:23 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-656 x1
+2026-03-07 07:45:36 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ24050182609038 -> SKU 8-1-902 (Desde BODEGA)
+2026-03-07 07:45:54 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-902 x1
+2026-03-07 07:45:57 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ24050182609605 -> SKU 8-1-902 (Desde BODEGA)
+2026-03-07 07:46:17 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-902 x1
+2026-03-07 07:46:21 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754430AB665B5 -> SKU 4-4-646 (Desde BODEGA)
+2026-03-07 07:46:42 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-646 x1
+2026-03-07 07:46:46 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754430E7A01B5 -> SKU 4-4-646 (Desde BODEGA)
+2026-03-07 07:47:09 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-646 x1
+2026-03-07 07:47:23 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112718093 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-07 07:47:47 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-904 x1
+2026-03-07 07:47:50 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112708082 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-07 07:48:16 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-904 x1
+2026-03-07 07:49:30 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112713995 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-07 07:49:57 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-904 x1
+2026-03-07 07:50:02 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112722309 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-07 07:50:29 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-904 x1
+2026-03-07 07:50:38 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112725430 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-07 07:51:07 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-904 x1
+2026-03-07 07:51:10 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112717375 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-07 07:51:38 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-904 x1
+2026-03-07 07:51:39 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112723956 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-07 07:52:07 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-904 x1
+2026-03-07 07:52:15 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112720890 -> SKU 8-1-904 (Desde BODEGA)
+2026-03-07 07:52:41 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-904 x1
+2026-03-07 08:10:05 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-07 08:10:06 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 08:10:14 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-07 08:10:17 | INFO     | database             | ⚙️ Verificando 7 móviles...
+2026-03-07 08:10:18 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-07 08:10:19 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-07 08:10:19 | INFO     | database             | Bootstrap Start
+2026-03-07 08:10:19 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-07 08:10:19 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-07 08:10:19 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-07 08:10:20 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-07 08:10:22 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-07 08:10:26 | INFO     | database             | Lazy loading tab: Material Dañado...
+2026-03-07 08:10:27 | INFO     | database             | Tab Material Dañado loaded successfully.
+2026-03-07 08:10:28 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-07 08:10:30 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-07 08:10:45 | WARNING  | database             | Equipo 485754432873FCAF en CONSUMIDO pero no hay stock en tabla asignacion_moviles.
+2026-03-07 08:10:55 | INFO     | database             | Lazy loading tab: Productos...
+2026-03-07 08:10:57 | INFO     | database             | Tab Productos loaded successfully.
+2026-03-07 08:11:02 | INFO     | database             | Lazy loading tab: Historial...
+2026-03-07 08:11:02 | INFO     | database             | Tab Historial loaded successfully.
+2026-03-07 08:11:03 | INFO     | database             | Lazy loading tab: Registro Global...
+2026-03-07 08:11:03 | ERROR    | database             | Error loading tab Registro Global: No module named 'gui.inventory.styles'
+2026-03-07 08:11:24 | INFO     | database             | Lazy loading tab: Configuración...
+2026-03-07 08:11:26 | INFO     | database             | Tab Configuración loaded successfully.
+2026-03-07 08:11:50 | INFO     | database             | Lazy loading tab: Registro Global...
+2026-03-07 08:11:50 | ERROR    | database             | Error loading tab Registro Global: No module named 'gui.inventory.styles'
+2026-03-07 08:40:28 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-644 -> Qty: 1 (Serial)
+2026-03-07 08:40:37 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-644 -> Qty: 1 (Serial)
+2026-03-07 08:40:58 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-644 -> Qty: 1 (Serial)
+2026-03-07 08:41:15 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-03-07 08:41:26 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-654 -> Qty: 1 (Serial)
+2026-03-07 08:41:43 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-07 08:41:47 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-07 08:41:50 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-07 08:41:52 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-07 08:41:55 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-07 08:42:15 | WARNING  | gui.inventory.movements | ❌ Código '1C73E2D7C0C2' no reconocido en este móvil
+2026-03-07 08:42:23 | WARNING  | gui.inventory.movements | ❌ Código '1C73E2D7C0C2' no reconocido en este móvil
+2026-03-07 08:42:29 | WARNING  | gui.inventory.movements | ❌ Código '482FD7D9DBCB' no reconocido en este móvil
+2026-03-07 08:42:34 | WARNING  | gui.inventory.movements | ❌ Código '482FD7D9DBCB' no reconocido en este móvil
+2026-03-07 08:44:34 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-7-07 x30
+2026-03-07 08:44:34 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: U4-4-633 x1
+2026-03-07 08:44:34 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-902 x2
+2026-03-07 08:44:34 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-2-41 x7
+2026-03-07 08:44:34 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-903 x2
+2026-03-07 08:44:34 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-4-61 x5
+2026-03-07 08:44:34 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-646 x2
+2026-03-07 08:44:34 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-647 x2
+2026-03-07 08:44:35 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-904 x3
+2026-03-07 08:44:35 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-3-18 x16
+2026-03-07 08:44:35 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-5-02 x30
+2026-03-07 08:44:35 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-8-40 x60
+2026-03-07 08:44:35 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-7-11 x7
+2026-03-07 08:44:35 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-3-42 x60
+2026-03-07 08:44:35 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-656 x5
+2026-03-07 08:44:35 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-03-07 08:53:58 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-07 08:53:59 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 08:54:11 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-07 08:54:15 | INFO     | database             | ⚙️ Verificando 7 móviles...
+2026-03-07 08:54:16 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-07 08:54:18 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-07 08:54:18 | INFO     | database             | Bootstrap Start
+2026-03-07 08:54:18 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-07 08:54:18 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-07 08:54:18 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-07 08:54:19 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-07 08:54:21 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-07 08:54:25 | INFO     | database             | Lazy loading tab: Registro Global...
+2026-03-07 08:54:28 | INFO     | database             | Tab Registro Global loaded successfully.
+2026-03-07 08:58:48 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-07 08:58:50 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 08:58:58 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-07 08:59:01 | INFO     | database             | ⚙️ Verificando 7 móviles...
+2026-03-07 08:59:01 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-07 08:59:02 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-07 08:59:03 | INFO     | database             | Bootstrap Start
+2026-03-07 08:59:03 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-07 08:59:03 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-07 08:59:03 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-07 08:59:04 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-07 08:59:07 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-07 08:59:39 | INFO     | database             | Lazy loading tab: Registro Global...
+2026-03-07 08:59:41 | INFO     | database             | Tab Registro Global loaded successfully.
+2026-03-07 09:01:40 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:01:40 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:01:42 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:01:42 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:01:42 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:01:42 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:01:45 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:01:45 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:01:45 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:01:45 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:01:46 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:01:46 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:01:46 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:01:46 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:01:50 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:01:50 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:01:50 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:01:50 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:01:54 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:01:54 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:01:54 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:01:54 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:01:54 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:01:54 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:01:54 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:01:54 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:02:03 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:02:03 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:02:03 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:02:03 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:02:03 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:02:03 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:02:10 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:02:10 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:02:11 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:02:11 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:02:11 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:02:11 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:02:38 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 09:02:38 | ERROR    | database             | Error en obtener_historial_completo: Failed getting connection; pool exhausted
+2026-03-07 09:03:14 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-07 09:03:14 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 09:03:23 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-07 09:03:25 | INFO     | database             | ⚙️ Verificando 7 móviles...
+2026-03-07 09:03:26 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-07 09:03:27 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-07 09:03:27 | INFO     | database             | Bootstrap Start
+2026-03-07 09:03:27 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-07 09:03:27 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-07 09:03:27 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-07 09:03:28 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-07 09:03:31 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-07 09:03:32 | INFO     | database             | Lazy loading tab: Registro Global...
+2026-03-07 09:03:34 | INFO     | database             | Tab Registro Global loaded successfully.
+2026-03-07 09:37:10 | INFO     | database             | Lazy loading tab: Historial...
+2026-03-07 09:37:10 | INFO     | database             | Tab Historial loaded successfully.
+2026-03-07 09:37:11 | INFO     | database             | Lazy loading tab: Productos...
+2026-03-07 09:37:12 | INFO     | database             | Tab Productos loaded successfully.
+2026-03-07 09:37:13 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-07 09:37:13 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-07 09:37:14 | INFO     | database             | Lazy loading tab: Material Dañado...
+2026-03-07 09:37:16 | INFO     | database             | Tab Material Dañado loaded successfully.
+2026-03-07 09:40:30 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-07 09:40:31 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 09:40:43 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-07 09:40:46 | INFO     | database             | ⚙️ Verificando 7 móviles...
+2026-03-07 09:40:46 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-07 09:40:47 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-07 09:40:47 | INFO     | database             | Bootstrap Start
+2026-03-07 09:40:47 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-07 09:40:47 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-07 09:40:47 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-07 09:40:48 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-07 09:40:50 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-07 09:40:53 | INFO     | database             | Lazy loading tab: Registro Global...
+2026-03-07 09:40:55 | INFO     | database             | Tab Registro Global loaded successfully.
+2026-03-07 09:41:35 | ERROR    | database             | Error en buscar_equipo_global: unsupported format character '"' (0x22) at index 1
+2026-03-07 09:42:27 | ERROR    | database             | Error en buscar_equipo_global: unsupported format character '"' (0x22) at index 1
+2026-03-07 09:43:47 | ERROR    | database             | Error en buscar_equipo_global: unsupported format character '"' (0x22) at index 1
+2026-03-07 09:51:12 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-07 09:51:12 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 09:51:22 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-07 09:51:25 | INFO     | database             | ⚙️ Verificando 7 móviles...
+2026-03-07 09:51:26 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-07 09:51:28 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-07 09:51:28 | INFO     | database             | Bootstrap Start
+2026-03-07 09:51:28 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-07 09:51:28 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-07 09:51:28 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-07 09:51:30 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-07 09:51:32 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-07 09:51:50 | INFO     | database             | Lazy loading tab: Registro Global...
+2026-03-07 09:51:52 | INFO     | database             | Tab Registro Global loaded successfully.
+2026-03-07 09:52:36 | ERROR    | database             | Error en buscar_equipo_global: unsupported format character '"' (0x22) at index 1
+2026-03-07 09:52:43 | ERROR    | database             | Error en buscar_equipo_global: unsupported format character '"' (0x22) at index 1
+2026-03-07 09:53:15 | ERROR    | database             | Error en buscar_equipo_global: unsupported format character '"' (0x22) at index 1
+2026-03-07 09:53:39 | ERROR    | database             | Error en buscar_equipo_global: unsupported format character '"' (0x22) at index 1
+2026-03-07 09:54:16 | ERROR    | database             | Error en buscar_equipo_global: unsupported format character '"' (0x22) at index 1
+2026-03-07 09:54:31 | ERROR    | database             | Error en buscar_equipo_global: unsupported format character '"' (0x22) at index 1
+2026-03-07 09:55:43 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 09:56:09 | INFO     | database             | Lazy loading tab: Material Dañado...
+2026-03-07 09:56:11 | INFO     | database             | Tab Material Dañado loaded successfully.
+2026-03-07 09:56:14 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-07 09:56:14 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-07 09:56:35 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-654 -> Qty: 1 (Serial)
+2026-03-07 09:56:54 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-07 09:56:56 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-07 09:56:57 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-07 09:56:59 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-07 09:57:00 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-07 09:57:38 | INFO     | database             | Lazy loading tab: Configuración...
+2026-03-07 09:57:40 | INFO     | database             | Tab Configuración loaded successfully.
+2026-03-07 09:58:05 | INFO     | database             | 🧹 Móvil Movil 203 (PAQUETE A) limpiado: 42 registros eliminados.
+2026-03-07 10:00:17 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-07 10:00:18 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:00:27 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-07 10:00:30 | INFO     | database             | ⚙️ Verificando 7 móviles...
+2026-03-07 10:00:30 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-07 10:00:32 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-07 10:00:32 | INFO     | database             | Bootstrap Start
+2026-03-07 10:00:32 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-07 10:00:32 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-07 10:00:32 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-07 10:00:33 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-07 10:00:36 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-07 10:02:17 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:02:27 | INFO     | database             | Lazy loading tab: Material Dañado...
+2026-03-07 10:02:29 | INFO     | database             | Tab Material Dañado loaded successfully.
+2026-03-07 10:02:29 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-07 10:02:30 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-07 10:02:48 | INFO     | database             | Lazy loading tab: Registro Global...
+2026-03-07 10:02:48 | INFO     | database             | Tab Registro Global loaded successfully.
+2026-03-07 10:03:56 | INFO     | database             | Lazy loading tab: Historial...
+2026-03-07 10:03:56 | INFO     | database             | Tab Historial loaded successfully.
+2026-03-07 10:08:34 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-07 10:08:35 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:08:43 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-07 10:08:46 | INFO     | database             | ⚙️ Verificando 7 móviles...
+2026-03-07 10:08:47 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-07 10:08:48 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-07 10:08:48 | INFO     | database             | Bootstrap Start
+2026-03-07 10:08:48 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-07 10:08:48 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-07 10:08:48 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-07 10:08:49 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-07 10:08:51 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-07 10:09:00 | INFO     | database             | Lazy loading tab: Registro Global...
+2026-03-07 10:09:02 | INFO     | database             | Tab Registro Global loaded successfully.
+2026-03-07 10:10:52 | INFO     | database             | Lazy loading tab: Material Dañado...
+2026-03-07 10:10:54 | INFO     | database             | Tab Material Dañado loaded successfully.
+2026-03-07 10:10:57 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-07 10:10:57 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-07 10:11:05 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:11:31 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:12:05 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:12:09 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-03-07 10:12:16 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 10:12:17 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-4-61 x5
+2026-03-07 10:12:21 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 10:12:22 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-8-40 x60
+2026-03-07 10:12:25 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 10:12:26 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-5-02 x30
+2026-03-07 10:12:39 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:12:48 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 48575443A8C6CAB3 -> SKU 4-4-654 (Ubicación: BODEGA)
+2026-03-07 10:12:48 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-654 x1
+2026-03-07 10:13:12 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112706231 -> SKU 8-1-904 (Ubicación: BODEGA)
+2026-03-07 10:13:12 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-904 x1
+2026-03-07 10:13:45 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 10:13:46 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-4-61 x5
+2026-03-07 10:13:59 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112720590 -> SKU 8-1-904 (Ubicación: BODEGA)
+2026-03-07 10:14:00 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-904 x1
+2026-03-07 10:14:04 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112721740 -> SKU 8-1-904 (Ubicación: BODEGA)
+2026-03-07 10:14:04 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-904 x1
+2026-03-07 10:14:43 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:17:02 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:17:58 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-07 10:18:04 | WARNING  | gui.inventory.movements | ❌ Código '2CD8AE04F754' no reconocido en este móvil
+2026-03-07 10:18:09 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-03-07 10:18:19 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-654 -> Qty: 1 (Serial)
+2026-03-07 10:18:29 | INFO     | gui.inventory.movements | ✅ Auditado: 1-4-61 -> Qty: 4 (Material)
+2026-03-07 10:18:52 | INFO     | gui.inventory.movements | ✅ Auditado: 1-8-40 -> Qty: 50 (Material)
+2026-03-07 10:19:10 | INFO     | gui.inventory.movements | ✅ Auditado: 2-5-02 -> Qty: 20 (Material)
+2026-03-07 10:19:44 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:24:32 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-4-61 x1
+2026-03-07 10:24:32 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-3-18 x16
+2026-03-07 10:24:32 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-647 x2
+2026-03-07 10:24:32 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-3-42 x60
+2026-03-07 10:24:32 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-656 x6
+2026-03-07 10:24:32 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-07 10:24:32 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-7-07 x30
+2026-03-07 10:24:32 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-2-41 x7
+2026-03-07 10:24:32 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | database             | [ERROR] obtener_detalles_serial: Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-646 x2
+2026-03-07 10:24:32 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | database             | [ERROR] obtener_detalles_serial: Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | database             | [ERROR] obtener_detalles_serial: Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-5-02 x10
+2026-03-07 10:24:32 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-902 x2
+2026-03-07 10:24:32 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-7-11 x7
+2026-03-07 10:24:32 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-904 x6
+2026-03-07 10:24:32 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | database             | [ERROR] obtener_detalles_serial: Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | database             | [ERROR] obtener_detalles_serial: Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | database             | [ERROR] obtener_detalles_serial: Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | database             | [ERROR] obtener_detalles_serial: Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | database             | [ERROR] obtener_detalles_serial: Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 10:24:32 | ERROR    | database             | [ERROR] obtener_detalles_serial: Failed getting connection; pool exhausted
+2026-03-07 10:24:33 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-8-40 x10
+2026-03-07 10:24:33 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: U4-4-633 x1
+2026-03-07 10:24:33 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-903 x2
+2026-03-07 10:24:33 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-03-07 10:29:04 | INFO     | database             | Lazy loading tab: Configuración...
+2026-03-07 10:29:06 | INFO     | database             | Tab Configuración loaded successfully.
+2026-03-07 10:29:21 | INFO     | database             | 🧹 Móvil Movil 203 (PAQUETE A) limpiado: 77 registros eliminados.
+2026-03-07 10:30:37 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-07 10:30:38 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:30:46 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-07 10:30:49 | INFO     | database             | ⚙️ Verificando 7 móviles...
+2026-03-07 10:30:50 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-07 10:30:51 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-07 10:30:51 | INFO     | database             | Bootstrap Start
+2026-03-07 10:30:51 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-07 10:30:51 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-07 10:30:51 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-07 10:30:52 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-07 10:30:54 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-07 10:30:58 | INFO     | database             | Lazy loading tab: Registro Global...
+2026-03-07 10:30:59 | INFO     | database             | Tab Registro Global loaded successfully.
+2026-03-07 10:32:04 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:35:37 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:38:13 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:38:21 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-07 10:38:22 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:38:31 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-07 10:38:34 | INFO     | database             | ⚙️ Verificando 7 móviles...
+2026-03-07 10:38:34 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-07 10:38:35 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-07 10:38:35 | INFO     | database             | Bootstrap Start
+2026-03-07 10:38:35 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-07 10:38:35 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-07 10:38:35 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-07 10:38:37 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-07 10:38:40 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-07 10:38:41 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:38:44 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-07 10:38:46 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-07 10:38:46 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Failed getting connection; pool exhausted
+2026-03-07 10:38:46 | ERROR    | database             | Error al obtener todos los SKUs para movimiento: Failed getting connection; pool exhausted
+2026-03-07 10:39:05 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-03-07 10:39:17 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 10:39:18 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-4-61 x5
+2026-03-07 10:39:27 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 10:39:28 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-4-61 x5
+2026-03-07 10:39:31 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 10:39:32 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-8-40 x60
+2026-03-07 10:39:36 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 10:39:37 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 2-5-02 x30
+2026-03-07 10:39:52 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112721740 -> SKU 8-1-904 (Ubicación: BODEGA)
+2026-03-07 10:39:52 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-904 x1
+2026-03-07 10:40:35 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-03-07 10:40:38 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-03-07 10:40:46 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 485754432B34B7AF -> SKU 4-4-644 (Ubicación: BODEGA)
+2026-03-07 10:40:46 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-07 10:41:02 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544301BB43AF -> SKU 4-4-644 (Ubicación: BODEGA)
+2026-03-07 10:41:02 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-07 10:41:17 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial 4857544328754DAF -> SKU 4-4-644 (Ubicación: BODEGA)
+2026-03-07 10:41:17 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 4-4-644 x1
+2026-03-07 10:42:16 | INFO     | database             | Lazy loading tab: Registro Global...
+2026-03-07 10:42:16 | INFO     | database             | Tab Registro Global loaded successfully.
+2026-03-07 10:42:18 | INFO     | database             | Lazy loading tab: Material Dañado...
+2026-03-07 10:42:20 | INFO     | database             | Tab Material Dañado loaded successfully.
+2026-03-07 10:45:39 | INFO     | __main__             | Inicializando app_inventario...
+2026-03-07 10:45:40 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:45:49 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-07 10:45:51 | INFO     | database             | ⚙️ Verificando 7 móviles...
+2026-03-07 10:45:52 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-07 10:45:53 | INFO     | database             | Iniciando aplicación sin sistema de login
+2026-03-07 10:45:53 | INFO     | database             | Bootstrap Start
+2026-03-07 10:45:53 | INFO     | database             | [INIT] Iniciando aplicación principal
+2026-03-07 10:45:53 | INFO     | database             | Local Web Server is disabled. Using Render Portal.
+2026-03-07 10:45:53 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-07 10:45:54 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-07 10:45:56 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-07 10:46:11 | INFO     | database             | Lazy loading tab: Registro Global...
+2026-03-07 10:46:13 | INFO     | database             | Tab Registro Global loaded successfully.
+2026-03-07 10:49:02 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:50:13 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-07 10:50:14 | INFO     | database             | Tab Inventario loaded successfully.
+2026-03-07 10:50:29 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:50:37 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-03-07 10:50:51 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112721740 -> SKU 8-1-904 (Ubicación: BODEGA)
+2026-03-07 10:50:51 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 8-1-904 x1
+2026-03-07 10:50:55 | INFO     | gui.mobile_output_scanner | Auto-reconocimiento: Serial GZ25040112706231 -> SKU 8-1-904 (Ubicación: CONSUMIDO)
+2026-03-07 10:51:05 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 10:51:06 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-4-61 x5
+2026-03-07 10:51:10 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 10:51:11 | INFO     | gui.mobile_output_scanner | Item agregado/mergeado: 1-8-40 x60
+2026-03-07 10:51:21 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:51:46 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:53:25 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:53:52 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:54:13 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:54:39 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:55:01 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:55:24 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:56:39 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:56:59 | INFO     | database             | Lazy loading tab: Configuración...
+2026-03-07 10:57:00 | INFO     | database             | Tab Configuración loaded successfully.
+2026-03-07 10:57:40 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:58:30 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:59:19 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 10:59:57 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 11:00:34 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 11:01:32 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 11:02:05 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 11:02:52 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 11:03:19 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 11:03:49 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 11:04:32 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 11:05:49 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 11:07:22 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 11:07:46 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 11:08:29 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 11:19:53 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 11:21:29 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 11:27:10 | INFO     | gui.abasto           | ⚡ PARCHE EN VIVO APLICADO: Funciones de base de datos actualizadas en memoria.
+2026-03-07 11:27:26 | INFO     | gui.abasto           | ⚡ PARCHE EN VIVO APLICADO: Funciones de base de datos actualizadas en memoria.
+2026-03-07 11:27:39 | INFO     | gui.abasto           | ⚡ PARCHE EN VIVO APLICADO: Funciones de base de datos actualizadas en memoria.
+2026-03-07 11:27:56 | INFO     | gui.abasto           | ⚡ PARCHE EN VIVO APLICADO: Funciones de base de datos actualizadas en memoria.
+2026-03-07 11:28:27 | INFO     | gui.abasto           | ⚡ PARCHE EN VIVO APLICADO: Funciones de base de datos actualizadas en memoria.
+2026-03-07 12:14:19 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': '9848740BA4B0', 'mac': None}
+2026-03-07 12:15:21 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': 'HTTPSÑ--SUPPORT.HUAWEI.COM-CARRIER-DOCVIEW_NID¿DOC1100480869', 'mac': None}
+2026-03-07 12:15:37 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': 'D86D1770A38B', 'mac': None}
+2026-03-07 12:16:03 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': 'HTTPSÑ--SUPPORT.HUAWEI.COM-CARRIER-DOCVIEW_NID¿DOC1100480869', 'mac': None}
+2026-03-07 14:02:53 | INFO     | gui.abasto           | ⚡ PARCHE EN VIVO APLICADO: Funciones de base de datos actualizadas en memoria.
+2026-03-07 14:14:22 | INFO     | app_inventario       | Inicializando app_inventario...
+2026-03-07 14:14:24 | INFO     | database             | --- INICIANDO MODO SANTIAGO (CONSUMO DIRECTO) ---
+2026-03-07 14:14:24 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-03-07 14:14:32 | INFO     | database             | 🔧 Re-intentando creación de tabla series_registradas...
+2026-03-07 14:14:34 | INFO     | database             | ⚙️ Verificando 7 móviles...
+2026-03-07 14:14:35 | INFO     | database             | ✅ Migración de móviles completada.
+2026-03-07 14:14:36 | INFO     | database             | Ícono cargado: logo-StockWare.ico
+2026-03-07 14:14:39 | INFO     | database             | Lazy loading tab: Dashboard...
+2026-03-07 14:14:46 | INFO     | database             | Tab Dashboard loaded successfully.
+2026-03-07 14:18:12 | INFO     | database             | Lazy loading tab: Inventario...
+2026-03-07 14:18:23 | INFO     | database             | Tab Inventario loaded successfully.

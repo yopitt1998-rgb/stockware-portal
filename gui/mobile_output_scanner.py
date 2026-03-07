@@ -3,7 +3,7 @@ from tkinter import ttk, messagebox, simpledialog
 from datetime import date
 import threading
 
-from config import PAQUETE_INSTALACION, PRODUCTOS_CON_CODIGO_BARRA
+from config import PAQUETE_INSTALACION, PRODUCTOS_CON_CODIGO_BARRA, CURRENT_CONTEXT
 from .styles import Styles
 from .utils import darken_color, mostrar_mensaje_emergente, mostrar_cargando_async
 from utils.logger import get_logger
@@ -54,6 +54,9 @@ class MobileOutputScannerWindow:
         
         # Cache de productos
         self.productos_cache = {} # sku -> {nombre, stock}
+        # Cache de detalles de seriales (serial -> {mac_number, ...})
+        # Evita repetir consultas DB remotas por cada render de tabla
+        self.serial_details_cache = {}
         
         self.create_interface()
         self.load_initial_data()
@@ -203,7 +206,7 @@ class MobileOutputScannerWindow:
         self.tree.pack(side='left', fill='both', expand=True)
         sb.pack(side='right', fill='y')
         
-        self.tree.bind('<Double-1>', self.eliminar_item)
+        self.tree.bind('<Double-1>', self.editar_o_eliminar_item)
 
     def crear_botones_accion(self, parent):
         frame = tk.Frame(parent, bg=Styles.LIGHT_BG, pady=10)
@@ -261,9 +264,12 @@ class MobileOutputScannerWindow:
         for widget in self.frame_lista_progreso.winfo_children():
             widget.destroy()
             
+        from config import MATERIALES_COMPARTIDOS
+        
         for sku, cantidad_esperada in self.paquete_base.items():
             completado = self.items_completados.get(sku, 0)
             nombre = self.productos_cache.get(sku, {}).get('nombre', sku)
+            es_compartido = sku in MATERIALES_COMPARTIDOS
             
             # Truncar nombre si es muy largo
             if len(nombre) > 25: nombre = nombre[:22] + "..."
@@ -276,7 +282,46 @@ class MobileOutputScannerWindow:
             
             tk.Label(frame, text=icon, bg='white').pack(side='left')
             tk.Label(frame, text=f"{nombre}", font=('Segoe UI', 9), bg='white', fg=color).pack(side='left')
-            tk.Label(frame, text=f"{completado}/{cantidad_esperada}", font=('Segoe UI', 9, 'bold'), bg='white', fg=color).pack(side='right')
+            
+            # Botón de auto-relleno si falta cantidad y NO es compartido
+            if completado < cantidad_esperada and not es_compartido:
+                btn_auto = tk.Button(frame, text="⚡", font=('Segoe UI', 8), 
+                                     command=lambda s=sku, n=nombre, c=(cantidad_esperada - completado): self.auto_rellenar_item(s, n, c),
+                                     bg='#f1c40f', fg='white', relief='flat', padx=2, pady=0)
+                btn_auto.pack(side='right', padx=2)
+            elif es_compartido:
+                 tk.Label(frame, text="🏠", font=('Segoe UI', 8), bg='white', fg='#3498db').pack(side='right', padx=2)
+            
+            tk.Label(frame, text=f"{completado}/{cantidad_esperada}", font=('Segoe UI', 9, 'bold'), bg='white', fg=color).pack(side='right', padx=2)
+
+    def auto_rellenar_item(self, sku, nombre, cantidad_faltante):
+        """Auto-rellena un material (sin serial) en el carrito"""
+        from config import PRODUCTOS_CON_CODIGO_BARRA
+        es_equipo = sku in PRODUCTOS_CON_CODIGO_BARRA
+        
+        # Validación dinámica adicional basada en la base de datos
+        if not es_equipo:
+            try:
+                from database import get_db_connection, close_connection
+                conn = get_db_connection()
+                if conn:
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT codigo_barra FROM productos WHERE sku = ? LIMIT 1", (sku,))
+                    res = cursor.fetchone()
+                    if res and res[0] and str(res[0]).lower() not in ['none', 'null', '']:
+                         es_equipo = True
+            except Exception as e:
+                logger.error(f"Error verificando si el sku {sku} requiere serial: {e}")
+            finally:
+                if 'conn' in locals() and conn:
+                    close_connection(conn)
+
+        if es_equipo:
+            messagebox.showinfo("Equipo con Serial", "Los equipos con serial deben escanearse uno a uno para registrar su MAC/Serial.", parent=self.window)
+            return
+            
+        self.agregar_al_carrito(sku, nombre, cantidad_faltante, [])
+        messagebox.showinfo("Auto-relleno", f"Se agregaron {cantidad_faltante} unidades de {nombre}.", parent=self.window)
 
     def on_package_change(self, event=None):
         """Maneja el cambio de paquete seleccionado"""
@@ -301,150 +346,186 @@ class MobileOutputScannerWindow:
         logger.info(f"Paquete cambiado a: {seleccion}")
 
     def procesar_escaneo(self, event=None):
-        try:
-            desde_database = None
-            try:
-                 from database import obtener_sku_por_codigo_barra, obtener_sku_por_serial
-                 desde_database = obtener_sku_por_codigo_barra
-            except ImportError:
-                 pass
+        """Procesa el código escaneado. El lookup de serial/barcode se hace en background
+        para no bloquear la UI ante la latencia de MySQL remoto."""
+        codigo = self.entry_scanner.get().strip().upper()
+        self.entry_scanner.delete(0, tk.END)
+        if not codigo:
+            return
 
-            codigo = self.entry_scanner.get().strip().upper()
-            self.entry_scanner.delete(0, tk.END)
-            
-            if not codigo: return
-            
-            # Identificar SKU y ORIGEN (Serial o Codigo)
+        # Deshabilitar el entry mientras se busca para evitar doble-escaneo
+        self.entry_scanner.config(state='disabled')
+
+        def buscar_en_background():
+            """Ejecutado en hilo secundario: resuelve codigo -> (sku, origen_serial, nombre_serial, ubicacion)"""
+            try:
+                from database import obtener_sku_por_codigo_barra, obtener_sku_por_serial
+            except ImportError:
+                obtener_sku_por_codigo_barra = None
+                obtener_sku_por_serial = None
+
             sku = codigo
             origen_serial = False
             nombre_serial = None
-            
-            try:
-                sku_serial, existe, ubicacion_actual = obtener_sku_por_serial(codigo)
-                if existe:
-                    # VALIDACIÓN CRÍTICA: La serie debe estar en BODEGA para poder salir
-                    if ubicacion_actual and ubicacion_actual != 'BODEGA':
-                        messagebox.showerror("Ubicación Inválida", 
-                            f"El equipo con serial {codigo} ya está asignado a: {ubicacion_actual}\n\n"
-                            "No se puede realizar una salida de un equipo que no esté en BODEGA.", 
-                            parent=self.window)
-                        self.entry_scanner.focus_set()
-                        return
-                        
-                    sku = sku_serial
-                    origen_serial = True
-                    nombre_serial = codigo
-                    logger.info(f"Auto-reconocimiento: Serial {codigo} -> SKU {sku} (Desde BODEGA)")
-            except Exception as e:
-                logger.error(f"Error en auto-reconocimiento de serial: {e}")
+            ubicacion_actual = None
+
+            # 1. Intentar reconocer como serial/MAC
+            if obtener_sku_por_serial:
+                try:
+                    sku_serial, existe, ub = obtener_sku_por_serial(codigo)
+                    if existe:
+                        sku = sku_serial
+                        origen_serial = True
+                        nombre_serial = codigo
+                        ubicacion_actual = ub
+                        logger.info(f"Auto-reconocimiento: Serial {codigo} -> SKU {sku} (Ubicación: {ub})")
+                except Exception as e:
+                    logger.error(f"Error en auto-reconocimiento de serial: {e}")
 
             # 2. Si no es serial, buscar por SKU/Barcode
             if not origen_serial:
                 if codigo in self.productos_cache:
                     sku = codigo
-                elif desde_database:
-                    sku_found = desde_database(codigo)
-                    if sku_found:
-                        sku = sku_found
-            
-            if sku not in self.productos_cache:
-                messagebox.showwarning("No encontrado", f"Producto o Serial no encontrado: {codigo}\n(Asegúrese de que el producto esté en catálogo o la serie en BODEGA)", parent=self.window)
-                self.window.lift()
-                self.entry_scanner.update()
-                self.entry_scanner.focus_set()
-                return
-                
-            nombre = self.productos_cache[sku]['nombre']
-            stock_disponible = self.productos_cache[sku].get('stock', 0)
-            
-            # Verificar si hay stock en BODEGA (Feedback Usuario)
-            if stock_disponible <= 0:
-                messagebox.showerror("Sin Stock", f"No hay stock disponible de {nombre} en BODEGA.\n(Stock: {stock_disponible})", parent=self.window)
-                self.entry_scanner.focus()
-                return
+                elif obtener_sku_por_codigo_barra:
+                    try:
+                        sku_found = obtener_sku_por_codigo_barra(codigo)
+                        if sku_found:
+                            sku = sku_found
+                    except Exception as e:
+                        logger.error(f"Error buscando por código de barra: {e}")
 
-            # Verificar si requiere serial
-            requires_serial = sku in PRODUCTOS_CON_CODIGO_BARRA
-            seriales = []
-            cant = 1
-            
-            if requires_serial:
-                # SI FUE RECONOCIDO POR SERIAL (MAC), AUTO-AGREGAR
-                if origen_serial:
-                    seriales = [nombre_serial]
-                    # Validar que no esté ya en el carrito
-                    ya_en_carrito = False
-                    for item in self.items_carrito:
-                        if nombre_serial in item.get('seriales', []):
-                             ya_en_carrito = True
-                             break
-                    
-                    if ya_en_carrito:
-                         messagebox.showwarning("Duplicado", f"El serial {nombre_serial} ya está en la lista.", parent=self.window)
-                         self.entry_scanner.focus()
-                         return
-                    
-                    # AUTO-ADD (Sin preguntar cantidad)
-                    self.agregar_al_carrito(sku, nombre, 1, seriales)
+            return sku, origen_serial, nombre_serial, ubicacion_actual
+
+        def al_terminar_busqueda(resultado):
+            """Ejecutado en hilo principal tras la búsqueda. Continúa el flujo normal."""
+            # Re-habilitar entry
+            if not self.window.winfo_exists():
+                return
+            self.entry_scanner.config(state='normal')
+
+            sku, origen_serial, nombre_serial, ubicacion_actual = resultado
+
+            try:
+                # Validación de ubicación si fue reconocido como serial
+                if origen_serial and ubicacion_actual and ubicacion_actual != 'BODEGA':
+                    messagebox.showerror("Ubicación Inválida",
+                        f"El equipo con serial {codigo} ya está asignado a: {ubicacion_actual}\n\n"
+                        "No se puede realizar una salida de un equipo que no esté en BODEGA.",
+                        parent=self.window)
+                    self.entry_scanner.focus_set()
+                    return
+
+                if sku not in self.productos_cache:
+                    messagebox.showwarning("No encontrado",
+                        f"Producto o Serial no encontrado: {codigo}\n"
+                        "(Asegúrese de que el producto esté en catálogo o la serie en BODEGA)",
+                        parent=self.window)
+                    self.window.lift()
+                    self.entry_scanner.update()
+                    self.entry_scanner.focus_set()
+                    return
+
+                nombre = self.productos_cache[sku]['nombre']
+                stock_disponible = self.productos_cache[sku].get('stock', 0)
+
+                if stock_disponible <= 0:
+                    messagebox.showerror("Sin Stock",
+                        f"No hay stock disponible de {nombre} en BODEGA.\n(Stock: {stock_disponible})",
+                        parent=self.window)
                     self.entry_scanner.focus()
                     return
 
+                requires_serial = sku in PRODUCTOS_CON_CODIGO_BARRA
+                seriales = []
+                cant = 1
+
+                if requires_serial:
+                    if origen_serial:
+                        seriales = [nombre_serial]
+                        ya_en_carrito = any(
+                            nombre_serial in item.get('seriales', [])
+                            for item in self.items_carrito
+                        )
+                        if ya_en_carrito:
+                            messagebox.showwarning("Duplicado",
+                                f"El serial {nombre_serial} ya está en la lista.", parent=self.window)
+                            self.entry_scanner.focus()
+                            return
+                        self.agregar_al_carrito(sku, nombre, 1, seriales)
+                        self.entry_scanner.focus()
+                        return
+                    else:
+                        cant_str = simpledialog.askstring("Cantidad",
+                            f"Ingrese cantidad para {nombre}:\n(Disponible: {stock_disponible})",
+                            parent=self.window, initialvalue="1")
+                        if not cant_str:
+                            self.entry_scanner.focus()
+                            return
+                        try:
+                            cant = int(cant_str)
+                            if cant <= 0:
+                                self.entry_scanner.focus()
+                                return
+                            if cant > stock_disponible:
+                                messagebox.showerror("Error",
+                                    f"No puede sacar más de lo disponible ({stock_disponible}).",
+                                    parent=self.window)
+                                self.entry_scanner.focus()
+                                return
+                        except:
+                            self.entry_scanner.focus()
+                            return
+                        dialog = SerialCaptureDialog(self.window, sku, nombre, cant, allow_existing=True)
+                        if dialog.cancelado or len(dialog.series_capturadas) != cant:
+                            self.entry_scanner.focus()
+                            return
+                        seriales = dialog.series_capturadas
                 else:
-                    # Flujo normal (Escaneó codigo maestro de un producto con serie)
-                    cant_str = simpledialog.askstring("Cantidad", f"Ingrese cantidad para {nombre}:\n(Disponible: {stock_disponible})", 
-                                                    parent=self.window, initialvalue="1")
-                    if not cant_str: 
+                    cant_str = simpledialog.askstring("Cantidad",
+                        f"Ingrese cantidad para {nombre}:\n(Disponible: {stock_disponible})",
+                        parent=self.window, initialvalue="1")
+                    if not cant_str:
                         self.entry_scanner.focus()
                         return
                     try:
                         cant = int(cant_str)
-                        if cant <= 0: 
+                        if cant <= 0:
                             self.entry_scanner.focus()
                             return
                         if cant > stock_disponible:
-                            messagebox.showerror("Error", f"No puede sacar más de lo disponible ({stock_disponible}).", parent=self.window)
+                            messagebox.showerror("Error",
+                                f"No puede sacar más de lo disponible ({stock_disponible}).",
+                                parent=self.window)
                             self.entry_scanner.focus()
                             return
                     except:
                         self.entry_scanner.focus()
                         return
-                    
-                    # Abrir captura de series
-                    dialog = SerialCaptureDialog(self.window, sku, nombre, cant, allow_existing=True)
-                    if dialog.cancelado or len(dialog.series_capturadas) != cant:
+
+                self.agregar_al_carrito(sku, nombre, cant, seriales)
+                self.entry_scanner.focus()
+
+            except Exception as e:
+                logger.error(f"Error completando escaneo: {e}")
+                self.window.bell()
+                self.entry_scanner.focus()
+
+        # Lanzar búsqueda en background, resultado se procesa en hilo UI
+        def run_and_schedule():
+            try:
+                resultado = buscar_en_background()
+                if self.window.winfo_exists():
+                    self.window.after(0, lambda r=resultado: al_terminar_busqueda(r))
+            except Exception as e:
+                logger.error(f"Error en hilo de búsqueda: {e}")
+                if self.window.winfo_exists():
+                    self.window.after(0, lambda: (
+                        self.entry_scanner.config(state='normal'),
+                        self.window.bell(),
                         self.entry_scanner.focus()
-                        return
-                    seriales = dialog.series_capturadas
-            else:
-                # Producto normal (Sin serial)
-                cant_str = simpledialog.askstring("Cantidad", f"Ingrese cantidad para {nombre}:\n(Disponible: {stock_disponible})", 
-                                                parent=self.window, initialvalue="1")
-                
-                if not cant_str: 
-                    self.entry_scanner.focus()
-                    return # Cancelado
-                
-                try:
-                    cant = int(cant_str)
-                    if cant <= 0: 
-                        self.entry_scanner.focus()
-                        return
-                    if cant > stock_disponible:
-                        messagebox.showerror("Error", f"No puede sacar más de lo disponible ({stock_disponible}).", parent=self.window)
-                        self.entry_scanner.focus()
-                        return
-                except:
-                    self.entry_scanner.focus()
-                    return
-            
-            self.agregar_al_carrito(sku, nombre, cant, seriales)
-            self.entry_scanner.focus()
-            
-        except Exception as e:
-            logger.error(f"Error procesando escaneo: {e}")
-            # No mostrar popup intrusivo por cada error de escaneo, solo log y beep
-            self.window.bell() 
-            self.entry_scanner.focus()
+                    ))
+
+        threading.Thread(target=run_and_schedule, daemon=True).start()
 
     def agregar_manual(self):
         """Diálogo para agregar productos manualmente con búsquedas y validación"""
@@ -486,66 +567,164 @@ class MobileOutputScannerWindow:
                  bg=Styles.SUCCESS_COLOR, fg='white', relief='flat', padx=20, pady=8).pack(pady=20)
 
     def agregar_al_carrito(self, sku, nombre, cantidad, seriales):
-        # Verificar si es paquete o adicional (Robust matching)
+        """Adds an item to the cart. If the SKU already exists, merges the quantity/serials."""
         sku_clean = sku.strip().upper()
         es_paquete = sku_clean in self.paquete_base
         
-        # Logging para depuración
-        if not es_paquete:
-            logger.info(f"SKU {sku_clean} no encontrado en paquete base: {list(self.paquete_base.keys())[:5]}...")
+        # --- MERGE LOGIC: Try to find existing item in cart ---
+        item_existente = None
+        for item in self.items_carrito:
+            if item['sku'] == sku:
+                item_existente = item
+                break
         
-        # Agregar a lista
-        self.items_carrito.append({
-            'sku': sku,
-            'nombre': nombre,
-            'cantidad': cantidad,
-            'seriales': seriales,
-            'es_adicional': not es_paquete
-        })
+        if item_existente is not None:
+            # Merge: add quantities and serials
+            item_existente['cantidad'] += cantidad
+            if seriales:
+                for s in seriales:
+                    if s not in item_existente['seriales']:
+                        item_existente['seriales'].append(s)
+        else:
+            # New item: append to list
+            if not es_paquete:
+                logger.info(f"SKU {sku_clean} no encontrado en paquete base.")
+            self.items_carrito.append({
+                'sku': sku,
+                'nombre': nombre,
+                'cantidad': cantidad,
+                'seriales': seriales,
+                'es_adicional': not es_paquete
+            })
         
-        # Actualizar contadores
+        # Update counters
         if es_paquete:
-            self.items_completados[sku] += cantidad
+            self.items_completados[sku] = self.items_completados.get(sku, 0) + cantidad
             
-        # Actualizar UI
-        tipo_str = "📦 Paquete" if es_paquete else "➕ Adicional"
-        series_str = ", ".join(seriales) if seriales else "—"
-        
-        self.tree.insert('', 0, values=(sku, nombre, cantidad, series_str, tipo_str))
+        # Refresh UI inmediatamente con datos del cache
+        self.actualizar_tabla()
         self.actualizar_panel_progreso()
-        
-        logger.info(f"Item agregado: {sku} x{cantidad}")
+        logger.info(f"Item agregado/mergeado: {sku} x{cantidad}")
 
-    def eliminar_item(self, event):
+        # Pre-cargar detalles MAC de seriales nuevos en background (sin bloquear UI)
+        seriales_sin_cache = [s for s in seriales if s not in self.serial_details_cache]
+        if seriales_sin_cache:
+            def cargar_detalles_seriales(lista_seriales):
+                try:
+                    from database import obtener_detalles_serial
+                    for s in lista_seriales:
+                        try:
+                            info = obtener_detalles_serial(s)
+                            if info:
+                                self.serial_details_cache[s] = info
+                        except Exception as e:
+                            logger.warning(f"No se pudo obtener detalles de serial {s}: {e}")
+                    # Refrescar tabla con datos MAC ahora disponibles
+                    if self.window.winfo_exists():
+                        self.window.after(0, self.actualizar_tabla)
+                except Exception as e:
+                    logger.error(f"Error en carga background de seriales: {e}")
+
+            threading.Thread(
+                target=cargar_detalles_seriales,
+                args=(list(seriales_sin_cache),),
+                daemon=True
+            ).start()
+
+    def editar_o_eliminar_item(self, event=None):
+        """Shows a dialog to edit quantity or delete the selected item from the cart."""
         item_id = self.tree.selection()
         if not item_id: return
         
         vals = self.tree.item(item_id[0])['values']
-        sku = vals[0]
-        cant = int(vals[2])
-        
-        if messagebox.askyesno("Eliminar", f"¿Quitar {sku} del carrito?", parent=self.window):
-            self.tree.delete(item_id)
-            
-            # Buscar y remover de lista interna
-            for i, item in enumerate(self.items_carrito):
-                if item['sku'] == sku and item['cantidad'] == cant: 
-                    self.items_carrito.pop(i)
-                    break
-            
-            # Actualizar contadores
-            if sku in self.paquete_base:
-                self.items_completados[sku] -= cant
-                if self.items_completados[sku] < 0: self.items_completados[sku] = 0
-                
-            self.actualizar_panel_progreso()
+        sku = str(vals[0])
+        nombre = str(vals[1])
+
+        # Find actual item in internal list
+        item_data = None
+        for item in self.items_carrito:
+            if item['sku'] == sku:
+                item_data = item
+                break
+        if not item_data: return
+
+        cant_actual = item_data['cantidad']
+        tiene_seriales = bool(item_data.get('seriales'))
+
+        dialog = tk.Toplevel(self.window)
+        dialog.title(f"Editar: {nombre[:40]}")
+        dialog.geometry("390x280")
+        dialog.transient(self.window)
+        dialog.grab_set()
+        dialog.configure(bg='white')
+
+        tk.Label(dialog, text="✏️ Editar Ítem", font=('Segoe UI', 13, 'bold'), bg='white', fg='#2c3e50').pack(pady=(15, 2))
+        tk.Label(dialog, text=nombre, font=('Segoe UI', 10), bg='white', fg='#555', wraplength=340).pack(pady=(0, 8))
+
+        if tiene_seriales:
+            serials_str = ", ".join(item_data['seriales'])
+            tk.Label(dialog, text=f"Seriales: {serials_str}", font=('Segoe UI', 9), bg='white', fg='gray', wraplength=340).pack(pady=(0, 5))
+            tk.Label(dialog, text="Para equipos: elimine el ítem y escanéelo de nuevo.", font=('Segoe UI', 8), bg='white', fg='#bbb').pack()
+        else:
+            qty_frame = tk.Frame(dialog, bg='white')
+            qty_frame.pack(pady=5)
+            tk.Label(qty_frame, text="Nueva Cantidad:", bg='white', font=('Segoe UI', 10)).pack(side='left', padx=5)
+            qty_var = tk.StringVar(value=str(cant_actual))
+            qty_entry = ttk.Entry(qty_frame, textvariable=qty_var, width=8, font=('Segoe UI', 11))
+            qty_entry.pack(side='left', padx=5)
+            qty_entry.select_range(0, tk.END)
+            qty_entry.focus_set()
+
+            def aplicar_cambio():
+                try:
+                    nueva_cant = int(qty_var.get())
+                    if nueva_cant <= 0: raise ValueError
+                except ValueError:
+                    messagebox.showerror("Error", "Ingrese una cantidad válida (> 0).", parent=dialog)
+                    return
+                old_cant = item_data['cantidad']
+                item_data['cantidad'] = nueva_cant
+                if sku in self.paquete_base:
+                    self.items_completados[sku] = max(0, self.items_completados.get(sku, 0) - old_cant + nueva_cant)
+                dialog.destroy()
+                self.actualizar_tabla()
+                self.actualizar_panel_progreso()
+
+            btn_apply_frame = tk.Frame(dialog, bg='white')
+            btn_apply_frame.pack(pady=8)
+            tk.Button(btn_apply_frame, text="✅ Aplicar Cantidad", command=aplicar_cambio,
+                      bg='#2ecc71', fg='white', relief='flat', padx=15, pady=6,
+                      font=('Segoe UI', 10, 'bold')).pack(side='left', padx=8)
+            dialog.bind('<Return>', lambda e: aplicar_cambio())
+
+        def eliminar():
+            if messagebox.askyesno("❌ Eliminar", f"¿Eliminar '{nombre[:50]}' del carrito?", parent=dialog):
+                dialog.destroy()
+                cant = item_data['cantidad']
+                self.items_carrito.remove(item_data)
+                if sku in self.paquete_base:
+                    self.items_completados[sku] = max(0, self.items_completados.get(sku, 0) - cant)
+                self.actualizar_tabla()
+                self.actualizar_panel_progreso()
+
+        btn_del_frame = tk.Frame(dialog, bg='white')
+        btn_del_frame.pack(pady=(0, 10))
+        tk.Button(btn_del_frame, text="🗑️ Eliminar Item", command=eliminar,
+                  bg='#e74c3c', fg='white', relief='flat', padx=15, pady=6,
+                  font=('Segoe UI', 10, 'bold')).pack(side='left', padx=8)
+        tk.Button(btn_del_frame, text="Cancelar", command=dialog.destroy,
+                  bg='#95a5a6', fg='white', relief='flat', padx=10, pady=6).pack(side='left')
+
+
 
     def actualizar_tabla(self):
-        """Limpia y vuelve a llenar la tabla con los items del carrito."""
+        """Limpia y vuelve a llenar la tabla con los items del carrito.
+        Usa el cache local de seriales para no bloquear el hilo de UI.
+        Los detalles MAC se pre-cargan en background desde agregar_al_carrito.
+        """
         for i in self.tree.get_children():
             self.tree.delete(i)
         
-        # Insertar items en orden (el último escaneado queda arriba si insertamos en 0)
         for item in self.items_carrito:
             sku = item['sku']
             nombre = item['nombre']
@@ -554,7 +733,23 @@ class MobileOutputScannerWindow:
             es_adicional = item.get('es_adicional', False)
             
             tipo_str = "📦 Paquete" if not es_adicional else "➕ Adicional"
-            series_str = ", ".join(seriales) if seriales else "—"
+            
+            # Usar cache local — SIN llamadas a DB en hilo UI
+            display_series = []
+            for s in seriales[:3]:
+                info = self.serial_details_cache.get(s)
+                if info and info.get('mac_number'):
+                    mac = str(info['mac_number']).strip()
+                    if mac and mac != str(s).strip():
+                        display_series.append(f"{s} (MAC:{mac})")
+                        continue
+                display_series.append(str(s))
+            
+            series_str = ", ".join(display_series)
+            if len(seriales) > 3:
+                series_str += f" (+{len(seriales)-3})"
+            if not seriales:
+                series_str = "—"
             
             self.tree.insert('', 0, values=(sku, nombre, cantidad, series_str, tipo_str))
 
@@ -588,9 +783,63 @@ class MobileOutputScannerWindow:
             self.entry_scanner.focus_set()
             return
             
-        items_to_process = self.items_carrito
+        items_to_process = list(self.items_carrito)
         
-                            
+        def process_background():
+            from database import registrar_movimiento_gui, actualizar_ubicacion_serial
+            count = 0
+            errores = []
+            exitosos = []
+            branch = CURRENT_CONTEXT.get('BRANCH')
+            
+            for item in items_to_process:
+                sku = item['sku']
+                nombre = item['nombre']
+                cantidad = item['cantidad']
+                seriales = [s.strip().upper() for s in item.get('seriales', [])]
+                paquete_sel = self.combo_paquete.get() if hasattr(self, 'combo_paquete') else None
+                
+                try:
+                    # Determinar tipo de movimiento
+                    tipo_mov = 'SALIDA_MOVIL'
+                    if self.mode == 'PRESTAMO_SANTIAGO':
+                        tipo_mov = 'PRESTAMO_SANTIAGO'
+                    elif self.mode == 'DEVOLUCION_SANTIAGO':
+                        tipo_mov = 'RETORNO_MOVIL'
+                    elif self.mode == 'TRASLADO':
+                        tipo_mov = 'TRASLADO'
+                    
+                    # 1. Registrar el movimiento en la bitácora y ajustar stock
+                    ok, msg = registrar_movimiento_gui(
+                        sku=sku,
+                        tipo_movimiento=tipo_mov,
+                        cantidad_afectada=cantidad,
+                        movil_afectado=movil,
+                        fecha_evento=fecha,
+                        paquete_asignado=paquete_sel,
+                        sucursal_context=branch
+                    )
+                    
+                    if not ok:
+                        errores.append(f"{nombre}: {msg}")
+                        continue
+                    
+                    # 2. Si hay seriales, actualizar su ubicación
+                    if seriales:
+                        for s in seriales:
+                            # La nueva ubicación es el móvil de destino
+                            s_ok, s_msg = actualizar_ubicacion_serial(s, movil, paquete=paquete_sel, sucursal_context=branch)
+                            if not s_ok:
+                                logger.warning(f"No se pudo actualizar ubicación de serial {s}: {s_msg}")
+                    
+                    exitosos.append((sku, seriales))
+                    count += 1
+
+                except Exception as e:
+                    errores.append(f"{nombre}: {e}")
+            
+            return count, errores, exitosos
+        
         def on_complete(result):
             # Rehabilitar botón
             if hasattr(self, 'btn_registrar'):
@@ -615,17 +864,27 @@ class MobileOutputScannerWindow:
 
             # LIMPIEZA PARCIAL: Solo remover lo que se registró bien
             for e_sku, e_seriales in exitosos:
+                e_sku_clean = str(e_sku).strip().upper()
                 # Buscar en el carrito y restar/remover
                 for item in list(self.items_carrito):
-                    if item['sku'] == e_sku:
+                    if str(item['sku']).strip().upper() == e_sku_clean:
                         if not e_seriales: # Material sin serial
                             self.items_carrito.remove(item)
                             break
                         else: # Equipo con serial
+                            seriales_carrito = [s.strip().upper() for s in item['seriales']]
                             for s in e_seriales:
-                                if s in item['seriales']:
-                                    item['seriales'].remove(s)
-                                    item['cantidad'] -= 1
+                                s_clean = s.strip().upper()
+                                if s_clean in seriales_carrito:
+                                    # Encontrar el índice original para remover
+                                    orig_idx = -1
+                                    for idx, orig_s in enumerate(item['seriales']):
+                                        if orig_s.strip().upper() == s_clean:
+                                            orig_idx = idx
+                                            break
+                                    if orig_idx != -1:
+                                        item['seriales'].pop(orig_idx)
+                                        item['cantidad'] -= 1
                             if item['cantidad'] <= 0:
                                 self.items_carrito.remove(item)
                             break

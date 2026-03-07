@@ -583,8 +583,7 @@ def registrar_bulk():
                     observaciones=obs,
                     documento_referencia=data.get('contrato'),
                     existing_conn=conn, # Usar misma conexión
-                    sucursal_context=sucursal_ctx,
-                    seriales=seriales # ← NUEVO: Pasar lista de seriales para observaciones
+                    sucursal_context=sucursal_ctx
                 )
                 
                 if not exito_mov:

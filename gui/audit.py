@@ -82,6 +82,9 @@ class AuditTab(tk.Frame):
         tk.Button(btn_frame, text="🔍 Cargar Historial", command=self.cargar_datos_pendientes,
                  bg=Styles.SECONDARY_COLOR, fg='white', font=('Segoe UI', 9, 'bold'), relief='flat', padx=10, pady=4).pack(side='left', padx=5)
 
+        tk.Button(btn_frame, text="📥 Exportar a Excel", command=self.exportar_a_excel,
+                 bg=Styles.SUCCESS_COLOR, fg='white', font=('Segoe UI', 9, 'bold'), relief='flat', padx=10, pady=4).pack(side='left', padx=5)
+
         # --- SECCIÓN INFERIOR ---
         bottom_frame = tk.Frame(main_container, bg='#f8f9fa', pady=10)
         bottom_frame.pack(side='bottom', fill='x')
@@ -249,7 +252,8 @@ class AuditTab(tk.Frame):
                 if texto_buscar:
                     consumos_filtrados = []
                     for c in consumos:
-                        datos_fila = [str(c[1]), str(c[5]), str(c[6]), str(c[8]), str(c[9]), str(c[10])]
+                        # Incluir seriales_usados (c[11]) en la búsqueda
+                        datos_fila = [str(c[1]), str(c[5]), str(c[6]), str(c[8]), str(c[9]), str(c[10]), str(c[11])]
                         if any(texto_buscar in d.upper() for d in datos_fila if d):
                             consumos_filtrados.append(c)
                     consumos = consumos_filtrados
@@ -272,7 +276,7 @@ class AuditTab(tk.Frame):
         todos_productos = set() 
 
         for c in consumos:
-            id_c, movil, sku, nombre, qty, tecnico, ticket, fecha, colilla, contrato, ayudante, seriales_usados = c
+            id_c, movil, sku, nombre, qty, tecnico, ticket, fecha, colilla, contrato, ayudante, seriales_usados, paquete_reportado = c
             key = (movil, fecha, tecnico, contrato or ticket or "S/C", colilla or "", contrato or ticket or "", ayudante or "")
             
             if seriales_usados:
@@ -379,3 +383,51 @@ class AuditTab(tk.Frame):
         
         tk.Button(popup, text="Cerrar", command=popup.destroy, bg=Styles.SECONDARY_COLOR, 
                   fg='white', font=('Segoe UI', 10, 'bold'), pady=8).pack(fill='x', padx=20, pady=15)
+
+    def exportar_a_excel(self):
+        """Exporta los datos actualmente visibles en la tabla a un archivo Excel"""
+        if not self.tabla.get_children():
+            messagebox.showwarning("Sin Datos", "No hay datos en la tabla para exportar.")
+            return
+
+        # Pedir nombre de archivo
+        fecha_str = datetime.now().strftime("%Y%m%d_%H%M")
+        default_name = f"Historial_Instalaciones_{fecha_str}.xlsx"
+        
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".xlsx",
+            filetypes=[("Excel files", "*.xlsx")],
+            initialfile=default_name,
+            title="Guardar Historial"
+        )
+        
+        if not file_path:
+            return
+
+        def process_export():
+            try:
+                import pandas as pd
+                
+                # Obtener encabezados y datos
+                columnas = self.tabla['columns']
+                items = self.tabla.get_children()
+                
+                rows_data = []
+                for item_id in items:
+                    values = self.tabla.item(item_id, 'values')
+                    rows_data.append(values)
+                
+                # Crear DataFrame
+                df = pd.DataFrame(rows_data, columns=columnas)
+                
+                # Guardar a Excel
+                df.to_excel(file_path, index=False)
+                
+                self.after(0, lambda: mostrar_mensaje_emergente(self, "Exportación Exitosa", 
+                            f"El historial ha sido exportado a:\n{file_path}", "success"))
+            except Exception as e:
+                logger.error(f"Error exportando a Excel: {e}")
+                self.after(0, lambda: messagebox.showerror("Error de Exportación", f"No se pudo exportar a Excel:\n{e}"))
+
+        # Mostrar indicador visual de carga (opcional)
+        threading.Thread(target=process_export, daemon=True).start()

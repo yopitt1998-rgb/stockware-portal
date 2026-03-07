@@ -11,7 +11,7 @@ def test_portal_query(movil, f):
         
         # 1. Check raw assignment
         f.write("1. Raw Assignment Table:\n")
-        run_query(cursor, "SELECT sku_producto, cantidad, paquete FROM asignacion_moviles WHERE movil = ?", (movil,))
+        run_query(cursor, "SELECT sku_producto, cantidad, paquete, sucursal FROM asignacion_moviles WHERE movil = ?", (movil,))
         raw = cursor.fetchall()
         for r in raw:
             f.write(f"   {r}\n")

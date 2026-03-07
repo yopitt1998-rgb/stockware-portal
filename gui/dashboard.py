@@ -113,8 +113,8 @@ class DashboardTab:
             quick_actions = [
                 ("🔫 Abasto Scanner", lambda: self.main_app.perform_inventory_action('abrir_ventana_abasto_scanner'), '#00C853'),
                 ("🔫 Salida Scanner", lambda: self.main_app.perform_inventory_action('abrir_ventana_salida_movil_scanner'), '#FF6F00'),
-                ("🔄 Devolución / Entrada", lambda: self.main_app.perform_inventory_action('abrir_ventana_retorno_movil'), Styles.SUCCESS_COLOR),
-                ("📋 Historial de Instalaciones", lambda: self.main_app.switch_to_tab("Historial"), Styles.ACCENT_COLOR)
+                ("🔄 Retorno de Móvil", lambda: self.main_app.perform_inventory_action('abrir_ventana_retorno_movil'), Styles.SUCCESS_COLOR),
+                ("📜 Registro Global", lambda: self.main_app.switch_to_tab("Registro Global"), '#6f42c1')
             ]
         
         actions_frame = ttk.Frame(quick_actions_frame, style='Modern.TFrame')
