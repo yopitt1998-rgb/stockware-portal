@@ -77,6 +77,14 @@ class IndividualOutputWindow:
         frame_selector = tk.Frame(self.ventana, padx=20, pady=20, bg=bg_selector)
         frame_selector.pack(fill='x')
         
+        if is_descarte:
+            tk.Label(frame_selector, text="Origen:", font=('Segoe UI', 10, 'bold'), bg=bg_selector).pack(side=tk.LEFT)
+            self.origen_combo = ttk.Combobox(frame_selector, state="readonly", width=15)
+            self.origen_combo['values'] = ["BODEGA"] + obtener_nombres_moviles()
+            self.origen_combo.set("BODEGA")
+            self.origen_combo.pack(side=tk.LEFT, padx=(0, 20))
+            self.origen_combo.bind("<<ComboboxSelected>>", self._on_origen_changed)
+            
         tk.Label(frame_selector, text="Fecha Evento (YYYY-MM-DD):", font=('Segoe UI', 10, 'bold'), bg=bg_selector).pack(side=tk.LEFT)
         self.fecha_entry = tk.Entry(frame_selector, width=15, font=('Segoe UI', 10))
         self.fecha_entry.insert(0, date.today().isoformat())
@@ -97,18 +105,18 @@ class IndividualOutputWindow:
         tk.Label(scan_frame, text="(Presiona Enter)", font=('Segoe UI', 9), bg='#f8f9fa', fg='gray').pack(side='left')
         
         # Tabla de productos
-        canvas = tk.Canvas(self.ventana)
-        scrollbar = ttk.Scrollbar(self.ventana, orient="vertical", command=canvas.yview)
-        frame_productos = tk.Frame(canvas)
-        canvas.create_window((0, 0), window=frame_productos, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
-        canvas.pack(side="left", fill="both", expand=True, padx=10)
+        self.canvas = tk.Canvas(self.ventana)
+        scrollbar = ttk.Scrollbar(self.ventana, orient="vertical", command=self.canvas.yview)
+        self.frame_productos_inner = tk.Frame(self.canvas)
+        self.canvas.create_window((0, 0), window=self.frame_productos_inner, anchor="nw")
+        self.canvas.configure(yscrollcommand=scrollbar.set)
+        self.canvas.pack(side="left", fill="both", expand=True, padx=10)
         scrollbar.pack(side="right", fill="y")
         
         def on_mousewheel(event):
             try:
-                if canvas.winfo_exists():
-                    canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+                if self.canvas.winfo_exists():
+                    self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
             except tk.TclError:
                 pass
         
@@ -117,32 +125,11 @@ class IndividualOutputWindow:
             for child in widget.winfo_children():
                 _bind_mousewheel_recursive(child)
         
-        _bind_mousewheel_recursive(canvas)
-        _bind_mousewheel_recursive(frame_productos)
+        _bind_mousewheel_recursive(self.canvas)
+        _bind_mousewheel_recursive(self.frame_productos_inner)
         
         self.entry_vars = {} 
-        
-        # Encabezados
-        tk.Label(frame_productos, text="Producto", font=('Segoe UI', 10, 'bold')).grid(row=0, column=0, padx=5, pady=5, sticky='w')
-        tk.Label(frame_productos, text="SKU", font=('Segoe UI', 10, 'bold')).grid(row=0, column=1, padx=5, pady=5, sticky='w')
-        tk.Label(frame_productos, text="Stock Bodega", font=('Segoe UI', 10, 'bold'), fg='red').grid(row=0, column=2, padx=5, pady=5, sticky='w')
-        tk.Label(frame_productos, text="Cant. a Procesar", font=('Segoe UI', 10, 'bold')).grid(row=0, column=3, padx=5, pady=5, sticky='w')
-        
-        fila = 1
-        for nombre, sku, stock_actual in productos:
-            tk.Label(frame_productos, text=nombre, anchor='w', justify='left', font=('Segoe UI', 9), wraplength=300).grid(row=fila, column=0, padx=5, pady=2, sticky='w')
-            tk.Label(frame_productos, text=sku, anchor='center', font=('Segoe UI', 9)).grid(row=fila, column=1, padx=5, pady=2, sticky='w')
-            tk.Label(frame_productos, text=str(stock_actual), anchor='center', font=('Segoe UI', 9), fg='red').grid(row=fila, column=2, padx=5, pady=2, sticky='w')
-            entry = tk.Entry(frame_productos, width=10, font=('Segoe UI', 9))
-            entry.grid(row=fila, column=3, padx=5, pady=2)
-            self.entry_vars[sku] = entry
-            fila += 1
-            
-        frame_productos.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
-
-        # Scanner logic
-        self.PRODUCTOS_CON_CODIGO_BARRA = [p[1] for p in productos]
-        self.productos_cache = productos
+        self._recargar_tabla(productos)
 
         self.scan_entry.bind('<Return>', self.real_scan_handler)
         self.scan_entry.focus_set()
@@ -150,6 +137,51 @@ class IndividualOutputWindow:
         tk.Button(self.ventana, text=btn_text, 
                 command=self.procesar_salida_individual, 
                 bg=header_color, fg='white', font=('Segoe UI', 12, 'bold')).pack(pady=10)
+
+    def _on_origen_changed(self, event=None):
+        if not hasattr(self, 'origen_combo'): return
+        origen = self.origen_combo.get()
+        if origen == "BODEGA":
+            mostrar_cargando_async(self.ventana, obtener_todos_los_skus_para_movimiento, self._recargar_tabla)
+        else:
+            def fetch_movil():
+                res = obtener_asignacion_movil_con_paquetes(origen)
+                return [(r[0], r[1], r[2]) for r in res]
+            mostrar_cargando_async(self.ventana, fetch_movil, self._recargar_tabla)
+
+    def _recargar_tabla(self, productos_filtrados):
+        for widget in self.frame_productos_inner.winfo_children():
+            widget.destroy()
+            
+        self.entry_vars.clear()
+        self.productos_cache = productos_filtrados
+        self.PRODUCTOS_CON_CODIGO_BARRA = [p[1] for p in productos_filtrados]
+
+        is_descarte = (self.mode == 'DESCARTE')
+        is_movil = is_descarte and hasattr(self, 'origen_combo') and self.origen_combo.get() != "BODEGA"
+        stock_header = "Stock en Móvil" if is_movil else "Stock Bodega"
+        
+        tk.Label(self.frame_productos_inner, text="Producto", font=('Segoe UI', 10, 'bold')).grid(row=0, column=0, padx=5, pady=5, sticky='w')
+        tk.Label(self.frame_productos_inner, text="SKU", font=('Segoe UI', 10, 'bold')).grid(row=0, column=1, padx=5, pady=5, sticky='w')
+        tk.Label(self.frame_productos_inner, text=stock_header, font=('Segoe UI', 10, 'bold'), fg='blue' if is_movil else 'red').grid(row=0, column=2, padx=5, pady=5, sticky='w')
+        tk.Label(self.frame_productos_inner, text="Cant. a Procesar", font=('Segoe UI', 10, 'bold')).grid(row=0, column=3, padx=5, pady=5, sticky='w')
+        
+        fila = 1
+        for row_data in productos_filtrados:
+            nombre = row_data[0]
+            sku = row_data[1]
+            stock_actual = row_data[2]
+            tk.Label(self.frame_productos_inner, text=nombre, anchor='w', justify='left', font=('Segoe UI', 9), wraplength=300).grid(row=fila, column=0, padx=5, pady=2, sticky='w')
+            tk.Label(self.frame_productos_inner, text=sku, anchor='center', font=('Segoe UI', 9)).grid(row=fila, column=1, padx=5, pady=2, sticky='w')
+            tk.Label(self.frame_productos_inner, text=str(stock_actual), anchor='center', font=('Segoe UI', 9), fg='blue' if is_movil else 'red').grid(row=fila, column=2, padx=5, pady=2, sticky='w')
+            entry = tk.Entry(self.frame_productos_inner, width=10, font=('Segoe UI', 9))
+            entry.grid(row=fila, column=3, padx=5, pady=2)
+            self.entry_vars[sku] = entry
+            fila += 1
+            
+        self.frame_productos_inner.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
+        self.frame_productos_inner.update_idletasks()
+        self.canvas.config(scrollregion=self.canvas.bbox("all"))
 
     def real_scan_handler(self, event):
         raw_code = self.scan_entry.get().strip().upper()
@@ -193,6 +225,12 @@ class IndividualOutputWindow:
 
         exitos = 0; errores = 0; mensaje_error = ""
         is_descarte = (self.mode == 'DESCARTE')
+        movil_afectado = None
+        if is_descarte and hasattr(self, 'origen_combo'):
+            origen = self.origen_combo.get()
+            if origen != "BODEGA":
+                movil_afectado = origen
+                
         tipo_mov = TIPO_MOVIMIENTO_DESCARTE if is_descarte else 'SALIDA'
         prefix_obs = "DESCARTE" if is_descarte else "SALIDA INDIVIDUAL"
 
@@ -202,15 +240,20 @@ class IndividualOutputWindow:
                 if cantidad_text:
                     cantidad = int(cantidad_text)
                     if cantidad > 0:
-                        disponible, stock = verificar_stock_disponible(sku, cantidad)
+                        stock_actual = next((st for n, s, st in self.productos_cache if str(s) == str(sku)), 0)
+                        if stock_actual >= cantidad:
+                            disponible, stock = True, stock_actual
+                        else:
+                            disponible, stock = False, stock_actual
+                            
                         if not disponible:
                             errores += 1
-                            mensaje_error += f"\\n- {sku}: Stock insuficiente ({stock} < {cantidad})"
+                            mensaje_error += f"\\n- {sku}: Stock insuficiente en origen ({stock} < {cantidad})"
                             entry.configure(bg='#FFCDD2')
                             continue
                             
                         obs_final = f"{prefix_obs} - {observaciones}" if observaciones else prefix_obs
-                        exito, mensaje = registrar_movimiento_gui(sku, tipo_mov, cantidad, None, fecha_evento, None, obs_final)
+                        exito, mensaje = registrar_movimiento_gui(sku, tipo_mov, cantidad, movil_afectado, fecha_evento, None, obs_final)
                         if exito: exitos += 1
                         else:
                             errores += 1
@@ -494,7 +537,7 @@ class MobileOutputWindow:
         if not self.seriales_escaneados:
             return
         total = sum(len(s) for s in self.seriales_escaneados.values())
-        if messagebox.askyesno("Limpiar", f"¿Está seguro de limpiar todos los {total} equipos escaneados?"):
+        if messagebox.askyesno("Limpiar", f"¿Está seguro de limpiar todos los {total} equipos escaneados?", parent=self.ventana):
             self.seriales_escaneados.clear()
             self.actualizar_tabla_escaneados()
             self.entry_scan.focus_set()
@@ -566,19 +609,19 @@ class MobileOutputWindow:
         sku, ubicacion = obtener_info_serial(serial)
         
         if not sku:
-            messagebox.showerror("Serial No Encontrado", f"El serial '{serial}' no existe en la base de datos.\\n\\nVerifique que fue registrado en Abasto.")
+            messagebox.showerror("Serial No Encontrado", f"El serial '{serial}' no existe en la base de datos.\\n\\nVerifique que fue registrado en Abasto.", parent=self.ventana)
             self.entry_scan.delete(0, tk.END)
             self.entry_scan.focus_set()
             return
         
         if ubicacion != 'BODEGA':
-            messagebox.showwarning("Serial Ya Asignado", f"El serial '{serial}' ya está asignado a: {ubicacion}\\n\\nNo se puede asignar nuevamente.")
+            messagebox.showwarning("Serial Ya Asignado", f"El serial '{serial}' ya está asignado a: {ubicacion}\\n\\nNo se puede asignar nuevamente.", parent=self.ventana)
             self.entry_scan.delete(0, tk.END)
             self.entry_scan.focus_set()
             return
         
         if serial in self.seriales_escaneados[sku]:
-            messagebox.showinfo("Duplicado", f"El serial '{serial}' ya fue escaneado en esta sesión.")
+            messagebox.showinfo("Duplicado", f"El serial '{serial}' ya fue escaneado en esta sesión.", parent=self.ventana)
             self.entry_scan.delete(0, tk.END)
             self.entry_scan.focus_set()
             return
@@ -611,7 +654,7 @@ class MobileOutputWindow:
 
     def _procesar_modo_escaneo(self, movil, fecha, paquete):
         total_equipos = sum(len(s) for s in self.seriales_escaneados.values())
-        if not messagebox.askyesno("Confirmar Asignación", f"¿Confirma asignar {total_equipos} equipos escaneados a {movil}?"):
+        if not messagebox.askyesno("Confirmar Asignación", f"¿Confirma asignar {total_equipos} equipos escaneados a {movil}?", parent=self.ventana):
             return
         
         exitos = 0
@@ -737,7 +780,7 @@ class MobileOutputWindow:
         if exitos > 0: self.crear_recordatorios_automaticos(fecha)
 
     def ofrecer_pdf(self, movil, items_iter):
-        if messagebox.askyesno("Vale de Despacho", "¿Desea generar el Vale de Despacho en PDF para este movimiento?"):
+        if messagebox.askyesno("Vale de Despacho", "¿Desea generar el Vale de Despacho en PDF para este movimiento?", parent=self.ventana):
             productos_pdf = []
             for sku, seriales_list in items_iter:
                 nombre_p = "Producto"
@@ -749,7 +792,7 @@ class MobileOutputWindow:
             self._generar_pdf_file(movil, productos_pdf)
 
     def ofrecer_pdf_manual(self, movil, items_iter):
-        if messagebox.askyesno("Vale de Despacho", "¿Desea generar el Vale de Despacho en PDF para este movimiento?"):
+        if messagebox.askyesno("Vale de Despacho", "¿Desea generar el Vale de Despacho en PDF para este movimiento?", parent=self.ventana):
             productos_pdf = []
             for sku, qty in items_iter:
                 nombre_p = "Producto"
@@ -915,7 +958,7 @@ class MobileReturnWindow:
         self.tree_fisico.pack(fill='both', expand=True, padx=5, pady=5)
         
         self.tree_fisico.tag_configure('found', background='#d4edda')
-        self.tree_fisico.tag_configure('missing', background='#f8d7da')
+        self.tree_fisico.tag_configure('missing', background='#c0392b', foreground='white')  # dark red
         self.tree_fisico.tag_configure('extra', background='#fff3cd')
 
         # --- ACTIONS ---
@@ -944,15 +987,25 @@ class MobileReturnWindow:
 
     def _load_moviles_con_tecnicos(self):
         """Carga los móviles junto con el nombre de su conductor para mostrar al seleccionar."""
-        from database import obtener_moviles
         try:
+            from database import obtener_moviles, obtener_nombres_moviles
             moviles_data = obtener_moviles(solo_activos=True)
             # Guardamos dict {nombre_movil: conductor}
-            self._movil_tecnico_map = {m[0]: m[2] for m in moviles_data if m[2]}  # m[2] = conductor
+            self._movil_tecnico_map = {m[0]: m[2] for m in moviles_data if len(m) > 2 and m[2]}  # m[2] = conductor
             nombres = [m[0] for m in moviles_data]
-        except Exception:
+            
+            # Fallback if empty
+            if not nombres:
+                nombres = obtener_nombres_moviles()
+        except Exception as e:
+            print(f"DEBUG: Error loading mobiles in thread: {e}")
             self._movil_tecnico_map = {}
-            nombres = obtener_nombres_moviles()
+            try:
+                from database import obtener_nombres_moviles
+                nombres = obtener_nombres_moviles()
+            except:
+                nombres = []
+                
         if self.ventana.winfo_exists():
             self.ventana.after(0, lambda: self._update_combo(nombres))
             
@@ -1001,12 +1054,16 @@ class MobileReturnWindow:
                  }
         
         pendientes = obtener_consumos_pendientes()
+        # consumo_reportado[sku][paquete] = total
         consumo_reportado = {}
         for p in pendientes:
             if str(p[1]).strip().upper() == movil.strip().upper():
                 sku = p[2]
                 qty = int(p[4])
-                consumo_reportado[sku] = consumo_reportado.get(sku, 0) + qty
+                paq_p = p[12] if (len(p) > 12 and p[12]) else 'NINGUNO' # Nuevo campo paquete
+                
+                if sku not in consumo_reportado: consumo_reportado[sku] = {}
+                consumo_reportado[sku][paq_p] = consumo_reportado[sku].get(paq_p, 0) + qty
         return {'stock': stock_actual, 'consumo': consumo_reportado}
 
     def _on_data_loaded(self, data):
@@ -1054,41 +1111,49 @@ class MobileReturnWindow:
             else:
                 name = self._prod_name_map.get(sku, "Material Extra (No Asignado)")
             
-            qty_app_total = self.session_data['consumo_app'].get(sku, 0)
+            # Sumar consumo: Paquete Específico + Consumos sin paquete (viniendo de Render)
+            prod_consumo_data = self.session_data['consumo_app'].get(sku, {})
+            qty_app_total = sum(prod_consumo_data.values()) # Total móvil
+            
+            if paquete_filtro == "TODOS" or is_shared:
+                qty_app = qty_app_total
+            else:
+                # Si filtramos por un paquete, sumamos el de ese paquete + lo que no tiene etiqueta (App Render)
+                qty_app = prod_consumo_data.get(paquete_filtro, 0) + \
+                          prod_consumo_data.get('NINGUNO', 0) + \
+                          prod_consumo_data.get('SIN_PAQUETE', 0)
+            
             qty_excel_total = 0
             for item in self.session_data['excel_data']:
                 if item['sku'] == sku: qty_excel_total += item['qty']
             
-            # --- Lógica de Drenado para Consumo ---
-            # Para evitar ocultar consumo real, si el item es compartido o estamos en 'TODOS', mostramos el total.
-            # Si estamos filtrando: mostramos el consumo total si el SKU es relevante para el paquete.
-            if paquete_filtro == "TODOS" or is_shared:
-                qty_app = qty_app_total
-                qty_excel = qty_excel_total
-            else:
-                qty_app = qty_app_total
-                qty_excel = qty_excel_total
-                # Nota: Antes se usaba un drenado complejo que filtraba por stock_paq. 
-                # Se simplificó para mostrar la realidad del consumo y no ocultar discrepancias.
-
-            # Almacenar el total verificado (Excel) para la auditoría física
-            self.session_data['consumo_verificado'][sku] = qty_excel_total 
+            qty_excel = qty_excel_total
+            
+            # Almacenar el total verificado para la auditoría física. 
+            # IMPORTANTE: Usamos el Máximo entre lo que dice la App y lo que dice Excel.
+            self.session_data['consumo_verificado'][sku] = max(qty_app, qty_excel)
 
             # --- NUEVA LÓGICA DE VISIBILIDAD ESTRICTA PERO SEGURA ---
             if paquete_filtro != "TODOS":
                 # REGLA 1: Solo mostrar si pertenece al paquete seleccionado O tiene stock personalizado O hay movimiento
-                # (Shared materials ignore package unless explicitly assigned to one)
+                # Rule 1: Skip if not in package, not personalized, and NO MOVEMENT
+                # (Shared materials should only show if they have movement or belong to the package context)
                 has_perso = (info.get("PERSONALIZADO", 0) if info else 0) > 0
                 has_movimiento = (qty_app > 0 or qty_excel > 0)
                 
-                if not is_in_package and not has_perso and not is_shared and not has_movimiento:
-                    continue
+                if not is_in_package and not has_perso:
+                    if not is_shared or not has_movimiento:
+                        continue
                 
-                # REGLA 2: Ocultar si no hubo movimiento Y además no hay stock asignado
+                # Rule 2: Hide if no movement AND no assigned stock in this view
                 if qty_app == 0 and qty_excel == 0:
                     stock_en_p = info.get(paquete_filtro, 0) if info else 0
                     if stock_en_p == 0 and not has_perso:
-                         continue
+                         if not is_shared:
+                             continue
+                         else:
+                             # Shared materials: only show if they have movement (covered by Rule 1 mostly)
+                             continue
 
             diff = qty_excel - qty_app
             status = "Correcto" if diff == 0 else f"Dif: {diff}"
@@ -1121,6 +1186,11 @@ class MobileReturnWindow:
             info = self.session_data['stock_teorico'].get(sku)
             is_shared = sku in MATERIALES_COMPARTIDOS
             is_in_package = sku in skus_paquete
+
+            # RETORNO: Nunca mostrar materiales compartidos (fibra, UTP, etc.)
+            # Estos se manejan por separado y no se cuentan físicamente en retorno.
+            if is_shared:
+                continue
 
             if info:
                 name = info['name']
@@ -1179,14 +1249,17 @@ class MobileReturnWindow:
             if paquete_filtro != "TODOS":
                 # REGLA 1: Solo mostrar si pertenece al paquete seleccionado O tiene stock personalizado
                 has_perso = (info.get("PERSONALIZADO", 0) if info else 0) > 0
+                
+                # Si no es del paquete ni personalizado, ocultar (incluso compartidos si no se han escaneado/esperado)
                 if not is_in_package and not has_perso:
-                    continue
-
-                # REGLA 2: Ocultar si no se espera nada y no se escaneó nada,
-                # PERO permitir ver si el item tenía stock asignado originalmente (para no desaparecer equipos consumidos)
-                if expected == 0 and scanned == 0:
-                    if gross == 0 and not has_perso:
+                    if not is_shared or (expected == 0 and scanned == 0):
                         continue
+
+                # REGLA 2: Ocultar si no se espera nada y no se escaneó nada
+                if expected == 0 and scanned == 0:
+                    if not is_in_package and not has_perso:
+                        continue
+                    # Si está en el paquete pero con 0, o es compartido pero sin uso, lo dejamos si es del paquete base.
 
             if scanned == expected:
                 state = "✅ OK"; tag = 'found'
@@ -1234,7 +1307,7 @@ class MobileReturnWindow:
             return
             
         # Obtener series
-        series = obtener_series_por_sku_y_ubicacion(sku, movil)
+        series = obtener_series_por_sku_y_ubicacion(sku, movil, self.paquete_combo.get())
         
         # Crear popup
         popup = tk.Toplevel(self.ventana)
@@ -1339,7 +1412,10 @@ class MobileReturnWindow:
             key_serials = f"_seriales_{sku_found}"
             if key_serials not in self.session_data: self.session_data[key_serials] = []
             if code in self.session_data[key_serials]:
-                 self.entry_scan.config(bg='#fff3cd') # Duplicado en esta sesión
+                 messagebox.showwarning("Duplicado",
+                                        f"El serial / MAC '{code}' ya fue escaneado en esta sesión.\nNo se puede agregar dos veces.",
+                                        parent=self.ventana)
+                 self.entry_scan.config(bg='#fff3cd')
                  self.ventana.after(1000, lambda: self.entry_scan.config(bg='#e8f0fe'))
                  return
             self.session_data[key_serials].append(code)
@@ -1366,32 +1442,33 @@ class MobileReturnWindow:
             qty_scanned = 1
             if not is_serial:
                 from tkinter import simpledialog
-                # Buscar nombre para el prompt
                 nombre_p = self._prod_name_map.get(sku_found, "Material")
                 qty = simpledialog.askinteger("Cantidad Real", f"Producto: {nombre_p}\nSKU: {sku_found}\n\n¿Qué cantidad física está contando?", 
                                                parent=self.ventana, minvalue=0)
-                if qty is None: return # Cancelado
+                if qty is None: return
                 qty_scanned = qty
             
             # Actualizar contador físico
             if is_serial:
                 self.session_data['stock_fisico_escaneado'][sku_found] = self.session_data['stock_fisico_escaneado'].get(sku_found, 0) + 1
             else:
-                # Los materiales se sobrescriben con la cantidad real contada/ingresada
                 self.session_data['stock_fisico_escaneado'][sku_found] = qty_scanned
             
             self.entry_scan.config(bg='#d4edda')
-            self.ventana.after(200, lambda: self.entry_scan.config(bg='#e8f0fe'))
+            self.ventana.after(500, lambda: self.entry_scan.config(bg='#e8f0fe'))
             self.update_fisico_ui()
             logger.info(f"✅ Auditado: {sku_found} -> Qty: {qty_scanned} ({'Serial' if is_serial else 'Material'})")
         else:
-            # No se encontró de ninguna forma
-            self.entry_scan.config(bg='#f8d7da')
-            self.ventana.after(1000, lambda: self.entry_scan.config(bg='#e8f0fe'))
+            # No se encontró — mostrar error claro
+            self.entry_scan.config(bg='#e74c3c')
+            self.ventana.after(1200, lambda: self.entry_scan.config(bg='#e8f0fe'))
+            messagebox.showerror("MAC / Código no reconocido",
+                                 f"'{code}' no se encontró en el sistema o no pertenece a este móvil.\n\nVerifique el código e intente de nuevo.",
+                                 parent=self.ventana)
             logger.warning(f"❌ Código '{code}' no reconocido en este móvil")
 
     def finalizar(self):
-        if not messagebox.askyesno("Confirmar Cierre", "Se procesará el retorno y consumo. ¿Continuar?"): return
+        if not messagebox.askyesno("Confirmar Cierre", "Se procesará el retorno y consumo. ¿Continuar?", parent=self.ventana): return
         self.btn_procesar.config(state='disabled', text="⏳ Procesando...")
         
         # Iniciar thread
@@ -1494,53 +1571,121 @@ class MobileReturnWindow:
             if errors:
                 messagebox.showwarning("Proceso con Errores", summary, parent=self.ventana)
             
-            # --- LÓGICA DE RELLENO (REFILL) BASADO EN PAQUETES ESTÁNDAR ---
-            from config import PAQUETES_MATERIALES
-            
-            paquete_nombre = self.paquete_combo.get()
-            if paquete_nombre == "TODOS":
-                paquete_nombre = "PAQUETE A" # Default de comparación
-            
-            objetivo_paquete = PAQUETES_MATERIALES.get(paquete_nombre, [])
-            faltantes_para_rellenar = []
-            lineas_resumen = []
-
-            # 1. Comparar Físico Escaneado contra Paquete Estándar
-            for sku_p, cant_p in objetivo_paquete:
-                scanned_qty = self.session_data['stock_fisico_escaneado'].get(sku_p, 0)
-                if scanned_qty < cant_p:
-                    diff = cant_p - scanned_qty
-                    # Buscar nombre
-                    nombre_p = self._prod_name_map.get(sku_p, sku_p)
-                    faltantes_para_rellenar.append({
-                        'sku': sku_p, 
-                        'nombre': nombre_p, 
-                        'cantidad': diff, 
-                        'seriales': []
-                    })
-                    lineas_resumen.append(f"  • {nombre_p[:30]}: faltan {diff} (Tienes {scanned_qty} de {cant_p})")
-
-            if faltantes_para_rellenar:
-                resumen_msg = f"📊 AUDITORÍA FINALIZADA\n\nBasado en el {paquete_nombre}, el móvil necesita los siguientes materiales para estar completo:\n\n"
-                resumen_msg += "\n".join(lineas_resumen[:12])
-                if len(lineas_resumen) > 12:
-                    resumen_msg += f"\n... y {len(lineas_resumen)-12} más."
+            try:
+                # --- LÓGICA DE RELLENO (REFILL) BASADO EN PAQUETES ESTÁNDAR Y ASIGNACIONES ---
+                from config import PAQUETES_MATERIALES, MATERIALES_COMPARTIDOS
                 
-                resumen_msg += f"\n\n¿Deseas abrir la ventana de SALIDA para recargar estos {len(faltantes_para_rellenar)} ítems?"
+                paquete_nombre = self.paquete_combo.get()
+                if paquete_nombre == "TODOS":
+                    paquete_nombre = "PAQUETE A" # Default de comparación
                 
-                if messagebox.askyesno("Sugerencia de Recarga", resumen_msg, parent=self.ventana):
-                    self.ventana.destroy()
-                    from ..mobile_output_scanner import MobileOutputScannerWindow
-                    MobileOutputScannerWindow(
-                        self.master_app, mode='SALIDA_MOVIL',
-                        prefill_items=faltantes_para_rellenar,
-                        initial_movil=movil,
-                        initial_package=paquete_nombre
-                    )
-                    return
-            else:
-                messagebox.showinfo("Auditoría Finalizada", "Felicidades: El stock físico coincide con el paquete estándar.\n\nEl consumo ha sido registrado correctamente.", parent=self.ventana)
+                objetivo_paquete = PAQUETES_MATERIALES.get(paquete_nombre, [])
+                skus_paquete = [s for s, c in objetivo_paquete]
+                
+                faltantes_para_rellenar = []
+                lineas_resumen = []
 
+                # Evaluar todos los SKUs conocidos (los del paquete y los que tiene el móvil)
+                skus_a_evaluar = set(skus_paquete) | set(self.session_data.get('stock_teorico', {}).keys())
+                
+                for sku_p in skus_a_evaluar:
+                    info = self.session_data.get('stock_teorico', {}).get(sku_p, {})
+                    if not isinstance(info, dict):
+                         info = {}
+                    scanned_qty = self.session_data.get('stock_fisico_escaneado', {}).get(sku_p, 0)
+                    if scanned_qty is None: scanned_qty = 0
+                    
+                    is_shared = sku_p in MATERIALES_COMPARTIDOS
+                    is_custom = info.get("PERSONALIZADO", 0) if isinstance(info.get("PERSONALIZADO"), (int, float)) else 0
+                    is_custom = is_custom > 0
+                    
+                    # REQUERIMIENTO: No auto-rellenar materiales compartidos porque se quedan en la móvil permanentemente
+                    if is_shared:
+                        continue
+                    
+                    cant_ideal = 0
+                    if paquete_nombre == "TODOS":
+                        cant_ideal = info.get('total', 0) if isinstance(info.get('total'), (int, float)) else 0
+                    else:
+                        if sku_p in skus_paquete:
+                            # Lo que manda la receta del paquete
+                            cant_ideal = next((c for s, c in objetivo_paquete if s == sku_p), 0)
+                            # Sumar personalizado adicional si tiene
+                            perso_val = info.get("PERSONALIZADO", 0) if isinstance(info.get("PERSONALIZADO"), (int, float)) else 0
+                            cant_ideal += perso_val
+                        elif is_custom:
+                            cant_ideal = info.get("PERSONALIZADO", 0) if isinstance(info.get("PERSONALIZADO"), (int, float)) else 0
+                    
+                    if cant_ideal > 0 and scanned_qty < cant_ideal:
+                        diff = cant_ideal - scanned_qty
+                        nombre_p = self._prod_name_map.get(sku_p, sku_p)
+                        
+                        # Identificar seriales faltantes si es equipo
+                        from config import PRODUCTOS_CON_CODIGO_BARRA
+                        seriales_faltantes = []
+                        if sku_p in PRODUCTOS_CON_CODIGO_BARRA:
+                            # Extraer los seriales que estaban en el móvil para este equipo y restar los escaneados
+                            pass
+                            
+                        faltantes_para_rellenar.append({
+                            'sku': sku_p, 
+                            'nombre': nombre_p, 
+                            'cantidad': diff, 
+                            'seriales': [] # Obliga a escanear en la salida
+                        })
+                        lineas_resumen.append(f"  • {nombre_p[:30]}: recargar {diff} (Tienes {scanned_qty} de {cant_ideal})")
+
+                resumen_msg = "📊 AUDITORÍA FINALIZADA\n\n"
+                
+                # Mostrar primero las discrepancias físicas (pérdidas reales vs consumos esperados)
+                hay_discrepancias = bool(discrepancias_msg.strip())
+                if hay_discrepancias:
+                    resumen_msg += "📌 RESULTADO FÍSICO (Pérdidas y Sobrantes):" + discrepancias_msg + "\n\n"
+                    
+                if faltantes_para_rellenar:
+                    resumen_msg += f"📦 RECARGA SUGERIDA (Paquete y Materiales Asignados):\n"
+                    resumen_msg += "\n".join(lineas_resumen[:12])
+                    if len(lineas_resumen) > 12:
+                        resumen_msg += f"\n... y {len(lineas_resumen)-12} más."
+                    
+                    resumen_msg += f"\n\n¿Deseas abrir la ventana de SALIDA para recargar estos materiales (incluyendo los consumidos y las pérdidas)?"
+                    
+                    if messagebox.askyesno("Sugerencia de Recarga", resumen_msg, parent=self.ventana):
+                        # FIX: Abrir el Scanner ANTES de destruir la ventana de Retorno
+                        from ..mobile_output_scanner import MobileOutputScannerWindow
+                        # Enriquecer equipos faltantes con sus seriales registrados en el móvil
+                        from config import PRODUCTOS_CON_CODIGO_BARRA
+                        for item in faltantes_para_rellenar:
+                            if item['sku'] in PRODUCTOS_CON_CODIGO_BARRA and not item.get('seriales'):
+                                try:
+                                    ya_escaneados = self.session_data.get(f'_seriales_{item["sku"]}', [])
+                                    todos_en_movil = obtener_series_por_sku_y_ubicacion(item['sku'], movil, paquete_nombre)
+                                    item['seriales'] = [s for s in todos_en_movil if s not in ya_escaneados][:item['cantidad']]
+                                except Exception as _e:
+                                    logger.warning(f"No se pudieron obtener seriales para {item['sku']}: {_e}")
+                        MobileOutputScannerWindow(
+                            self.master_app, mode='SALIDA_MOVIL',
+                            prefill_items=faltantes_para_rellenar,
+                            initial_movil=movil,
+                            initial_package=paquete_nombre
+                        )
+                        if self.ventana.winfo_exists():
+                            self.ventana.destroy()
+                        return
+                    else:
+                        # El usuario declinó la recarga. Mostrar confirmación de finalización antes de cerrar.
+                        messagebox.showinfo("Auditoría Finalizada", resumen_msg + "\n\nOperación finalizada sin recargas adicionales.", parent=self.ventana)
+                else:
+                    extra_msg = "El stock físico coincide y no requiere recargas." if not hay_discrepancias else "No hay recargas sugeridas."
+                    messagebox.showinfo("Auditoría Finalizada", resumen_msg + extra_msg, parent=self.ventana)
+
+            except Exception as e:
+                logger.error(f"Error parseando feedback final de retorno: {e}")
+                # Mostrar error para no crashear en silencio
+                messagebox.showinfo("Auditoría Finalizada (Con alerta UI)", 
+                                  f"El retorno se guardó correctamente, pero ocurrió un error gráfico:\n{e}", 
+                                  parent=self.ventana)
+                                  
             if self.on_close_callback: self.on_close_callback()
             if self.ventana.winfo_exists():
                 self.ventana.destroy()
@@ -1559,41 +1704,88 @@ class MobileReturnWindow:
             messagebox.showerror("Error", "Debe seleccionar un móvil primero.", parent=self.ventana)
             return
         
-        # Recopilar faltantes desde la tabla
+        from config import PRODUCTOS_CON_CODIGO_BARRA, MATERIALES_COMPARTIDOS
+        
+        # Recopilar faltantes desde la tabla de auditoría física
         faltantes_relleno = []
+        equipos_faltantes = []  # Equipment with missing units (requiring new scans)
+        
         for i in self.tree_fisico.get_children():
             v = self.tree_fisico.item(i, 'values')
             sku_c, nom_c = v[0], v[1]
             try:
                 exp_c = int(v[2]); sca_c = int(v[3])
-                if sca_c < exp_c:
+                if sca_c >= exp_c: continue # No hay faltantes
+                
+                # Omitir compartidos de la recarga rápida
+                if sku_c in MATERIALES_COMPARTIDOS: continue
+                
+                cant_falta = exp_c - sca_c
+                
+                if sku_c not in PRODUCTOS_CON_CODIGO_BARRA:
+                    # Es un material regular
                     faltantes_relleno.append({
                         'sku': sku_c,
                         'nombre': nom_c,
-                        'cantidad': exp_c - sca_c,
+                        'cantidad': cant_falta,
                         'seriales': []
                     })
+                else:
+                    # Es un equipo: intentar pre-cargar los seriales registrados en el móvil.
+                    # Esto permite que Salida Móvil los muestre como "equipos registrados con MAC".
+                    seriales_en_movil = []
+                    try:
+                        ya_escaneados = self.session_data.get(f'_seriales_{sku_c}', [])
+                        todos_en_movil = obtener_series_por_sku_y_ubicacion(sku_c, movil, self.paquete_combo.get())
+                        seriales_en_movil = [s for s in todos_en_movil if s not in ya_escaneados][:cant_falta]
+                    except Exception as _e:
+                        logger.warning(f"No se pudieron obtener seriales para {sku_c}: {_e}")
+                    faltantes_relleno.append({
+                        'sku': sku_c,
+                        'nombre': nom_c,
+                        'cantidad': cant_falta,
+                        'seriales': seriales_en_movil
+                    })
+                    if seriales_en_movil:
+                        equipos_faltantes.append(f"{nom_c}: {cant_falta} uds (MACs: {', '.join(seriales_en_movil[:2])}{'...' if len(seriales_en_movil)>2 else ''})")
+                    else:
+                        equipos_faltantes.append(f"{nom_c} (faltan {cant_falta} — escanear en Salida)")
+                        
             except: pass
         
-        if not faltantes_relleno:
+        if not faltantes_relleno and not equipos_faltantes:
             from tkinter import messagebox
-            messagebox.showinfo("Sin Faltantes", "No se detectan faltantes en la auditoría actual. Escanea items para comparar.", parent=self.ventana)
+            messagebox.showinfo("Sin Faltantes", "No se detectan faltantes en la auditoría actual (o solo son compartidos).", parent=self.ventana)
             return
         
         from tkinter import messagebox
-        resumen = "\n".join([f"  • {f['nombre']}: faltan {f['cantidad']}" for f in faltantes_relleno[:10]])
+        
+        msg_body = ""
+        materiales = [f for f in faltantes_relleno if f['sku'] not in PRODUCTOS_CON_CODIGO_BARRA]
+        if materiales:
+            resumen_mat = "\n".join([f"  • {f['nombre']}: faltan {f['cantidad']}" for f in materiales[:8]])
+            msg_body += f"📦 Materiales a reponer:\n{resumen_mat}\n\n"
+        
+        if equipos_faltantes:
+            resumen_ef = "\n".join([f"  • {e}" for e in equipos_faltantes[:5]])
+            msg_body += f"⚠️ Equipos faltantes (Requerirá escanear nuevas MAC reales en Salida):\n{resumen_ef}\n\n"
+        
         if not messagebox.askyesno("Abrir Salida para Rellenar", 
-                                   f"Se detectaron {len(faltantes_relleno)} productos con faltantes:\n\n{resumen}\n\n"
-                                   f"¿Abrir Salida a {movil} para rellenar estos items?",
+                                   f"{msg_body}"
+                                   f"¿Desea abrir la ventana de Salida para completar el inventario de {movil}?",
                                    parent=self.ventana):
             return
         
-        self.ventana.destroy()
+        prefill_combinado = faltantes_relleno
+        
+        # FIX: Abrir Scanner ANTES de destruir la ventana
         from ..mobile_output_scanner import MobileOutputScannerWindow
         MobileOutputScannerWindow(self.master_app, mode='SALIDA_MOVIL',
-                                  prefill_items=faltantes_relleno,
+                                  prefill_items=prefill_combinado,
                                   initial_movil=movil,
                                   initial_package=paquete_objetivo if paquete_objetivo != 'TODOS' else 'PAQUETE A')
+        if self.ventana.winfo_exists():
+            self.ventana.destroy()
 
 
 

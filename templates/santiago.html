@@ -3,8 +3,10 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>StockWare Santiago - Consumo Directo</title>
+    <!-- ZXing-js: Barcode/QR scanner for browser cameras -->
+    <script src="https://unpkg.com/@zxing/library@0.18.6/umd/index.min.js"></script>
     <style>
         :root {
             --primary: #2c3e50;
@@ -14,12 +16,15 @@
             --dark: #2f3640;
         }
 
+        * { box-sizing: border-box; }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: var(--bg);
             margin: 0;
             padding: 0;
             color: var(--dark);
+            -webkit-tap-highlight-color: transparent;
         }
 
         .header {
@@ -27,19 +32,10 @@
             color: white;
             padding: 20px;
             text-align: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
         }
-
-        .header h1 {
-            margin: 0;
-            font-size: 24px;
-        }
-
-        .header p {
-            margin: 5px 0 0;
-            font-size: 14px;
-            opacity: 0.8;
-        }
+        .header h1 { margin: 0; font-size: 22px; }
+        .header p { margin: 5px 0 0; font-size: 13px; opacity: 0.8; }
 
         .container {
             max-width: 600px;
@@ -52,7 +48,7 @@
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.06);
         }
 
         .section-title {
@@ -64,11 +60,10 @@
             gap: 10px;
             border-bottom: 2px solid #eee;
             padding-bottom: 8px;
+            font-size: 15px;
         }
 
-        .form-group {
-            margin-bottom: 15px;
-        }
+        .form-group { margin-bottom: 15px; }
 
         label {
             display: block;
@@ -77,57 +72,39 @@
             font-weight: 600;
         }
 
-        select,
-        input {
+        select, input {
             width: 100%;
             padding: 12px;
             border: 2px solid #dfe6e9;
             border-radius: 8px;
             font-size: 16px;
-            box-sizing: border-box;
             transition: border-color 0.2s;
         }
-
-        select:focus,
-        input:focus {
+        select:focus, input:focus {
             outline: none;
             border-color: var(--accent);
-        }
-
-        .search-box {
-            position: sticky;
-            top: 10px;
-            z-index: 100;
-            background: white;
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
         }
 
         .material-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 15px;
+            padding: 14px 15px;
             border-bottom: 1px solid #f1f2f6;
+            gap: 10px;
         }
+        .material-item:last-child { border-bottom: none; }
 
-        .material-info {
-            flex: 1;
-        }
-
+        .material-info { flex: 1; min-width: 0; }
         .material-name {
             font-weight: bold;
-            font-size: 16px;
+            font-size: 15px;
             display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-
-        .material-sku {
-            font-size: 12px;
-            color: #7f8c8d;
-        }
-
+        .material-sku { font-size: 12px; color: #7f8c8d; }
         .stock-badge {
             font-size: 11px;
             padding: 2px 8px;
@@ -138,26 +115,35 @@
             display: inline-block;
         }
 
-        .actions {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
+        .actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
 
         .qty-input {
-            width: 70px !important;
+            width: 65px !important;
             text-align: center;
             padding: 8px !important;
+            font-size: 16px;
         }
 
         .scan-btn {
             background: var(--accent);
             color: white;
             border: none;
-            padding: 10px 15px;
+            padding: 10px 14px;
             border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
+            font-size: 14px;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+        .scan-btn:active { background: #d35400; }
+
+        .badge-ok {
+            color: var(--success);
+            font-weight: bold;
+            font-size: 12px;
+            text-align: center;
+            min-width: 60px;
         }
 
         .footer-action {
@@ -166,11 +152,10 @@
             left: 0;
             width: 100%;
             background: white;
-            padding: 15px;
+            padding: 12px 15px;
             box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.1);
             display: flex;
             justify-content: center;
-            box-sizing: border-box;
         }
 
         .submit-btn {
@@ -179,91 +164,250 @@
             border: none;
             width: 100%;
             max-width: 570px;
-            padding: 15px;
+            padding: 16px;
             border-radius: 10px;
             font-size: 18px;
             font-weight: bold;
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
+            transition: transform 0.1s;
         }
+        .submit-btn:active { transform: scale(0.98); }
+        .submit-btn:disabled { background: #95a5a6; cursor: default; }
 
-        .submit-btn:active {
-            transform: scale(0.98);
-        }
-
-        /* Modal Scanner */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        .scan-anim {
-            font-size: 50px;
-            margin-bottom: 20px;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-                opacity: 1;
-            }
-
-            50% {
-                transform: scale(1.1);
-                opacity: 0.7;
-            }
-
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
+        /* ─── ALERT ─── */
         .alert {
             position: fixed;
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            padding: 15px 25px;
+            padding: 14px 22px;
             border-radius: 8px;
             color: white;
             font-weight: bold;
-            z-index: 2000;
+            z-index: 3000;
             display: none;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 90vw;
+        }
+        .alert-success { background: #2ecc71; }
+        .alert-error   { background: #e74c3c; }
+        .alert-info    { background: #3498db; }
+
+        /* ─── MODAL BASE ─── */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: flex-end;
+            padding: 0;
+        }
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 20px 20px 0 0;
+            overflow: hidden;
+            animation: slideUp 0.25s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to   { transform: translateY(0); }
         }
 
-        .alert-success {
-            background: #2ecc71;
+        /* ─── MODAL HEADER ─── */
+        .modal-header {
+            background: var(--primary);
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header h3 { margin: 0; font-size: 16px; flex: 1; }
+        .modal-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 20px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .alert-error {
-            background: #e74c3c;
+        /* ─── CAMERA VIEW ─── */
+        .camera-panel { position: relative; background: black; }
+
+        #scanVideo {
+            width: 100%;
+            max-height: 45vh;
+            object-fit: cover;
+            display: block;
         }
+
+        .scan-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+        .scan-frame {
+            width: min(65vw, 240px);
+            height: min(65vw, 240px);
+            border: 3px solid rgba(255,255,255,0.5);
+            border-radius: 16px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        /* Corner markers */
+        .scan-frame::before,
+        .scan-frame::after {
+            content: '';
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            border-color: var(--accent);
+            border-style: solid;
+        }
+        .scan-frame::before {
+            top: -3px; left: -3px;
+            border-width: 4px 0 0 4px;
+            border-radius: 8px 0 0 0;
+        }
+        .scan-frame::after {
+            bottom: -3px; right: -3px;
+            border-width: 0 4px 4px 0;
+            border-radius: 0 0 8px 0;
+        }
+        /* Scan line animation */
+        .scan-line {
+            position: absolute;
+            left: 8px; right: 8px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            animation: scanAnim 2s ease-in-out infinite;
+        }
+        @keyframes scanAnim {
+            0%   { top: 10%;  opacity: 0; }
+            10%  { opacity: 1; }
+            90%  { opacity: 1; }
+            100% { top: 90%; opacity: 0; }
+        }
+
+        .camera-hint {
+            position: absolute;
+            bottom: 10px;
+            left: 0; right: 0;
+            text-align: center;
+            color: rgba(255,255,255,0.85);
+            font-size: 13px;
+            text-shadow: 0 1px 3px black;
+        }
+
+        /* ─── CAMERA CONTROLS ─── */
+        .camera-controls {
+            display: flex;
+            gap: 10px;
+            padding: 12px 15px;
+            background: #1a252f;
+            justify-content: center;
+        }
+        .cam-btn {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .cam-btn:active { background: rgba(255,255,255,0.3); }
+
+        /* ─── MANUAL FALLBACK ─── */
+        .manual-panel {
+            padding: 15px 20px;
+            display: none;
+        }
+        .manual-panel.visible { display: block; }
+
+        .manual-input-row {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+        }
+        .manual-input-row input {
+            flex: 1;
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .add-serial-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-size: 20px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        /* ─── SERIAL LIST ─── */
+        .serials-panel { padding: 0 20px 15px; }
+        .serials-title {
+            font-size: 13px;
+            color: #7f8c8d;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .serial-tag {
+            display: inline-flex;
+            align-items: center;
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-radius: 20px;
+            padding: 4px 10px;
+            font-size: 13px;
+            font-family: monospace;
+            margin: 3px 4px 3px 0;
+            gap: 6px;
+        }
+        .serial-remove {
+            background: none;
+            border: none;
+            color: #c62828;
+            cursor: pointer;
+            font-size: 15px;
+            padding: 0;
+            line-height: 1;
+        }
+
+        /* ─── CAMERA UNAVAILABLE ─── */
+        .no-camera {
+            padding: 30px 20px;
+            text-align: center;
+            display: none;
+        }
+        .no-camera.visible { display: block; }
+        .no-camera p { color: #7f8c8d; margin-bottom: 15px; }
     </style>
 </head>
 
@@ -276,24 +420,80 @@
         <p>Sistema de Consumo Directo de Bodega</p>
     </div>
 
-    <!-- Scanner Modal -->
+    <!-- ─── SCANNER MODAL ─── -->
     <div class="modal" id="scanModal">
         <div class="modal-content">
-            <div class="scan-anim">🔍</div>
-            <h2 id="scanTitle">Escaneando Equipo</h2>
-            <p id="scanSub" style="color: #666; font-size: 14px;">Coloque el cursor en el cuadro y escanee el MAC/Serial
-            </p>
-            <input type="text" id="scanInput"
-                style="margin-top: 15px; text-align: center; border: 2px solid var(--accent); font-size: 20px;">
-            <div style="margin-top: 25px; display: flex; gap: 10px;">
-                <button onclick="confirmScan()"
-                    style="flex: 1; background: var(--success); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold;">AGREGAR</button>
-                <button onclick="closeScanner()"
-                    style="flex: 1; background: #eee; border: none; padding: 12px; border-radius: 8px;">CERRAR</button>
+
+            <!-- Header -->
+            <div class="modal-header">
+                <div>
+                    <div style="font-size:11px; opacity:0.7; margin-bottom:2px;">Escaneando serial de:</div>
+                    <h3 id="scanTitle">Equipo</h3>
+                </div>
+                <button class="modal-close" onclick="closeScanner()">✕</button>
             </div>
+
+            <!-- Camera view -->
+            <div class="camera-panel" id="cameraPanel">
+                <video id="scanVideo" autoplay muted playsinline></video>
+                <div class="scan-overlay">
+                    <div class="scan-frame">
+                        <div class="scan-line"></div>
+                    </div>
+                </div>
+                <div class="camera-hint">Apunta el código de barras al encuadre</div>
+            </div>
+
+            <!-- Camera controls -->
+            <div class="camera-controls" id="cameraControls">
+                <button class="cam-btn" onclick="flipCamera()" id="flipBtn">
+                    🔄 Cambiar cámara
+                </button>
+                <button class="cam-btn" onclick="toggleManual()">
+                    ⌨️ Escribir manualmente
+                </button>
+            </div>
+
+            <!-- No camera fallback (shown if camera fails) -->
+            <div class="no-camera" id="noCameraMsg">
+                <p>📵 Cámara no disponible.<br>Por favor escribe el serial manualmente.</p>
+            </div>
+
+            <!-- Manual input (toggle or always-on fallback) -->
+            <div class="manual-panel" id="manualPanel">
+                <div class="manual-input-row">
+                    <input type="text" id="scanInput"
+                        placeholder="MAC / Serial..."
+                        autocomplete="off"
+                        autocorrect="off"
+                        autocapitalize="characters"
+                        spellcheck="false">
+                    <button class="add-serial-btn" onclick="addManualSerial()">➕</button>
+                </div>
+            </div>
+
+            <!-- List of scanned serials for this item -->
+            <div class="serials-panel">
+                <div class="serials-title">
+                    <span>Seriales capturados:</span>
+                    <span id="serialCount">0</span>
+                </div>
+                <div id="serialTags"></div>
+            </div>
+
+            <!-- Done button -->
+            <div style="padding: 10px 20px 20px;">
+                <button onclick="closeScanner()"
+                    style="width:100%; background:var(--primary); color:white; border:none;
+                           padding:14px; border-radius:10px; font-size:16px; font-weight:bold; cursor:pointer;">
+                    ✅ Listo (cerrar)
+                </button>
+            </div>
+
         </div>
     </div>
 
+    <!-- ─── MAIN CONTENT ─── -->
     <div class="container">
 
         <div class="card">
@@ -317,11 +517,6 @@
             </div>
         </div>
 
-        <!-- Buscador oculto por solicitud -->
-        <div style="display:none">
-            <input type="text" id="search" value="">
-        </div>
-
         <div class="card" style="padding: 0;">
             <div id="material-list">
                 {% for p in productos %}
@@ -333,12 +528,13 @@
                     </div>
                     <div class="actions">
                         {% if p.es_equipo %}
-                        <button class="scan-btn" onclick="openScanner('{{ p.sku }}', '{{ p.nombre }}')">📡
-                            ESCANEAR</button>
-                        <div id="badge-{{ p.sku }}"
-                            style="display:none; color: var(--success); font-weight: bold; font-size: 12px;">✅ OK</div>
+                        <button class="scan-btn" onclick="openScanner('{{ p.sku }}', '{{ p.nombre }}')">
+                            📷 ESCANEAR
+                        </button>
+                        <div id="badge-{{ p.sku }}" class="badge-ok" style="display:none;">✅ 0</div>
                         {% else %}
-                        <input type="number" class="qty-input" data-sku="{{ p.sku }}" min="0" placeholder="0"
+                        <input type="number" class="qty-input" data-sku="{{ p.sku }}"
+                            min="0" placeholder="0"
                             onchange="validateQty(this, {{ p.stock }})">
                         {% endif %}
                     </div>
@@ -354,133 +550,272 @@
     </div>
 
     <script>
-        const CART = {}; // {sku: {cantidad: X, seriales: []}}
+        // ─── CART & STATE ───────────────────────────────────────────────
+        const CART = {};          // { sku: { cantidad: N, seriales: [] } }
+        let scanActiveSku = null;
+        let codeReader = null;
+        let currentDeviceIndex = 0;
+        let availableCameras = [];
+        let isScanning = false;
+        let manualVisible = false;
+        let cameraAvailable = true;
 
+        // ─── ALERT ──────────────────────────────────────────────────────
         function showAlert(msg, type = 'success') {
             const el = document.getElementById('alert');
             el.innerText = msg;
             el.className = `alert alert-${type}`;
             el.style.display = 'block';
-            setTimeout(() => el.style.display = 'none', 4000);
+            setTimeout(() => el.style.display = 'none', 3500);
         }
 
-        function filterMaterials() {
-            const query = document.getElementById('search').value.toLowerCase();
-            const items = document.querySelectorAll('.material-item');
-            items.forEach(item => {
-                const text = item.getAttribute('data-name') + ' ' + item.getAttribute('data-sku').toLowerCase();
-                item.style.display = text.includes(query) ? 'flex' : 'none';
-            });
-        }
-
+        // ─── MATERIAL VALIDATION ────────────────────────────────────────
         function validateQty(input, max) {
             const val = parseInt(input.value) || 0;
-            if (val < 0) input.value = 0;
-            if (val > max) {
-                if (confirm(`Solo hay ${max} en bodega. ¿Desea reportar ${val}?`)) {
-                    // OK
-                } else {
-                    input.value = max;
-                }
+            if (val < 0) { input.value = 0; return; }
+            if (val > max && !confirm(`Solo hay ${max} en bodega. ¿Desea reportar ${val}?`)) {
+                input.value = max;
             }
             const sku = input.getAttribute('data-sku');
-            if (val > 0) {
-                CART[sku] = { cantidad: val };
+            if (parseInt(input.value) > 0) {
+                CART[sku] = { cantidad: parseInt(input.value) };
             } else {
                 delete CART[sku];
             }
         }
 
-        let scanActiveSku = null;
+        // ─── SERIALS UI ─────────────────────────────────────────────────
+        function renderSerials(sku) {
+            const list = (CART[sku] && CART[sku].seriales) ? CART[sku].seriales : [];
+            const container = document.getElementById('serialTags');
+            const countEl   = document.getElementById('serialCount');
+            countEl.innerText = list.length;
+            container.innerHTML = list.map((sn, i) => `
+                <span class="serial-tag">
+                    ${sn}
+                    <button class="serial-remove" onclick="removeSerial(${i})">✕</button>
+                </span>`).join('');
+        }
 
-        function openScanner(sku, name) {
+        function removeSerial(index) {
+            if (!scanActiveSku || !CART[scanActiveSku]) return;
+            CART[scanActiveSku].seriales.splice(index, 1);
+            CART[scanActiveSku].cantidad = CART[scanActiveSku].seriales.length;
+            updateBadge(scanActiveSku);
+            renderSerials(scanActiveSku);
+        }
+
+        function updateBadge(sku) {
+            const badge = document.getElementById(`badge-${sku}`);
+            if (!badge) return;
+            const cnt = (CART[sku] && CART[sku].seriales) ? CART[sku].seriales.length : 0;
+            if (cnt > 0) {
+                badge.style.display = 'block';
+                badge.innerText = `✅ ${cnt}`;
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function addSerial(sn) {
+            sn = sn.trim().toUpperCase();
+            if (!sn || !scanActiveSku) return false;
+            if (!CART[scanActiveSku]) CART[scanActiveSku] = { cantidad: 0, seriales: [] };
+            if (CART[scanActiveSku].seriales.includes(sn)) {
+                showAlert(`Serial ${sn} ya está en la lista.`, 'error');
+                return false;
+            }
+            CART[scanActiveSku].seriales.push(sn);
+            CART[scanActiveSku].cantidad = CART[scanActiveSku].seriales.length;
+            updateBadge(scanActiveSku);
+            renderSerials(scanActiveSku);
+            showAlert(`✅ ${sn} agregado.`, 'success');
+            return true;
+        }
+
+        function addManualSerial() {
+            const input = document.getElementById('scanInput');
+            if (addSerial(input.value)) input.value = '';
+            input.focus();
+        }
+
+        // ─── CAMERA SCANNER ─────────────────────────────────────────────
+        async function startCamera() {
+            try {
+                codeReader = new ZXing.BrowserMultiFormatReader();
+                availableCameras = await codeReader.listVideoInputDevices();
+
+                if (availableCameras.length === 0) throw new Error('No cameras found');
+
+                // Prefer back camera
+                const backIdx = availableCameras.findIndex(d =>
+                    /back|rear|trasera|environment/i.test(d.label));
+                currentDeviceIndex = backIdx >= 0 ? backIdx : 0;
+
+                document.getElementById('flipBtn').style.display =
+                    availableCameras.length > 1 ? 'flex' : 'none';
+
+                await launchReader();
+                cameraAvailable = true;
+            } catch (err) {
+                console.warn('Camera error:', err);
+                showCameraFallback();
+            }
+        }
+
+        async function launchReader() {
+            if (!codeReader || availableCameras.length === 0) return;
+            const deviceId = availableCameras[currentDeviceIndex].deviceId;
+            isScanning = true;
+            try {
+                await codeReader.decodeFromVideoDevice(deviceId, 'scanVideo', (result, err) => {
+                    if (result && isScanning) {
+                        isScanning = false; // Debounce: pause until next openScanner
+                        const text = result.getText();
+                        // Short pause so user sees the detected result
+                        setTimeout(() => {
+                            addSerial(text);
+                            // Flash video briefly
+                            document.getElementById('scanVideo').style.filter = 'brightness(3)';
+                            setTimeout(() => {
+                                document.getElementById('scanVideo').style.filter = '';
+                                isScanning = true;
+                            }, 600);
+                        }, 100);
+                    }
+                });
+            } catch(e) {
+                console.warn('Reader error:', e);
+                showCameraFallback();
+            }
+        }
+
+        function stopCamera() {
+            isScanning = false;
+            if (codeReader) {
+                try { codeReader.reset(); } catch(e) {}
+                codeReader = null;
+            }
+            const video = document.getElementById('scanVideo');
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(t => t.stop());
+                video.srcObject = null;
+            }
+        }
+
+        function showCameraFallback() {
+            cameraAvailable = false;
+            document.getElementById('cameraPanel').style.display = 'none';
+            document.getElementById('cameraControls').style.display = 'none';
+            document.getElementById('noCameraMsg').classList.add('visible');
+            document.getElementById('manualPanel').classList.add('visible');
+            manualVisible = true;
+        }
+
+        async function flipCamera() {
+            if (availableCameras.length < 2) return;
+            stopCamera();
+            currentDeviceIndex = (currentDeviceIndex + 1) % availableCameras.length;
+            codeReader = new ZXing.BrowserMultiFormatReader();
+            await launchReader();
+        }
+
+        function toggleManual() {
+            manualVisible = !manualVisible;
+            document.getElementById('manualPanel').classList.toggle('visible', manualVisible);
+            if (manualVisible) document.getElementById('scanInput').focus();
+        }
+
+        // ─── OPEN / CLOSE MODAL ─────────────────────────────────────────
+        async function openScanner(sku, name) {
             scanActiveSku = sku;
+            manualVisible = false;
+
+            // Reset UI
             document.getElementById('scanTitle').innerText = name;
-            document.getElementById('scanModal').classList.add('active');
+            document.getElementById('manualPanel').classList.remove('visible');
             document.getElementById('scanInput').value = '';
-            document.getElementById('scanInput').focus();
+            document.getElementById('cameraPanel').style.display = 'block';
+            document.getElementById('cameraControls').style.display = 'flex';
+            document.getElementById('noCameraMsg').classList.remove('visible');
+
+            // Render existing serials for this sku
+            renderSerials(sku);
+
+            document.getElementById('scanModal').classList.add('active');
+
+            // Start camera
+            await startCamera();
         }
 
         function closeScanner() {
+            stopCamera();
             document.getElementById('scanModal').classList.remove('active');
             scanActiveSku = null;
         }
 
-        function confirmScan() {
-            const sn = document.getElementById('scanInput').value.trim().toUpperCase();
-            if (!sn) return;
+        // Enter key on manual input
+        document.getElementById('scanInput').addEventListener('keydown', e => {
+            if (e.key === 'Enter') addManualSerial();
+        });
 
-            if (!CART[scanActiveSku]) CART[scanActiveSku] = { cantidad: 0, seriales: [] };
+        // Close modal on backdrop click
+        document.getElementById('scanModal').addEventListener('click', function(e) {
+            if (e.target === this) closeScanner();
+        });
 
-            if (!CART[scanActiveSku].seriales.includes(sn)) {
-                CART[scanActiveSku].seriales.push(sn);
-                CART[scanActiveSku].cantidad = CART[scanActiveSku].seriales.length;
-                document.getElementById(`badge-${scanActiveSku}`).innerText = `✅ ${CART[scanActiveSku].cantidad} ESCANEADOS`;
-                document.getElementById(`badge-${scanActiveSku}`).style.display = 'block';
-                showAlert(`Serial ${sn} agregado.`);
-            } else {
-                showAlert(`El serial ${sn} ya está en la lista.`, 'error');
-            }
-
-            closeScanner();
-        }
-
-        document.getElementById('scanInput').onkeydown = (e) => {
-            if (e.key === 'Enter') confirmScan();
-        };
-
+        // ─── SUBMIT ─────────────────────────────────────────────────────
         async function submitReport() {
-            const movil = document.getElementById('movil').value;
-            const tecnico = document.getElementById('tecnico').value.trim();
+            const movil    = document.getElementById('movil').value;
+            const tecnico  = document.getElementById('tecnico').value.trim();
             const contrato = document.getElementById('contrato').value.trim();
 
             if (!movil || !tecnico || !contrato) {
-                showAlert("Complete todos los datos del servicio.", "error");
+                showAlert('Complete todos los datos del servicio.', 'error');
                 return;
             }
 
-            const materiales = [];
-            for (const sku in CART) {
-                materiales.push({
-                    sku: sku,
-                    cantidad: CART[sku].cantidad,
-                    seriales: CART[sku].seriales || []
-                });
-            }
+            const materiales = Object.entries(CART)
+                .filter(([, v]) => v.cantidad > 0)
+                .map(([sku, v]) => ({
+                    sku,
+                    cantidad: v.cantidad,
+                    seriales: v.seriales || []
+                }));
 
             if (materiales.length === 0) {
-                showAlert("No ha marcado ningún consumo.", "error");
+                showAlert('No ha marcado ningún consumo.', 'error');
                 return;
             }
 
             try {
                 const btn = document.querySelector('.submit-btn');
                 btn.disabled = true;
-                btn.innerText = "⏳ ENVIANDO...";
+                btn.innerText = '⏳ ENVIANDO...';
 
                 const res = await fetch('/registrar_santiago', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        movil, tecnico, contrato,
-                        materiales,
+                        movil, tecnico, contrato, materiales,
                         fecha: new Date().toISOString().split('T')[0]
                     })
                 });
 
                 const data = await res.json();
                 if (data.exito) {
-                    showAlert("✅ CONSUMO REGISTRADO EXITOSAMENTE");
-                    setTimeout(() => window.location.reload(), 2000);
+                    showAlert('✅ CONSUMO REGISTRADO EXITOSAMENTE');
+                    setTimeout(() => window.location.reload(), 2200);
                 } else {
-                    showAlert("❌ ERROR: " + data.mensaje, "error");
+                    showAlert('❌ ERROR: ' + data.mensaje, 'error');
                     btn.disabled = false;
-                    btn.innerText = "📤 ENVIAR CONSUMO";
+                    btn.innerText = '📤 ENVIAR CONSUMO';
                 }
             } catch (e) {
-                showAlert("❌ Error de red", "error");
+                showAlert('❌ Error de red', 'error');
+                const btn = document.querySelector('.submit-btn');
                 btn.disabled = false;
-                btn.innerText = "📤 ENVIAR CONSUMO";
+                btn.innerText = '📤 ENVIAR CONSUMO';
             }
         }
     </script>
