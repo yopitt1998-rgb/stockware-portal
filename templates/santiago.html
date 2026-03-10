@@ -332,17 +332,23 @@
             align-items: center;
             justify-content: center;
             pointer-events: none;
+            overflow: hidden;
+            /* Para contener el gran box-shadow */
         }
 
         .scan-frame {
-            width: min(65vw, 240px);
-            height: min(65vw, 240px);
+            width: min(85vw, 300px);
+            /* Un poco más ancho para albergar el serial */
+            height: min(30vw, 100px);
+            /* Mucho más bajo (tipo ranura / rectángulo) */
             border: 3px solid rgba(255, 255, 255, 0.5);
-            border-radius: 16px;
+            border-radius: 12px;
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.65);
+            /* Falso overlay para oscurecer el resto de la cámara */
         }
 
         /* Corner markers */
