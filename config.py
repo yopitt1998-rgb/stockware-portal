@@ -41,7 +41,7 @@ MYSQL_HOST = os.getenv("MYSQL_HOST")
 MYSQL_USER = os.getenv("MYSQL_USER")
 MYSQL_PASS = os.getenv("MYSQL_PASSWORD")
 MYSQL_DB = os.getenv("MYSQL_DATABASE_OVERRIDE", os.getenv("MYSQL_DATABASE"))
-MYSQL_DB_SANTIAGO = os.getenv("MYSQL_DATABASE_SANTIAGO") # Nuevo: DB para Santiago
+MYSQL_DB_SANTIAGO = None # Deprecated: Ahora usamos la misma DB filtrando por columna sucursal
 MYSQL_PORT = int(os.getenv("MYSQL_PORT", 3306))
 
 # Branch Name for UI title
@@ -207,9 +207,7 @@ def set_branch_context(branch_code):
         
         # Switch DB
         if DB_TYPE == 'MYSQL':
-            if MYSQL_DB_SANTIAGO:
-                CURRENT_CONTEXT['MYSQL_DB'] = MYSQL_DB_SANTIAGO
-                print(f" -> DB MySQL cambiada a: {MYSQL_DB_SANTIAGO}")
+            # Nota: Ya no se cambia el SCHEMA fisico, se filtra por columna sucursal
         else:
             # Local SQLite: Separamos Santiago a otro archivo? 
             # Si el usuario quiere Separation TOTAL, debería ser otro archivo.

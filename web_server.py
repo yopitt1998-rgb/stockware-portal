@@ -15,7 +15,7 @@ import threading
 import json
 from config import (
     DB_TYPE, PAQUETES_MATERIALES, MATERIALES_COMPARTIDOS, 
-    MOVILES_SANTIAGO, MYSQL_DB_SANTIAGO, PRODUCTOS_CON_CODIGO_BARRA
+    MOVILES_SANTIAGO, PRODUCTOS_CON_CODIGO_BARRA
 )
 
 # Mapeo SKU → Nombre Excel (para mostrar nombres cortos en portal)
@@ -139,7 +139,7 @@ def santiago():
     try:
         # En Santiago Directo, obtenemos TODO el stock de BODEGA
         # Usamos la conexión de Santiago si está configurada
-        target_db = MYSQL_DB_SANTIAGO if MYSQL_DB_SANTIAGO else None
+        target_db = None
         
         # Obtenemos el stock actual de la BD
         raw_stock = obtener_todos_los_skus_para_movimiento(target_db=target_db, sucursal_context='SANTIAGO')
@@ -190,7 +190,7 @@ def registrar_santiago_post():
         fecha = data.get('fecha', date.today().isoformat())
 
         from database import verificar_seriales_bodega
-        from config import MYSQL_DB_SANTIAGO
+        
 
         for item in materiales:
             sku = item['sku']
@@ -199,7 +199,7 @@ def registrar_santiago_post():
             
             # 1. DETERMINAR CONTEXTO Y DB
             sucursal_ctx = 'SANTIAGO' if movil in MOVILES_SANTIAGO else 'CHIRIQUI'
-            target_db_ctx = MYSQL_DB_SANTIAGO if sucursal_ctx == 'SANTIAGO' else None
+            target_db_ctx = None
 
             # 2. VALIDAR SERIALES/MACs (EQUIPOS)
             if seriales:
@@ -245,10 +245,10 @@ def api_validar_serial():
     conn = None
     try:
         from database import get_db_connection, run_query
-        from config import MOVILES_SANTIAGO, MYSQL_DB_SANTIAGO
+        from config import MOVILES_SANTIAGO
         
         sucursal = 'SANTIAGO' if movil in MOVILES_SANTIAGO else 'CHIRIQUI'
-        target_db = MYSQL_DB_SANTIAGO if sucursal == 'SANTIAGO' else None
+        target_db = None
         
         conn = get_db_connection(target_db=target_db)
         cursor = conn.cursor()
@@ -423,9 +423,9 @@ def get_inventario_movil(movil):
     try:
         # Detectar DB correcta (Chiriquí o Santiago)
         target_db = None
-        from config import MOVILES_SANTIAGO, MYSQL_DB_SANTIAGO
-        if movil in MOVILES_SANTIAGO and MYSQL_DB_SANTIAGO:
-            target_db = MYSQL_DB_SANTIAGO
+        from config import MOVILES_SANTIAGO
+        if movil in MOVILES_SANTIAGO:
+            pass
             
         conn = get_db_connection(target_db=target_db)
         cursor = conn.cursor()
@@ -539,12 +539,10 @@ def registrar_bulk():
     try:
         # LÓGICA DE ENRUTAMIENTO (NUEVO)
         target_db = None
-        from config import MOVILES_SANTIAGO, MYSQL_DB_SANTIAGO
+        from config import MOVILES_SANTIAGO
         movil = data.get('movil', '')
         
         if movil in MOVILES_SANTIAGO:
-            if MYSQL_DB_SANTIAGO:
-                target_db = MYSQL_DB_SANTIAGO
             sucursal_ctx = 'SANTIAGO'
         else:
             sucursal_ctx = 'CHIRIQUI'
@@ -659,11 +657,10 @@ def api_consumos_dia():
 
     try:
         from database import get_db_connection, run_query
-        from config import MOVILES_SANTIAGO, MYSQL_DB_SANTIAGO
+        from config import MOVILES_SANTIAGO
 
         target_db = None
-        if movil and movil in MOVILES_SANTIAGO and MYSQL_DB_SANTIAGO:
-            target_db = MYSQL_DB_SANTIAGO
+        pass
 
         conn = get_db_connection(target_db=target_db)
         cursor = conn.cursor()
@@ -754,11 +751,10 @@ def api_comparar_excel():
 
         # Obtener consumos de la DB para comparar
         from database import get_db_connection, run_query
-        from config import MOVILES_SANTIAGO, MYSQL_DB_SANTIAGO
+        from config import MOVILES_SANTIAGO
 
         target_db = None
-        if movil and movil in MOVILES_SANTIAGO and MYSQL_DB_SANTIAGO:
-            target_db = MYSQL_DB_SANTIAGO
+        pass
 
         conn = get_db_connection(target_db=target_db)
         cursor = conn.cursor()

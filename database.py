@@ -1071,14 +1071,9 @@ def registrar_prestamo_santiago(sku, cantidad, fecha_evento, observaciones=None)
 
         # PASO B: Sumar a Santiago
         # Necesitamos el nombre de la DB de Santiago desde config
-        from config import MYSQL_DB_SANTIAGO
-        
-        if not MYSQL_DB_SANTIAGO:
-             return True, f"Transferencia completada SOLO en Local (No se configuró DB Santiago). {msg_salida}"
-
         obs_entrada = f"TRANSFERENCIA DESDE CHIRIQUI - {observaciones}" if observaciones else "TRANSFERENCIA DESDE CHIRIQUI"
         # Usamos 'ENTRADA' para que sume a Bodega Santiago. Si no existe el producto allá, lo crea.
-        exito_entrada, msg_entrada = registrar_movimiento_gui(sku, 'ENTRADA', cantidad, None, fecha_evento, None, obs_entrada, target_db_name=MYSQL_DB_SANTIAGO)
+        exito_entrada, msg_entrada = registrar_movimiento_gui(sku, 'ENTRADA', cantidad, None, fecha_evento, None, obs_entrada, sucursal_context='SANTIAGO')
         
         if exito_entrada:
              # PASO C: Registrar en prestamos_activos (Local) para seguimiento?
@@ -2333,10 +2328,10 @@ def registrar_consumo_pendiente(movil, sku, cantidad, tecnico, ticket, fecha, co
     try:
         # LÓGICA DE ENRUTAMIENTO (NUEVO): Detectar si es Santiago
         target_db = None
-        from config import MOVILES_SANTIAGO, MYSQL_DB_SANTIAGO
+        from config import MOVILES_SANTIAGO
         
-        if movil in MOVILES_SANTIAGO and MYSQL_DB_SANTIAGO:
-            target_db = MYSQL_DB_SANTIAGO
+        if movil in MOVILES_SANTIAGO:
+            pass
             logger.info(f"[ROUTING] Redirigiendo consumo de {movil} a {target_db}")
             
         conn = get_db_connection(target_db=target_db)
