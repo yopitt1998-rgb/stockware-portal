@@ -2,9 +2,9 @@
 import os
 import sys
 
-# Forzar sucursal Santiago
-os.environ['FORCE_BRANCH'] = 'SANTIAGO'
-os.environ['SANTIAGO_DIRECT_MODE'] = '1'
+# Forzar sucursal Chiriquí
+os.environ['FORCE_BRANCH'] = 'CHIRIQUI'
+os.environ['SANTIAGO_DIRECT_MODE'] = '0'
 
 # Importar y ejecutar la aplicación principal
 from app_inventario import main

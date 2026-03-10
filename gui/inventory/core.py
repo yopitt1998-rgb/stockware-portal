@@ -41,7 +41,6 @@ from config import PRODUCTOS_INICIALES
 from .movements import (
     IndividualOutputWindow,
     MobileOutputWindow,
-    MobileReturnWindow,
     ConciliacionPaquetesWindow
 )
 from ..utils import mostrar_cargando_async
@@ -183,9 +182,6 @@ class InventoryTab:
             ("🔫 Salida Móvil Scanner", self.abrir_ventana_salida_movil_scanner, '#FF6F00'),
             ("❌ Eliminar Producto", self.abrir_ventana_eliminar, Styles.ACCENT_COLOR),
             ("🔄 Traslado", self.abrir_ventana_traslado, Styles.SECONDARY_COLOR),
-            ("📤 Transferencia Santiago", self.abrir_ventana_prestamo_santiago_scanner, '#6f42c1'),
-            ("📥 Devolución Santiago", self.abrir_ventana_devolucion_santiago_scanner, '#fd7e14'),
-            ("📋 Ver Préstamos", self.abrir_ventana_prestamos_activos, '#009688'),
             ("🚚 Gestionar Móviles", self.abrir_ventana_gestion_moviles, '#E91E63'),
             ("🧹 Limpieza Avanzada", self.mostrar_herramientas_limpieza, '#9C27B0')
         ]
@@ -708,8 +704,8 @@ class InventoryTab:
             header_labels = []
             header_labels.append(tk.Label(frame_productos, text="Producto", font=('Segoe UI', 10, 'bold')))
             header_labels.append(tk.Label(frame_productos, text="SKU", font=('Segoe UI', 10, 'bold')))
-            header_labels.append(tk.Label(frame_productos, text="Stock en Móvil", font=('Segoe UI', 10, 'bold'), fg='blue'))
-            header_labels.append(tk.Label(frame_productos, text="Cant. a Trasladar", font=('Segoe UI', 10, 'bold')))
+            header_labels.append(tk.Label(frame_productos, text="MAC / Serial", font=('Segoe UI', 10, 'bold'), fg='blue'))
+            header_labels.append(tk.Label(frame_productos, text="Seleccionar", font=('Segoe UI', 10, 'bold')))
             
             for i, label in enumerate(header_labels):
                 label.grid(row=0, column=i, padx=5, pady=5, sticky='w')
@@ -738,23 +734,49 @@ class InventoryTab:
                 productos_en_movil_origen.clear() # Clear previous data
                 
                 def renderizar_productos(productos_asignados):
-                    nonlocal productos_en_movil_origen
+                    from config import PRODUCTOS_CON_CODIGO_BARRA
                     if not productos_asignados:
                         tk.Label(frame_productos, text="No hay productos asignados a este móvil", 
                                 font=('Segoe UI', 10), fg='red').grid(row=1, column=0, columnspan=4, padx=10, pady=10)
                         return
                     
-                    productos_en_movil_origen = productos_asignados # Store for scanner
+                    # Filtrar solo equipos que tengan serial/MAC
+                    equipos_asignados = [p for p in productos_asignados if p[1] in PRODUCTOS_CON_CODIGO_BARRA]
                     
+                    if not equipos_asignados:
+                        tk.Label(frame_productos, text="No hay equipos (con MAC) asignados a este móvil", 
+                                font=('Segoe UI', 10), fg='orange').grid(row=1, column=0, columnspan=4, padx=10, pady=10)
+                        return
+
                     fila = 1
-                    for nombre, sku, cantidad in productos_asignados:
-                        tk.Label(frame_productos, text=nombre, anchor='w', justify='left', font=('Segoe UI', 9)).grid(row=fila, column=0, padx=5, pady=2, sticky='ew')
-                        tk.Label(frame_productos, text=sku, anchor='center', font=('Segoe UI', 9)).grid(row=fila, column=1, padx=5, pady=2, sticky='ew')
-                        tk.Label(frame_productos, text=str(cantidad), anchor='center', font=('Segoe UI', 9), fg='blue').grid(row=fila, column=2, padx=5, pady=2, sticky='ew')
-                        entry = tk.Entry(frame_productos, width=8, font=('Segoe UI', 9))
-                        entry.grid(row=fila, column=3, padx=5, pady=2)
-                        ventana.entry_vars[sku] = entry # Store entry widget by SKU
-                        fila += 1
+                    for nombre, sku, cantidad in equipos_asignados:
+                        # Obtener las series/MACs individuales para este SKU en este móvil
+                        from database import obtener_series_por_sku_y_ubicacion
+                        series = obtener_series_por_sku_y_ubicacion(sku, movil_origen)
+                        
+                        if not series:
+                            # Caso borde: SKU es equipo pero no hay series registradas en tabla series_registradas
+                            tk.Label(frame_productos, text=nombre, anchor='w', font=('Segoe UI', 9)).grid(row=fila, column=0, padx=5, pady=2, sticky='ew')
+                            tk.Label(frame_productos, text=sku, anchor='center', font=('Segoe UI', 9)).grid(row=fila, column=1, padx=5, pady=2, sticky='ew')
+                            tk.Label(frame_productos, text="Sin series en BD", font=('Segoe UI', 9, 'italic'), fg='gray').grid(row=fila, column=2, padx=5, pady=2, sticky='ew')
+                            fila += 1
+                            continue
+
+                        for s_num, m_num in series:
+                            # Identificador prioritario: MAC, si no hay MAC, Serial
+                            display_id = m_num if m_num and m_num != 'N/A' else s_num
+                            
+                            tk.Label(frame_productos, text=nombre, anchor='w', font=('Segoe UI', 9)).grid(row=fila, column=0, padx=5, pady=2, sticky='ew')
+                            tk.Label(frame_productos, text=sku, anchor='center', font=('Segoe UI', 9)).grid(row=fila, column=1, padx=5, pady=2, sticky='ew')
+                            tk.Label(frame_productos, text=display_id, anchor='center', font=('Segoe UI', 9), fg='blue').grid(row=fila, column=2, padx=5, pady=2, sticky='ew')
+                            
+                            var = tk.BooleanVar()
+                            chk = tk.Checkbutton(frame_productos, variable=var, bg='white')
+                            chk.grid(row=fila, column=3, padx=5, pady=2)
+                            
+                            # Guardar info para procesamiento: (sku, id_serie)
+                            ventana.entry_vars[f"{sku}_{display_id}"] = (var, sku, display_id)
+                            fila += 1
                     
                     frame_productos.update_idletasks()
                     canvas.config(scrollregion=canvas.bbox("all"))
@@ -765,43 +787,21 @@ class InventoryTab:
             movil_origen_combo.bind("<<ComboboxSelected>>", cargar_productos_movil)
             frame_productos.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
 
-            # Scanner logic
+            # Scanner logic (Modificado para alternar checkboxes)
             def real_scan_handler(event):
                 codigo = scan_entry.get().strip().upper()
                 if not codigo: return
 
-                if not productos_en_movil_origen:
-                    messagebox.showwarning("Error", "Primero debe seleccionar un móvil de origen para cargar los productos.", master=ventana)
-                    scan_entry.delete(0, tk.END)
-                    return
-
-                # Check if the scanned code is among the products loaded for the origin mobile
-                scannable_skus = [p[1] for p in productos_en_movil_origen]
-                if codigo not in scannable_skus:
-                    messagebox.showwarning("Código No Permitido", f"El código '{codigo}' no está asignado al móvil de origen seleccionado.", master=ventana)
-                    scan_entry.delete(0, tk.END)
-                    return
-
-                if codigo in ventana.entry_vars:
-                    entry_widget = ventana.entry_vars[codigo]
-                    try:
-                        curr = entry_widget.get().strip()
-                        val = int(curr) + 1 if curr else 1
-                        
-                        # Validate stock against the stock in the origin mobile
-                        max_stock = next((q for n, s, q in productos_en_movil_origen if s == codigo), 0)
-                        
-                        if val > max_stock:
-                             messagebox.showwarning("Stock Insuficiente", f"No hay suficiente stock para {codigo} en el móvil de origen. Max: {max_stock}", master=ventana)
-                        else:
-                            entry_widget.delete(0, tk.END)
-                            entry_widget.insert(0, str(val))
-                            entry_widget.config(bg=Styles.SUCCESS_COLOR, fg='white')
-                            ventana.after(500, lambda: entry_widget.config(bg='white', fg='black'))
-
-                    except ValueError: pass
-                else:
-                    messagebox.showwarning("No Encontrado", f"Producto {codigo} no listado para este móvil.", master=ventana)
+                encontrado = False
+                for key, data in ventana.entry_vars.items():
+                    var, sku, display_id = data
+                    if codigo == display_id:
+                        var.set(not var.get()) # Alternar selección
+                        encontrado = True
+                        break
+                
+                if not encontrado:
+                    messagebox.showwarning("No Encontrado", f"El equipo con MAC/Serial '{codigo}' no está listado para este móvil.", master=ventana)
                 
                 scan_entry.delete(0, tk.END)
 
@@ -829,44 +829,42 @@ class InventoryTab:
                 errores = 0
                 mensaje_error = ""
     
-                for sku, entry in ventana.entry_vars.items(): # Use ventana.entry_vars
-                    try:
-                        cantidad_text = entry.get().strip()
-                        if cantidad_text:
-                            cantidad = int(cantidad_text)
-                            if cantidad > 0:
-                                # VERIFICACIÓN DE STOCK EN MÓVIL (PUNTO 5)
-                                # Necesitamos saber cuanto hay en el movil origen
-                                # Por simplicidad, ya tenemos los datos en la tabla, pero re-verificamos con la BD
-                                prod_movil = obtener_asignacion_movil(movil_origen)
-                                stock_en_movil = next((p[2] for p in prod_movil if str(p[1]) == str(sku)), 0)
-                                
-                                if stock_en_movil < cantidad:
-                                    errores += 1
-                                    mensaje_error += f"\n- {sku}: Stock insuficiente en {movil_origen} ({stock_en_movil} < {cantidad})"
-                                    entry.configure(bg='#FFCDD2')
-                                    continue
-    
-                                # Registrar retorno desde móvil origen
-                                exito1, mensaje1 = registrar_movimiento_gui(sku, 'RETORNO_MOVIL', cantidad, movil_origen, fecha_evento, None, "TRASLADO")
-                                # Registrar salida a móvil destino
-                                exito2, mensaje2 = registrar_movimiento_gui(sku, 'SALIDA_MOVIL', cantidad, movil_destino, fecha_evento, None, "TRASLADO")
-                                
-                                if exito1 and exito2:
-                                    exitos += 1
-                                else:
-                                    errores += 1
-                                    if not exito1:
-                                        mensaje_error += f"\n- SKU {sku} (Retorno): {mensaje1}"
-                                    if not exito2:
-                                        mensaje_error += f"\n- SKU {sku} (Salida): {mensaje2}"
-                    except ValueError:
-                        if cantidad_text:
+                from database import registrar_movimiento_gui, actualizar_ubicacion_serial
+
+                for key, data in ventana.entry_vars.items():
+                    var, sku, display_id = data
+                    if var.get(): # Si está seleccionado
+                        try:
+                            # 1. Actualizar ubicación física del serial en la BD
+                            exito_u, msg_u = actualizar_ubicacion_serial(display_id, movil_destino)
+                            
+                            if not exito_u:
+                                errores += 1
+                                mensaje_error += f"\n- {display_id}: {msg_u}"
+                                continue
+
+                            # 2. Registrar movimientos de inventario por cantidad
+                            # Retorno desde origen
+                            exito1, mensaje1 = registrar_movimiento_gui(
+                                sku, 'RETORNO_MOVIL', 1, movil_origen, fecha_evento, 
+                                None, f"TRASLADO A {movil_destino}", seriales=[display_id]
+                            )
+                            # Salida a destino
+                            exito2, mensaje2 = registrar_movimiento_gui(
+                                sku, 'SALIDA_MOVIL', 1, movil_destino, fecha_evento, 
+                                None, f"TRASLADO DESDE {movil_origen}", seriales=[display_id]
+                            )
+                            
+                            if exito1 and exito2:
+                                exitos += 1
+                            else:
+                                errores += 1
+                                if not exito1: mensaje_error += f"\n- {display_id} (Origen): {mensaje1}"
+                                if not exito2: mensaje_error += f"\n- {display_id} (Destino): {mensaje2}"
+
+                        except Exception as e:
                             errores += 1
-                            mensaje_error += f"\n- SKU {sku}: Cantidad no válida"
-                    except Exception as e:
-                        errores += 1
-                        mensaje_error += f"\n- SKU {sku} (Error Inesperado): {e}"
+                            mensaje_error += f"\n- {display_id} (Error): {e}"
     
                 if exitos > 0 or errores > 0:
                     if errores > 0:
@@ -1357,11 +1355,6 @@ class InventoryTab:
         """Abre ventana para salida a móvil (Refactored)"""
         MobileOutputWindow(self.main_app, on_close_callback=self.cargar_datos_tabla)
 
-    
-    def abrir_ventana_retorno_movil(self):
-        """Abre ventana para retorno móvil (Refactored)"""
-        MobileReturnWindow(self.main_app, on_close_callback=self.cargar_datos_tabla)
-
     def abrir_ventana_consiliacion(self):
         """Abre ventana para conciliación (Refactored)"""
         ConciliacionPaquetesWindow(self.main_app, on_close_callback=self.cargar_datos_tabla)
@@ -1459,6 +1452,100 @@ class InventoryTab:
                                 values=list(productos_dict.keys()), 
                                 state="readonly", width=60)
         sku_combo.pack(side=tk.LEFT, padx=10)
+    
+        def exportar_a_excel():
+            if not tabla_historial.get_children():
+                messagebox.showwarning("Sin Datos", "No hay historial para exportar.")
+                return
+
+            from datetime import datetime
+            import pandas as pd
+            from tkinter import filedialog
+            import threading
+            from utils.logger import get_logger
+            logger = get_logger(__name__)
+
+            fecha_str = datetime.now().strftime("%Y%m%d_%H%M")
+            producto_name = sku_combo.get().split(' (')[0].replace(' ', '_') if sku_combo.get() else 'Producto'
+            # Sanear nombre
+            import re
+            producto_name = re.sub(r'[^a-zA-Z0-9_\-]', '', producto_name)
+            default_name = f"Historial_{producto_name}_{fecha_str}.xlsx"
+
+            file_path = filedialog.asksaveasfilename(
+                defaultextension=".xlsx",
+                filetypes=[("Excel files", "*.xlsx")],
+                initialfile=default_name,
+                title="Guardar Historial"
+            )
+
+            if not file_path:
+                return
+
+            def process_export():
+                try:
+                    columnas = [tabla_historial.heading(c)['text'] for c in tabla_historial['columns']]
+                    items = tabla_historial.get_children()
+                    
+                    rows_data = []
+                    for item_id in items:
+                        values = tabla_historial.item(item_id, 'values')
+                        rows_data.append(values)
+                    
+                    df = pd.DataFrame(rows_data, columns=columnas)
+                    
+                    # --- APLICAR ESTILOS CON OPENPYXL ---
+                    with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
+                        df.to_excel(writer, index=False, sheet_name='Historial')
+                        workbook = writer.book
+                        worksheet = writer.sheets['Historial']
+                        
+                        from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+                        
+                        # Estilos
+                        header_font = Font(bold=True, color="FFFFFF")
+                        header_fill = PatternFill(start_color="0056b3", end_color="0056b3", fill_type="solid")
+                        center_alignment = Alignment(horizontal="left", vertical="center")
+                        thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), 
+                                             top=Side(style='thin'), bottom=Side(style='thin'))
+                        
+                        # Dar estilo a las cabeceras
+                        for col_num, cell in enumerate(worksheet[1], 1):
+                            cell.font = header_font
+                            cell.fill = header_fill
+                            cell.alignment = Alignment(horizontal="center", vertical="center")
+                            cell.border = thin_border
+                        
+                        # Dar estilo a los datos y ajustar anchos
+                        for col in worksheet.columns:
+                            max_length = 0
+                            column = col[0].column_letter
+                            
+                            for cell in col:
+                                if cell.row > 1:
+                                    cell.alignment = center_alignment
+                                    cell.border = thin_border
+                                    
+                                try:
+                                    if len(str(cell.value)) > max_length:
+                                        max_length = len(str(cell.value))
+                                except:
+                                    pass
+                            
+                            worksheet.column_dimensions[column].width = min(max_length + 2, 50)
+                    
+                    ventana.after(0, lambda: messagebox.showinfo("Exportación Exitosa", f"El historial ha sido exportado a:\n{file_path}"))
+                except Exception as e:
+                    logger.error(f"Error exportando a Excel: {e}")
+                    ventana.after(0, lambda: messagebox.showerror("Error", f"No se pudo exportar a Excel:\n{e}"))
+
+            threading.Thread(target=process_export, daemon=True).start()
+
+        # Botón Exportar a Excel
+        btn_export = tk.Button(frame_seleccion, text="📥 EXPORTAR A EXCEL", command=exportar_a_excel,
+                               bg=Styles.SUCCESS_COLOR, fg='white', font=('Segoe UI', 10, 'bold'),
+                               relief='flat', padx=15, pady=5)
+        btn_export.pack(side=tk.RIGHT, padx=10)
         
         # Si hay SKU preseleccionado, establecerlo
         if sku_preseleccionado:

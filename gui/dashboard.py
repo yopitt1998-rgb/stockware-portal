@@ -32,7 +32,6 @@ class DashboardTab:
             {"title": "Productos en Bodega", "key": "productos_bodega", "icon": "📦", "color": Styles.SECONDARY_COLOR},
             {"title": "Móviles Activos", "key": "moviles_activos", "icon": "🚚", "color": Styles.SUCCESS_COLOR},
             {"title": "Stock Total", "key": "stock_total", "icon": "📈", "color": Styles.WARNING_COLOR},
-            {"title": "Préstamos Activos", "key": "prestamos_activos", "icon": "📋", "color": Styles.INFO_COLOR},
             {"title": "Bajo Stock", "key": "bajo_stock", "icon": "⚠️", "color": Styles.ACCENT_COLOR}
         ]
         
@@ -66,31 +65,63 @@ class DashboardTab:
         
         refresh_loop()
         
+    def on_card_click(self, key):
+        """Maneja el evento de click en las tarjetas del dashboard"""
+        if key == "productos_bodega" or key == "stock_total":
+            self.main_app.switch_to_tab("Inventario")
+        elif key == "moviles_activos":
+            self.main_app.perform_inventory_action('abrir_ventana_gestion_moviles')
+        elif key == "bajo_stock":
+            self.main_app.perform_inventory_action('mostrar_stock_critico')
+
     def create_metric_card(self, parent, metric, index):
-        """Crear tarjeta de métrica individual moderna"""
+        """Crear tarjeta de métrica individual moderna e interactiva"""
         card = tk.Frame(parent, bg='white', relief='raised', borderwidth=0, 
-                       highlightbackground='#ddd', highlightthickness=1)
+                       highlightbackground='#ddd', highlightthickness=1, cursor='hand2')
         card.grid(row=0, column=index, padx=10, pady=10, sticky='nsew')
         parent.columnconfigure(index, weight=1)
         
         # Icono y contenido
-        icon_frame = tk.Frame(card, bg='white')
+        icon_frame = tk.Frame(card, bg='white', cursor='hand2')
         icon_frame.pack(fill='x', pady=(15, 5))
         
         icon_label = tk.Label(icon_frame, text=metric["icon"], font=('Segoe UI', 28), 
-                             bg='white', fg=metric["color"])
+                             bg='white', fg=metric["color"], cursor='hand2')
         icon_label.pack()
         
         # Label para el valor (guardar referencia para actualizar)
         value_label = tk.Label(card, text="...", font=('Segoe UI', 24, 'bold'),
-                              bg='white', fg=Styles.DARK_TEXT)
+                              bg='white', fg=Styles.DARK_TEXT, cursor='hand2')
         value_label.pack(pady=5)
         self.metric_labels[metric["key"]] = value_label
         
         title_label = tk.Label(card, text=metric["title"], font=('Segoe UI', 10),
-                              bg='white', fg='#7f8c8d')
+                              bg='white', fg='#7f8c8d', cursor='hand2')
         title_label.pack(pady=(0, 15))
         
+        # Interacciones Hover y Click
+        def on_enter(e):
+            card.configure(bg='#f0f4f8')
+            icon_frame.configure(bg='#f0f4f8')
+            icon_label.configure(bg='#f0f4f8')
+            value_label.configure(bg='#f0f4f8')
+            title_label.configure(bg='#f0f4f8')
+            
+        def on_leave(e):
+            card.configure(bg='white')
+            icon_frame.configure(bg='white')
+            icon_label.configure(bg='white')
+            value_label.configure(bg='white')
+            title_label.configure(bg='white')
+            
+        def on_click(e, key=metric["key"]):
+            self.on_card_click(key)
+
+        for widget in (card, icon_frame, icon_label, value_label, title_label):
+            widget.bind("<Enter>", on_enter)
+            widget.bind("<Leave>", on_leave)
+            widget.bind("<Button-1>", on_click)
+            
         return card
 
     def create_quick_actions(self, parent):
@@ -107,7 +138,8 @@ class DashboardTab:
             quick_actions = [
                 ("🔫 Abasto Scanner", lambda: self.main_app.perform_inventory_action('abrir_ventana_abasto_scanner'), '#00C853'),
                 ("⚠️ Reportar Daño", lambda: self.main_app.switch_to_tab("Material Dañado"), '#c0392b'),
-                ("🔫 Auditoría Física", lambda: self.main_app.switch_to_tab("Auditoría Física"), '#607D8B')
+                ("🔫 Auditoría Física", lambda: self.main_app.switch_to_tab("Auditoría Física"), '#607D8B'),
+                ("🚚 Gestión Móviles", lambda: self.main_app.perform_inventory_action('abrir_ventana_gestion_moviles'), '#3498db')
             ]
         else:
             quick_actions = [

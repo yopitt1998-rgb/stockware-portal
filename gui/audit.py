@@ -82,12 +82,13 @@ class AuditTab(tk.Frame):
         tk.Button(btn_frame, text="🔍 Cargar Historial", command=self.cargar_datos_pendientes,
                  bg=Styles.SECONDARY_COLOR, fg='white', font=('Segoe UI', 9, 'bold'), relief='flat', padx=10, pady=4).pack(side='left', padx=5)
 
-        tk.Button(btn_frame, text="📥 Exportar a Excel", command=self.exportar_a_excel,
-                 bg=Styles.SUCCESS_COLOR, fg='white', font=('Segoe UI', 9, 'bold'), relief='flat', padx=10, pady=4).pack(side='left', padx=5)
-
         # --- SECCIÓN INFERIOR ---
         bottom_frame = tk.Frame(main_container, bg='#f8f9fa', pady=10)
         bottom_frame.pack(side='bottom', fill='x')
+        
+        # MOVER EL BOTÓN AQUÍ: Abajo a la izquierda para garantizar visibilidad
+        tk.Button(bottom_frame, text="📥 EXPORTAR HISTORIAL A EXCEL", command=self.exportar_a_excel,
+                 bg=Styles.SUCCESS_COLOR, fg='white', font=('Segoe UI', 9, 'bold'), relief='flat', padx=10, pady=4).pack(side='left', padx=10)
 
         tk.Label(bottom_frame, text="* Vista de Historial de Instalaciones y Consumo Reportado de Técnicos.", 
                 font=('Segoe UI', 9, 'italic'), bg='#f8f9fa', fg='#666').pack(side='left', padx=10)
@@ -408,8 +409,7 @@ class AuditTab(tk.Frame):
             try:
                 import pandas as pd
                 
-                # Obtener encabezados y datos
-                columnas = self.tabla['columns']
+                columnas = [self.tabla.heading(c)['text'] for c in self.tabla['columns']]
                 items = self.tabla.get_children()
                 
                 rows_data = []
@@ -417,17 +417,58 @@ class AuditTab(tk.Frame):
                     values = self.tabla.item(item_id, 'values')
                     rows_data.append(values)
                 
-                # Crear DataFrame
                 df = pd.DataFrame(rows_data, columns=columnas)
                 
-                # Guardar a Excel
-                df.to_excel(file_path, index=False)
+                # --- APLICAR ESTILOS CON OPENPYXL ---
+                with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
+                    df.to_excel(writer, index=False, sheet_name='Historial')
+                    workbook = writer.book
+                    worksheet = writer.sheets['Historial']
+                    
+                    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+                    
+                    # Estilos
+                    header_font = Font(bold=True, color="FFFFFF")
+                    header_fill = PatternFill(start_color="0056b3", end_color="0056b3", fill_type="solid")
+                    center_alignment = Alignment(horizontal="left", vertical="center")
+                    thin_border = Border(left=Side(style='thin'), 
+                                         right=Side(style='thin'), 
+                                         top=Side(style='thin'), 
+                                         bottom=Side(style='thin'))
+                    
+                    # Dar estilo a las cabeceras
+                    for col_num, cell in enumerate(worksheet[1], 1):
+                        cell.font = header_font
+                        cell.fill = header_fill
+                        cell.alignment = Alignment(horizontal="center", vertical="center")
+                        cell.border = thin_border
+                    
+                    # Dar estilo a los datos y ajustar anchos de columna
+                    for col in worksheet.columns:
+                        max_length = 0
+                        column = col[0].column_letter # Obtener letra de la columna
+                        
+                        for cell in col:
+                            # Estilo de celdas normales
+                            if cell.row > 1:
+                                cell.alignment = center_alignment
+                                cell.border = thin_border
+                                
+                            try:
+                                if len(str(cell.value)) > max_length:
+                                    max_length = len(str(cell.value))
+                            except:
+                                pass
+                        
+                        # Añadir un poco de padding
+                        adjusted_width = (max_length + 2)
+                        worksheet.column_dimensions[column].width = min(adjusted_width, 50) # Máximo ancho 50
                 
-                self.after(0, lambda: mostrar_mensaje_emergente(self, "Exportación Exitosa", 
-                            f"El historial ha sido exportado a:\n{file_path}", "success"))
+                self.after(0, lambda: messagebox.showinfo("Exportación Exitosa", f"El historial ha sido exportado a:\n{file_path}"))
             except Exception as e:
-                logger.error(f"Error exportando a Excel: {e}")
-                self.after(0, lambda: messagebox.showerror("Error de Exportación", f"No se pudo exportar a Excel:\n{e}"))
+                import traceback
+                traceback.print_exc()
+                self.after(0, lambda: messagebox.showerror("Error", f"No se pudo exportar a Excel:\n{e}"))
 
         # Mostrar indicador visual de carga (opcional)
         threading.Thread(target=process_export, daemon=True).start()

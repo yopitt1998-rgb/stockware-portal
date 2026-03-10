@@ -571,40 +571,51 @@ class MobileOutputScannerWindow:
         sku_clean = sku.strip().upper()
         es_paquete = sku_clean in self.paquete_base
         
-        # --- MERGE LOGIC: Try to find existing item in cart ---
-        item_existente = None
-        for item in self.items_carrito:
-            if item['sku'] == sku:
-                item_existente = item
-                break
+        from config import PRODUCTOS_CON_CODIGO_BARRA
+        requires_serial = sku_clean in PRODUCTOS_CON_CODIGO_BARRA
         
-        if item_existente is not None:
-            # Merge: add quantities and serials
-            item_existente['cantidad'] += cantidad
-            if seriales:
-                for s in seriales:
-                    if s not in item_existente['seriales']:
-                        item_existente['seriales'].append(s)
-        else:
-            # New item: append to list
-            if not es_paquete:
-                logger.info(f"SKU {sku_clean} no encontrado en paquete base.")
-            self.items_carrito.append({
-                'sku': sku,
-                'nombre': nombre,
-                'cantidad': cantidad,
-                'seriales': seriales,
-                'es_adicional': not es_paquete
-            })
-        
-        # Update counters
-        if es_paquete:
-            self.items_completados[sku] = self.items_completados.get(sku, 0) + cantidad
+        if requires_serial:
+            # Los equipos con serial NO se agrupan: se agregan uno por uno para visualización clara
+            for s in seriales:
+                self.items_carrito.append({
+                    'sku': sku,
+                    'nombre': nombre,
+                    'cantidad': 1,
+                    'seriales': [s],
+                    'es_adicional': not es_paquete
+                })
+                if es_paquete:
+                    self.items_completados[sku] = self.items_completados.get(sku, 0) + 1
             
-        # Refresh UI inmediatamente con datos del cache
+            # Si se pasó cantidad > len(seriales) por error en un equipo, el remanente (sin MAC) se ignora
+            # o se podría agregar sin serial, pero siguiendo la instrucción del usuario: 
+            # "si no hay mac no debe mostrar nada" (para equipos).
+        else:
+            # --- LÓGICA DE MERGE PARA MATERIALES (Sin Serial) ---
+            item_existente = None
+            for item in self.items_carrito:
+                if item['sku'] == sku:
+                    item_existente = item
+                    break
+            
+            if item_existente is not None:
+                item_existente['cantidad'] += cantidad
+            else:
+                self.items_carrito.append({
+                    'sku': sku,
+                    'nombre': nombre,
+                    'cantidad': cantidad,
+                    'seriales': [],
+                    'es_adicional': not es_paquete
+                })
+            
+            if es_paquete:
+                self.items_completados[sku] = self.items_completados.get(sku, 0) + cantidad
+            
+        # Refresh UI inmediatamente
         self.actualizar_tabla()
         self.actualizar_panel_progreso()
-        logger.info(f"Item agregado/mergeado: {sku} x{cantidad}")
+        logger.info(f"Item(s) procesado(s): {sku} (Equipos individuales o Material agrupado)")
 
         # Pre-cargar detalles MAC de seriales nuevos en background (sin bloquear UI)
         seriales_sin_cache = [s for s in seriales if s not in self.serial_details_cache]

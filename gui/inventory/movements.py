@@ -27,7 +27,7 @@ from database import (
     get_db_connection,
     obtener_series_por_sku_y_ubicacion,
 )
-from config import TIPO_MOVIMIENTO_DESCARTE, PRODUCTOS_INICIALES, DATABASE_NAME
+from config import TIPO_MOVIMIENTO_DESCARTE, PRODUCTOS_INICIALES, DATABASE_NAME, PRODUCTOS_CON_CODIGO_BARRA
 
 logger = get_logger(__name__)
 
@@ -876,6 +876,8 @@ class MobileReturnWindow:
             'consumo_app': {},
             'consumo_verificado': {},
             'stock_fisico_escaneado': {},
+            'stock_danado': {},
+            'seriales_danados': {},
         }
         
         try:
@@ -945,6 +947,10 @@ class MobileReturnWindow:
         self.entry_scan = tk.Entry(scan_frame, font=('Segoe UI', 12), width=25, bg='#e8f0fe')
         self.entry_scan.pack(side='left', padx=5)
         self.entry_scan.focus_set()
+        
+        self.var_danado = tk.BooleanVar(value=False)
+        self.chk_danado = tk.Checkbutton(scan_frame, text="⚠️ Es Dañado", variable=self.var_danado, bg='white', fg='#c0392b', font=('Segoe UI', 10, 'bold'), activebackground='white')
+        self.chk_danado.pack(side='left', padx=10)
 
         self.tree_fisico = ttk.Treeview(right_panel, columns=('SKU', 'Producto', 'Esperado', 'Escaneado', 'Estado'), show='headings')
         self.tree_fisico.heading('SKU', text='SKU'); self.tree_fisico.column('SKU', width=80)
@@ -1056,11 +1062,22 @@ class MobileReturnWindow:
         pendientes = obtener_consumos_pendientes()
         # consumo_reportado[sku][paquete] = total
         consumo_reportado = {}
+        
+        # Mapping para robustez si cambian los índices en database.py
+        # c.id(0), c.movil(1), c.sku(2), p.nombre(3), c.cantidad(4), c.tecnico_nombre(5), 
+        # c.ticket(6), c.fecha(7), c.colilla(8), c.num_contrato(9), c.ayudante_nombre(10), 
+        # c.seriales_usados(11), c.paquete(12)
+        IDX_MOVIL = 1
+        IDX_SKU = 2
+        IDX_QTY = 4
+        IDX_PAQUETE = 12
+        
         for p in pendientes:
-            if str(p[1]).strip().upper() == movil.strip().upper():
-                sku = p[2]
-                qty = int(p[4])
-                paq_p = p[12] if (len(p) > 12 and p[12]) else 'NINGUNO' # Nuevo campo paquete
+            p_movil = str(p[IDX_MOVIL]).strip().upper()
+            if p_movil == movil.strip().upper():
+                sku = p[IDX_SKU]
+                qty = int(p[IDX_QTY])
+                paq_p = p[IDX_PAQUETE] if (len(p) > IDX_PAQUETE and p[IDX_PAQUETE]) else 'NINGUNO'
                 
                 if sku not in consumo_reportado: consumo_reportado[sku] = {}
                 consumo_reportado[sku][paq_p] = consumo_reportado[sku].get(paq_p, 0) + qty
@@ -1197,69 +1214,54 @@ class MobileReturnWindow:
             else:
                 name = self._prod_name_map.get(sku, "Material Extra (No Asignado)")
             
-            # --- NUEVA LÓGICA DE CÁLCULO DE EXPECTED ---
+            # --- LÓGICA DE CÁLCULO DE EXPECTED (CORREGIDA) ---
             # 1. Obtener Stock Bruto (Base)
             if paquete_filtro == "TODOS":
                 gross = info.get('total', 0) if info else 0
-            elif is_shared:
-                # Los compartidos (Fibra, etc) siempre muestran el total del móvil
-                gross = info.get('total', 0) if info else 0
             else:
-                # Paquete específico: Sumamos lo del paquete + Personalizado
+                # Paquete específico: Sumamos lo del paquete + Personalizado + NINGUNO (Puente)
+                # El stock 'NINGUNO' es stock base que no tiene etiqueta pero reside en el móvil.
                 gross = (info.get(paquete_filtro, 0) if info else 0) + \
-                        (info.get("PERSONALIZADO", 0) if info else 0)
+                        (info.get("PERSONALIZADO", 0) if info else 0) + \
+                        (info.get("NINGUNO", 0) if info else 0)
             
-            # 2. Restar Consumos Pendientes (Drenado inteligente por paquetes)
-            consumed_total = self.session_data['consumo_verificado'].get(sku, 0)
-            
-            if paquete_filtro == "TODOS" or is_shared:
-                expected = max(0, gross - consumed_total)
-            else:
-                # Drenamos consumos en orden de prioridad
-                drain_order = ["PAQUETE A", "PAQUETE B", "CARRO", "PERSONALIZADO", "SIN_PAQUETE"]
-                current_idx = drain_order.index(paquete_filtro) if paquete_filtro in drain_order else 99
-                
-                consumption_for_this_package = 0
-                remaining_consumption = consumed_total
-                
-                # Para el cálculo del paquete actual (o personalizado), necesitamos saber 
-                # cuánto consumo "cae" en esta categoría.
-                for idx, p_key in enumerate(drain_order):
-                    stock_in_p = info.get(p_key, 0) if info else 0
-                    drain_from_p = min(remaining_consumption, stock_in_p)
+            # ELIMINADO: Ya no restamos consumos_pendientes (consumed_total) porque la tabla 
+            # asignacion_moviles ya se descuenta cuando el técnico reporta en la App.
+            expected = gross
+
+            # Si es equipo, intentar poner la MAC en el nombre para facilitar identificación
+            display_name = name
+            if sku in PRODUCTOS_CON_CODIGO_BARRA:
+                series_data = obtener_series_por_sku_y_ubicacion(sku, self.session_data.get('movil'), self.paquete_combo.get())
+                if series_data:
+                    # series_data es [(serial, mac), ...] - extraemos el mejor id para mostrar
+                    ids_to_show = []
+                    for s, m in series_data:
+                        best_id = m if m and str(m).strip() not in ['', 'N/A', 'None'] else s
+                        ids_to_show.append(str(best_id))
                     
-                    if p_key == paquete_filtro or (p_key == "PERSONALIZADO" and paquete_filtro in ("PAQUETE A", "PAQUETE B", "CARRO")):
-                        # El consumo de este paquete o el personalizado (que es compartido)
-                        # Pero cuidado: el personalizado se consume DESPUÉS de los paquetes base.
-                        # Sumamos el drenaje si es el paquete actual.
-                        if p_key == paquete_filtro:
-                            consumption_for_this_package += drain_from_p
-                        elif p_key == "PERSONALIZADO":
-                            # Si estamos viendo un paquete, y el consumo llegó hasta el personalizado,
-                            # también lo restamos del total visible.
-                            consumption_for_this_package += drain_from_p
-                    
-                    remaining_consumption -= drain_from_p
-                
-                expected = max(0, gross - consumption_for_this_package)
+                    macs_str = ", ".join(ids_to_show[:2])
+                    if len(ids_to_show) > 2: macs_str += "..."
+                    display_name = f"{name} ({macs_str})"
 
             scanned = self.session_data['stock_fisico_escaneado'].get(sku, 0)
             
             # Lógica de filtrado de visualización (FILTRA RELEVANCIA)
             if paquete_filtro != "TODOS":
-                # REGLA 1: Solo mostrar si pertenece al paquete seleccionado O tiene stock personalizado
-                has_perso = (info.get("PERSONALIZADO", 0) if info else 0) > 0
+                # REGLA 1: Solo mostrar si pertenece al paquete seleccionado O tiene stock personalizado O NINGUNO
+                has_base_stock = ((info.get(paquete_filtro, 0) if info else 0) > 0 or 
+                                (info.get("PERSONALIZADO", 0) if info else 0) > 0 or
+                                (info.get("NINGUNO", 0) if info else 0) > 0)
                 
-                # Si no es del paquete ni personalizado, ocultar (incluso compartidos si no se han escaneado/esperado)
-                if not is_in_package and not has_perso:
-                    if not is_shared or (expected == 0 and scanned == 0):
+                # Si no es del paquete ni tiene stock base, ocultar si no hay escaneo
+                if not is_in_package and not has_base_stock:
+                    if scanned == 0:
                         continue
 
                 # REGLA 2: Ocultar si no se espera nada y no se escaneó nada
                 if expected == 0 and scanned == 0:
-                    if not is_in_package and not has_perso:
+                    if not is_in_package:
                         continue
-                    # Si está en el paquete pero con 0, o es compartido pero sin uso, lo dejamos si es del paquete base.
 
             if scanned == expected:
                 state = "✅ OK"; tag = 'found'
@@ -1268,7 +1270,7 @@ class MobileReturnWindow:
             else:
                 state = f"⚠️ Sobran {scanned - expected}"; tag = 'extra'
             
-            self.tree_fisico.insert('', 'end', values=(sku, name, expected, scanned, state), tags=(tag,))
+            self.tree_fisico.insert('', 'end', values=(sku, display_name, expected, scanned, state), tags=(tag,))
         
         if self.session_data['stock_fisico_escaneado']: 
             self.btn_procesar.config(state='normal')
@@ -1438,6 +1440,8 @@ class MobileReturnWindow:
 
         # Procesar Hallazgo
         if sku_found:
+            es_danado = getattr(self, 'var_danado', None) and self.var_danado.get()
+            
             # Si es material (no serial), pedir cantidad
             qty_scanned = 1
             if not is_serial:
@@ -1448,16 +1452,36 @@ class MobileReturnWindow:
                 if qty is None: return
                 qty_scanned = qty
             
-            # Actualizar contador físico
-            if is_serial:
-                self.session_data['stock_fisico_escaneado'][sku_found] = self.session_data['stock_fisico_escaneado'].get(sku_found, 0) + 1
+            # Registrar según su estado (Bueno o Dañado)
+            if es_danado:
+                self.session_data['stock_danado'][sku_found] = self.session_data['stock_danado'].get(sku_found, 0) + qty_scanned
+                if is_serial:
+                    if sku_found not in self.session_data['seriales_danados']:
+                        self.session_data['seriales_danados'][sku_found] = []
+                    self.session_data['seriales_danados'][sku_found].append(code)
+                    
+                    # Remover el serial de los 'buenos' para que NO se mande al Salida a Móvil
+                    key_serials = f"_seriales_{sku_found}"
+                    if key_serials in self.session_data and code in self.session_data[key_serials]:
+                        self.session_data[key_serials].remove(code)
+                
+                # Alerta visual roja
+                self.entry_scan.config(bg='#f8d7da')
+                self.var_danado.set(False) # Resetear checkbox para el próximo scan
+                logger.info(f"⚠️ Dañado registrado: {sku_found} -> Qty: {qty_scanned}")
+                messagebox.showinfo("Dañado", f"Se registró {qty_scanned} ud(s) de '{sku_found}' como DAÑADO.", parent=self.ventana)
             else:
-                self.session_data['stock_fisico_escaneado'][sku_found] = qty_scanned
+                # Actualizar contador físico normal
+                if is_serial:
+                    self.session_data['stock_fisico_escaneado'][sku_found] = self.session_data['stock_fisico_escaneado'].get(sku_found, 0) + 1
+                else:
+                    self.session_data['stock_fisico_escaneado'][sku_found] = qty_scanned
+                
+                self.entry_scan.config(bg='#d4edda')
+                logger.info(f"✅ Auditado: {sku_found} -> Qty: {qty_scanned} ({'Serial' if is_serial else 'Material'})")
             
-            self.entry_scan.config(bg='#d4edda')
             self.ventana.after(500, lambda: self.entry_scan.config(bg='#e8f0fe'))
             self.update_fisico_ui()
-            logger.info(f"✅ Auditado: {sku_found} -> Qty: {qty_scanned} ({'Serial' if is_serial else 'Material'})")
         else:
             # No se encontró — mostrar error claro
             self.entry_scan.config(bg='#e74c3c')
@@ -1511,6 +1535,14 @@ class MobileReturnWindow:
         discrepancias_msg = ""
         if faltantes_msg: discrepancias_msg += "\n⚠️ FALTANTES:" + faltantes_msg
         if sobrantes_msg: discrepancias_msg += "\n\n✅ SOBRANTES:" + sobrantes_msg
+        
+        # Agregar sumario de dañados a discrepancias_msg
+        danados_msg = ""
+        for sku_d, qty_d in self.session_data.get('stock_danado', {}).items():
+             if qty_d > 0:
+                  n_d = self._prod_name_map.get(sku_d, sku_d)
+                  danados_msg += f"\n- {n_d}: {qty_d} Dañados"
+        if danados_msg: discrepancias_msg += "\n\n♻️ DAÑADOS REPORTADOS:" + danados_msg
             
         movil = self.session_data['movil']
             
@@ -1519,30 +1551,70 @@ class MobileReturnWindow:
             cursor = conn.cursor()
             fecha_evento = self.entry_fecha.get()
             
-            # 1. Procesar CONSUMOS
+            # --- NUEVA LÓGICA DE LIMPIEZA Y REINICIO ---
+            from database import resetear_stock_movil, registrar_movimiento_gui, run_query, registrar_danado_directo
+            
+            # 0.5. Procesar equipos/materiales DAÑADOS escaneados durante el Retorno
+            for sku_d, qty_d in self.session_data.get('stock_danado', {}).items():
+                if qty_d > 0:
+                    seriales_d = self.session_data.get('seriales_danados', {}).get(sku_d, [])
+                    ok_d, msg_d = registrar_danado_directo(
+                        sku=sku_d, 
+                        cantidad=qty_d, 
+                        tecnico=movil, 
+                        seriales=seriales_d if seriales_d else None,
+                        observaciones="Reporte de Dañado durante Auditoría/Retorno",
+                        paquete=paquete_objetivo
+                    )
+                    if not ok_d:
+                        errors.append(f"Dañado {sku_d}: {msg_d}")
+                        logger.error(f"Fallo al registrar dañado {sku_d}: {msg_d}")
+
+            # 1. Procesar CONSUMOS reales (Excel) primero para que se descuenten del stock asignado
             for sku, qty in self.session_data['consumo_verificado'].items():
                 if qty > 0:
-                    ok, msg = registrar_movimiento_gui(sku, 'CONSUMO_MOVIL', qty, movil, fecha_evento, None, "Auditoría Automática (Excel)", existing_conn=conn)
+                    ok, msg = registrar_movimiento_gui(sku, 'CONSUMO_MOVIL', qty, movil, fecha_evento, paquete_objetivo, "Auditoría Automática (Excel)", existing_conn=conn)
                     if ok: exitos_consumo += 1
                     else: errors.append(f"Consumo {sku}: {msg}")
             
-            # 2. Procesar RETORNOS (OPCIONAL/MANUAL)
-            # NOTA: El usuario indicó que NO quiere que todo lo escaneado se retorne automáticamente.
-            # Solo retornamos si el usuario lo marca explícitamente o si es una lógica de 'Limpieza'.
-            # Por ahora, mantenemos la lógica de registrar el movimiento pero con una nota de que
-            # el stock físico escaneado es lo que SE QUEDA en el móvil.
-            # LO QUE SE RETORNA es la diferencia si el usuario lo decide, o simplemente no registramos retorno
-            # de lo que el usuario validó que TIENE.
+            # 2. Retornar formalmente a Bodega todo lo que QUEDA físicamente (stock teórico restante) 
+            # para que 'productos' recupere su stock general y el móvil quede en cero matemáticamente.
+            if paquete_objetivo == "TODOS":
+                run_query(cursor, "SELECT sku_producto, SUM(cantidad) FROM asignacion_moviles WHERE UPPER(TRIM(movil)) = UPPER(TRIM(?)) GROUP BY sku_producto", (movil,))
+            else:
+                run_query(cursor, "SELECT sku_producto, SUM(cantidad) FROM asignacion_moviles WHERE UPPER(TRIM(movil)) = UPPER(TRIM(?)) AND COALESCE(paquete, 'NINGUNO') = ? GROUP BY sku_producto", (movil, paquete_objetivo))
             
-            # Sin embargo, para que el sistema cuadre, si el usuario dice "Tengo 5" y "Debía tener 10",
-            # el sistema ya registró el consumo de 5 (vía Excel). 
-            # Si el usuario NO escanea los otros 5, son FALTANTES.
+            remanentes = cursor.fetchall()
+            for r in remanentes:
+                sku_r = r[0]
+                qty_r = float(r[1])
+                if qty_r > 0:
+                    ok, msg = registrar_movimiento_gui(sku_r, 'RETORNO_MOVIL', qty_r, movil, fecha_evento, paquete_objetivo, "Auditoría Automática (Retorno a Bodega)", existing_conn=conn)
+                    if not ok: errors.append(f"Retorno Auto {sku_r}: {msg}")
+
+            # 3. Limpiar cualquier basura residual (seriales no retornados correctamente, asignaciones en 0, etc)
+            # Esto vacía la tabla asignacion_moviles y desvincula las series de la móvil en la BD.
+            # Como le pasamos una nueva conexión por dentro (no usa existing_conn), hacemos commit de nuestra transacción primero.
+            conn.commit()
             
-            # ELIMINADO: No registramos RETORNO_MOVIL de lo escaneado, 
-            # porque lo escaneado es lo que el técnico se QUEDA para trabajar.
+            ok_reset, msg_reset = resetear_stock_movil(movil, paquete_objetivo)
+            if not ok_reset:
+                logger.error(f"Fallo al limpiar stock previo de {movil} ({paquete_objetivo}): {msg_reset}")
+                errors.append(f"Limpieza Residual: {msg_reset}")
             
-            # 3. Actualizar Seriales (Solo marcar los CONSUMIDOS)
-            # Los seriales escaneados permanecen en el móvil. No hay que hacer nada.
+            # 4. Calcular el éxito del retorno FÍSICO (lo que escaneó el usuario con la pistola = success del trabajo)
+            from config import PRODUCTOS_CON_CODIGO_BARRA, MATERIALES_COMPARTIDOS
+            
+            for i in self.tree_fisico.get_children():
+                v = self.tree_fisico.item(i, 'values')
+                sku_c = v[0]
+                sca_c = int(v[3]) # Cantidad Física Escaneada
+                
+                # Materiales compartidos no se tocan en el flujo de retorno regular
+                if sku_c in MATERIALES_COMPARTIDOS: continue
+                    
+                if sca_c > 0:
+                    exitos_retorno += sca_c # Lo contamos como "físicamente verificado" / retornado
 
             conn.commit()
         except Exception as e:
@@ -1552,15 +1624,8 @@ class MobileReturnWindow:
         finally:
             if conn: conn.close()
         
-        # 4. Limpieza de Pendientes
-        try:
-            pendientes = obtener_consumos_pendientes()
-            ids_to_clean = [p[0] for p in pendientes if str(p[1]).upper() == str(self.session_data['movil']).upper()]
-            for pid in ids_to_clean: eliminar_consumo_pendiente(pid)
-        except Exception as e: logger.error(f"Error limpiando pendientes: {e}")
-        
         # 5. Resultado final
-        summary = f"Proceso Completado.\n\nConsumos: {exitos_consumo}\nRetornos: {exitos_retorno}"
+        summary = f"Auditoría Finalizada.\n\nConsumos Registrados: {exitos_consumo}\nEquipos Físicos Verificados: {exitos_retorno}"
         if errors: summary += "\n\nErrores:\n" + "\n".join(errors[:5])
         
         def final_ui_feedback():
@@ -1616,53 +1681,54 @@ class MobileReturnWindow:
                         elif is_custom:
                             cant_ideal = info.get("PERSONALIZADO", 0) if isinstance(info.get("PERSONALIZADO"), (int, float)) else 0
                     
-                    if cant_ideal > 0 and scanned_qty < cant_ideal:
-                        diff = cant_ideal - scanned_qty
+                    # Para mantener el móvil limpio, siempre requerimos despachar la cant_ideal (toda)
+                    if cant_ideal > 0:
                         nombre_p = self._prod_name_map.get(sku_p, sku_p)
                         
-                        # Identificar seriales faltantes si es equipo
-                        from config import PRODUCTOS_CON_CODIGO_BARRA
-                        seriales_faltantes = []
-                        if sku_p in PRODUCTOS_CON_CODIGO_BARRA:
-                            # Extraer los seriales que estaban en el móvil para este equipo y restar los escaneados
-                            pass
+                        seriales_a_reponer = []
+                        is_equipo = sku_p in PRODUCTOS_CON_CODIGO_BARRA
+                        if is_equipo:
+                            seriales_escaneados = self.session_data.get(f'_seriales_{sku_p}', [])
+                            seriales_a_reponer = seriales_escaneados[:cant_ideal]
                             
+                            # Si es equipo pero NO se escaneó nada en el retorno, NO auto-rellenar
+                            # para obligar a que se escanee con MAC real en la ventana de Salida.
+                            if not seriales_a_reponer:
+                                logger.info(f"Refill: Saltando equipo {sku_p} por falta de MACs escaneadas.")
+                                continue
+                            
+                            cant_a_rellenar = len(seriales_a_reponer)
+                        else:
+                            cant_a_rellenar = cant_ideal
+
                         faltantes_para_rellenar.append({
                             'sku': sku_p, 
                             'nombre': nombre_p, 
-                            'cantidad': diff, 
-                            'seriales': [] # Obliga a escanear en la salida
+                            'cantidad': cant_a_rellenar, 
+                            'seriales': seriales_a_reponer
                         })
-                        lineas_resumen.append(f"  • {nombre_p[:30]}: recargar {diff} (Tienes {scanned_qty} de {cant_ideal})")
+                        
+                        tag_extra = f" (con {len(seriales_a_reponer)} MACs)" if is_equipo else ""
+                        lineas_resumen.append(f"  • {nombre_p[:30]}: recargar {cant_a_rellenar}{tag_extra}")
 
-                resumen_msg = "📊 AUDITORÍA FINALIZADA\n\n"
+                resumen_msg = "📊 AUDITORÍA Y RETORNO FINALIZADOS\n\nEl móvil ha sido vaciado temporalmente en el sistema.\n\n"
                 
                 # Mostrar primero las discrepancias físicas (pérdidas reales vs consumos esperados)
                 hay_discrepancias = bool(discrepancias_msg.strip())
                 if hay_discrepancias:
-                    resumen_msg += "📌 RESULTADO FÍSICO (Pérdidas y Sobrantes):" + discrepancias_msg + "\n\n"
+                    resumen_msg += "📌 RESULTADO FÍSICO (Pérdidas y Sobrantes del Retorno):" + discrepancias_msg + "\n\n"
                     
                 if faltantes_para_rellenar:
-                    resumen_msg += f"📦 RECARGA SUGERIDA (Paquete y Materiales Asignados):\n"
+                    resumen_msg += f"📦 RECARGA OBLIGATORIA (Salida a Móvil):\n"
                     resumen_msg += "\n".join(lineas_resumen[:12])
                     if len(lineas_resumen) > 12:
                         resumen_msg += f"\n... y {len(lineas_resumen)-12} más."
                     
-                    resumen_msg += f"\n\n¿Deseas abrir la ventana de SALIDA para recargar estos materiales (incluyendo los consumidos y las pérdidas)?"
+                    resumen_msg += f"\n\n¿Deseas abrir la ventana de SALIDA ahora para realizar la recarga oficial de {paquete_nombre}?"
                     
-                    if messagebox.askyesno("Sugerencia de Recarga", resumen_msg, parent=self.ventana):
+                    if messagebox.askyesno("Confirmar Salida", resumen_msg, parent=self.ventana):
                         # FIX: Abrir el Scanner ANTES de destruir la ventana de Retorno
                         from ..mobile_output_scanner import MobileOutputScannerWindow
-                        # Enriquecer equipos faltantes con sus seriales registrados en el móvil
-                        from config import PRODUCTOS_CON_CODIGO_BARRA
-                        for item in faltantes_para_rellenar:
-                            if item['sku'] in PRODUCTOS_CON_CODIGO_BARRA and not item.get('seriales'):
-                                try:
-                                    ya_escaneados = self.session_data.get(f'_seriales_{item["sku"]}', [])
-                                    todos_en_movil = obtener_series_por_sku_y_ubicacion(item['sku'], movil, paquete_nombre)
-                                    item['seriales'] = [s for s in todos_en_movil if s not in ya_escaneados][:item['cantidad']]
-                                except Exception as _e:
-                                    logger.warning(f"No se pudieron obtener seriales para {item['sku']}: {_e}")
                         MobileOutputScannerWindow(
                             self.master_app, mode='SALIDA_MOVIL',
                             prefill_items=faltantes_para_rellenar,
@@ -1673,11 +1739,9 @@ class MobileReturnWindow:
                             self.ventana.destroy()
                         return
                     else:
-                        # El usuario declinó la recarga. Mostrar confirmación de finalización antes de cerrar.
-                        messagebox.showinfo("Auditoría Finalizada", resumen_msg + "\n\nOperación finalizada sin recargas adicionales.", parent=self.ventana)
+                        messagebox.showinfo("Auditoría Finalizada", "Operación finalizada. El móvil ha quedado sin la asignación del paquete en el sistema.", parent=self.ventana)
                 else:
-                    extra_msg = "El stock físico coincide y no requiere recargas." if not hay_discrepancias else "No hay recargas sugeridas."
-                    messagebox.showinfo("Auditoría Finalizada", resumen_msg + extra_msg, parent=self.ventana)
+                    messagebox.showinfo("Auditoría Finalizada", resumen_msg + "No hay recargas requeridas.", parent=self.ventana)
 
             except Exception as e:
                 logger.error(f"Error parseando feedback final de retorno: {e}")
@@ -1732,7 +1796,6 @@ class MobileReturnWindow:
                     })
                 else:
                     # Es un equipo: intentar pre-cargar los seriales registrados en el móvil.
-                    # Esto permite que Salida Móvil los muestre como "equipos registrados con MAC".
                     seriales_en_movil = []
                     try:
                         ya_escaneados = self.session_data.get(f'_seriales_{sku_c}', [])
@@ -1740,16 +1803,18 @@ class MobileReturnWindow:
                         seriales_en_movil = [s for s in todos_en_movil if s not in ya_escaneados][:cant_falta]
                     except Exception as _e:
                         logger.warning(f"No se pudieron obtener seriales para {sku_c}: {_e}")
+                    
+                    if not seriales_en_movil:
+                         logger.info(f"Auto-Refill: Omitiendo equipo {sku_c} por falta de MACs en BD para este móvil.")
+                         continue
+
                     faltantes_relleno.append({
                         'sku': sku_c,
                         'nombre': nom_c,
-                        'cantidad': cant_falta,
+                        'cantidad': len(seriales_en_movil),
                         'seriales': seriales_en_movil
                     })
-                    if seriales_en_movil:
-                        equipos_faltantes.append(f"{nom_c}: {cant_falta} uds (MACs: {', '.join(seriales_en_movil[:2])}{'...' if len(seriales_en_movil)>2 else ''})")
-                    else:
-                        equipos_faltantes.append(f"{nom_c} (faltan {cant_falta} — escanear en Salida)")
+                    equipos_faltantes.append(f"{nom_c}: {len(seriales_en_movil)} uds (MACs: {', '.join(seriales_en_movil[:1])}{'...' if len(seriales_en_movil)>1 else ''})")
                         
             except: pass
         

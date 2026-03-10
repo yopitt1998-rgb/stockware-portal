@@ -1428,3 +1428,221 @@ ValueError: too many values to unpack (expected 12)
 2026-03-07 10:39:36 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
 2026-03-07 10:51:05 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
 2026-03-07 10:51:10 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-03-07 15:32:35 | ERROR    | database             | ❌ Error SQL ejecución: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 6 column 27 near ") AND c.estado IN ('PENDIENTE', 'AUTO_APROBADO') AND c.fecha BETWEEN '2026-02-28' AND '2026-03-07' ORDER BY c.fecha_registro DESC" 
+2026-03-07 15:32:35 | ERROR    | database             |    Query: 
+            SELECT c.id, c.movil, c.sku, p.nombre, c.cantidad, c.tecnico_nombre, c.ticket, c.fecha, c.colilla, c.num_contrato, c.ayudante_nombre, c.seriales_usados, c.paquete
+            FROM consumos_pendientes c
+            LEFT JOIN productos p ON c.sku = p.sku AND p.ubicacion = 'BODEGA'
+            WHERE 1=1
+         AND c.movil IN () AND c.estado IN ('PENDIENTE', 'AUTO_APROBADO') AND c.fecha BETWEEN %s AND %s ORDER BY c.fecha_registro DESC
+2026-03-07 15:32:35 | ERROR    | database             |    Params: ('2026-02-28', '2026-03-07')
+2026-03-07 15:32:35 | ERROR    | database             | Error al obtener consumos pendientes: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 6 column 27 near ") AND c.estado IN ('PENDIENTE', 'AUTO_APROBADO') AND c.fecha BETWEEN '2026-02-28' AND '2026-03-07' ORDER BY c.fecha_registro DESC" 
+2026-03-07 15:32:43 | ERROR    | database             | ❌ Error SQL ejecución: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 6 column 27 near ") AND c.estado IN ('PENDIENTE', 'AUTO_APROBADO') AND c.fecha BETWEEN '2026-02-28' AND '2026-03-07' ORDER BY c.fecha_registro DESC" 
+2026-03-07 15:32:43 | ERROR    | database             |    Query: 
+            SELECT c.id, c.movil, c.sku, p.nombre, c.cantidad, c.tecnico_nombre, c.ticket, c.fecha, c.colilla, c.num_contrato, c.ayudante_nombre, c.seriales_usados, c.paquete
+            FROM consumos_pendientes c
+            LEFT JOIN productos p ON c.sku = p.sku AND p.ubicacion = 'BODEGA'
+            WHERE 1=1
+         AND c.movil IN () AND c.estado IN ('PENDIENTE', 'AUTO_APROBADO') AND c.fecha BETWEEN %s AND %s ORDER BY c.fecha_registro DESC
+2026-03-07 15:32:43 | ERROR    | database             |    Params: ('2026-02-28', '2026-03-07')
+2026-03-07 15:32:43 | ERROR    | database             | Error al obtener consumos pendientes: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 6 column 27 near ") AND c.estado IN ('PENDIENTE', 'AUTO_APROBADO') AND c.fecha BETWEEN '2026-02-28' AND '2026-03-07' ORDER BY c.fecha_registro DESC" 
+2026-03-07 15:46:17 | ERROR    | database             | ❌ Error SQL ejecución: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 6 column 27 near ") AND c.estado IN ('PENDIENTE', 'AUTO_APROBADO') AND c.fecha BETWEEN '2026-02-28' AND '2026-03-07' ORDER BY c.fecha_registro DESC" 
+2026-03-07 15:46:17 | ERROR    | database             |    Query: 
+            SELECT c.id, c.movil, c.sku, p.nombre, c.cantidad, c.tecnico_nombre, c.ticket, c.fecha, c.colilla, c.num_contrato, c.ayudante_nombre, c.seriales_usados, c.paquete
+            FROM consumos_pendientes c
+            LEFT JOIN productos p ON c.sku = p.sku AND p.ubicacion = 'BODEGA'
+            WHERE 1=1
+         AND c.movil IN () AND c.estado IN ('PENDIENTE', 'AUTO_APROBADO') AND c.fecha BETWEEN %s AND %s ORDER BY c.fecha_registro DESC
+2026-03-07 15:46:17 | ERROR    | database             |    Params: ('2026-02-28', '2026-03-07')
+2026-03-07 15:46:17 | ERROR    | database             | Error al obtener consumos pendientes: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 6 column 27 near ") AND c.estado IN ('PENDIENTE', 'AUTO_APROBADO') AND c.fecha BETWEEN '2026-02-28' AND '2026-03-07' ORDER BY c.fecha_registro DESC" 
+2026-03-07 19:40:21 | ERROR    | database             | ❌ Error SQL ejecución: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 6 column 27 near ") AND c.estado IN ('PENDIENTE', 'AUTO_APROBADO') AND c.fecha BETWEEN '2026-02-28' AND '2026-03-07' ORDER BY c.fecha_registro DESC" 
+2026-03-07 19:40:21 | ERROR    | database             |    Query: 
+            SELECT c.id, c.movil, c.sku, p.nombre, c.cantidad, c.tecnico_nombre, c.ticket, c.fecha, c.colilla, c.num_contrato, c.ayudante_nombre, c.seriales_usados, c.paquete
+            FROM consumos_pendientes c
+            LEFT JOIN productos p ON c.sku = p.sku AND p.ubicacion = 'BODEGA'
+            WHERE 1=1
+         AND c.movil IN () AND c.estado IN ('PENDIENTE', 'AUTO_APROBADO') AND c.fecha BETWEEN %s AND %s ORDER BY c.fecha_registro DESC
+2026-03-07 19:40:21 | ERROR    | database             |    Params: ('2026-02-28', '2026-03-07')
+2026-03-07 19:40:21 | ERROR    | database             | Error al obtener consumos pendientes: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 6 column 27 near ") AND c.estado IN ('PENDIENTE', 'AUTO_APROBADO') AND c.fecha BETWEEN '2026-02-28' AND '2026-03-07' ORDER BY c.fecha_registro DESC" 
+2026-03-07 20:27:10 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 34, in <lambda>
+    ventana.after(0, lambda: _finalizar_carga(ventana, frame_carga, callback_exito, datos))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 47, in _finalizar_carga
+    callback_exito(datos)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1078, in _on_data_loaded
+    sku = p[IDX_SKU]
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1170, in update_consumo_ui
+    continue
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1223, in update_fisico_ui
+    # El stock 'NINGUNO' es stock base que no tiene etiqueta pero reside en el móvil.
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+NameError: name 'PRODUCTOS_CON_CODIGO_BARRA' is not defined
+
+2026-03-07 20:27:36 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 921, in <lambda>
+    self.paquete_combo.bind("<<ComboboxSelected>>", lambda e: self.update_consumo_ui())
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1170, in update_consumo_ui
+    continue
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1223, in update_fisico_ui
+    # El stock 'NINGUNO' es stock base que no tiene etiqueta pero reside en el móvil.
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+NameError: name 'PRODUCTOS_CON_CODIGO_BARRA' is not defined
+
+2026-03-07 20:27:41 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 921, in <lambda>
+    self.paquete_combo.bind("<<ComboboxSelected>>", lambda e: self.update_consumo_ui())
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1170, in update_consumo_ui
+    continue
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1223, in update_fisico_ui
+    # El stock 'NINGUNO' es stock base que no tiene etiqueta pero reside en el móvil.
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+NameError: name 'PRODUCTOS_CON_CODIGO_BARRA' is not defined
+
+2026-03-07 20:27:58 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 921, in <lambda>
+    self.paquete_combo.bind("<<ComboboxSelected>>", lambda e: self.update_consumo_ui())
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1170, in update_consumo_ui
+    continue
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1223, in update_fisico_ui
+    # El stock 'NINGUNO' es stock base que no tiene etiqueta pero reside en el móvil.
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+NameError: name 'PRODUCTOS_CON_CODIGO_BARRA' is not defined
+
+2026-03-09 08:25:21 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-03-09 08:25:32 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-03-09 08:25:37 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-03-09 09:14:19 | ERROR    | database             | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 34, in <lambda>
+    ventana.after(0, lambda: _finalizar_carga(ventana, frame_carga, callback_exito, datos))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 47, in _finalizar_carga
+    callback_exito(datos)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1089, in _on_data_loaded
+    self.update_consumo_ui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1181, in update_consumo_ui
+    self.update_fisico_ui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1238, in update_fisico_ui
+    macs_str = ", ".join(series_obj[:2])
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: sequence item 0: expected str instance, tuple found
+
+2026-03-09 10:13:00 | ERROR    | utils.db_connector   | Error creando pool MySQL para test: 2055: Lost connection to MySQL server at 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000', system error: timed out
+2026-03-09 10:13:00 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): 2055: Lost connection to MySQL server at 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000', system error: timed out
+2026-03-09 12:01:08 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-03-09 12:08:50 | ERROR    | database             | ❌ Error SQL ejecución: Unread result found
+2026-03-09 12:08:50 | ERROR    | database             |    Query: 
+                SELECT movil, num_contrato 
+                FROM consumos_pendientes 
+                WHERE (seriales_usados LIKE %s OR seriales_usados LIKE %s)
+                  AND sucursal = %s
+                ORDER BY id DESC LIMIT 1
+            
+2026-03-09 12:08:50 | ERROR    | database             |    Params: ('%"4857544301A53AAF"%', '%"___NONE___"%', 'CHIRIQUI')
+2026-03-09 12:08:50 | ERROR    | database             | Error en buscar_equipo_global: Unread result found
+2026-03-09 12:09:10 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:09:10 | ERROR    | database             | Error en obtener_historial_completo: Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:09:29 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:09:29 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:10:26 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:10:26 | ERROR    | database             | Error en buscar_equipo_global: Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:10:29 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:10:29 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:10:30 | ERROR    | database             | Error en buscar_equipo_global: cannot access local variable 'movil_hallado' where it is not associated with a value
+2026-03-09 12:10:39 | ERROR    | database             | ❌ Error SQL ejecución: Unread result found
+2026-03-09 12:10:39 | ERROR    | database             |    Query: 
+                SELECT movil, num_contrato 
+                FROM consumos_pendientes 
+                WHERE (seriales_usados LIKE %s OR seriales_usados LIKE %s)
+                  AND sucursal = %s
+                ORDER BY id DESC LIMIT 1
+            
+2026-03-09 12:10:39 | ERROR    | database             |    Params: ('%"4857544301A53AAF"%', '%"___NONE___"%', 'CHIRIQUI')
+2026-03-09 12:10:39 | ERROR    | database             | Error en buscar_equipo_global: Unread result found
+2026-03-09 12:10:53 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:10:53 | ERROR    | database             | Error al obtener móviles: Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:10:56 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:10:56 | ERROR    | database             | Error al obtener todos los SKUs para movimiento: Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:11:08 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:11:08 | ERROR    | database             | ❌ Error en obtener_sku_por_serial: Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:11:18 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:11:18 | ERROR    | database             | Error al obtener resumen de abastos: Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:11:25 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:11:25 | ERROR    | database             | ❌ Error en obtener_estadisticas_reales: Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:11:28 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:11:28 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:11:30 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:11:30 | ERROR    | database             | Error buscando producto por código de barra 8'1'904: Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:11:51 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:11:51 | ERROR    | database             | Error verificando serie: Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:12:07 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:12:07 | ERROR    | database             | Error al obtener móviles: Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:12:09 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:12:09 | ERROR    | database             | Error al obtener todos los SKUs para movimiento: Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:12:11 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:12:11 | ERROR    | database             | ❌ Error en obtener_sku_por_serial: Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:12:23 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:12:23 | ERROR    | database             | ❌ Error en obtener_sku_por_serial: Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:12:24 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:12:24 | ERROR    | database             | Error buscando por código de barra: Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:12:29 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:13:04 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:13:04 | ERROR    | database             | Error al obtener resumen de abastos: Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:13:18 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:13:18 | ERROR    | database             | Error verificando serie: Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:13:27 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:13:27 | ERROR    | database             | ❌ Error en obtener_estadisticas_reales: Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:13:30 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:13:30 | ERROR    | database             | ❌ Error en obtener_stock_actual_y_moviles: Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:14:15 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:14:15 | ERROR    | database             | Error en obtener_historial_completo: Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:14:25 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:14:25 | ERROR    | database             | ❌ Error en obtener_estadisticas_reales: Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:14:27 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:15:27 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): Unread result found
+2026-03-09 12:56:30 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
+2026-03-09 12:56:56 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-11 requiere serial: Not all parameters were used in the SQL statement
+2026-03-09 12:57:02 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-2-41 requiere serial: Not all parameters were used in the SQL statement
+2026-03-09 13:05:13 | ERROR    | database             | Error en buscar_equipo_global: cannot access local variable 'movil_hallado' where it is not associated with a value
+2026-03-09 13:17:12 | ERROR    | database             | Error en buscar_equipo_global: cannot access local variable 'movil_hallado' where it is not associated with a value
+2026-03-09 13:17:27 | ERROR    | database             | Error en buscar_equipo_global: cannot access local variable 'movil_hallado' where it is not associated with a value
+2026-03-09 13:18:05 | ERROR    | database             | Error en buscar_equipo_global: cannot access local variable 'movil_hallado' where it is not associated with a value
+2026-03-09 13:18:06 | ERROR    | database             | Error en buscar_equipo_global: cannot access local variable 'movil_hallado' where it is not associated with a value
+2026-03-09 13:18:08 | ERROR    | database             | Error en buscar_equipo_global: cannot access local variable 'movil_hallado' where it is not associated with a value
+2026-03-09 13:18:10 | ERROR    | database             | Error en buscar_equipo_global: cannot access local variable 'movil_hallado' where it is not associated with a value
+2026-03-09 13:19:05 | ERROR    | database             | Error en buscar_equipo_global: cannot access local variable 'movil_hallado' where it is not associated with a value
+2026-03-09 13:31:18 | ERROR    | database             | Error en buscar_equipo_global: cannot access local variable 'movil_hallado' where it is not associated with a value
+2026-03-09 13:31:29 | ERROR    | database             | Error en buscar_equipo_global: cannot access local variable 'movil_hallado' where it is not associated with a value
+2026-03-09 13:31:35 | ERROR    | database             | Error en buscar_equipo_global: cannot access local variable 'movil_hallado' where it is not associated with a value
+2026-03-09 13:31:46 | ERROR    | database             | Error en buscar_equipo_global: cannot access local variable 'movil_hallado' where it is not associated with a value
+2026-03-09 14:48:22 | ERROR    | database             | Error en buscar_equipo_global: cannot access local variable 'movil_hallado' where it is not associated with a value
+2026-03-09 14:48:28 | ERROR    | database             | Error en buscar_equipo_global: cannot access local variable 'movil_hallado' where it is not associated with a value
+2026-03-09 14:48:38 | ERROR    | database             | Error en buscar_equipo_global: cannot access local variable 'movil_hallado' where it is not associated with a value
+2026-03-09 14:48:45 | ERROR    | database             | Error en buscar_equipo_global: cannot access local variable 'movil_hallado' where it is not associated with a value

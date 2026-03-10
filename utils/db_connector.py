@@ -119,7 +119,12 @@ def db_session(target_db=None):
     cursor = None
     try:
         conn = get_db_connection(target_db)
-        cursor = conn.cursor()
+        # Usar cursores con buffer para MySQL para evitar problemas de "Unread result found"
+        # y permitir que la conexión se use de forma más flexible.
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         yield conn, cursor
         conn.commit()
     except Exception as e:

@@ -504,18 +504,18 @@ class AbastoScannerWindow:
         tk.Button(ctrl_frame, text="🔄 Actualizar Lista", command=self.load_history,
                 bg=Styles.INFO_COLOR, fg='white', relief='flat', padx=10).pack(side='left')
                 
-        # Treeview
+        # Frame para tree + scroll
+        tree_frame = tk.Frame(container)
+        tree_frame.pack(fill='both', expand=True)
+
+        # Treeview (Ahora con el padre correcto)
         columns = ("Fecha", "Referencia", "Items", "Total Unidades", "Última Modificación")
-        self.tree_history = ttk.Treeview(container, columns=columns, show='headings')
+        self.tree_history = ttk.Treeview(tree_frame, columns=columns, show='headings')
         
         for col in columns:
             self.tree_history.heading(col, text=col)
             self.tree_history.column(col, anchor='center')
             
-        # Frame para tree + scroll
-        tree_frame = tk.Frame(container)
-        tree_frame.pack(fill='both', expand=True)
-        
         sb = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree_history.yview)
         self.tree_history.configure(yscrollcommand=sb.set)
         

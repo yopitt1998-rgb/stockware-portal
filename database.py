@@ -89,7 +89,11 @@ def inicializar_bd():
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        # Usar cursores con buffer para MySQL por defecto
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         # Auxiliares para compatibilidad
         AUTOINC = "AUTO_INCREMENT" if DB_TYPE == 'MYSQL' else "AUTOINCREMENT"
@@ -356,6 +360,20 @@ def inicializar_bd():
                 else:
                     logger.warning(f"⚠️ No se pudo crear índice {name} en {table}: {e}")
 
+        q_series = f"""
+            CREATE TABLE IF NOT EXISTS series_registradas (
+                id {INT_TYPE} PRIMARY KEY {AUTOINC},
+                sku VARCHAR(50) NOT NULL,
+                serial_number VARCHAR(100) NOT NULL,
+                mac_number VARCHAR(100),
+                ubicacion VARCHAR(100) DEFAULT 'BODEGA',
+                movil VARCHAR(100),
+                contrato VARCHAR(255),
+                fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+                sucursal VARCHAR(50) DEFAULT 'CHIRIQUI',
+                paquete VARCHAR(50)
+            )
+        """
         try:
             cursor.execute(q_series)
         except Exception as e:
@@ -457,7 +475,10 @@ def diagnosticar_duplicados_movil(movil):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         run_query(cursor, """
             SELECT movil, sku_producto, COUNT(*) as count, SUM(cantidad) as total
@@ -481,7 +502,10 @@ def limpiar_productos_duplicados():
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         # Encontrar SKUs duplicados en BODEGA
         run_query(cursor, """
@@ -525,7 +549,10 @@ def limpiar_duplicados_asignacion_moviles():
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         # Diagnosticar duplicados primero
         run_query(cursor, """
@@ -582,7 +609,10 @@ def verificar_y_corregir_duplicados_completo(silent=False):
     # 2. Limpiar duplicados en asignacion_moviles
     # Solo limpiamos esto SI detectamos que hay duplicados para evitar re-escritura total lenta
     conn = get_db_connection()
-    cursor = conn.cursor()
+    if DB_TYPE == 'MYSQL':
+        cursor = conn.cursor(buffered=True)
+    else:
+        cursor = conn.cursor()
     run_query(cursor, "SELECT COUNT(*) FROM (SELECT 1 FROM asignacion_moviles GROUP BY movil, sku_producto HAVING COUNT(*) > 1) as sub")
     tiene_duplicados = cursor.fetchone()[0] > 0
     conn.close()
@@ -601,7 +631,10 @@ def poblar_datos_iniciales():
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         # Primero limpiar duplicados
         # eliminados, mensaje = limpiar_productos_duplicados()
@@ -647,7 +680,10 @@ def anadir_producto(nombre, sku, cantidad, ubicacion, secuencia_vista, minimo_st
              return False, f"Datos inválidos: {ve}"
 
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         if not fecha_evento: fecha_evento = date.today().isoformat()
         
@@ -679,7 +715,10 @@ def verificar_stock_disponible(sku, cantidad_requerida, ubicacion='BODEGA'):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         run_query(cursor, "SELECT cantidad FROM productos WHERE sku = ? AND ubicacion = ?", (sku, ubicacion))
         res = cursor.fetchone()
         
@@ -729,10 +768,16 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
         if existing_conn:
             conn = existing_conn
             should_close = False
-            cursor = conn.cursor()
+            if DB_TYPE == 'MYSQL':
+                cursor = conn.cursor(buffered=True)
+            else:
+                cursor = conn.cursor()
         else:
             conn = get_db_connection(target_db=target_db_name)
-            cursor = conn.cursor()
+            if DB_TYPE == 'MYSQL':
+                cursor = conn.cursor(buffered=True)
+            else:
+                cursor = conn.cursor()
         
         if not fecha_evento: 
              return False, "Error de Fecha: La fecha del evento es obligatoria."
@@ -997,7 +1042,10 @@ def registrar_prestamo_santiago(sku, cantidad, fecha_evento, observaciones=None)
 
         # 1. VERIFICACIÓN LOCAL
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         run_query(cursor, "SELECT cantidad, nombre FROM productos WHERE sku = ? AND ubicacion = 'BODEGA'", (sku,))
         resultado = cursor.fetchone()
@@ -1073,7 +1121,10 @@ def registrar_devolucion_santiago(sku, cantidad, seriales_nuevos, fecha_evento, 
 
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
 
         # 1. Verificar stock asignado a SANTIAGO
         if DB_TYPE == 'MYSQL':
@@ -1145,7 +1196,10 @@ def obtener_prestamos_activos():
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         run_query(cursor, """
             SELECT sku, nombre_producto, SUM(cantidad_prestada) as total_prestado, 
@@ -1168,7 +1222,10 @@ def obtener_historial_prestamos_completo():
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         run_query(cursor, """
             SELECT sku, nombre_producto, cantidad_prestada, fecha_prestamo, 
@@ -1190,7 +1247,10 @@ def crear_recordatorio(movil, paquete, tipo_recordatorio, fecha_recordatorio):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         # Verificar si ya existe un recordatorio no completado para esta combinación
         run_query(cursor, """
@@ -1220,7 +1280,10 @@ def obtener_recordatorios_pendientes(fecha=None):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         if fecha is None:
             fecha = date.today().isoformat()
@@ -1246,7 +1309,10 @@ def obtener_recordatorios_todos(fecha=None):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         if fecha is None:
             fecha = date.today().isoformat()
@@ -1272,7 +1338,10 @@ def marcar_recordatorio_completado(id_recordatorio):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         run_query(cursor, """
             UPDATE recordatorios_pendientes 
@@ -1295,7 +1364,10 @@ def eliminar_recordatorios_completados():
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         run_query(cursor, "DELETE FROM recordatorios_pendientes WHERE completado = 1")
         conn.commit()
@@ -1313,7 +1385,10 @@ def verificar_y_crear_recordatorios_salida(fecha_salida):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         # Obtener todas las salidas del día para paquetes A y B
         run_query(cursor, """
@@ -1363,7 +1438,10 @@ def obtener_inventario():
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         run_query(cursor, """
             SELECT id, nombre, sku, cantidad, ubicacion, categoria, marca, minimo_stock 
             FROM productos 
@@ -1386,7 +1464,10 @@ def obtener_inventario_para_exportar():
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         sql_query = """
         SELECT ubicacion, secuencia_vista, sku, nombre, cantidad, fecha_creacion
         FROM productos 
@@ -1406,7 +1487,10 @@ def obtener_todos_los_skus_para_movimiento(target_db=None, sucursal_context=None
     conn = None
     try:
         conn = get_db_connection(target_db=target_db)
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         # MODIFICADO: Obtener TODOS los productos únicos (no solo BODEGA)
         sql_unique_skus = """
@@ -1451,7 +1535,10 @@ def obtener_ultima_salida_movil(movil):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         sql_query = """
             SELECT sku_producto, cantidad_afectada 
@@ -1477,7 +1564,10 @@ def obtener_asignacion_movil(movil):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         sql_query = """
              SELECT 
                  p.nombre, a.sku_producto, SUM(a.cantidad) as cantidad_total
@@ -1503,18 +1593,21 @@ def obtener_asignacion_movil_con_paquetes(movil):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
 
         # DETERMINAR FILTRO DE SUCURSAL
         import os
         sucursal_target = 'SANTIAGO' if os.environ.get('SANTIAGO_DIRECT_MODE') == '1' else 'CHIRIQUI'
 
-        # 1. Obtener productos asignados a ese móvil (FILTRADO POR SUCURSAL)
         sql_total = """
             SELECT p.nombre, a.sku_producto, SUM(a.cantidad) as total
             FROM asignacion_moviles a
-            JOIN (SELECT sku, nombre, secuencia_vista FROM productos WHERE sucursal = ? GROUP BY sku, nombre, secuencia_vista) p ON a.sku_producto = p.sku
-            WHERE UPPER(TRIM(a.movil)) = UPPER(TRIM(?)) AND a.cantidad > 0 AND a.sucursal = ?
+            JOIN (SELECT sku, nombre, secuencia_vista FROM productos WHERE UPPER(TRIM(sucursal)) = ? OR sucursal IS NULL OR sucursal = '' GROUP BY sku, nombre, secuencia_vista) p ON a.sku_producto = p.sku
+            WHERE UPPER(TRIM(a.movil)) = UPPER(TRIM(?)) AND a.cantidad > 0 
+            AND (UPPER(TRIM(a.sucursal)) = ? OR a.sucursal IS NULL OR a.sucursal = '')
             GROUP BY a.sku_producto, p.nombre, p.secuencia_vista
             ORDER BY p.secuencia_vista ASC
         """
@@ -1566,7 +1659,8 @@ def obtener_asignacion_movil_con_paquetes(movil):
             sql_pqs = """
                 SELECT COALESCE(paquete, 'SIN_PAQUETE'), SUM(cantidad) 
                 FROM asignacion_moviles 
-                WHERE sku_producto = ? AND UPPER(TRIM(movil)) = UPPER(TRIM(?)) AND sucursal = ?
+                WHERE sku_producto = ? AND UPPER(TRIM(movil)) = UPPER(TRIM(?)) 
+                AND (UPPER(TRIM(sucursal)) = ? OR sucursal IS NULL OR sucursal = '')
                 GROUP BY paquete
             """
             run_query(cursor, sql_pqs, (sku, movil, sucursal_target))
@@ -1607,7 +1701,10 @@ def obtener_reporte_asignacion_moviles(movil=None):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         sql_query = """
              SELECT 
@@ -1637,7 +1734,10 @@ def eliminar_producto(sku):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         run_query(cursor, "SELECT nombre FROM productos WHERE sku = ? LIMIT 1", (sku,))
         if not cursor.fetchone():
@@ -1662,7 +1762,10 @@ def obtener_historial_producto(sku, fecha_inicio=None, fecha_fin=None):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         sql_query = """
             SELECT 
@@ -1701,7 +1804,10 @@ def obtener_abastos_resumen():
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         # DETERMINAR FILTRO DE SUCURSAL
         import os
@@ -1736,7 +1842,10 @@ def obtener_detalle_abasto(fecha, referencia):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         # DETERMINAR FILTRO DE SUCURSAL
         import os
@@ -1772,7 +1881,10 @@ def actualizar_movimiento_abasto(id_movimiento, nueva_cantidad, nueva_referencia
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         # 1. Obtener datos actuales del movimiento
         run_query(cursor, "SELECT sku_producto, cantidad_afectada FROM movimientos WHERE id = ?", (id_movimiento,))
@@ -1811,7 +1923,10 @@ def obtener_historial_producto_para_exportar(sku, fecha_inicio=None, fecha_fin=N
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         sql_query = """
             SELECT 
@@ -1843,7 +1958,10 @@ def obtener_reporte_consumo(fecha_inicio, fecha_fin):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         sql_query = f"""
             SELECT 
@@ -1876,7 +1994,10 @@ def obtener_reporte_abasto(fecha_inicio, fecha_fin):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         sql_query = f"""
             SELECT 
@@ -1909,7 +2030,10 @@ def obtener_stock_actual_y_moviles():
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         # SUCURSAL CONTEXTO
         import os
@@ -2024,7 +2148,10 @@ def obtener_estadisticas_reales():
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         # DETERMINAR FILTRO DE SUCURSAL
         import os
@@ -2137,7 +2264,10 @@ def limpiar_base_datos():
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         # Limpiar todas las tablas de datos
         tablas_a_limpiar = [
@@ -2171,7 +2301,10 @@ def obtener_movimientos_por_rango(fecha_inicio, fecha_fin):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         sql_query = """
             SELECT 
@@ -2194,7 +2327,7 @@ def obtener_movimientos_por_rango(fecha_inicio, fecha_fin):
 
 # --- FUNCIONES PARA PORTAL MÓVIL (PUNTO 5) ---
 
-def registrar_consumo_pendiente(movil, sku, cantidad, tecnico, ticket, fecha, colilla=None, contrato=None, ayudante=None):
+def registrar_consumo_pendiente(movil, sku, cantidad, tecnico, ticket, fecha, colilla=None, contrato=None, ayudante=None, paquete=None):
     """Guarda un reporte proveniente del portal móvil (Punto 5)."""
     conn = None
     try:
@@ -2207,11 +2340,18 @@ def registrar_consumo_pendiente(movil, sku, cantidad, tecnico, ticket, fecha, co
             logger.info(f"[ROUTING] Redirigiendo consumo de {movil} a {target_db}")
             
         conn = get_db_connection(target_db=target_db)
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
+        
+        # SUCURSAL CONTEXTO
+        sucursal = 'SANTIAGO' if movil in MOVILES_SANTIAGO else 'CHIRIQUI'
+        
         run_query(cursor, """
-            INSERT INTO consumos_pendientes (movil, sku, cantidad, tecnico_nombre, ayudante_nombre, ticket, fecha, colilla, num_contrato)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (movil, sku, cantidad, tecnico, ayudante, ticket, fecha, colilla, contrato))
+            INSERT INTO consumos_pendientes (movil, sku, cantidad, tecnico_nombre, ayudante_nombre, ticket, fecha, colilla, num_contrato, paquete, sucursal)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (movil, sku, cantidad, tecnico, ayudante, ticket, fecha, colilla, contrato, paquete or 'NINGUNO', sucursal))
         conn.commit()
         return True, "Registro guardado"
     except Exception as e:
@@ -2224,7 +2364,10 @@ def eliminar_consumo_pendiente(id_consumo):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         run_query(cursor, "DELETE FROM consumos_pendientes WHERE id = ?", (id_consumo,))
         conn.commit()
         return True, "Registro eliminado correctamente."
@@ -2238,7 +2381,10 @@ def eliminar_consumos_pendientes_por_movil(movil):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         # Usar LIKE o UPPER para mayor flexibilidad si es necesario
         run_query(cursor, "DELETE FROM consumos_pendientes WHERE UPPER(movil) = UPPER(?)", (movil,))
         conn.commit()
@@ -2258,7 +2404,10 @@ def obtener_consumos_pendientes(fecha_inicio=None, fecha_fin=None, estado=None, 
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         # DETERMINAR FILTRO DE SUCURSAL
         from config import MOVILES_SANTIAGO, MOVILES_DISPONIBLES
@@ -2269,7 +2418,8 @@ def obtener_consumos_pendientes(fecha_inicio=None, fecha_fin=None, estado=None, 
         sql_query = """
             SELECT c.id, c.movil, c.sku, p.nombre, c.cantidad, c.tecnico_nombre, c.ticket, c.fecha, c.colilla, c.num_contrato, c.ayudante_nombre, c.seriales_usados, c.paquete
             FROM consumos_pendientes c
-            LEFT JOIN productos p ON c.sku = p.sku AND p.ubicacion = 'BODEGA'
+            LEFT JOIN productos p ON c.sku = p.sku AND p.ubicacion = 'BODEGA' 
+            AND (p.sucursal = c.sucursal OR p.sucursal IS NULL OR c.sucursal IS NULL)
             WHERE 1=1
         """
         
@@ -2297,14 +2447,15 @@ def obtener_consumos_pendientes(fecha_inicio=None, fecha_fin=None, estado=None, 
             params.extend(moviles_filtro)
         
         if fecha_inicio and fecha_fin:
-            sql_query += " AND c.fecha BETWEEN ? AND ?"
-            params.extend([fecha_inicio, fecha_fin])
+            # Asegurar inclusividad del día final (hasta 23:59:59)
+            sql_query += " AND c.fecha >= ? AND c.fecha <= ?"
+            params.extend([fecha_inicio, f"{fecha_fin} 23:59:59"])
         elif fecha_inicio:
             sql_query += " AND c.fecha >= ?"
             params.append(fecha_inicio)
         elif fecha_fin:
             sql_query += " AND c.fecha <= ?"
-            params.append(fecha_fin)
+            params.append(f"{fecha_fin} 23:59:59")
             
         if paquete and paquete != 'TODOS':
             sql_query += " AND COALESCE(UPPER(TRIM(c.paquete)), 'NINGUNO') = ?"
@@ -2330,7 +2481,10 @@ def obtener_detalles_moviles():
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         run_query(cursor, "SELECT nombre, conductor, ayudante FROM moviles WHERE activo = 1")
         filas = cursor.fetchall()
         
@@ -2355,7 +2509,10 @@ def obtener_inventario_movil(movil):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         # DETERMINAR FILTRO DE SUCURSAL
         from config import MOVILES_SANTIAGO
@@ -2382,7 +2539,10 @@ def obtener_ultimos_movimientos(limite=15):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         # Obtener movimientos según motor de base de datos (Optimizado para latencia y compatibilidad)
         
@@ -2439,7 +2599,10 @@ def obtener_historial_completo(limite=500, filtro_texto=None, sucursal_context=N
         sucursal_target = sucursal_context or CURRENT_CONTEXT.get('BRANCH', 'CHIRIQUI')
         
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         sql = """
             SELECT 
@@ -2457,10 +2620,17 @@ def obtener_historial_completo(limite=500, filtro_texto=None, sucursal_context=N
         params = [sucursal_target, sucursal_target]
         
         if filtro_texto:
-            sql += " AND (m.sku_producto LIKE ? OR m.tipo_movimiento LIKE ? OR m.movil_afectado LIKE ? OR m.observaciones LIKE ? OR m.documento_referencia LIKE ?)"
-            params.extend([f"%{filtro_texto}%"] * 5)
+            sql += """ AND (
+                m.sku_producto LIKE ? OR 
+                m.tipo_movimiento LIKE ? OR 
+                m.movil_afectado LIKE ? OR 
+                m.observaciones LIKE ? OR 
+                m.documento_referencia LIKE ? OR 
+                COALESCE(p.nombre, '') LIKE ?
+            )"""
+            params.extend([f"%{filtro_texto}%"] * 6)
             
-        sql += " ORDER BY m.fecha_movimiento DESC LIMIT ?"
+        sql += " ORDER BY m.id DESC LIMIT ?"
         params.append(limite)
         
         if DB_TYPE == 'MYSQL':
@@ -2484,23 +2654,26 @@ def buscar_equipo_global(termino, sucursal_context=None):
         sucursal_target = sucursal_context or CURRENT_CONTEXT.get('BRANCH', 'CHIRIQUI')
         
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         termino_clean = str(termino).strip().upper()
+        logger.info(f"🔎 Buscando equipo global: '{termino_clean}' en sucursal: '{sucursal_target}'")
         
         sql = """
             SELECT 
                 s.serial_number,
                 s.mac_number,
                 s.sku,
-                COALESCE(p.nombre, 'Equipo Desconocido') as nombre,
+                COALESCE((SELECT nombre FROM productos WHERE sku = s.sku LIMIT 1), 'Equipo Desconocido') as nombre,
                 s.ubicacion,
                 s.estado,
                 s.paquete
             FROM series_registradas s
-            LEFT JOIN productos p ON s.sku = p.sku AND p.ubicacion = 'BODEGA'
             WHERE (UPPER(s.serial_number) = ? OR UPPER(s.mac_number) = ?)
-              AND (s.sucursal = ? OR (s.sucursal IS NULL AND ? = 'CHIRIQUI'))
+              AND (UPPER(s.sucursal) = UPPER(?) OR (s.sucursal IS NULL AND UPPER(?) = 'CHIRIQUI'))
         """
         
         if DB_TYPE == 'MYSQL':
@@ -2509,11 +2682,20 @@ def buscar_equipo_global(termino, sucursal_context=None):
         run_query(cursor, sql, (termino_clean, termino_clean, sucursal_target, sucursal_target))
         res = cursor.fetchone()
         
+        if not res:
+            logger.warning(f"❌ No se encontró resultado para '{termino_clean}' con sucursal '{sucursal_target}'")
+        else:
+            logger.info(f"✅ Resultado encontrado: {res[2]} ({res[4]})")
+        
         if res:
             res_list = list(res)
             serial, mac, sku, nombre, ubicacion, estado, paquete = res_list
             
-            # Intentar siempre buscar contrato y movil en consumos_pendientes (útil para saber de donde vino si fue retornado)
+            # Inicializar info extra
+            movil_final = None
+            contrato_final = None
+            
+            # --- PLAN A: Buscar en consumos_pendientes (Búsqueda Directa por Serial/MAC) ---
             sql_c = """
                 SELECT movil, num_contrato 
                 FROM consumos_pendientes 
@@ -2521,8 +2703,6 @@ def buscar_equipo_global(termino, sucursal_context=None):
                   AND sucursal = ?
                 ORDER BY id DESC LIMIT 1
             """
-            # Buscamos el serial o la mac dentro del JSON string
-            # Formato LIKE: %"SERIAL"%
             pattern_s = f'%"{serial}"%' if serial else "%\"___NONE___\"%"
             pattern_m = f'%"{mac}"%' if mac else "%\"___NONE___\"%"
             
@@ -2530,57 +2710,41 @@ def buscar_equipo_global(termino, sucursal_context=None):
             cons_extra = cursor.fetchone()
             
             if cons_extra:
-                movil_c, contrato_c = cons_extra
-                res_list.extend([movil_c, contrato_c])
+                movil_final, contrato_final = cons_extra
             else:
-                # PLAN B: Buscar en la tabla movimientos (en las observaciones)
-                # IMPORTANTE: Esto es para equipos ya consumidos que no se vincularon bien en consumos_pendientes
+                # --- PLAN B: Buscar en movimientos (Observaciones o Documento) ---
                 sql_m = """
                     SELECT movil_afectado, documento_referencia 
                     FROM movimientos 
                     WHERE sku_producto = ? 
-                      AND observaciones LIKE ?
-                      AND tipo_movimiento = 'CONSUMO_MOVIL'
-                    ORDER BY id DESC LIMIT 1
+                      AND (observaciones LIKE ? OR documento_referencia LIKE ?)
+                      AND tipo_movimiento IN ('CONSUMO_MOVIL', 'SALIDA_MOVIL')
+                      AND sucursal = ?
+                    ORDER BY CASE WHEN tipo_movimiento = 'CONSUMO_MOVIL' THEN 1 ELSE 2 END, id DESC LIMIT 1
                 """
-                pattern_obs = f"%{serial}%" if serial else "___NONE___"
-                run_query(cursor, sql_m, (sku, pattern_obs))
+                pattern_search = f"%{serial}%" if serial else (f"%{mac}%" if mac else "___NONE___")
+                run_query(cursor, sql_m, (sku, pattern_search, pattern_search, sucursal_target))
                 mov_extra = cursor.fetchone()
                 
                 if mov_extra:
-                    res_list.extend(list(mov_extra))
+                    movil_final, contrato_final = mov_extra
                 else:
-                    # PLAN C: Heurística por SKU y Paquete (Búsqueda más agresiva)
-                    contrato_hallado = None
-                    movil_hallado = None
-                    
+                    # --- PLAN C: Heurística por Paquete (Última salida de ese SKU/Paquete) ---
                     if paquete and paquete != 'NINGUNO':
-                        # Primero intentar en movimientos (Historial permanente)
-                        sql_h1 = """
+                        sql_h = """
                             SELECT movil_afectado, documento_referencia 
                             FROM movimientos 
                             WHERE sku_producto = ? AND paquete_asignado = ? AND sucursal = ?
-                              AND tipo_movimiento = 'CONSUMO_MOVIL'
+                              AND tipo_movimiento = 'SALIDA_MOVIL'
                             ORDER BY id DESC LIMIT 1
                         """
-                        run_query(cursor, sql_h1, (sku, paquete, sucursal_target))
-                        res_h1 = cursor.fetchone()
-                        if res_h1:
-                            movil_hallado, contrato_hallado = res_h1
-                        else:
-                            # Segundo intentar en consumos_pendientes (Reportes de App)
-                            sql_h2 = """
-                                SELECT movil, num_contrato 
-                                FROM consumos_pendientes 
-                                WHERE sku = ? AND paquete = ? AND sucursal = ?
-                                ORDER BY id DESC LIMIT 1
-                            """
-                            run_query(cursor, sql_h2, (sku, paquete, sucursal_target))
-                            res_h2 = cursor.fetchone()
-                            if res_h2:
-                                movil_hallado, contrato_hallado = res_h2
-                    
-                    res_list.extend([movil_hallado, contrato_hallado])
+                        run_query(cursor, sql_h, (sku, paquete, sucursal_target))
+                        mov_h = cursor.fetchone()
+                        if mov_h:
+                            movil_final, contrato_final = mov_h
+
+            # Agregar info extra al resultado (siempre 2 elementos adicionales)
+            res_list.extend([movil_final, contrato_final])
                 
             return tuple(res_list)
             
@@ -2600,7 +2764,10 @@ def crear_movil(nombre, patente=None, conductor=None, ayudante=None):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         run_query(cursor, """
             INSERT INTO moviles (nombre, patente, conductor, ayudante, activo) 
             VALUES (?, ?, ?, ?, 1)
@@ -2622,7 +2789,10 @@ def obtener_moviles(solo_activos=True):
         moviles_permitidos = CURRENT_CONTEXT.get('MOVILES', [])
         
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         query = "SELECT nombre, patente, conductor, ayudante, activo FROM moviles"
         if solo_activos:
             query += " WHERE activo = 1"
@@ -2671,7 +2841,10 @@ def editar_movil(nombre_actual, nuevo_nombre, nueva_patente, nuevo_conductor, nu
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         run_query(cursor, """
             UPDATE moviles 
             SET nombre = ?, patente = ?, conductor = ?, ayudante = ?
@@ -2700,7 +2873,10 @@ def eliminar_movil(nombre):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         # Verificar si tiene asignación
         run_query(cursor, "SELECT COUNT(*) FROM asignacion_moviles WHERE movil = ? AND cantidad > 0", (nombre,))
@@ -2728,7 +2904,10 @@ def obtener_configuracion():
             cursor = conn.cursor(dictionary=True)
         else:
             conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
+            if DB_TYPE == 'MYSQL':
+                cursor = conn.cursor(buffered=True)
+            else:
+                cursor = conn.cursor()
         
         run_query(cursor, "SELECT * FROM configuracion WHERE id_config = 1")
         row = cursor.fetchone()
@@ -2746,7 +2925,10 @@ def guardar_configuracion(datos):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         sql = """
             UPDATE configuracion SET 
@@ -2781,7 +2963,10 @@ def autenticar_usuario(username, password):
             cursor = conn.cursor(dictionary=True)
         else:
             conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
+            if DB_TYPE == 'MYSQL':
+                cursor = conn.cursor(buffered=True)
+            else:
+                cursor = conn.cursor()
         
         run_query(cursor, """
             SELECT id, usuario, rol 
@@ -2807,7 +2992,10 @@ def crear_usuario(username, password, rol, nombre):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         run_query(cursor, """
             INSERT INTO usuarios (usuario, password, rol) 
             VALUES (?, ?, ?)
@@ -2826,7 +3014,10 @@ def obtener_usuarios():
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         run_query(cursor, "SELECT id, usuario, rol FROM usuarios")
         return cursor.fetchall()
     except Exception:
@@ -2839,7 +3030,10 @@ def eliminar_usuario(id_usuario):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         run_query(cursor, "DELETE FROM usuarios WHERE id = ?", (id_usuario,))
         conn.commit()
         return True, "Usuario eliminado."
@@ -2858,7 +3052,11 @@ def verificar_serie_existe(serial, sku=None, ubicacion_requerida=None, estado_re
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        # MySQL requiere cursores con buffer para evitar "Unread result found"
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         ph = '%s' if DB_TYPE == 'MYSQL' else '?'
         
@@ -2886,7 +3084,8 @@ def verificar_serie_existe(serial, sku=None, ubicacion_requerida=None, estado_re
 
     except Exception as e:
         logger.error(f"Error verificando serie: {e}")
-        return True, f"Error de verificación: {e}"
+        # IMPORTANTE: Si hay un error de conexión, retornar False para permitir reintento
+        return False, f"Error de verificación: {e}"
     finally:
         if conn: close_connection(conn)
 
@@ -2903,7 +3102,10 @@ def registrar_series_bulk(series_data, fecha_ingreso=None, paquete=None):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         ph = '%s' if DB_TYPE == 'MYSQL' else '?'
         sql = f"""
@@ -2950,7 +3152,10 @@ def obtener_info_serial(serial_number):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         serial_clean = str(serial_number).strip().upper()
         
@@ -2980,7 +3185,10 @@ def obtener_detalles_serial(serial_number):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         serial_clean = str(serial_number).strip().upper()
         
@@ -3023,10 +3231,16 @@ def actualizar_ubicacion_serial(serial_number, nueva_ubicacion, paquete=None, ex
         if existing_conn:
             conn = existing_conn
             should_close = False
-            cursor = conn.cursor()
+            if DB_TYPE == 'MYSQL':
+                cursor = conn.cursor(buffered=True)
+            else:
+                cursor = conn.cursor()
         else:
             conn = get_db_connection()
-            cursor = conn.cursor()
+            if DB_TYPE == 'MYSQL':
+                cursor = conn.cursor(buffered=True)
+            else:
+                cursor = conn.cursor()
         
         # Resolver sucursal si no se proporciona
         sucursal = sucursal_context
@@ -3066,19 +3280,21 @@ def obtener_series_por_sku_y_ubicacion(sku, ubicacion, paquete=None):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
-        sql = "SELECT serial_number FROM series_registradas WHERE sku = ? AND ubicacion = ? AND estado = 'DISPONIBLE'"
+        sql = "SELECT serial_number, mac_number FROM series_registradas WHERE sku = ? AND UPPER(TRIM(ubicacion)) = UPPER(TRIM(?)) AND estado = 'DISPONIBLE'"
         params = [sku, ubicacion]
         
         if paquete and paquete != "TODOS":
-            sql += " AND (paquete = ? OR paquete IS NULL)" # Permitir NULL si no hay asignación estricta
+            # Permitir NULL o NINGUNO como fallback
+            sql += " AND (UPPER(TRIM(paquete)) = UPPER(TRIM(?)) OR paquete IS NULL OR paquete = '' OR UPPER(TRIM(paquete)) = 'NINGUNO')"
             params.append(paquete)
             
         run_query(cursor, sql, params)
-        resultados = cursor.fetchall()
-        
-        return [r[0] for r in resultados]
+        return cursor.fetchall()
         
     except Exception as e:
         logger.error(f"Error obteniendo series: {e}")
@@ -3096,7 +3312,10 @@ def incrementar_asignacion_movil(nombre_movil, sku, cantidad):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         # Primero verificar si existe
         sql_check = """
@@ -3153,7 +3372,10 @@ def obtener_asignacion_movil_activa(movil):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         # Obtener asignaciones actuales del móvil
         query = """
@@ -3183,7 +3405,10 @@ def procesar_retorno_manual(movil, sku, cantidad, fecha_evento, observaciones=No
     try:
         # Validar que el móvil tenga material asignado
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         run_query(cursor, """
             SELECT cantidad FROM asignacion_moviles 
@@ -3236,7 +3461,10 @@ def obtener_sku_por_codigo_barra(codigo_barra):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         # NORMALIZACIÓN CENTRAL: Reemplazar comillas por guiones
         raw_code = str(codigo_barra).strip().upper()
@@ -3295,7 +3523,10 @@ def obtener_sku_por_serial(serial):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         # Reemplazos básicos para evitar errores de scanner
         serial_clean = str(serial).strip().upper().replace("'", "-")
@@ -3338,7 +3569,10 @@ def buscar_producto_por_codigo_barra_maestro(codigo_barra):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         # NORMALIZACIÓN CENTRAL: Reemplazar comillas por guiones
         raw_code = str(codigo_barra).strip().upper()
@@ -3386,7 +3620,10 @@ def obtener_producto_nombre(sku):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         run_query(cursor, "SELECT nombre FROM productos WHERE sku = ? LIMIT 1", (sku,))
         resultado = cursor.fetchone()
         return resultado[0] if resultado else None
@@ -3411,7 +3648,10 @@ def buscar_producto_por_mac(mac_address):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         # Normalizar MAC (uppercase y trim)
         mac = mac_address.strip().upper()
@@ -3475,7 +3715,10 @@ def actualizar_codigo_barra_maestro(sku, codigo_barra_maestro):
             codigo_barra_maestro = codigo_barra_maestro.strip().upper()
         
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         # Verificar si el código ya existe en otro producto
         if codigo_barra_maestro:
@@ -3516,7 +3759,10 @@ def registrar_abasto_batch(items_abasto, fecha_evento, numero_abasto=None):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         # Iniciar transacción explícita
         if DB_TYPE == 'MYSQL':
@@ -3610,7 +3856,10 @@ def eliminar_consumos_pendientes_por_movil(movil):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         ph = '%s' if DB_TYPE == 'MYSQL' else '?'
         
         # Eliminar consumos pendientes
@@ -3635,7 +3884,10 @@ def resetear_stock_movil(movil, paquete):
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         ph = '%s' if DB_TYPE == 'MYSQL' else '?'
         
         from config import CURRENT_CONTEXT
@@ -3708,11 +3960,11 @@ def resetear_stock_movil(movil, paquete):
     finally:
         if conn: close_connection(conn)
 
-def registrar_danado_directo(sku, cantidad, tecnico, observaciones=None, seriales=None, sucursal_context=None):
+def registrar_danado_directo(sku, cantidad, tecnico, observaciones=None, seriales=None, sucursal_context=None, paquete=None):
     """
     Registra material o equipos DAÑADOS. 
     Para equipo, detecta su ubicación automáticamente (Bodega o Móvil) y lo descarga.
-    Para material, lo descarga de BODEGA por defecto.
+    Para material, lo descarga de BODEGA por defecto si es reporte directo, o del móvil si se proveen datos.
     """
     from config import UBICACION_DESCARTE, TIPO_MOVIMIENTO_DESCARTE
     from datetime import date
@@ -3720,23 +3972,29 @@ def registrar_danado_directo(sku, cantidad, tecnico, observaciones=None, seriale
     import json
     
     if not seriales:
-        # Reutilizamos la lógica de consumo directo para materiales desde BODEGA
+        # Reutilizamos la lógica de consumo directo para materiales
+        # Si técnico es una móvil, intentamos descontar de ahí si se desea, 
+        # pero para simplificar registrar_danado_directo sin seriales suele ser desde bodega o descarga general.
         return registrar_consumo_directo(
             sku=sku,
             cantidad=cantidad,
-            movil='BODEGA',
+            movil=tecnico if tecnico else 'BODEGA',
             tecnico=tecnico,
             fecha_evento=date.today().isoformat(),
             seriales=seriales,
             observaciones=observaciones if observaciones else "Reporte de Material Dañado",
-            tipo_custom=TIPO_MOVIMIENTO_DESCARTE
+            tipo_custom=TIPO_MOVIMIENTO_DESCARTE,
+            paquete=paquete
         )
         
     # Lógica para EQUIPOS (detectando ubicación en vivo)
     conn = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         # Determinar sucursal del contexto si es posible
         from config import CURRENT_CONTEXT
@@ -3824,14 +4082,17 @@ def registrar_danado_directo(sku, cantidad, tecnico, observaciones=None, seriale
     finally:
         if conn: close_connection(conn)
 
-def registrar_consumo_directo(sku, cantidad, movil, tecnico, ayudante=None, ticket=None, colilla=None, fecha_evento=None, seriales=None, observaciones=None, tipo_custom=None, target_db=None, sucursal_context=None):
+def registrar_consumo_directo(sku, cantidad, movil, tecnico, ayudante=None, ticket=None, colilla=None, fecha_evento=None, seriales=None, observaciones=None, tipo_custom=None, target_db=None, sucursal_context=None, paquete=None):
     """
-    Registra un consumo directo desde BODEGA para la sucursal de Santiago.
+    Registra un consumo directo desde BODEGA para la sucursal de Santiago o Móvil.
     """
     conn = None
     try:
         conn = get_db_connection(target_db=target_db)
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         from datetime import date
         if not fecha_evento: fecha_evento = date.today().isoformat()
@@ -3870,13 +4131,14 @@ def registrar_consumo_directo(sku, cantidad, movil, tecnico, ayudante=None, tick
         
         # 4. Registrar en consumos_pendientes (Audit Trail)
         seriales_json = json.dumps(seriales) if seriales else None
+        pq_final = paquete if paquete else 'NINGUNO'
         
         # En consumos_pendientes, el ticket se guarda en 'ticket' y 'num_contrato'
         run_query(cursor, """
             INSERT INTO consumos_pendientes 
-            (movil, sku, cantidad, tecnico_nombre, ayudante_nombre, ticket, fecha, colilla, num_contrato, seriales_usados, estado)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'AUTO_APROBADO')
-        """, (movil, sku, cantidad, tecnico, ayudante or '', ticket, fecha_evento, colilla or '', ticket, seriales_json))
+            (movil, sku, cantidad, tecnico_nombre, ayudante_nombre, ticket, fecha, colilla, num_contrato, seriales_usados, estado, paquete, sucursal)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'AUTO_APROBADO', ?, ?)
+        """, (movil, sku, cantidad, tecnico, ayudante or '', ticket, fecha_evento, colilla or '', ticket, seriales_json, pq_final, sucursal))
         
         # 5. Manejar Seriales
         if seriales:
@@ -3911,7 +4173,10 @@ def verificar_seriales_bodega(seriales, sucursal_context='CHIRIQUI', target_db=N
     conn = None
     try:
         conn = get_db_connection(target_db=target_db)
-        cursor = conn.cursor()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         
         sucursal = sucursal_context.upper()
         faltantes = []

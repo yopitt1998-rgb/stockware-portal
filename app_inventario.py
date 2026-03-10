@@ -3,6 +3,14 @@ import sys
 import os
 from datetime import datetime, date, timedelta
 
+# SOPORTE PARA DPI ALTO (Windows)
+if os.name == 'nt':
+    try:
+        from ctypes import windll
+        windll.shcore.SetProcessDpiAwareness(1)
+    except Exception:
+        pass
+
 # Sistema de Logging Centralizado
 from utils.logger import get_logger, log_startup
 
@@ -335,7 +343,7 @@ class ModernInventarioApp:
         main_frame.rowconfigure(0, weight=1)
 
         # Sidebar Navigation
-        self.sidebar = tk.Frame(main_frame, bg='#2c3e50', width=250)
+        self.sidebar = tk.Frame(main_frame, bg='#2c3e50', width=220)
         self.sidebar.grid(row=0, column=0, sticky='ns')
         self.sidebar.pack_propagate(False)
 
@@ -347,7 +355,7 @@ class ModernInventarioApp:
         
         # NOTEBOOK PRINCIPAL
         self.main_notebook = ttk.Notebook(main_frame)
-        self.main_notebook.grid(row=0, column=1, sticky='nsew', padx=20, pady=20)
+        self.main_notebook.grid(row=0, column=1, sticky='nsew', padx=(10, 20), pady=10)
         
         # DETECTAR SI ESTAMOS EN MODO SANTIAGO DIRECTO
         is_santiago_direct = os.environ.get('SANTIAGO_DIRECT_MODE') == '1'
@@ -641,11 +649,22 @@ class BranchSelectorWindow:
         self.on_select_callback()
 
 def main():
-
-    # 0. CARGAR PREFERENCIA DE SUCURSAL
-    from config import load_branch_preference, set_branch_context
-    sucursal = load_branch_preference()
-    set_branch_context(sucursal)
+    """
+    Punto de entrada principal.
+    Fuerza CHIRIQUI por defecto, a menos que se defina la variable de entorno FORCE_BRANCH (como hace app_santiago.py).
+    """
+    from config import set_branch_context
+    
+    # Prioridad 1: Variable de entorno (Para ejecutables separados, ej: app_santiago.py)
+    forced_branch = os.environ.get('FORCE_BRANCH')
+    
+    if forced_branch:
+        logger.info(f"Fuerza de sucursal detectada: {forced_branch}")
+        set_branch_context(forced_branch)
+    else:
+        # Prioridad Default: Siempre CHIRIQUI para la app principal
+        logger.info("Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI")
+        set_branch_context('CHIRIQUI')
     
     # Iniciar aplicación directamente
     iniciar_aplicacion_principal()

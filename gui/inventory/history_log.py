@@ -5,6 +5,8 @@ from datetime import datetime
 
 from database import obtener_historial_completo, buscar_equipo_global, logger
 from gui.styles import Styles
+import pandas as pd
+from tkinter import filedialog
 
 class HistoryLogTab(tk.Frame):
     def __init__(self, notebook, main_app):
@@ -128,13 +130,15 @@ class HistoryLogTab(tk.Frame):
         movil_c = extra[0] if len(extra) > 0 else None
         contrato_c = extra[1] if len(extra) > 1 else None
         
-        # Formatear ubicación para el usuario
+        # Formatear ubicación y estado para el usuario
+        is_damaged = (estado and str(estado).upper() in ['DAÑADO', 'MALO', 'DEFECTUOSO', 'DESCARTE'])
+        
         color_status = '#2e7d32' # Verde (OK)
         if ubicacion == 'CONSUMIDO':
             disp_loc = "🏠 CONSUMIDO / INSTALADO"
             color_status = '#1565c0'
-        elif ubicacion == 'DESCARTE':
-            disp_loc = "⚠️ DAÑADO / DESCARTE"
+        elif ubicacion == 'DESCARTE' or is_damaged:
+            disp_loc = f"⚠️ DAÑADO ({ubicacion})" if ubicacion != 'DESCARTE' else "⚠️ DAÑADO / DESCARTE"
             color_status = '#c62828'
         elif ubicacion == 'BODEGA':
             disp_loc = "🏢 BODEGA (Disponible)"
@@ -151,19 +155,22 @@ class HistoryLogTab(tk.Frame):
         tk.Label(content, text=f"Producto: {nombre} ({sku})", font=('Segoe UI', 11), bg='#e3f2fd').grid(row=1, column=0, sticky='w', pady=2)
         tk.Label(content, text=f"Serial: {sn} | MAC: {mac}", font=('Segoe UI', 11), bg='#e3f2fd').grid(row=2, column=0, sticky='w', pady=2)
         
-        # MOSTRAR CONTRATO Y MOVIL CON ESTILO DESTACADO
-        if contrato_c:
-             extra_frame = tk.Frame(content, bg='white', highlightbackground="#1a237e", highlightthickness=1, padx=10, pady=5)
-             extra_frame.grid(row=3, column=0, columnspan=2, sticky='we', pady=(10, 0))
-             
-             tk.Label(extra_frame, text=f"📄 CONTRATO: {contrato_c}", 
-                      font=('Segoe UI', 12, 'bold'), bg='white', fg='#1a237e').pack(side='left', padx=10)
-             tk.Label(extra_frame, text=f"🔧 MÓVIL: {movil_c}", 
-                      font=('Segoe UI', 12, 'bold'), bg='white', fg='#1a237e').pack(side='left', padx=10)
-        
         if paquete and paquete != 'NINGUNO':
             # Moverlo a la derecha del estado actual
             tk.Label(content, text=f"📦 Paquete: {paquete}", font=('Segoe UI', 11, 'bold'), bg='#e3f2fd', fg='#4527a0').grid(row=0, column=1, sticky='e', padx=20)
+        
+        # MOSTRAR CONTRATO Y MOVIL CON ESTILO DESTACADO (Si están disponibles)
+        if contrato_c or movil_c:
+             extra_frame = tk.Frame(content, bg='white', highlightbackground="#1a237e", highlightthickness=1, padx=10, pady=5)
+             extra_frame.grid(row=3, column=0, columnspan=2, sticky='we', pady=(10, 0))
+             
+             if contrato_c:
+                 tk.Label(extra_frame, text=f"📄 CONTRATO: {contrato_c}", 
+                          font=('Segoe UI', 12, 'bold'), bg='white', fg='#1a237e').pack(side='left', padx=10)
+             
+             if movil_c:
+                 tk.Label(extra_frame, text=f"🔧 MÓVIL / TÉCNICO: {movil_c}", 
+                          font=('Segoe UI', 12, 'bold'), bg='white', fg='#455a64').pack(side='left', padx=10)
         
         # AUTO-FILTRAR EL HISTORIAL DE ABAJO PARA ESTE SERIAL (NUEVO)
         self.hist_filter_var.set(sn if sn else mac)
@@ -204,3 +211,48 @@ class HistoryLogTab(tk.Frame):
         for i in self.tree.get_children(): self.tree.delete(i)
         for row in data:
             self.tree.insert('', 'end', values=row)
+
+    def exportar_a_excel(self):
+        """Exporta los datos actualmente visibles en la tabla a un archivo Excel"""
+        if not self.tree.get_children():
+            messagebox.showwarning("Sin Datos", "No hay datos en la tabla para exportar.")
+            return
+
+        fecha_str = datetime.now().strftime("%Y%m%d_%H%M")
+        default_name = f"Historial_Global_{fecha_str}.xlsx"
+        
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".xlsx",
+            filetypes=[("Excel files", "*.xlsx")],
+            initialfile=default_name,
+            title="Guardar Historial"
+        )
+        
+        if not file_path:
+            return
+
+        def process_export():
+            try:
+                import pandas as pd
+                
+                # Obtener encabezados
+                columnas = [self.tree.heading(c)['text'] for c in self.tree['columns']]
+                items = self.tree.get_children()
+                
+                rows_data = []
+                for item_id in items:
+                    values = self.tree.item(item_id, 'values')
+                    rows_data.append(values)
+                
+                # Crear DataFrame y guardar a Excel
+                df = pd.DataFrame(rows_data, columns=columnas)
+                df.to_excel(file_path, index=False)
+                
+                self.after(0, lambda: messagebox.showinfo("Exportación Exitosa", 
+                            f"El historial ha sido exportado a:\n{file_path}"))
+            except Exception as e:
+                logger.error(f"Error exportando a Excel: {e}")
+                self.after(0, lambda: messagebox.showerror("Error de Exportación", f"No se pudo exportar a Excel:\n{e}"))
+
+        threading.Thread(target=process_export, daemon=True).start()
+
