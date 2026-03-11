@@ -320,7 +320,7 @@
 
         #scanVideo {
             width: 100%;
-            max-height: 45vh;
+            max-height: 22vh;
             object-fit: cover;
             display: block;
         }
@@ -337,18 +337,15 @@
         }
 
         .scan-frame {
-            width: min(85vw, 300px);
-            /* Un poco más ancho para albergar el serial */
-            height: min(30vw, 100px);
-            /* Mucho más bajo (tipo ranura / rectángulo) */
+            width: min(70vw, 200px);
+            height: min(16vw, 55px);
             border: 3px solid rgba(255, 255, 255, 0.5);
-            border-radius: 12px;
+            border-radius: 10px;
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.65);
-            /* Falso overlay para oscurecer el resto de la cámara */
         }
 
         /* Corner markers */
@@ -792,9 +789,12 @@
                 hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
                     ZXing.BarcodeFormat.CODE_128,
                     ZXing.BarcodeFormat.CODE_39,
+                    ZXing.BarcodeFormat.CODE_39_EXTENDED,
                     ZXing.BarcodeFormat.EAN_13,
                     ZXing.BarcodeFormat.QR_CODE,
-                    ZXing.BarcodeFormat.DATA_MATRIX
+                    ZXing.BarcodeFormat.DATA_MATRIX,
+                    ZXing.BarcodeFormat.ITF,
+                    ZXing.BarcodeFormat.PDF_417
                 ]);
                 hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
 
@@ -830,8 +830,7 @@
                         deviceId: deviceId ? { exact: deviceId } : undefined,
                         width: { min: 640, ideal: 1280, max: 1920 },
                         height: { min: 480, ideal: 720, max: 1080 },
-                        focusMode: "continuous",
-                        advanced: [{ zoom: 2.0 }] // Zoom leve si está disponible para acercar el código
+                        focusMode: "continuous"
                     }
                 };
 

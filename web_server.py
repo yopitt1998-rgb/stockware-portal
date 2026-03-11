@@ -138,8 +138,8 @@ def santiago():
     
     try:
         # En Santiago Directo, obtenemos TODO el stock de BODEGA
-        # Usamos la conexión de Santiago si está configurada
-        target_db = None
+        from config import MYSQL_DB as _MYSQL_DB_S
+        target_db = _MYSQL_DB_S  # Forzar DB correcta de Render
         
         # Obtenemos el stock actual de la BD
         raw_stock = obtener_todos_los_skus_para_movimiento(target_db=target_db, sucursal_context='SANTIAGO')
@@ -190,7 +190,7 @@ def registrar_santiago_post():
         fecha = data.get('fecha', date.today().isoformat())
 
         from database import verificar_seriales_bodega
-        
+        from config import MYSQL_DB as _MYSQL_DB
 
         for item in materiales:
             sku = item['sku']
@@ -199,7 +199,8 @@ def registrar_santiago_post():
             
             # 1. DETERMINAR CONTEXTO Y DB
             sucursal_ctx = 'SANTIAGO' if movil in MOVILES_SANTIAGO else 'CHIRIQUI'
-            target_db_ctx = None
+            # Forzar DB correcta de Render para evitar 'inventario_santiago'
+            target_db_ctx = _MYSQL_DB
 
             # 2. VALIDAR SERIALES/MACs (EQUIPOS)
             if seriales:
@@ -245,10 +246,12 @@ def api_validar_serial():
     conn = None
     try:
         from database import get_db_connection, run_query
-        from config import MOVILES_SANTIAGO
+        from config import MOVILES_SANTIAGO, MYSQL_DB
         
         sucursal = 'SANTIAGO' if movil in MOVILES_SANTIAGO else 'CHIRIQUI'
-        target_db = None
+        # Forzar uso de la DB correcta (variable de entorno MYSQL_DATABASE de Render)
+        # Evitar que get_current_db_name() devuelva 'inventario_santiago' por contexto dinámico
+        target_db = MYSQL_DB
         
         conn = get_db_connection(target_db=target_db)
         cursor = conn.cursor()
