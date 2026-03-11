@@ -208,11 +208,9 @@ def set_branch_context(branch_code):
         # Switch DB
         if DB_TYPE == 'MYSQL':
             # Nota: Ya no se cambia el SCHEMA fisico, se filtra por columna sucursal
+            pass
         else:
-            # Local SQLite: Separamos Santiago a otro archivo? 
-            # Si el usuario quiere Separation TOTAL, debería ser otro archivo.
-            # Por ahora, usamos el mismo archivo pero filtramos datos, 
-            # O podemos usar 'inventario_santiago.db'
+            # Local SQLite: mismo archivo, filtrando por sucursal
             santiago_db = os.path.join(application_path, "inventario_santiago.db")
             CURRENT_CONTEXT['DB_NAME'] = santiago_db
             print(f" -> DB SQLite cambiada a: {santiago_db}")
