@@ -580,7 +580,7 @@ def registrar_bulk():
                     cantidad_afectada=cantidad,
                     movil_afectado=data['movil'],
                     fecha_evento=data['fecha'],
-                    paquete_asignado=data.get('paquete'), # Pass package from web portal
+                    paquete_asignado=None, # Modificado: Forzar auto-deducción inteligente de stock global del móvil
                     observaciones=obs,
                     documento_referencia=data.get('contrato'),
                     existing_conn=conn, # Usar misma conexión
