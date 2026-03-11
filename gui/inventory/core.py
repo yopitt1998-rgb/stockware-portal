@@ -1359,6 +1359,18 @@ class InventoryTab:
         """Abre ventana para conciliación (Refactored)"""
         ConciliacionPaquetesWindow(self.main_app, on_close_callback=self.cargar_datos_tabla)
 
+    def abrir_ventana_retorno_movil(self):
+        """Abre ventana de Auditoría y Retorno de Móvil"""
+        try:
+            from .movements import MobileReturnWindow
+            MobileReturnWindow(self.main_app, on_close_callback=self.cargar_datos_tabla)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            from tkinter import messagebox
+            messagebox.showerror("Error", f"No se pudo abrir Retorno de Móvil:\n{e}")
+
+
     def abrir_ventana_abasto(self):
         """Abre ventana para registro de abasto"""
         AbastoWindow(self.main_app, mode='registrar')
