@@ -3508,6 +3508,66 @@ def obtener_sku_por_codigo_barra(codigo_barra):
     finally:
         if conn: close_connection(conn)
 
+def identificar_codigo_escaneado_gui(codigo):
+    """
+    Combina obtener_info_serial y obtener_sku_por_codigo_barra en una SOLA conexión.
+    Esto reduce drásticamente el lag (handshake de red) en aplicaciones GUI.
+    Retorna: (sku_encontrado, es_serial, ubicacion_serial)
+    """
+    if not codigo: return None, False, None
+    conn = None
+    try:
+        conn = get_db_connection()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
+            
+        raw_code = str(codigo).strip().upper()
+        codigo_norm = raw_code.replace("'", "-").replace("´", "-").replace("`", "-")
+        
+        # 1. Intentar como Serial/MAC (series_registradas)
+        sql_serial = "SELECT sku, ubicacion FROM series_registradas WHERE UPPER(serial_number) = ? OR UPPER(mac_number) = ? LIMIT 1"
+        run_query(cursor, sql_serial, (raw_code, raw_code))
+        result_serial = cursor.fetchone()
+        
+        if result_serial:
+            return result_serial[0], True, result_serial[1]
+            
+        # 2. Intentar como Material (productos: codigo_barra)
+        try:
+             query_cb = "SELECT sku FROM productos WHERE codigo_barra = ? OR codigo_barra = ? LIMIT 1"
+             run_query(cursor, query_cb, (codigo_norm, raw_code))
+             result_cb = cursor.fetchone()
+             if result_cb: return result_cb[0], False, None
+        except: pass
+        
+        # 3. Intentar como Maestro (productos: codigo_barra_maestro)
+        try:
+             candidates = [codigo_norm, raw_code]
+             if "-" in raw_code: candidates.append(raw_code.replace("-", "'"))
+             for cand in candidates:
+                 query_maestro = "SELECT sku FROM productos WHERE codigo_barra_maestro = ? LIMIT 1"
+                 run_query(cursor, query_maestro, (cand,))
+                 result_maestro = cursor.fetchone()
+                 if result_maestro: return result_maestro[0], False, None
+        except: pass
+        
+        # 4. Fallback directo a SKU
+        query_sku = "SELECT sku FROM productos WHERE sku = ? OR sku = ? LIMIT 1"
+        run_query(cursor, query_sku, (codigo_norm, raw_code))
+        result_sku = cursor.fetchone()
+        if result_sku: return result_sku[0], False, None
+        
+        return None, False, None
+        
+    except Exception as e:
+        logger.error(f"Error en identificar_codigo_escaneado_gui: {e}")
+        return None, False, None
+    finally:
+        if conn: close_connection(conn)
+
+
 def obtener_sku_por_serial(serial):
     """
     Busca el SKU asociado a un número de serie (MAC, etc) en la tabla series_registradas.

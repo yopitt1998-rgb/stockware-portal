@@ -20,6 +20,7 @@ from database import (
     eliminar_consumo_pendiente,
     obtener_info_serial,
     obtener_sku_por_codigo_barra,
+    identificar_codigo_escaneado_gui,
     actualizar_ubicacion_serial,
     obtener_asignacion_movil_con_paquetes,
     obtener_configuracion,
@@ -1394,58 +1395,67 @@ class MobileReturnWindow:
         if not movil:
             messagebox.showerror("Error", "Debe seleccionar un móvil primero", parent=self.ventana)
             return
-            
-        # Pipeline de Identificación: Serial -> Barcode -> SKU
-        sku_found = None
-        is_serial = False
+
+        # Bloquear caja de texto para dar feedback visual inmediato
+        self.entry_scan.config(state='disabled', bg='#fff3cd')
+        self.entry_scan.config(state='normal')
+        self.entry_scan.insert(0, f"Buscando {code}...")
+        self.entry_scan.config(state='disabled')
         
-        # 1. Intentar como Serial (Equipo)
-        sku_serial, ubicacion = obtener_info_serial(code)
-        if sku_serial:
-            if ubicacion != movil:
-                # El usuario quiere poder retornar cosas aunque la BD diga que están en otro lado.
-                # Permitimos la captura pero con un color de advertencia (amarillo/naranja).
-                logger.warning(f"⚠️ Serial '{code}' registrado en {ubicacion}, pero se está retornando desde {movil}")
-                self.entry_scan.config(bg='#ffeeba') # Color aviso
-            
-            sku_found = sku_serial
-            is_serial = True
-            
-            key_serials = f"_seriales_{sku_found}"
-            if key_serials not in self.session_data: self.session_data[key_serials] = []
-            if code in self.session_data[key_serials]:
-                 messagebox.showwarning("Duplicado",
-                                        f"El serial / MAC '{code}' ya fue escaneado en esta sesión.\nNo se puede agregar dos veces.",
-                                        parent=self.ventana)
-                 self.entry_scan.config(bg='#fff3cd')
-                 self.ventana.after(1000, lambda: self.entry_scan.config(bg='#e8f0fe'))
-                 return
-            self.session_data[key_serials].append(code)
+        # Procesar en segundo plano para evitar que se congele la ventana (Tkinter)
+        threading.Thread(target=self._buscar_codigo_bg, args=(code, movil), daemon=True).start()
 
-        # 2. Intentar como Barcode (Material)
+    def _buscar_codigo_bg(self, code, movil):
+        # 1. Búsqueda rápida y única en la base de datos (Serial, Barcode o Maestro todo en una)
+        sku_found, is_serial, ubicacion = identificar_codigo_escaneado_gui(code)
+        
+        # 2. Si no encontró en base de datos, quizás el técnico digitó un SKU directamente
         if not sku_found:
-            mapped_sku = obtener_sku_por_codigo_barra(code)
-            if mapped_sku:
-                sku_found = mapped_sku
-
-        # 3. Intentar como SKU Directo (Incluso si no está en stock_teorico)
-        if not sku_found:
-             # Si el código es un SKU válido en el sistema (aunque no esté asignado al móvil)
              if not hasattr(self, '_prod_name_map'):
                  try: self._prod_name_map = {p[1]: p[0] for p in obtener_todos_los_skus_para_movimiento()}
                  except: self._prod_name_map = {}
              
              if code in self._prod_name_map:
                  sku_found = code
+                 is_serial = False
+                 ubicacion = None
 
-        # Procesar Hallazgo
+        # 3. Mandar el resultado de vuelta al hilo principal de Tkinter
+        self.ventana.after(0, self._procesar_resultado_scan, code, movil, sku_found, is_serial, ubicacion)
+
+    def _procesar_resultado_scan(self, code, movil, sku_found, is_serial, ubicacion):
+        # Desbloquear entry
+        self.entry_scan.config(state='normal')
+        self.entry_scan.delete(0, tk.END)
+        self.entry_scan.focus_set()
+        
         if sku_found:
+            # Validaciones para equipos (Seriales)
+            if is_serial:
+                if ubicacion != movil:
+                    logger.warning(f"⚠️ Serial '{code}' registrado en {ubicacion}, pero se está retornando desde {movil}")
+                    self.entry_scan.config(bg='#ffeeba') # Color aviso
+                
+                key_serials = f"_seriales_{sku_found}"
+                if key_serials not in self.session_data: self.session_data[key_serials] = []
+                if code in self.session_data[key_serials]:
+                     messagebox.showwarning("Duplicado",
+                                            f"El serial / MAC '{code}' ya fue escaneado en esta sesión.\nNo se puede agregar dos veces.",
+                                            parent=self.ventana)
+                     self.entry_scan.config(bg='#fff3cd')
+                     self.ventana.after(1000, lambda: self.entry_scan.config(bg='#e8f0fe'))
+                     return
+                self.session_data[key_serials].append(code)
+
             es_danado = getattr(self, 'var_danado', None) and self.var_danado.get()
-            
-            # Si es material (no serial), pedir cantidad
             qty_scanned = 1
+            
+            # Si es material (no serial), pedir cantidad física real
             if not is_serial:
                 from tkinter import simpledialog
+                if not hasattr(self, '_prod_name_map'):
+                    try: self._prod_name_map = {p[1]: p[0] for p in obtener_todos_los_skus_para_movimiento()}
+                    except: self._prod_name_map = {}
                 nombre_p = self._prod_name_map.get(sku_found, "Material")
                 qty = simpledialog.askinteger("Cantidad Real", f"Producto: {nombre_p}\nSKU: {sku_found}\n\n¿Qué cantidad física está contando?", 
                                                parent=self.ventana, minvalue=0)
@@ -1460,14 +1470,14 @@ class MobileReturnWindow:
                         self.session_data['seriales_danados'][sku_found] = []
                     self.session_data['seriales_danados'][sku_found].append(code)
                     
-                    # Remover el serial de los 'buenos' para que NO se mande al Salida a Móvil
+                    # Remover el serial de los 'buenos'
                     key_serials = f"_seriales_{sku_found}"
                     if key_serials in self.session_data and code in self.session_data[key_serials]:
                         self.session_data[key_serials].remove(code)
                 
-                # Alerta visual roja
                 self.entry_scan.config(bg='#f8d7da')
-                self.var_danado.set(False) # Resetear checkbox para el próximo scan
+                if getattr(self, 'var_danado', None):
+                    self.var_danado.set(False) # Resetear checkbox
                 logger.info(f"⚠️ Dañado registrado: {sku_found} -> Qty: {qty_scanned}")
                 messagebox.showinfo("Dañado", f"Se registró {qty_scanned} ud(s) de '{sku_found}' como DAÑADO.", parent=self.ventana)
             else:
@@ -1483,13 +1493,14 @@ class MobileReturnWindow:
             self.ventana.after(500, lambda: self.entry_scan.config(bg='#e8f0fe'))
             self.update_fisico_ui()
         else:
-            # No se encontró — mostrar error claro
+            # No se encontró
             self.entry_scan.config(bg='#e74c3c')
             self.ventana.after(1200, lambda: self.entry_scan.config(bg='#e8f0fe'))
             messagebox.showerror("MAC / Código no reconocido",
                                  f"'{code}' no se encontró en el sistema o no pertenece a este móvil.\n\nVerifique el código e intente de nuevo.",
                                  parent=self.ventana)
             logger.warning(f"❌ Código '{code}' no reconocido en este móvil")
+
 
     def finalizar(self):
         if not messagebox.askyesno("Confirmar Cierre", "Se procesará el retorno y consumo. ¿Continuar?", parent=self.ventana): return
