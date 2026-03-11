@@ -1370,6 +1370,22 @@ class InventoryTab:
             from tkinter import messagebox
             messagebox.showerror("Error", f"No se pudo abrir Retorno de Móvil:\n{e}")
 
+    def mostrar_stock_critico(self):
+        """Filtra y resalta los productos con bajo stock en la tabla principal"""
+        try:
+            from tkinter import messagebox
+            import tkinter as tk
+            # Refrescar tabla con filtro de bajo stock
+            self.cargar_datos_tabla()
+            messagebox.showinfo(
+                "Stock Crítico",
+                "Se han resaltado los productos con stock bajo en la tabla.\n\n"
+                "Revisa los items marcados en rojo.",
+                parent=self.master
+            )
+        except Exception as e:
+            from tkinter import messagebox
+            messagebox.showerror("Error", f"No se pudo mostrar stock crítico:\n{e}")
 
     def abrir_ventana_abasto(self):
         """Abre ventana para registro de abasto"""
