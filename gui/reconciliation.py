@@ -4,9 +4,9 @@ from tkinter import ttk, messagebox, filedialog
 import pandas as pd
 # Suppress FutureWarning for clear logs
 pd.set_option('future.no_silent_downcasting', True)
-from datetime import datetime, timedelta
+from datetime import datetime
 from tkcalendar import DateEntry
-from database import obtener_movimientos_por_rango, obtener_asignacion_movil, registrar_movimiento_gui
+from database import obtener_asignacion_movil, registrar_movimiento_gui
 from config import PRODUCTOS_INICIALES
 import sqlite3 
 import difflib

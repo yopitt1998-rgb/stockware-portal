@@ -4,6 +4,7 @@ import threading
 from tkinter import ttk
 from .styles import Styles
 from .tooltips import create_tooltip, TOOLTIPS
+from .utils import ScrollableFrame
 from database import obtener_estadisticas_reales, obtener_inventario, obtener_stock_actual_y_moviles, obtener_ultimos_movimientos
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -14,7 +15,15 @@ class DashboardTab:
     def __init__(self, notebook, main_app):
         self.notebook = notebook
         self.main_app = main_app
-        self.metric_labels = {} # Store references to update later
+        self.metric_labels = {}
+        self.scroll_container = None
+        self.dashboard_table = None
+        self.ax_bar = None
+        self.fig_bar = None
+        self.canvas_bar = None
+        self.ax_pie = None
+        self.fig_pie = None
+        self.canvas_pie = None
         
         self.create_widgets()
         
@@ -23,8 +32,14 @@ class DashboardTab:
         dashboard_frame = ttk.Frame(self.notebook, style='Modern.TFrame')
         self.notebook.add(dashboard_frame, text="📊 Dashboard")
         
+        # Envolver todo en un ScrollableFrame para pantallas pequeñas
+        self.scroll_container = ScrollableFrame(dashboard_frame)
+        self.scroll_container.pack(fill='both', expand=True)
+        
+        main_content = self.scroll_container.scrollable_frame
+
         # Grid para métricas
-        metrics_frame = ttk.Frame(dashboard_frame, style='Modern.TFrame')
+        metrics_frame = ttk.Frame(main_content, style='Modern.TFrame')
         metrics_frame.pack(fill='x', padx=20, pady=20)
         
         # Métricas iniciales (se actualizarán luego)
@@ -39,13 +54,13 @@ class DashboardTab:
             self.create_metric_card(metrics_frame, metric, i)
             
         # Acciones Rápidas
-        self.create_quick_actions(dashboard_frame)
+        self.create_quick_actions(main_content)
         
         # Tabla de movimientos recientes
-        self.create_recent_table(dashboard_frame)
+        self.create_recent_table(main_content)
 
         # Gráficos
-        self.create_charts(dashboard_frame)
+        self.create_charts(main_content)
 
         # Actualizar valores iniciales
         self.actualizar_metricas()
@@ -222,8 +237,23 @@ class DashboardTab:
                 self.main_app.master.after(0, lambda: self._aplicar_actualizacion_ui(estadisticas, movimientos, datos_charts))
             except Exception as e:
                 print(f"⚠️ Error al actualizar dashboard: {e}")
-                # Mostrar error en la tabla para que el usuario sepa que falló
-                self.main_app.master.after(0, lambda: self.dashboard_table.insert('', tk.END, values=("❌", "Error de Red", "No se pudo conectar", "Reintente en unos momentos", "", "")))
+                # Mostrar error visual en los labels para que el usuario sepa que no hay conexión
+                def _mostrar_error_conexion():
+                    if not self.notebook.winfo_exists():
+                        return
+                    for key, lbl in self.metric_labels.items():
+                        try:
+                            lbl.config(text="⚠️")
+                        except Exception:
+                            pass
+                    if self.dashboard_table and self.dashboard_table.winfo_exists():
+                        for child in self.dashboard_table.get_children():
+                            self.dashboard_table.delete(child)
+                        self.dashboard_table.insert('', tk.END, values=(
+                            "❌", "Error de Red", "Sin conexión a MySQL",
+                            "Verifica tu internet y reintenta", "", ""
+                        ))
+                self.main_app.master.after(0, _mostrar_error_conexion)
 
         threading.Thread(target=run_update, daemon=True).start()
 

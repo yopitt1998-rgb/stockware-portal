@@ -9,7 +9,8 @@ from database import (
     obtener_todos_los_skus_para_movimiento,
     obtener_detalles_moviles,
     registrar_consumo_directo,
-    inicializar_bd
+    inicializar_bd,
+    obtener_tecnicos
 )
 import threading
 import json
@@ -17,6 +18,11 @@ from config import (
     DB_TYPE, PAQUETES_MATERIALES, MATERIALES_COMPARTIDOS, 
     MOVILES_SANTIAGO, PRODUCTOS_CON_CODIGO_BARRA
 )
+import logging
+
+# Configurar logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Mapeo SKU → Nombre Excel (para mostrar nombres cortos en portal)
 SKU_TO_EXCEL_NAME = {
@@ -29,7 +35,7 @@ SKU_TO_EXCEL_NAME = {
     "1-8-41": "TAPE",
     "2-5-02": "GRAPAS",
     "2-5-03": "G_C_PARED6",
-    "2-7-07": "CALCAMONIA",
+    "2-7-07": "Sticker",
     "2-7-11": "COLILLA",
     "4-2-41": "TOALLAS",
     "4-3-18": "CONEC_MECA",
@@ -61,6 +67,27 @@ try:
     print("✅ Base de Datos inicializada correctamente.")
 except Exception as e:
     print(f"⚠️ Error inicializando BD: {e}")
+
+@app.errorhandler(500)
+def handle_500_error(e):
+    """Manejador global para errores de servidor (Evita páginas en blanco)"""
+    logger.error(f"💥 Error 500 detectado: {e}")
+    import traceback
+    error_trace = traceback.format_exc()
+    return f"""
+    <html>
+        <body style="font-family: sans-serif; padding: 20px; background: #fff5f5;">
+            <h1 style="color: #c53030;">🚀 StockWare: Error Crítico de Servidor</h1>
+            <div style="background: white; border: 1px solid #feb2b2; padding: 15px; border-radius: 8px;">
+                <p><b>Mensaje:</b> {str(e)}</p>
+                <hr>
+                <p><b>Detalle Técnico:</b></p>
+                <pre style="background: #f7fafc; padding: 10px; border-radius: 4px; overflow: auto;">{error_trace}</pre>
+            </div>
+            <p><a href="/">🏠 Volver al inicio</a></p>
+        </body>
+    </html>
+    """, 500
 
 @app.route('/')
 def index():
@@ -97,6 +124,7 @@ def index():
                 productos_excel.append((nombre_excel, sku, cantidad))
             
             details_moviles = obtener_detalles_moviles()
+            tecnicos = obtener_tecnicos(solo_activos=True)
             
             count_m = len(moviles)
             count_p = len(productos_excel)
@@ -111,6 +139,7 @@ def index():
             moviles = []
             productos = []
             details_moviles = {}
+            tecnicos = []
 
     try:
         return render_template('index.html', 
@@ -121,6 +150,7 @@ def index():
                                  sku_to_excel_name=json.dumps(SKU_TO_EXCEL_NAME),
                                  paquetes=json.dumps(PAQUETES_MATERIALES),
                                  materiales_compartidos=json.dumps(MATERIALES_COMPARTIDOS),
+                                 tecnicos=tecnicos if 'tecnicos' in locals() else [],
                                  db_status=status,
                                  db_engine=engine,
                                  error_detail=error_detail,
@@ -137,23 +167,17 @@ def santiago():
     productos_santiago = []
     
     try:
-        # En Santiago Directo, obtenemos TODO el stock de BODEGA
         from config import MYSQL_DB as _MYSQL_DB_S
-        target_db = _MYSQL_DB_S  # Forzar DB correcta de Render
+        from database import obtener_todos_los_skus_para_movimiento
+        target_db = _MYSQL_DB_S
         
-        # Obtenemos el stock actual de la BD
         raw_stock = obtener_todos_los_skus_para_movimiento(target_db=target_db, sucursal_context='SANTIAGO')
         stock_map = {sku: cantidad for _, sku, cantidad in raw_stock}
         
-        # Traemos la lista maestra de config para asegurar que salgan todos (incluso con stock 0)
         from config import PRODUCTOS_INICIALES
-        
         for name_excel, sku, _ in PRODUCTOS_INICIALES:
-            # Evitar mostrar el router 4-4-654 si anteriormente se pidió filtrar, 
-            # pero el usuario ahora pide "toda la lista", así que lo dejamos si está en la maestra.
             cantidad = stock_map.get(sku, 0)
             es_equipo = sku in PRODUCTOS_CON_CODIGO_BARRA
-            
             productos_santiago.append({
                 "nombre": name_excel,
                 "sku": sku,
@@ -165,14 +189,122 @@ def santiago():
         status = "ERROR"
         error_detail = str(e)
         logger.error(f"Error cargando portal Santiago: {e}")
+ 
+    try:
+        return render_template('santiago.html',
+                               hoy=date.today().isoformat(),
+                               moviles=MOVILES_SANTIAGO,
+                               productos=productos_santiago,
+                               details_moviles=json.dumps(obtener_detalles_moviles()),
+                               tecnicos=obtener_tecnicos(solo_activos=True),
+                               sku_to_excel_name=json.dumps(SKU_TO_EXCEL_NAME),
+                               db_status=status,
+                               error_detail=error_detail)
+    except Exception as template_err:
+        logger.error(f"Error renderizando santiago.html: {template_err}")
+        return f"<h1>⚠️ Error Santiago</h1><p>Status: {status}</p><p>Detail: {error_detail}</p><p>Template: {str(template_err)}</p>"
 
-    return render_template('santiago.html',
-                           hoy=date.today().isoformat(),
-                           moviles=MOVILES_SANTIAGO,
-                           productos=productos_santiago,
-                           sku_to_excel_name=json.dumps(SKU_TO_EXCEL_NAME),
-                           db_status=status,
-                           error_detail=error_detail)
+@app.route('/modo_lunes')
+def modo_lunes():
+    """Página del Plan B (Lunes) - Consumo Directo de Bodega"""
+    status = "OK"
+    error_detail = ""
+    productos_equipos = []
+    
+    try:
+        from config import PRODUCTOS_INICIALES, PRODUCTOS_CON_CODIGO_BARRA
+        from database import obtener_todos_los_skus_para_movimiento
+        
+        # Filtramos solo los equipos (seriales) para la interfaz de lunes
+        for name_excel, sku, _ in PRODUCTOS_INICIALES:
+            if sku in PRODUCTOS_CON_CODIGO_BARRA:
+                productos_equipos.append({
+                    "nombre": name_excel,
+                    "sku": sku
+                })
+                
+        moviles = obtener_nombres_moviles()
+        details_moviles = obtener_detalles_moviles()
+        tecnicos = obtener_tecnicos(solo_activos=True)
+            
+    except Exception as e:
+        status = "ERROR"
+        error_detail = str(e)
+        moviles = []
+        details_moviles = {}
+        tecnicos = []
+
+    try:
+        return render_template('modo_lunes.html',
+                               hoy=date.today().isoformat(),
+                               moviles=moviles,
+                               productos=productos_equipos,
+                               details_moviles=json.dumps(details_moviles),
+                               tecnicos=tecnicos,
+                               sku_to_excel_name=json.dumps(SKU_TO_EXCEL_NAME),
+                               db_status=status,
+                               error_detail=error_detail)
+    except Exception as template_err:
+        logger.error(f"Error renderizando modo_lunes.html: {template_err}")
+        return f"<h1>⚠️ Error Modo Lunes</h1><p>Status: {status}</p><p>Detail: {error_detail}</p><p>Template: {str(template_err)}</p>"
+
+@app.route('/registrar_lunes', methods=['POST'])
+def registrar_lunes_post():
+    """Procesa el consumo directo del Plan B (Lunes)"""
+    data = request.json
+    if not data:
+        return jsonify({"exito": False, "mensaje": "Sin datos"})
+
+    try:
+        exitos = 0
+        materiales = data.get('materiales', [])
+        movil = data.get('movil')
+        tecnico = data.get('tecnico')
+        ticket = data.get('contrato')
+        fecha = data.get('fecha', date.today().isoformat())
+
+        from database import verificar_seriales_bodega, registrar_consumo_directo
+        from config import MYSQL_DB, MOVILES_SANTIAGO
+
+        for item in materiales:
+            sku = item['sku']
+            cantidad = item.get('cantidad', 1)
+            seriales = item.get('seriales', [])
+            
+            # 1. DETERMINAR SUCURSAL SEGÚN EL MÓVIL SELECCIONADO
+            sucursal_ctx = 'SANTIAGO' if movil in MOVILES_SANTIAGO else 'CHIRIQUI'
+            target_db_ctx = MYSQL_DB
+
+            # 2. VALIDAR SERIALES
+            if seriales:
+                ok_v, msg_v = verificar_seriales_bodega(seriales, sucursal_context=sucursal_ctx, target_db=target_db_ctx)
+                if not ok_v:
+                    return jsonify({"exito": False, "mensaje": msg_v})
+
+            # 3. REGISTRAR COMO CONSUMO DIRECTO (DESCUENTA DE BODEGA)
+            exito, msg = registrar_consumo_directo(
+                sku=sku,
+                cantidad=cantidad,
+                movil=movil,
+                tecnico=tecnico,
+                ticket=ticket,
+                fecha_evento=fecha,
+                seriales=seriales,
+                observaciones=f"Plan B Lunes - Ticket {ticket}",
+                target_db=target_db_ctx,
+                sucursal_context=sucursal_ctx
+            )
+            
+            if not exito:
+                raise Exception(f"Error en {sku}: {msg}")
+            
+            exitos += 1
+            
+        return jsonify({"exito": True, "mensaje": f"Reporte de Lunes procesado correctamente ({exitos} equipos)."})
+
+    except Exception as e:
+        logger.error(f"Error en registrar_lunes: {e}")
+        return jsonify({"exito": False, "mensaje": str(e)})
 
 @app.route('/registrar_santiago', methods=['POST'])
 def registrar_santiago_post():
@@ -656,37 +788,41 @@ def auditoria():
 def api_consumos_dia():
     """Devuelve los consumos del día para una móvil y fecha dadas"""
     movil = request.args.get('movil', '')
-    fecha = request.args.get('fecha', date.today().isoformat())
+    fecha_inicio = request.args.get('fecha_inicio', date.today().isoformat())
+    fecha_fin = request.args.get('fecha_fin', date.today().isoformat())
 
     try:
         from database import get_db_connection, run_query
         from config import MOVILES_SANTIAGO
 
         target_db = None
-        pass
+        # Resolver contexto de sucursal
+        sucursal_ctx = 'SANTIAGO' if movil in MOVILES_SANTIAGO else 'CHIRIQUI'
 
         conn = get_db_connection(target_db=target_db)
         cursor = conn.cursor()
 
-        # Traer consumos del día para esa móvil (o todas si no se especifica)
+        # Traer consumos del rango para esa móvil (o todas si no se especifica)
+        params = [f"{fecha_inicio}", f"{fecha_fin} 23:59:59"]
         if movil:
             sql = """
                 SELECT id, movil, sku, cantidad, tecnico_nombre, ayudante_nombre,
                        ticket, fecha, colilla, num_contrato, seriales_usados, estado
                 FROM consumos_pendientes
-                WHERE fecha = ? AND movil = ?
-                ORDER BY id DESC
+                WHERE fecha >= ? AND fecha <= ? AND movil = ?
+                ORDER BY fecha DESC, id DESC
             """
-            run_query(cursor, sql, (fecha, movil))
+            params.append(movil)
+            run_query(cursor, sql, tuple(params))
         else:
             sql = """
                 SELECT id, movil, sku, cantidad, tecnico_nombre, ayudante_nombre,
                        ticket, fecha, colilla, num_contrato, seriales_usados, estado
                 FROM consumos_pendientes
-                WHERE fecha = ?
-                ORDER BY movil, id DESC
+                WHERE fecha >= ? AND fecha <= ?
+                ORDER BY fecha DESC, movil, id DESC
             """
-            run_query(cursor, sql, (fecha,))
+            run_query(cursor, sql, tuple(params))
 
         rows = cursor.fetchall()
         conn.close()
@@ -717,7 +853,7 @@ def api_consumos_dia():
                 "estado": estado or ""
             })
 
-        return jsonify({"fecha": fecha, "movil": movil, "consumos": consumos, "total": len(consumos)})
+        return jsonify({"fecha_inicio": fecha_inicio, "fecha_fin": fecha_fin, "movil": movil, "consumos": consumos, "total": len(consumos)})
 
     except Exception as e:
         import traceback

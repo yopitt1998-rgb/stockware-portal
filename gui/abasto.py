@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import threading
+import os
 from datetime import date
 from config import PRODUCTOS_CON_CODIGO_BARRA
 from .styles import Styles
@@ -255,31 +256,43 @@ class AbastoWindow:
         self.setup_history_tab()
         
     def setup_register_tab(self):
-        # --- Formulario ---
-        form_frame = tk.Frame(self.tab_register, bg='#f8f9fa', pady=10)
-        form_frame.pack(fill='x')
+        # --- Formulario superior (grid organizado) ---
+        form_outer = tk.Frame(self.tab_register, bg='#f0f4f8', padx=20, pady=12)
+        form_outer.pack(fill='x')
         
-        # Fecha
-        tk.Label(form_frame, text="Fecha (YYYY-MM-DD):", font=('Segoe UI', 10, 'bold'), bg='#f8f9fa').pack(side='left', padx=(20, 5))
-        self.fecha_entry = tk.Entry(form_frame, width=15, font=('Segoe UI', 10))
+        tk.Label(form_outer, text="📦 Datos del Abasto", font=('Segoe UI', 11, 'bold'),
+                 bg='#f0f4f8', fg='#2c3e50').grid(row=0, column=0, columnspan=4, sticky='w', pady=(0, 8))
+
+        # Fila 1: Fecha y Referencia
+        tk.Label(form_outer, text="Fecha (YYYY-MM-DD):", font=('Segoe UI', 10, 'bold'),
+                 bg='#f0f4f8').grid(row=1, column=0, sticky='w', padx=(0, 5), pady=4)
+        self.fecha_entry = tk.Entry(form_outer, width=15, font=('Segoe UI', 10))
         self.fecha_entry.insert(0, date.today().isoformat())
-        self.fecha_entry.pack(side='left', padx=5)
-        
-        # Referencia
-        tk.Label(form_frame, text="Referencia / ID Abasto:", font=('Segoe UI', 10, 'bold'), bg='#f8f9fa').pack(side='left', padx=(20, 5))
-        self.ref_entry = tk.Entry(form_frame, width=20, font=('Segoe UI', 10))
-        self.ref_entry.pack(side='left', padx=5)
-        
-        # Observaciones
-        tk.Label(form_frame, text="Observaciones:", font=('Segoe UI', 10, 'bold'), bg='#f8f9fa').pack(side='left', padx=(20, 5))
-        self.obs_entry = tk.Entry(form_frame, width=30, font=('Segoe UI', 10))
-        self.obs_entry.pack(side='left', padx=5)
-        
-        # Botón Guardar
-        self.btn_save = tk.Button(form_frame, text="💾 Guardar Abasto", command=self.guardar_abasto,
-                           bg=Styles.SUCCESS_COLOR, fg='white', font=('Segoe UI', 10, 'bold'), relief='flat', padx=15, pady=5)
-        self.btn_save.pack(side='right', padx=20)
-        
+        self.fecha_entry.grid(row=1, column=1, sticky='w', padx=(0, 25), pady=4)
+
+        tk.Label(form_outer, text="Referencia:", font=('Segoe UI', 10, 'bold'),
+                 bg='#f0f4f8').grid(row=1, column=2, sticky='w', padx=(0, 5), pady=4)
+        self.ref_entry = tk.Entry(form_outer, width=22, font=('Segoe UI', 10))
+        self.ref_entry.grid(row=1, column=3, sticky='w', pady=4)
+
+        # Fila 2: Observaciones + Botón
+        tk.Label(form_outer, text="Observaciones:", font=('Segoe UI', 10, 'bold'),
+                 bg='#f0f4f8').grid(row=2, column=0, sticky='w', padx=(0, 5), pady=4)
+        self.obs_entry = tk.Entry(form_outer, width=48, font=('Segoe UI', 10))
+        self.obs_entry.grid(row=2, column=1, columnspan=2, sticky='ew', padx=(0, 10), pady=4)
+
+        self.btn_save = tk.Button(
+            form_outer, text="💾  Guardar Abasto",
+            command=self.guardar_abasto,
+            bg='#27ae60', fg='white',
+            font=('Segoe UI', 11, 'bold'),
+            relief='flat', padx=18, pady=8,
+            cursor='hand2'
+        )
+        self.btn_save.grid(row=2, column=3, sticky='e', pady=4)
+
+        form_outer.columnconfigure(3, weight=1)
+
         # --- SECCIÓN DE ESCÁNER (NUEVO) ---
         scan_frame = tk.Frame(self.tab_register, bg='#E8EAF6', padx=10, pady=5, relief='groove', bd=1)
         scan_frame.pack(fill='x', padx=20, pady=(10, 0))
@@ -532,6 +545,14 @@ class AbastoWindow:
             self.btn_save.config(state='disabled', text="⏳ Guardando...")
             self.window.update_idletasks() # Forzar actualización UI
             
+            # --- INITIALIZATIONS ---
+            series_globales = []
+            success_count = 0
+            errors = []
+            
+            # SUCURSAL CONTEXT
+            sucursal = 'SANTIAGO' if os.environ.get('SANTIAGO_DIRECT_MODE') == '1' else 'CHIRIQUI'
+            
             # --- VALIDACIÓN DE SERIES ---
             for sku, qty in items_to_save:
                 if sku in PRODUCTOS_CON_CODIGO_BARRA:
@@ -554,7 +575,8 @@ class AbastoWindow:
             for sku, qty in items_to_save:
                 ok, msg = registrar_movimiento_gui(
                     sku, 'ABASTO', qty, None, fecha, 
-                    documento_referencia=ref, observaciones=obs
+                    documento_referencia=ref, observaciones=obs,
+                    sucursal_context=sucursal
                 )
                 if ok:
                     success_count += 1

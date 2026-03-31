@@ -73,7 +73,9 @@ class MobileOutputScannerWindow:
         
     def load_initial_data(self):
         def load():
-            from database import obtener_nombres_moviles, obtener_todos_los_skus_para_movimiento
+            from database import obtener_nombres_moviles, obtener_todos_los_skus_para_movimiento, obtener_diccionarios_escaneo
+            from config import CURRENT_CONTEXT
+            branch = CURRENT_CONTEXT.get('BRANCH', 'CHIRIQUI')
             
             # Cargar móviles
             moviles = obtener_nombres_moviles()
@@ -82,12 +84,17 @@ class MobileOutputScannerWindow:
             prods = obtener_todos_los_skus_para_movimiento()
             cache = {sku: {'nombre': nombre, 'stock': stock} for nombre, sku, stock in prods}
             
-            return moviles, cache
+            # Cargar cachés de escaneo rápido
+            seriales, barcodes = obtener_diccionarios_escaneo(sucursal_context=branch)
+            
+            return moviles, cache, seriales, barcodes
             
         def on_loaded(result):
-            moviles, cache = result
+            moviles, cache, seriales, barcodes = result
             self.combo_movil['values'] = moviles
             self.productos_cache = cache
+            self.serial_cache = seriales
+            self.barcode_cache = barcodes
             
             # Pre-seleccionar según modo o parámetros iniciales
             if self.initial_movil:
@@ -369,8 +376,17 @@ class MobileOutputScannerWindow:
             nombre_serial = None
             ubicacion_actual = None
 
-            # 1. Intentar reconocer como serial/MAC
-            if obtener_sku_por_serial:
+            # 1. Intentar reconocer como serial/MAC en memoria caché (INSTANTÁNEO)
+            if hasattr(self, 'serial_cache') and codigo in self.serial_cache:
+                sku_serial, ub = self.serial_cache[codigo]
+                sku = sku_serial
+                origen_serial = True
+                nombre_serial = codigo
+                ubicacion_actual = ub
+                logger.debug(f"Cache Hit: Serial {codigo} -> SKU {sku} (Ubicación: {ub})")
+            
+            # 2. Búsqueda remota (Fallback) solo si no está en caché
+            elif obtener_sku_por_serial:
                 try:
                     sku_serial, existe, ub = obtener_sku_por_serial(codigo)
                     if existe:
@@ -378,21 +394,27 @@ class MobileOutputScannerWindow:
                         origen_serial = True
                         nombre_serial = codigo
                         ubicacion_actual = ub
-                        logger.info(f"Auto-reconocimiento: Serial {codigo} -> SKU {sku} (Ubicación: {ub})")
+                        logger.info(f"Fallback remoto: Serial {codigo} -> SKU {sku} (Ubicación: {ub})")
                 except Exception as e:
-                    logger.error(f"Error en auto-reconocimiento de serial: {e}")
+                    logger.error(f"Error en auto-reconocimiento remoto de serial: {e}")
 
-            # 2. Si no es serial, buscar por SKU/Barcode
+            # 3. Si no es serial, buscar por SKU/Barcode
             if not origen_serial:
                 if codigo in self.productos_cache:
                     sku = codigo
+                # Buscar en caché de códigos de barra en memoria (INSTANTÁNEO)
+                elif hasattr(self, 'barcode_cache') and codigo in self.barcode_cache:
+                    sku = self.barcode_cache[codigo]
+                    logger.debug(f"Cache Hit: Barcode {codigo} -> SKU {sku}")
+                # Búsqueda remota de barcode (Fallback)
                 elif obtener_sku_por_codigo_barra:
                     try:
                         sku_found = obtener_sku_por_codigo_barra(codigo)
                         if sku_found:
                             sku = sku_found
+                            logger.info(f"Fallback remoto: Barcode {codigo} -> SKU {sku}")
                     except Exception as e:
-                        logger.error(f"Error buscando por código de barra: {e}")
+                        logger.error(f"Error buscando por código de barra remoto: {e}")
 
             return sku, origen_serial, nombre_serial, ubicacion_actual
 
@@ -407,10 +429,10 @@ class MobileOutputScannerWindow:
 
             try:
                 # Validación de ubicación si fue reconocido como serial
-                if origen_serial and ubicacion_actual and ubicacion_actual != 'BODEGA':
+                if origen_serial and ubicacion_actual and ubicacion_actual not in ['BODEGA', 'FALTANTE']:
                     messagebox.showerror("Ubicación Inválida",
                         f"El equipo con serial {codigo} ya está asignado a: {ubicacion_actual}\n\n"
-                        "No se puede realizar una salida de un equipo que no esté en BODEGA.",
+                        "No se puede realizar una salida de un equipo que no esté en BODEGA o FALTANTE.",
                         parent=self.window)
                     self.entry_scanner.focus_set()
                     return
@@ -797,57 +819,85 @@ class MobileOutputScannerWindow:
         items_to_process = list(self.items_carrito)
         
         def process_background():
-            from database import registrar_movimiento_gui, actualizar_ubicacion_serial
+            from database import registrar_movimiento_gui, actualizar_ubicacion_serial, get_db_connection, close_connection
             count = 0
             errores = []
             exitosos = []
             branch = CURRENT_CONTEXT.get('BRANCH')
+            paquete_sel = self.combo_paquete.get() if hasattr(self, 'combo_paquete') else None
             
-            for item in items_to_process:
-                sku = item['sku']
-                nombre = item['nombre']
-                cantidad = item['cantidad']
-                seriales = [s.strip().upper() for s in item.get('seriales', [])]
-                paquete_sel = self.combo_paquete.get() if hasattr(self, 'combo_paquete') else None
-                
-                try:
-                    # Determinar tipo de movimiento
-                    tipo_mov = 'SALIDA_MOVIL'
-                    if self.mode == 'PRESTAMO_SANTIAGO':
-                        tipo_mov = 'PRESTAMO_SANTIAGO'
-                    elif self.mode == 'DEVOLUCION_SANTIAGO':
-                        tipo_mov = 'RETORNO_MOVIL'
-                    elif self.mode == 'TRASLADO':
-                        tipo_mov = 'TRASLADO'
+            # OPTIMIZACIÓN: Una sola conexión compartida para todos los items (reduce latencia MySQL)
+            shared_conn = None
+            try:
+                shared_conn = get_db_connection()
+            except Exception as e:
+                logger.warning(f"No se pudo abrir conexión compartida: {e}. Usando conexiones individuales.")
+                shared_conn = None
+            
+            total = len(items_to_process)
+            try:
+                for idx, item in enumerate(items_to_process, 1):
+                    sku = item['sku']
+                    nombre = item['nombre']
+                    cantidad = item['cantidad']
+                    seriales = [s.strip().upper() for s in item.get('seriales', [])]
                     
-                    # 1. Registrar el movimiento en la bitácora y ajustar stock
-                    ok, msg = registrar_movimiento_gui(
-                        sku=sku,
-                        tipo_movimiento=tipo_mov,
-                        cantidad_afectada=cantidad,
-                        movil_afectado=movil,
-                        fecha_evento=fecha,
-                        paquete_asignado=paquete_sel,
-                        sucursal_context=branch
-                    )
+                    # Feedback de progreso en el botón
+                    if self.window.winfo_exists():
+                        self.window.after(0, lambda i=idx, t=total: 
+                            self.btn_registrar.config(text=f"⏳ Procesando {i}/{t}...") 
+                            if hasattr(self, 'btn_registrar') else None)
                     
-                    if not ok:
-                        errores.append(f"{nombre}: {msg}")
-                        continue
-                    
-                    # 2. Si hay seriales, actualizar su ubicación
-                    if seriales:
-                        for s in seriales:
-                            # La nueva ubicación es el móvil de destino
-                            s_ok, s_msg = actualizar_ubicacion_serial(s, movil, paquete=paquete_sel, sucursal_context=branch)
-                            if not s_ok:
-                                logger.warning(f"No se pudo actualizar ubicación de serial {s}: {s_msg}")
-                    
-                    exitosos.append((sku, seriales))
-                    count += 1
+                    try:
+                        # Determinar tipo de movimiento
+                        tipo_mov = 'SALIDA_MOVIL'
+                        if self.mode == 'PRESTAMO_SANTIAGO':
+                            tipo_mov = 'PRESTAMO_SANTIAGO'
+                        elif self.mode == 'DEVOLUCION_SANTIAGO':
+                            tipo_mov = 'RETORNO_MOVIL'
+                        elif self.mode == 'TRASLADO':
+                            tipo_mov = 'TRASLADO'
+                        
+                        # 1. Registrar usando conexión compartida para velocidad
+                        ok, msg = registrar_movimiento_gui(
+                            sku=sku,
+                            tipo_movimiento=tipo_mov,
+                            cantidad_afectada=cantidad,
+                            movil_afectado=movil,
+                            fecha_evento=fecha,
+                            paquete_asignado=paquete_sel,
+                            sucursal_context=branch,
+                            existing_conn=shared_conn
+                        )
+                        
+                        if not ok:
+                            errores.append(f"{nombre}: {msg}")
+                            continue
+                        
+                        # 2. Actualizar ubicación de seriales si aplica
+                        if seriales:
+                            for s in seriales:
+                                s_ok, s_msg = actualizar_ubicacion_serial(s, movil, paquete=paquete_sel, existing_conn=shared_conn, sucursal_context=branch)
+                                if not s_ok:
+                                    logger.warning(f"No se pudo actualizar ubicación de serial {s}: {s_msg}")
+                        
+                        exitosos.append((sku, seriales))
+                        count += 1
 
-                except Exception as e:
-                    errores.append(f"{nombre}: {e}")
+                    except Exception as e:
+                        errores.append(f"{nombre}: {e}")
+                
+                # Commit final único para todos los items
+                if shared_conn:
+                    try:
+                        shared_conn.commit()
+                    except Exception as ce:
+                        logger.error(f"Error en commit final: {ce}")
+            finally:
+                if shared_conn:
+                    try:
+                        close_connection(shared_conn)
+                    except: pass
             
             return count, errores, exitosos
         

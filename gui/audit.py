@@ -4,12 +4,12 @@ import threading
 from tkinter import ttk, filedialog, messagebox
 from datetime import datetime, timedelta
 from .styles import Styles
-from .utils import mostrar_mensaje_emergente
 from database import (
     obtener_consumos_pendientes,
     obtener_nombres_moviles
 )
 from config import CURRENT_CONTEXT
+from .utils import ScrollableFrame, mostrar_mensaje_emergente
 
 class AuditTab(tk.Frame):
     """
@@ -22,13 +22,26 @@ class AuditTab(tk.Frame):
         self.configure(bg='#f8f9fa')
         
         self.datos_excel = None
-        self.moviles_seleccionados = []  # Inicializar lista de móviles seleccionados
+        self.moviles_seleccionados = []
+        self.columnas_base = []
+        self.columnas_materiales = []
+        self._row_ids = {}
+        self.scroll_container = None
+        self.tabla = None
+        self.table_frame = None
+        self.bottom_section = None
+        self.fecha_inicio = None
+        self.fecha_fin = None
+        self.btn_moviles = None
+        self.filtro_entry = None
+        self.context_menu = None
+        
         self.create_widgets()
         self.cargar_datos_pendientes()
 
     def create_widgets(self):
-        # Layout principal
-        main_container = tk.Frame(self, bg='#f8f9fa', padx=20, pady=20)
+        # Layout principal directamente sobre self (sin ScrollableFrame redundante)
+        main_container = tk.Frame(self, bg='#f8f9fa', padx=5, pady=5)
         main_container.pack(fill='both', expand=True)
 
         # --- SECCIÓN SUPERIOR: ACCIONES ---
@@ -68,8 +81,9 @@ class AuditTab(tk.Frame):
         self.filtro_entry.bind('<Return>', lambda e: self.cargar_datos_pendientes())
         
         # Botón Buscar explícito (UX mejora)
-        tk.Button(dates_frame, text="🔍", command=self.cargar_datos_pendientes,
-                 bg='#00897B', fg='white', font=('Segoe UI', 8, 'bold'), relief='flat').pack(side='left', padx=0)
+        tk.Button(dates_frame, text="🔍 BUSCAR", command=self.cargar_datos_pendientes,
+                 bg='#00897B', fg='white', font=('Segoe UI', 9, 'bold'), relief='flat',
+                 padx=10, pady=2).pack(side='left', padx=(5, 0))
         
         # Botón de reset filtros
         tk.Button(dates_frame, text="✖", command=lambda: [self.filtro_entry.delete(0, 'end'), self.cargar_datos_pendientes()],
@@ -95,14 +109,14 @@ class AuditTab(tk.Frame):
 
         # === CONTENEDOR DE TABLA DE HISTORIAL ===
         self.bottom_section = tk.LabelFrame(main_container, text="📜 HISTORIAL DE INSTALACIONES (REPORTADO)", 
-                                    font=('Segoe UI', 11, 'bold'), bg='#f8f9fa', fg=Styles.PRIMARY_COLOR, 
-                                    relief='groove', borderwidth=2, padx=5, pady=5)
+                                    font=('Segoe UI', 12, 'bold'), bg='#f8f9fa', fg=Styles.PRIMARY_COLOR, 
+                                    relief='groove', borderwidth=2, padx=0, pady=0)
         self.bottom_section.pack(side='top', fill='both', expand=True, pady=(10, 0))
         
         self.table_frame = tk.Frame(self.bottom_section, bg='white', relief='flat')
         self.table_frame.pack(fill='both', expand=True)
 
-        self.columnas_base = ["Móvil", "Contrato", "Fecha Cierre", "Colilla TV"]
+        self.columnas_base = ["Móvil", "Técnico", "Ayudante", "Contrato", "Fecha Cierre", "Colilla TV", "Estado"]
         self.columnas_materiales = []
         self._row_ids = {}
 
@@ -173,12 +187,13 @@ class AuditTab(tk.Frame):
 
         frame.bind("<Configure>", on_frame_configure)
         
-        # Cargar Móviles
+        # Cargar Móviles filtrados por Sucursal
         from config import CURRENT_CONTEXT
         todos_moviles = CURRENT_CONTEXT.get('MOVILES', [])
         
         if not todos_moviles:
              try:
+                # Fallback a todos si por alguna razón el contexto está vacío
                 todos_moviles = obtener_nombres_moviles()
              except:
                 todos_moviles = []
@@ -206,6 +221,7 @@ class AuditTab(tk.Frame):
         scroll_x = ttk.Scrollbar(self.table_frame, orient="horizontal")
 
         self.tabla = ttk.Treeview(self.table_frame, columns=columnas, show='headings',
+                                 style='Modern.Treeview',
                                  yscrollcommand=scroll_y.set, xscrollcommand=scroll_x.set)
         
         scroll_y.config(command=self.tabla.yview)
@@ -223,7 +239,8 @@ class AuditTab(tk.Frame):
             if col == "Contrato": width = 150
             if col == "Seriales": width = 250 
             
-            self.tabla.column(col, width=width, anchor='center')
+            stretch = True if col in ["Seriales", "Técnico", "Ayudante"] else False
+            self.tabla.column(col, width=width, anchor='center', stretch=stretch)
 
         self.tabla.tag_configure('evenrow', background='#f2f2f2')
         self.tabla.tag_configure('oddrow', background='white')
@@ -240,14 +257,13 @@ class AuditTab(tk.Frame):
                 moviles_sql = filtro_moviles
                 if not moviles_sql:
                     from config import CURRENT_CONTEXT
-                    allowed_moviles = CURRENT_CONTEXT.get('MOVILES', [])
-                    if allowed_moviles:
-                        moviles_sql = allowed_moviles
+                    moviles_sql = CURRENT_CONTEXT.get('MOVILES', [])
                 
                 consumos = obtener_consumos_pendientes(
                     fecha_inicio=inicio, 
                     fecha_fin=fin,
-                    moviles_filtro=moviles_sql
+                    moviles_filtro=moviles_sql,
+                    estado='TODOS'
                 )
                 
                 if texto_buscar:
@@ -277,8 +293,8 @@ class AuditTab(tk.Frame):
         todos_productos = set() 
 
         for c in consumos:
-            id_c, movil, sku, nombre, qty, tecnico, ticket, fecha, colilla, contrato, ayudante, seriales_usados, paquete_reportado = c
-            key = (movil, fecha, tecnico, contrato or ticket or "S/C", colilla or "", contrato or ticket or "", ayudante or "")
+            id_c, movil, sku, nombre, qty, tecnico, ticket, fecha, colilla, contrato, ayudante, seriales_usados, paquete_reportado, estado = c
+            key = (movil, fecha, tecnico, ticket or contrato or "S/C", colilla or "", contrato or ticket or "", ayudante or "", estado or "")
             
             if seriales_usados:
                 if key not in seriales_agrupados: seriales_agrupados[key] = set()
@@ -303,7 +319,7 @@ class AuditTab(tk.Frame):
         self._row_ids = {} 
         
         for key, materiales in ordenes.items():
-            movil, fecha, tecnico, ticket, colilla, contrato, ayudante = key
+            movil, fecha, tecnico, ticket, colilla, contrato, ayudante, estado = key
             ids = ",".join([str(m['id']) for m in materiales])
             
             cantidades_por_producto = {}
@@ -312,7 +328,7 @@ class AuditTab(tk.Frame):
                 cantidades_por_producto[nombre_p] = cantidades_por_producto.get(nombre_p, 0) + m['cantidad']
             
             txt_seriales = ", ".join(sorted(list(seriales_agrupados.get(key, []))))
-            valores = [movil, contrato or ticket, fecha, colilla]
+            valores = [movil, tecnico, ayudante or "", contrato or ticket, fecha, colilla, estado]
 
             for producto in productos_ordenados:
                 cant = cantidades_por_producto.get(producto, 0)

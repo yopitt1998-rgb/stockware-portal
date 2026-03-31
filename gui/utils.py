@@ -132,3 +132,51 @@ def mostrar_mensaje_emergente(master, titulo, mensaje, tipo="info"):
     # Auto-cierre
     ventana_mensaje.after(3000, ventana_mensaje.destroy)
 
+class ScrollableFrame(tk.Frame):
+    def __init__(self, container, *args, **kwargs):
+        super().__init__(container, *args, **kwargs)
+        
+        # Color de fondo igual al del contenedor si no se especifica
+        try:
+            bg_color = kwargs.get('bg', container.cget('bg'))
+        except (tk.TclError, AttributeError):
+            bg_color = kwargs.get('bg', '#f8f9fa') # Fallback seguro
+            
+        self.configure(bg=bg_color)
+        
+        self.canvas = tk.Canvas(self, bg=bg_color, highlightthickness=0)
+        self.scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.scrollable_frame = tk.Frame(self.canvas, bg=bg_color)
+
+        self.scrollable_frame.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(
+                scrollregion=self.canvas.bbox("all")
+            )
+        )
+
+        self.canvas_window = self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+
+        self.canvas.pack(side="left", fill="both", expand=True)
+        self.scrollbar.pack(side="right", fill="y")
+        
+        # Forzar que el frame interno use todo el ancho del canvas
+        self.canvas.bind('<Configure>', self._on_canvas_configure)
+
+        # Permitir scroll con la rueda del ratón
+        self.scrollable_frame.bind("<Enter>", self._bound_to_mousewheel)
+        self.scrollable_frame.bind("<Leave>", self._unbound_to_mousewheel)
+
+    def _on_canvas_configure(self, event):
+        # Actualizar el ancho del frame interno al del canvas
+        self.canvas.itemconfig(self.canvas_window, width=event.width)
+
+    def _bound_to_mousewheel(self, event):
+        self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
+
+    def _unbound_to_mousewheel(self, event):
+        self.canvas.unbind_all("<MouseWheel>")
+
+    def _on_mousewheel(self, event):
+        self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")

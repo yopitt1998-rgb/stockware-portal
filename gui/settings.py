@@ -6,6 +6,7 @@ from .styles import Styles
 from .utils import mostrar_mensaje_emergente
 from datetime import datetime
 import os
+from gui.package_editor import PackageEditorDialog
 
 class SettingsTab(tk.Frame):
     def __init__(self, master, main_app):
@@ -184,6 +185,20 @@ class SettingsTab(tk.Frame):
         
         tk.Button(consumos_cleanup_frame, text="📋 Limpiar Consumos", command=self.limpiar_consumos_dialogo,
                  bg='#607D8B', fg='white', font=('Segoe UI', 10, 'bold'),
+                 relief='flat', padx=20, pady=8, cursor='hand2').pack(side='right')
+
+        # --- SECCIÓN DE CONFIGURACIÓN DE PAQUETES (NUEVO) ---
+        tk.Label(inner_content, text="📦 PROGRESO DE PAQUETES (SALIDA)", 
+                font=('Segoe UI', 13, 'bold'), bg='#f8f9fa', fg='#2980b9').pack(pady=(30, 10), anchor='w')
+        
+        paquetes_frame = tk.Frame(inner_content, bg='#E8F8F5', padx=20, pady=20, highlightthickness=1, highlightbackground='#A3E4D7')
+        paquetes_frame.pack(fill='x')
+        
+        tk.Label(paquetes_frame, text="Modifica las cantidades objetivo (el progreso 100%) para los paquetes predefinidos (PAQUETE A, B, etc).", 
+                font=('Segoe UI', 9), bg='#E8F8F5', justify='left').pack(side='left', fill='x', expand=True)
+        
+        tk.Button(paquetes_frame, text="⚙️ Configurar Paquetes", command=lambda: PackageEditorDialog(self),
+                 bg='#2980b9', fg='white', font=('Segoe UI', 10, 'bold'),
                  relief='flat', padx=20, pady=8, cursor='hand2').pack(side='right')
 
 

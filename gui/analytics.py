@@ -17,7 +17,6 @@ import time
 
 from database import (
     obtener_stock_actual_y_moviles,
-    obtener_movimientos_por_rango,
     obtener_nombres_moviles,
     get_db_connection,
     run_query

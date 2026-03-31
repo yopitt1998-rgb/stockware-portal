@@ -8,11 +8,14 @@ class Styles:
     SECONDARY_COLOR = '#3498db'
     ACCENT_COLOR = '#e74c3c'
     SUCCESS_COLOR = '#27ae60'
+    DANGER_COLOR = '#e74c3c'   # Alias de ACCENT_COLOR
     WARNING_COLOR = '#f39c12'
     INFO_COLOR = '#17a2b8'
     LIGHT_BG = '#ecf0f1'
+    BG_COLOR = '#ecf0f1' # Alias para compatibilidad
     DARK_TEXT = '#2c3e50'
     LIGHT_TEXT = '#ecf0f1'
+    TEXT_COLOR = '#2c3e50' # Alias para compatibilidad
 
     @classmethod
     def setup_styles(cls):
@@ -84,7 +87,8 @@ class Styles:
                     background='white',
                     fieldbackground='white',
                     foreground=cls.DARK_TEXT,
-                    rowheight=25)
+                    font=('Segoe UI', 11),
+                    rowheight=35)
         
         style.configure('Modern.Treeview.Heading',
                     background=cls.PRIMARY_COLOR,

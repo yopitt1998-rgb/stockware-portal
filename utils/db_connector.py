@@ -108,28 +108,48 @@ def close_connection(conn, cursor=None):
         logger.warning(f"Error cerrando conexión: {e}")
 
 @contextmanager
-def db_session(target_db=None):
+def db_session(target_db=None, existing_conn=None):
     """
-    Context manager para manejar el ciclo de vida de la conexión y cursor a la base de datos automatizando commit/rollback y finally.
+    Context manager para manejar el ciclo de vida automatizando commit/rollback y finally.
+    Acepta 'existing_conn' para permitir transacciones anidadas (unirse al padre).
     Patrón de uso:
         with db_session() as (conn, cursor):
-            run_query(cursor, "...")
+            ...
     """
-    conn = None
+    conn = existing_conn
     cursor = None
+    we_created_conn = False
+
     try:
-        conn = get_db_connection(target_db)
+        if conn is None:
+            conn = get_db_connection(target_db)
+            we_created_conn = True
+
         # Usar cursores con buffer para MySQL para evitar problemas de "Unread result found"
-        # y permitir que la conexión se use de forma más flexible.
         if DB_TYPE == 'MYSQL':
             cursor = conn.cursor(buffered=True)
         else:
             cursor = conn.cursor()
+
         yield conn, cursor
-        conn.commit()
+
+        # Solo hacer commit si esta sesión fue la que abrió la conexión (es el nivel más alto)
+        if we_created_conn:
+            conn.commit()
+
     except Exception as e:
-        if conn:
+        # Solo hacer rollback si esta sesión es la dueña de la conexión
+        if we_created_conn and conn:
             conn.rollback()
         raise e
     finally:
-        close_connection(conn, cursor)
+        # Siempre cerramos el cursor que abrimos en ESTA sesión
+        if cursor:
+            try:
+                cursor.close()
+            except Exception as e:
+                logger.warning(f"Error cerrando cursor en db_session: {e}")
+        
+        # Solo cerramos la conexión si nosotros la creamos
+        if we_created_conn and conn:
+            close_connection(conn)

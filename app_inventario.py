@@ -12,7 +12,7 @@ if os.name == 'nt':
         pass
 
 # Sistema de Logging Centralizado
-from utils.logger import get_logger, log_startup
+from utils.logger import get_logger
 
 logger = get_logger(__name__)
 logger.info("Inicializando app_inventario...")
@@ -252,6 +252,7 @@ class ModernInventarioApp:
         self.light_bg = '#ecf0f1'
         self.dark_text = '#2c3e50'
         self.light_text = '#ecf0f1'
+        self.text_color = '#2c3e50' # Alias para compatibilidad
         
         # Configurar estilos
         style.configure('Modern.TFrame', background=self.light_bg)
@@ -317,7 +318,8 @@ class ModernInventarioApp:
                        background='white',
                        fieldbackground='white',
                        foreground=self.dark_text,
-                       rowheight=25)
+                       font=('Segoe UI', 11),
+                       rowheight=35)
         
         style.configure('Modern.Treeview.Heading',
                        background=self.primary_color,
@@ -369,12 +371,12 @@ class ModernInventarioApp:
                 "icon": "📊",
                 "btn_text": "Dashboard"
             },
-            "Material Dañado": {
+            "Bajas y Consumos": {
                 "loaded": False,
                 "module": "gui.santiago_danados",
                 "class": "SantiagoDanadosTab",
-                "icon": "⚠️",
-                "btn_text": "Dañados"
+                "icon": "📑",
+                "btn_text": "Bajas"
             }
         }
 
@@ -421,7 +423,7 @@ class ModernInventarioApp:
             "module": "gui.audit",
             "class": "AuditTab",
             "icon": "📋",
-            "btn_text": "Historial" if is_santiago_direct else "Historial de Instalaciones"
+            "btn_text": "Historial"
         }
 
         self.tabs_data["Registro Global"] = {
@@ -523,13 +525,24 @@ class ModernInventarioApp:
             import types
             data['frame'].add = types.MethodType(_fake_add, data['frame'])
 
-        # Mostrar indicador de carga (opcional, si es muy lento)
+        # Mostrar indicador de carga inmediato antes del import (que puede tardar)
+        loading_label = tk.Label(data['frame'],
+                                  text="⏳  Cargando...",
+                                  font=('Segoe UI', 18, 'bold'),
+                                  fg='#3498db', bg='#ecf0f1')
+        loading_label.place(relx=0.5, rely=0.5, anchor='center')
+        data['frame'].update_idletasks()  # Forzar redibujado inmediato antes de la carga
+
         logger.info(f"Lazy loading tab: {tab_name}...")
         
         try:
             import importlib
             module = importlib.import_module(data['module'])
             cls = getattr(module, data['class'])
+            
+            # Quitar indicador de carga
+            if loading_label.winfo_exists():
+                loading_label.destroy()
             
             # Limpiar cualquier cosa previa en el frame (no debería haber)
             for widget in data['frame'].winfo_children():
@@ -563,6 +576,9 @@ class ModernInventarioApp:
             logger.info(f"Tab {tab_name} loaded successfully.")
             
         except Exception as e:
+            if loading_label.winfo_exists():
+                loading_label.destroy()
+
             logger.error(f"Error loading tab {tab_name}: {e}")
             import traceback
             traceback.print_exc()
@@ -651,7 +667,7 @@ class BranchSelectorWindow:
 def main():
     """
     Punto de entrada principal.
-    Fuerza CHIRIQUI por defecto, a menos que se defina la variable de entorno FORCE_BRANCH (como hace app_santiago.py).
+    Fuerza CHIRIQUI por defecto, a menos que se defina la variable de entorno FORCE_BRANCH.
     """
     from config import set_branch_context
     

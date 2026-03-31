@@ -125,10 +125,11 @@ class HistoryLogTab(tk.Frame):
                      font=('Segoe UI', 10, 'bold'), bg='#ffebee', fg='#c62828', pady=10).pack()
             return
 
-        # Ahora res tiene 9 elementos si se encontró algo extendido
+        # Ahora res tiene 10 elementos si se encontró algo extendido
         sn, mac, sku, nombre, ubicacion, estado, paquete, *extra = res
         movil_c = extra[0] if len(extra) > 0 else None
         contrato_c = extra[1] if len(extra) > 1 else None
+        fecha_c = extra[2] if len(extra) > 2 else None
         
         # Formatear ubicación y estado para el usuario
         is_damaged = (estado and str(estado).upper() in ['DAÑADO', 'MALO', 'DEFECTUOSO', 'DESCARTE'])
@@ -159,18 +160,26 @@ class HistoryLogTab(tk.Frame):
             # Moverlo a la derecha del estado actual
             tk.Label(content, text=f"📦 Paquete: {paquete}", font=('Segoe UI', 11, 'bold'), bg='#e3f2fd', fg='#4527a0').grid(row=0, column=1, sticky='e', padx=20)
         
-        # MOSTRAR CONTRATO Y MOVIL CON ESTILO DESTACADO (Si están disponibles)
-        if contrato_c or movil_c:
-             extra_frame = tk.Frame(content, bg='white', highlightbackground="#1a237e", highlightthickness=1, padx=10, pady=5)
+        # MOSTRAR CONTRATO, FECHA Y MÓVIL CON ESTILO DESTACADO
+        if contrato_c or movil_c or fecha_c:
+             extra_frame = tk.Frame(content, bg='white', highlightbackground="#1a237e", highlightthickness=1, padx=15, pady=10)
              extra_frame.grid(row=3, column=0, columnspan=2, sticky='we', pady=(10, 0))
              
-             if contrato_c:
-                 tk.Label(extra_frame, text=f"📄 CONTRATO: {contrato_c}", 
-                          font=('Segoe UI', 12, 'bold'), bg='white', fg='#1a237e').pack(side='left', padx=10)
+             # Reorganizar en grid para evitar recortes
+             # FECHA
+             fecha_val = fecha_c if (fecha_c and str(fecha_c).strip()) else "(No registrada)"
+             tk.Label(extra_frame, text=f"📅 FECHA: {fecha_val}", 
+                      font=('Segoe UI', 11, 'bold'), bg='white', fg='#2e7d32').grid(row=0, column=0, sticky='w', padx=10)
              
-             if movil_c:
-                 tk.Label(extra_frame, text=f"🔧 MÓVIL / TÉCNICO: {movil_c}", 
-                          font=('Segoe UI', 12, 'bold'), bg='white', fg='#455a64').pack(side='left', padx=10)
+             # CONTRATO
+             contrato_val = contrato_c if (contrato_c and str(contrato_c).strip()) else "(No disponible)"
+             tk.Label(extra_frame, text=f"📄 CONTRATO: {contrato_val}", 
+                      font=('Segoe UI', 11, 'bold'), bg='white', fg='#1a237e').grid(row=0, column=1, sticky='w', padx=10)
+             
+             # MÓVIL/TÉCNICO
+             movil_val = movil_c if (movil_c and str(movil_c).strip()) else "(Bodega/General)"
+             tk.Label(extra_frame, text=f"🔧 MÓVIL/TÉCNICO: {movil_val}", 
+                      font=('Segoe UI', 11, 'bold'), bg='white', fg='#455a64').grid(row=1, column=0, columnspan=2, sticky='w', padx=10, pady=(5,0))
         
         # AUTO-FILTRAR EL HISTORIAL DE ABAJO PARA ESTE SERIAL (NUEVO)
         self.hist_filter_var.set(sn if sn else mac)

@@ -479,8 +479,12 @@
                 <div id="lbl_tecnico" style="margin-top: 5px; font-weight: 600; color: #63b3ed; font-size: 13px;"></div>
             </div>
             <div class="filtro-group">
-                <label>Fecha</label>
-                <input type="date" id="filtro_fecha" value="{{ hoy }}">
+                <label>Desde</label>
+                <input type="date" id="filtro_desde">
+            </div>
+            <div class="filtro-group">
+                <label>Hasta</label>
+                <input type="date" id="filtro_hasta" value="{{ hoy }}">
             </div>
             <button class="btn-cargar" onclick="cargarConsumos()">🔍 Cargar Consumos</button>
         </div>
@@ -490,7 +494,7 @@
         <!-- ══════════════════════════════════════════════════════════ -->
         <div class="section-card">
             <div class="section-header">
-                <h2>🚚 Consumo del Día</h2>
+                <h2>🚚 Consumo del Período</h2>
                 <span class="badge-count" id="badge_total">0 registros</span>
             </div>
 
@@ -522,7 +526,7 @@
 
                 <div style="display:flex; gap:12px; margin-top:16px; flex-wrap:wrap;">
                     <button class="btn-comparar" id="btn_comparar" onclick="compararExcel()" disabled>
-                        ⚖️ Comparar con Consumos del Día
+                        ⚖️ Comparar con Consumos del Período
                     </button>
                 </div>
             </div>
@@ -553,6 +557,15 @@
         let archivoExcel = null;
         let consumosActuales = [];
 
+        window.onload = function() {
+            // Inicializar fecha "Desde" hace 7 días
+            const hoy = new Date();
+            const hace7 = new Date();
+            hace7.setDate(hoy.getDate() - 7);
+            document.getElementById('filtro_desde').value = hace7.toISOString().split('T')[0];
+            document.getElementById('filtro_hasta').value = hoy.toISOString().split('T')[0];
+        };
+
         // ── Al seleccionar móvil ──────────────────────────────────────────
         document.getElementById('filtro_movil').onchange = function () {
             const movil = this.value;
@@ -569,10 +582,11 @@
             }
         };
 
-        // ── Cargar consumos del día ────────────────────────────────────
+        // ── Cargar consumos del período ────────────────────────────────────
         async function cargarConsumos() {
             const movil = document.getElementById('filtro_movil').value;
-            const fecha = document.getElementById('filtro_fecha').value;
+            const desde = document.getElementById('filtro_desde').value;
+            const hasta = document.getElementById('filtro_hasta').value;
             const container = document.getElementById('consumos_container');
             const badge = document.getElementById('badge_total');
 
@@ -580,7 +594,10 @@
             badge.textContent = '...';
 
             try {
-                const params = new URLSearchParams({ fecha });
+                const params = new URLSearchParams({ 
+                    fecha_inicio: desde, 
+                    fecha_fin: hasta 
+                });
                 if (movil) params.append('movil', movil);
                 const res = await fetch(`/api/consumos_dia?${params}`);
                 const data = await res.json();
@@ -626,7 +643,7 @@
                 <tr>
                     <th>Móvil</th>
                     <th>Técnico</th>
-                    <th>Ayudante</th>
+                    <th>Técnico 2</th>
                     <th>Colilla</th>
                     <th>Contrato</th>
                     <th>SKU</th>
@@ -702,7 +719,8 @@
             if (!archivoExcel) return;
 
             const movil = document.getElementById('filtro_movil').value;
-            const fecha = document.getElementById('filtro_fecha').value;
+            const desde = document.getElementById('filtro_desde').value;
+            const hasta = document.getElementById('filtro_hasta').value;
             const btn = document.getElementById('btn_comparar');
 
             btn.disabled = true;
@@ -711,7 +729,8 @@
             const formData = new FormData();
             formData.append('archivo', archivoExcel);
             formData.append('movil', movil);
-            formData.append('fecha', fecha);
+            formData.append('fecha_inicio', desde);
+            formData.append('fecha_fin', hasta);
 
             try {
                 const res = await fetch('/api/comparar_excel', { method: 'POST', body: formData });
@@ -732,7 +751,7 @@
                 alert('Error de red: ' + e.message);
             } finally {
                 btn.disabled = false;
-                btn.textContent = '⚖️ Comparar con Consumos del Día';
+                btn.textContent = '⚖️ Comparar con Consumos del Período';
             }
         }
 

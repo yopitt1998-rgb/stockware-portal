@@ -11,7 +11,7 @@ from utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-from config import TIPOS_MOVIMIENTO, DATABASE_NAME, PRODUCTOS_CON_CODIGO_BARRA
+from config import DATABASE_NAME, PRODUCTOS_CON_CODIGO_BARRA
 from database import (
     obtener_inventario, obtener_todos_los_skus_para_movimiento,
     anadir_producto, registrar_movimiento_gui, eliminar_producto,
@@ -21,9 +21,9 @@ from database import (
     limpiar_duplicados_asignacion_moviles,
     TIPO_MOVIMIENTO_DESCARTE, obtener_stock_actual_y_moviles,
     obtener_abastos_resumen, obtener_detalle_abasto, actualizar_movimiento_abasto,
-    obtener_nombres_moviles, verificar_stock_disponible,
-    obtener_consumos_pendientes, eliminar_consumo_pendiente, # NUEVOS IMPORTS
-    obtener_info_serial, actualizar_ubicacion_serial, incrementar_asignacion_movil # Para Salida a Móvil con Seriales
+    obtener_nombres_moviles,
+    obtener_consumos_pendientes,
+    obtener_info_serial, actualizar_ubicacion_serial
 )
 import pandas as pd
 from tkinter import filedialog
@@ -43,6 +43,7 @@ from .movements import (
     MobileOutputWindow,
     ConciliacionPaquetesWindow
 )
+from .faltantes_dashboard import FaltantesDashboardWindow
 from ..utils import mostrar_cargando_async
 
 class InventoryTab:
@@ -183,6 +184,8 @@ class InventoryTab:
             ("❌ Eliminar Producto", self.abrir_ventana_eliminar, Styles.ACCENT_COLOR),
             ("🔄 Traslado", self.abrir_ventana_traslado, Styles.SECONDARY_COLOR),
             ("🚚 Gestionar Móviles", self.abrir_ventana_gestion_moviles, '#E91E63'),
+            ("🚩 Historial Faltantes", self.abrir_historial_faltantes, '#d32f2f'), # NUEVO
+            ("⏪ Reversar Consumo", self.abrir_reverso_consumo, '#00BCD4'), # NUEVA FUNCION
             ("🧹 Limpieza Avanzada", self.mostrar_herramientas_limpieza, '#9C27B0')
         ]
         
@@ -387,6 +390,11 @@ class InventoryTab:
         # Actualizar dashboard si es posible
         if hasattr(self.main_app, 'dashboard_tab'):
              self.main_app.dashboard_tab.actualizar_metricas()
+
+    def abrir_historial_faltantes(self):
+        """Abre la ventana del historial de faltantes"""
+        from .faltantes_dashboard import FaltantesDashboardWindow
+        FaltantesDashboardWindow(self.main_app)
 
     def abrir_ventana_gestion_moviles(self):
         """Abre la ventana de gestión de móviles"""
@@ -1395,6 +1403,10 @@ class InventoryTab:
         """Abre ventana de abasto por escaneo universal (NUEVO)"""
         AbastoScannerWindow(self.main_app)
     
+    def abrir_reverso_consumo(self):
+        """Abre ventana para reversar consumos erróneos"""
+        from gui.inventory.reverso import ReversoConsumoScannerWindow
+        ReversoConsumoScannerWindow(self.main_app)
     def abrir_ventana_salida_movil_scanner(self):
         """Abre ventana de salida a móvil por escaneo con paquete (NUEVO)"""
         try:

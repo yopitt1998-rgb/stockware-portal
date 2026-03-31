@@ -1,4 +1,0 @@
-[SEARCH] Buscando .env en: C:\Users\johni\Documents\GestorInventario_MySQL\.env
-[OK] .env cargado exitosamente
-[CHIRIQUI] Cambiando Contexto de Sucursal...
- -> Contexto CHIRIQUI activo.

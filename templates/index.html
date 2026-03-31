@@ -31,6 +31,20 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
+        .monday-btn {
+            display: block;
+            text-align: center;
+            background: #f39c12;
+            color: white;
+            text-decoration: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            font-size: 14px;
+        }
+
         h1 {
             text-align: center;
             color: var(--primary);
@@ -269,7 +283,11 @@
         </div>
     </div>
 
-    <div class="logo">🚀 StockWare</div>
+    <div class="logo">
+        <h1>🚀 StockWare</h1>
+        
+        <a href="/modo_lunes" class="monday-btn">📅 IR A INTERFAZ DE LUNES (PLAN B)</a>
+    </div>
 
     <div class="container">
         <h1>Reporte de Consumo</h1>
@@ -325,12 +343,22 @@
             </div>
 
             <div class="form-group">
-                <label>Técnico (Conductor):</label>
-                <input type="text" name="tecnico" id="tecnico" required>
+                <label>Técnico:</label>
+                <select name="tecnico" id="tecnico" required>
+                    <option value="">--- Seleccionar ---</option>
+                    {% for t in tecnicos %}
+                    <option value="{{ t[1] }}">{{ t[1] }}</option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="form-group">
-                <label>Ayudante:</label>
-                <input type="text" name="ayudante" id="ayudante">
+                <label>Técnico 2:</label>
+                <select name="ayudante" id="ayudante">
+                    <option value="">--- Seleccionar ---</option>
+                    {% for t in tecnicos %}
+                    <option value="{{ t[1] }}">{{ t[1] }}</option>
+                    {% endfor %}
+                </select>
             </div>
 
             <div class="section-title" id="section_materiales" style="display:none;">📦 Materiales Asignados al Móvil
@@ -388,9 +416,17 @@
                 const d = DETAILS_MOVILES[movil];
                 const lblTecnico = document.getElementById('lbl_tecnico');
                 if (d) {
-                    document.getElementById('tecnico').value = d.conductor || '';
-                    document.getElementById('ayudante').value = d.ayudante || '';
-                    if (lblTecnico) lblTecnico.innerText = d.conductor ? `👤 Conductor: ${d.conductor}` : '👤 Sin conductor asignado';
+                    // Set selected index for technician and assistant
+                    const selectTecnico = document.getElementById('tecnico');
+                    const selectAyudante = document.getElementById('ayudante');
+                    
+                    if (d.conductor) selectTecnico.value = d.conductor;
+                    else selectTecnico.selectedIndex = 0;
+                    
+                    if (d.ayudante) selectAyudante.value = d.ayudante;
+                    else selectAyudante.selectedIndex = 0;
+
+                    if (lblTecnico) lblTecnico.innerText = d.conductor ? `👤 Técnico: ${d.conductor}` : '👤 Sin técnico asignado';
                 } else {
                     if (lblTecnico) lblTecnico.innerText = '';
                 }

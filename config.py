@@ -79,15 +79,15 @@ PAQUETES_MATERIALES = {
         ("1-4-61", 5),      # PLACAS_F_O
         ("1-8-40", 60),     # FAJILLA_8
         ("2-5-02", 30),     # GRAPAS
-        ("2-7-07", 30),     # CALCAMONIA
+        ("2-7-07", 30),     # Sticker
         ("2-7-11", 7),      # COLILLA
         ("4-2-41", 7),      # TOALLAS
         ("4-3-18", 16),     # CONEC_MECA
         ("4-3-42", 60),     # TENSOR_FO
         ("U4-4-633", 1),    # HG8247W5 (con serial)
-        ("4-4-644", 1),     # ONT HUAWEI EchoLife EG8145V5 (con serial)
+        ("4-4-644", 6),     # ONT HUAWEI EchoLife EG8145V5 (con serial)
         ("4-4-654", 1),     # O_EG8041X6 (con serial)
-        ("4-4-656", 6),     # O_EG8041X6 (con serial)
+        ("4-4-656", 4),     # O_EG8041X6 (con serial)
         ("4-4-646", 2),     # R_K562E_10 (con serial)
         ("4-4-647", 2),     # R_AS5113 (con serial)
         ("8-1-902", 2),     # A_W541_2.4 (con serial)
@@ -98,15 +98,15 @@ PAQUETES_MATERIALES = {
         ("1-4-61", 5),      # PLACAS_F_O
         ("1-8-40", 60),     # FAJILLA_8
         ("2-5-02", 30),     # GRAPAS
-        ("2-7-07", 30),     # CALCAMONIA
+        ("2-7-07", 30),     # Sticker
         ("2-7-11", 7),      # COLILLA
         ("4-2-41", 7),      # TOALLAS
         ("4-3-18", 16),     # CONEC_MECA
         ("4-3-42", 60),     # TENSOR_FO
         ("U4-4-633", 1),    # HG8247W5 (con serial)
-        ("4-4-644", 1),     # ONT HUAWEI EchoLife EG8145V5 (con serial)
+        ("4-4-644", 6),     # ONT HUAWEI EchoLife EG8145V5 (con serial)
         ("4-4-654", 1),     # O_EG8041X6 (con serial)
-        ("4-4-656", 6),     # O_EG8041X6 (con serial)
+        ("4-4-656", 4),     # O_EG8041X6 (con serial)
         ("4-4-646", 2),     # R_K562E_10 (con serial)
         ("4-4-647", 2),     # R_AS5113 (con serial)
         ("8-1-902", 2),     # A_W541_2.4 (con serial)
@@ -114,6 +114,7 @@ PAQUETES_MATERIALES = {
         ("8-1-904", 8)      # A_W531_WIFI (con serial)
     ]
 }
+
 
 # Materiales que se comparten entre paquetes (ej: fibra, cables bulk)
 # No se dividen, sino que muestran el total disponible en el móvil en todos los paquetes.
@@ -153,7 +154,7 @@ PRODUCTOS_INICIALES = [
     ("TAPE", "1-8-41", "008"),               # TAPE ELECTRIC
     ("GRAPAS", "2-5-02", "009"),             # GRAPA "Q" SPAN
     ("G_C_PARED6", "2-5-03", "010"),         # CLIP, 7MM CABLE BLANCO
-    ("CALCAMONIA", "2-7-07", "011"),         # STICKER PRECAUCION
+    ("Sticker", "2-7-07", "011"),            # STICKER PRECAUCION
     ("COLILLA", "2-7-11", "012"),            # COLILLAS BLANCAS
     ("TOALLAS", "4-2-41", "013"),            # TOALLAS LIBRE PELO
     ("CONEC_MECA", "4-3-18", "014"),         # CONECTORES F.O SM SC-APC
@@ -167,6 +168,9 @@ PRODUCTOS_INICIALES = [
     ("T_PLAYPRO", "8-1-902", "024"),         # STB OTT RETAIL Z11B
     ("T_PLAY", "8-1-903", "025"),            # STBs OTT AOSP DUAL BAND Z4
     ("E_T_PLAY", "8-1-904", "023"),          # Dongle OTT Retail Z11D
+    ("FIBRA_PRECON", "7-2-192", "026"),      # Fibra Preconectizada (Nueva)
+    ("FIBRA_PRECON_L", "7-2-198", "027"),    # Fibra Preconectizada Larga (Nueva)
+    ("ROSET_FO", "8-1-92", "028"),           # Roseta Fibra Optica (Nueva)
 ]
 
 # UI Colors
@@ -254,6 +258,45 @@ def save_branch_preference(branch_code):
         # print(f"Preferencia de sucursal guardada: {branch_code}")
     except Exception as e:
         print(f"Error guardando preferencias: {e}")
+
+PACKAGES_FILE = os.path.join(application_path, "user_packages.json")
+
+def load_custom_packages():
+    """Carga definiciones de paquetes personalizados sobrescribiendo los por defecto."""
+    try:
+        if os.path.exists(PACKAGES_FILE):
+            with open(PACKAGES_FILE, 'r') as f:
+                custom_pkgs = json.load(f)
+                for pkg_name, items in custom_pkgs.items():
+                    if isinstance(items, dict):
+                        PAQUETES_MATERIALES[pkg_name] = [(sku, cant) for sku, cant in items.items()]
+                    elif isinstance(items, list):
+                        PAQUETES_MATERIALES[pkg_name] = [(item[0], item[1]) for item in items]
+                
+                # Update dependent dict
+                global PAQUETE_INSTALACION
+                if "PAQUETE A" in PAQUETES_MATERIALES:
+                    PAQUETE_INSTALACION = dict(PAQUETES_MATERIALES["PAQUETE A"])
+    except Exception as e:
+        print(f"Error cargando paquetes personalizados: {e}")
+
+def save_custom_packages():
+    """Guarda PAQUETES_MATERIALES en JSON."""
+    try:
+        with open(PACKAGES_FILE, 'w') as f:
+            json.dump(PAQUETES_MATERIALES, f, indent=4)
+        
+        # Update dependent dict globally
+        global PAQUETE_INSTALACION
+        if "PAQUETE A" in PAQUETES_MATERIALES:
+            PAQUETE_INSTALACION.clear()
+            PAQUETE_INSTALACION.update(dict(PAQUETES_MATERIALES["PAQUETE A"]))
+            
+    except Exception as e:
+        print(f"Error guardando paquetes: {e}")
+
+# Ejecutar carga inicial
+load_custom_packages()
 
 # Modificar para cargar preferencia si no se pasa argumento explícito (no cambios aqui, logica en app)
 

@@ -45,9 +45,10 @@ class MobilesManager(tk.Toplevel):
         tk.Label(form_frame, text="Técnico 1:", bg='#f8f9fa').grid(row=1, column=0, sticky='w', pady=5)
         self.conductor_entry = ttk.Entry(form_frame, width=30)
         self.conductor_entry.grid(row=1, column=1, sticky='w', padx=10, pady=5)
-        
-        # Ayudante Removed as per user request
-        self.ayudante_entry = None # Placeholder logic if needed to avoid referencing undefined var
+
+        tk.Label(form_frame, text="Técnico 2:", bg='#f8f9fa').grid(row=1, column=2, sticky='w', pady=5)
+        self.ayudante_entry = ttk.Entry(form_frame, width=30)
+        self.ayudante_entry.grid(row=1, column=3, sticky='w', padx=10, pady=5)
 
         
         # Buttons
@@ -59,6 +60,11 @@ class MobilesManager(tk.Toplevel):
                                    relief='flat', padx=15, pady=5, cursor='hand2')
         self.btn_guardar.pack(side='left', padx=5)
         
+        self.btn_tecnicos = tk.Button(btn_frame, text="👥 Gestionar Técnicos", command=self.abrir_gestor_tecnicos,
+                                   bg='#6c757d', fg='white', font=('Segoe UI', 9, 'bold'),
+                                   relief='flat', padx=15, pady=5, cursor='hand2')
+        self.btn_tecnicos.pack(side='left', padx=5)
+
         self.btn_editar = tk.Button(btn_frame, text="✏️ Actualizar Seleccionado", command=self.actualizar_movil,
                                   bg=Styles.INFO_COLOR, fg='white', font=('Segoe UI', 9, 'bold'),
                                   relief='flat', padx=15, pady=5, cursor='hand2', state='disabled')
@@ -73,12 +79,12 @@ class MobilesManager(tk.Toplevel):
         table_frame = tk.Frame(content_frame, bg='#f8f9fa')
         table_frame.pack(fill='both', expand=True)
         
-        columns = ("Nombre", "Patente", "Técnico 1", "Estado")
+        columns = ("Nombre", "Patente", "Técnico 1", "Técnico 2", "Estado")
         self.tabla = ttk.Treeview(table_frame, columns=columns, show='headings', style='Modern.Treeview')
         
         for col in columns:
             self.tabla.heading(col, text=col)
-            self.tabla.column(col, anchor='center', width=150)
+            self.tabla.column(col, anchor='center', width=130)
         
         scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=self.tabla.yview)
         self.tabla.configure(yscrollcommand=scrollbar.set)
@@ -108,9 +114,12 @@ class MobilesManager(tk.Toplevel):
         for nombre, patente, conductor, ayudante, activo in moviles:
             estado = "Activo" if activo else "Inactivo"
             tags = () if activo else ('inactivo',)
-            self.tabla.insert('', tk.END, values=(nombre, patente, conductor, estado), tags=tags)
+            self.tabla.insert('', tk.END, values=(nombre, patente, conductor, ayudante, estado), tags=tags)
         
         self.tabla.tag_configure('inactivo', foreground='gray')
+
+    def abrir_gestor_tecnicos(self):
+        TechnicianManager(self)
 
     def on_select(self, event):
         seleccion = self.tabla.selection()
@@ -127,7 +136,8 @@ class MobilesManager(tk.Toplevel):
             self.conductor_entry.delete(0, tk.END)
             self.conductor_entry.insert(0, "" if not valores[2] or valores[2] == "None" else valores[2])
             
-            # Ayudante logic removed
+            self.ayudante_entry.delete(0, tk.END)
+            self.ayudante_entry.insert(0, "" if not valores[3] or valores[3] == "None" else valores[3])
             
             self.btn_editar.config(state='normal')
             self.btn_guardar.config(state='disabled')
@@ -136,7 +146,7 @@ class MobilesManager(tk.Toplevel):
         self.nombre_entry.delete(0, tk.END)
         self.patente_entry.delete(0, tk.END)
         self.conductor_entry.delete(0, tk.END)
-        # self.ayudante_entry.delete(0, tk.END)
+        self.ayudante_entry.delete(0, tk.END)
         self.btn_editar.config(state='disabled')
         self.btn_guardar.config(state='normal')
 
@@ -144,7 +154,7 @@ class MobilesManager(tk.Toplevel):
         nombre = self.nombre_entry.get().strip()
         patente = self.patente_entry.get().strip()
         conductor = self.conductor_entry.get().strip()
-        ayudante = "" # self.ayudante_entry.get().strip()
+        ayudante = self.ayudante_entry.get().strip()
         
         if not nombre:
             mostrar_mensaje_emergente(self, "Error", "El nombre es obligatorio.", "error")
@@ -162,7 +172,7 @@ class MobilesManager(tk.Toplevel):
         nuevo_nombre = self.nombre_entry.get().strip()
         nueva_patente = self.patente_entry.get().strip()
         nuevo_conductor = self.conductor_entry.get().strip()
-        nuevo_ayudante = "" # self.ayudante_entry.get().strip()
+        nuevo_ayudante = self.ayudante_entry.get().strip()
         
         if not nuevo_nombre:
             mostrar_mensaje_emergente(self, "Error", "El nombre es obligatorio.", "error")
@@ -188,3 +198,105 @@ class MobilesManager(tk.Toplevel):
                 self.cargar_datos()
             else:
                 mostrar_mensaje_emergente(self, "Error", mensaje, "error")
+
+
+class TechnicianManager(tk.Toplevel):
+    def __init__(self, master):
+        super().__init__(master)
+        self.title("👥 Gestión de Técnicos")
+        self.geometry("600x500")
+        self.configure(bg='#f8f9fa')
+        self.grab_set()
+        
+        from database import obtener_tecnicos, crear_tecnico, editar_tecnico, eliminar_tecnico
+        self.db_funcs = {
+            'list': obtener_tecnicos,
+            'create': crear_tecnico,
+            'edit': editar_tecnico,
+            'delete': eliminar_tecnico
+        }
+        
+        self.create_widgets()
+        self.cargar_datos()
+
+    def create_widgets(self):
+        # Header
+        header_frame = tk.Frame(self, bg='#34495e', height=60)
+        header_frame.pack(fill='x')
+        tk.Label(header_frame, text="👥 MAESTRO DE TÉCNICOS", 
+                font=('Segoe UI', 14, 'bold'), bg='#34495e', fg='white').pack(pady=15)
+        
+        # Content
+        content = tk.Frame(self, padx=20, pady=20, bg='#f8f9fa')
+        content.pack(fill='both', expand=True)
+        
+        # Form
+        entry_frame = tk.Frame(content, bg='#f8f9fa')
+        entry_frame.pack(fill='x', pady=(0, 15))
+        
+        tk.Label(entry_frame, text="Nombre del Técnico:", bg='#f8f9fa').pack(side='left')
+        self.nombre_var = tk.StringVar()
+        self.entry_nombre = ttk.Entry(entry_frame, textvariable=self.nombre_var, width=30)
+        self.entry_nombre.pack(side='left', padx=10)
+        
+        self.btn_add = tk.Button(entry_frame, text="➕ Añadir", command=self.guardar,
+                               bg=Styles.SUCCESS_COLOR, fg='white', font=('Segoe UI', 9, 'bold'),
+                               relief='flat', padx=10, pady=2)
+        self.btn_add.pack(side='left')
+        
+        # Table
+        table_frame = tk.Frame(content)
+        table_frame.pack(fill='both', expand=True)
+        
+        self.tree = ttk.Treeview(table_frame, columns=("ID", "Nombre", "Estado"), show='headings')
+        self.tree.heading("ID", text="ID")
+        self.tree.heading("Nombre", text="Nombre")
+        self.tree.heading("Estado", text="Estado")
+        self.tree.column("ID", width=50, anchor='center')
+        self.tree.column("Nombre", width=300)
+        self.tree.column("Estado", width=100, anchor='center')
+        self.tree.pack(side='left', fill='both', expand=True)
+        
+        scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=self.tree.yview)
+        self.tree.configure(yscrollcommand=scrollbar.set)
+        scrollbar.pack(side='right', fill='y')
+        
+        # Delete button
+        self.btn_del = tk.Button(content, text="🗑️ Eliminar/Desactivar Seleccionado", command=self.eliminar,
+                               bg=Styles.DANGER_COLOR, fg='white', font=('Segoe UI', 9, 'bold'),
+                               relief='flat', pady=5)
+        self.btn_del.pack(fill='x', pady=(10, 0))
+
+    def cargar_datos(self):
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+        
+        tecnicos = self.db_funcs['list']()
+        for tid, nombre, activo in tecnicos:
+            estado = "Activo" if activo else "Inactivo"
+            self.tree.insert('', tk.END, values=(tid, nombre, estado))
+
+    def guardar(self):
+        nombre = self.nombre_var.get().strip()
+        if not nombre: return
+        
+        exito, msg = self.db_funcs['create'](nombre)
+        if exito:
+            self.nombre_var.set("")
+            self.cargar_datos()
+        else:
+            messagebox.showerror("Error", msg)
+
+    def eliminar(self):
+        sel = self.tree.selection()
+        if not sel: return
+        
+        tid = self.tree.item(sel[0])['values'][0]
+        nombre = self.tree.item(sel[0])['values'][1]
+        
+        if messagebox.askyesno("Confirmar", f"¿Desactivar al técnico {nombre}?"):
+            exito, msg = self.db_funcs['delete'](tid)
+            if exito:
+                self.cargar_datos()
+            else:
+                messagebox.showerror("Error", msg)

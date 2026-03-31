@@ -521,6 +521,19 @@
             display: block;
         }
 
+        .monday-btn {
+            display: block;
+            text-align: center;
+            background: #f39c12;
+            color: white;
+            text-decoration: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            margin: 10px 15px 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            font-size: 16px;
+        }
         .no-camera p {
             color: #7f8c8d;
             margin-bottom: 15px;
@@ -532,10 +545,19 @@
 
     <div id="alert" class="alert"></div>
 
+    {% if db_status != 'OK' %}
+    <div class="alert alert-error" style="display: block; margin: 10px 15px; text-align: center;">
+        <b>⚠️ ERROR DE CONEXIÓN:</b> {{ db_status }}<br>
+        <small>{{ error_detail }}</small>
+    </div>
+    {% endif %}
+
     <div class="header">
         <h1>🚀 StockWare Santiago</h1>
         <p>Sistema de Consumo Directo de Bodega</p>
     </div>
+
+    <a href="/modo_lunes" class="monday-btn">📅 IR A INTERFAZ DE LUNES (PLAN B)</a>
 
     <!-- ─── SCANNER MODAL ─── -->
     <div class="modal" id="scanModal">
@@ -621,7 +643,12 @@
             </div>
             <div class="form-group">
                 <label>Técnico:</label>
-                <input type="text" id="tecnico" placeholder="Nombre completo" required>
+                <select id="tecnico" required>
+                    <option value="">-- Seleccionar Técnico --</option>
+                    {% for t in tecnicos %}
+                    <option value="{{ t[1] }}">{{ t[1] }}</option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="form-group">
                 <label>N° Ticket / Contrato:</label>
