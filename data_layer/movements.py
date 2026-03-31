@@ -1,10 +1,6 @@
 import sqlite3
 import mysql.connector
-from mysql.connector import pooling
 import os
-import sys
-import csv
-import shutil
 from datetime import datetime, date, timedelta
 
 from utils.logger import get_logger
@@ -522,9 +518,9 @@ def registrar_abasto_batch(items_abasto, fecha_evento, numero_abasto=None, exist
         total_unidades = 0
         series_globales = []
         
-        # SUCURSAL CONTEXT
-        import os
-        sucursal = 'SANTIAGO' if os.environ.get('SANTIAGO_DIRECT_MODE') == '1' else 'CHIRIQUI'
+        # SUCURSAL CONTEXT — usar el contexto activo de la sesión, no variable de entorno
+        from config import CURRENT_CONTEXT
+        sucursal = sucursal_context or CURRENT_CONTEXT.get('BRANCH', 'CHIRIQUI')
 
         for item in items_abasto:
             sku = item['sku']

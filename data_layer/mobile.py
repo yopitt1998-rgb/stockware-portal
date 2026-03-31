@@ -1,10 +1,5 @@
-import sqlite3
 import mysql.connector
-from mysql.connector import pooling
 import os
-import sys
-import csv
-import shutil
 from datetime import datetime, date, timedelta
 
 from utils.logger import get_logger

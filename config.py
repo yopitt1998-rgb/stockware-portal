@@ -54,19 +54,20 @@ MOVILES_SANTIAGO = ["Movil 207", "Movil 208", "Movil 209", "Movil 210"]
 ALL_MOVILES = MOVILES_DISPONIBLES + MOVILES_SANTIAGO
 
 # DETALLES DE MÓVILES (Fallback para Cloud cuando no hay tabla 'moviles')
-# Formato: "Nombre Movil": {"conductor": "Nombre", "ayudante": "Nombre", "patente": "Patente"}
+# Se usan nombres vacíos para no mostrar datos ficticios en el portal si la BD falla.
+# Los datos reales se cargan desde la tabla `moviles` vía obtener_detalles_moviles().
 MOVILES_DETAILS_FALLBACK = {
-    "Movil 200": {"conductor": "Tecnico 1", "ayudante": "Ayudante 200", "patente": "P-200"},
-    "Movil 201": {"conductor": "Tecnico 2", "ayudante": "Ayudante 201", "patente": "P-201"},
-    "Movil 202": {"conductor": "Tecnico 3", "ayudante": "Ayudante 202", "patente": "P-202"},
-    "Movil 203": {"conductor": "Tecnico 4", "ayudante": "Ayudante 203", "patente": "P-203"},
-    "Movil 204": {"conductor": "Tecnico 5", "ayudante": "Ayudante 204", "patente": "P-204"},
-    "Movil 205": {"conductor": "Tecnico 6", "ayudante": "Ayudante 205", "patente": "P-205"},
-    "Movil 206": {"conductor": "Tecnico 7", "ayudante": "Ayudante 206", "patente": "P-206"},
-    "Movil 207": {"conductor": "Tecnico Santiago 1", "ayudante": "Ayudante 207", "patente": "P-207"},
-    "Movil 208": {"conductor": "Tecnico Santiago 2", "ayudante": "Ayudante 208", "patente": "P-208"},
-    "Movil 209": {"conductor": "Tecnico Santiago 3", "ayudante": "Ayudante 209", "patente": "P-209"},
-    "Movil 210": {"conductor": "Tecnico Santiago 4", "ayudante": "Ayudante 210", "patente": "P-210"}
+    "Movil 200": {"conductor": "", "ayudante": "", "patente": ""},
+    "Movil 201": {"conductor": "", "ayudante": "", "patente": ""},
+    "Movil 202": {"conductor": "", "ayudante": "", "patente": ""},
+    "Movil 203": {"conductor": "", "ayudante": "", "patente": ""},
+    "Movil 204": {"conductor": "", "ayudante": "", "patente": ""},
+    "Movil 205": {"conductor": "", "ayudante": "", "patente": ""},
+    "Movil 206": {"conductor": "", "ayudante": "", "patente": ""},
+    "Movil 207": {"conductor": "", "ayudante": "", "patente": ""},
+    "Movil 208": {"conductor": "", "ayudante": "", "patente": ""},
+    "Movil 209": {"conductor": "", "ayudante": "", "patente": ""},
+    "Movil 210": {"conductor": "", "ayudante": "", "patente": ""}
 }
 UBICACION_DESCARTE = "DESCARTE"
 TIPO_MOVIMIENTO_DESCARTE = "DESCARTE" 

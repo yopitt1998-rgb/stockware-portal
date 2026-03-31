@@ -58,42 +58,53 @@ class StockWareLogger:
         if logger.handlers:
             return logger
         
-        # Handler para archivo principal con rotación
-        main_log_file = os.path.join(LOG_DIR, 'stockware.log')
-        file_handler = RotatingFileHandler(
-            main_log_file,
-            maxBytes=5 * 1024 * 1024,  # 5 MB
-            backupCount=3,
-            encoding='utf-8'
-        )
-        file_handler.setLevel(logging.DEBUG)
-        file_handler.setFormatter(logging.Formatter(LOG_FORMAT, DATE_FORMAT))
+        # Detectar entorno cloud/Render (filesystem efímero — usar stdout)
+        is_render = os.getenv('RENDER', '').lower() in ('true', '1', 'yes')
+        is_cloud = is_render or os.getenv('DYNO') or os.getenv('RAILWAY_ENVIRONMENT')
         
-        # Handler para errores (archivo separado)
-        error_log_file = os.path.join(LOG_DIR, 'errors.log')
-        error_handler = RotatingFileHandler(
-            error_log_file,
-            maxBytes=5 * 1024 * 1024,  # 5 MB
-            backupCount=5,
-            encoding='utf-8'
-        )
-        error_handler.setLevel(logging.ERROR)
-        error_handler.setFormatter(logging.Formatter(LOG_FORMAT, DATE_FORMAT))
-        
-        # Handler para consola (solo en desarrollo)
-        if os.getenv('DEV_MODE', 'false').lower() == 'true':
+        if is_cloud:
+            # En Render/cloud: loggear a stdout (Render lo captura automáticamente)
             console_handler = logging.StreamHandler(sys.stdout)
-            console_handler.setLevel(logging.INFO)
-            console_handler.setFormatter(logging.Formatter(
-                '%(levelname)-8s | %(name)-15s | %(message)s'
-            ))
+            console_handler.setLevel(logging.DEBUG)
+            console_handler.setFormatter(logging.Formatter(LOG_FORMAT, DATE_FORMAT))
             logger.addHandler(console_handler)
-        
-        logger.addHandler(file_handler)
-        logger.addHandler(error_handler)
+        else:
+            # En local/desktop: archivos con rotación
+            main_log_file = os.path.join(LOG_DIR, 'stockware.log')
+            file_handler = RotatingFileHandler(
+                main_log_file,
+                maxBytes=5 * 1024 * 1024,  # 5 MB
+                backupCount=3,
+                encoding='utf-8'
+            )
+            file_handler.setLevel(logging.DEBUG)
+            file_handler.setFormatter(logging.Formatter(LOG_FORMAT, DATE_FORMAT))
+            
+            # archivo separado solo para errores
+            error_log_file = os.path.join(LOG_DIR, 'errors.log')
+            error_handler = RotatingFileHandler(
+                error_log_file,
+                maxBytes=5 * 1024 * 1024,  # 5 MB
+                backupCount=5,
+                encoding='utf-8'
+            )
+            error_handler.setLevel(logging.ERROR)
+            error_handler.setFormatter(logging.Formatter(LOG_FORMAT, DATE_FORMAT))
+            logger.addHandler(file_handler)
+            logger.addHandler(error_handler)
+            
+            # Consola adicional en modo dev local
+            if os.getenv('DEV_MODE', 'false').lower() == 'true':
+                console_handler = logging.StreamHandler(sys.stdout)
+                console_handler.setLevel(logging.INFO)
+                console_handler.setFormatter(logging.Formatter(
+                    '%(levelname)-8s | %(name)-15s | %(message)s'
+                ))
+                logger.addHandler(console_handler)
         
         cls._loggers[name] = logger
         return logger
+
 
 
 def get_logger(name: str = None) -> logging.Logger:
