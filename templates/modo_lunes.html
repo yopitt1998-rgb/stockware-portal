@@ -6,6 +6,7 @@
     <title>StockWare - Plan B (Lunes)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@zxing/library@latest"></script>
     <style>
         :root {
             --primary: #2c3e50;
@@ -179,6 +180,106 @@
         .submit-btn:disabled { background: #ccc; box-shadow: none; }
 
         #empty-state { text-align: center; color: #aaa; padding: 30px; font-style: italic; font-size: 14px; }
+
+        /* ─── MODAL ESCANER ─── */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: #1a252f;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        .modal-header {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .camera-container {
+            position: relative;
+            background: black;
+            aspect-ratio: 1;
+            overflow: hidden;
+        }
+        #scanVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .scan-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+        .scan-frame {
+            width: 70%;
+            height: 40%;
+            border: 2px solid rgba(255,255,255,0.5);
+            border-radius: 15px;
+            box-shadow: 0 0 0 1000px rgba(0,0,0,0.5);
+            position: relative;
+        }
+        .scan-frame::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 10%; right: 10%;
+            height: 2px;
+            background: #3498db;
+            box-shadow: 0 0 10px #3498db;
+            animation: scanLine 2s infinite ease-in-out;
+        }
+        @keyframes scanLine {
+            0%, 100% { top: 10%; }
+            50% { top: 90%; }
+        }
+        .modal-footer {
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        .btn-modal {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-close { background: #e74c3c; color: white; }
+        .btn-switch { background: #3498db; color: white; }
+        
+        .scan-btn-trigger {
+            background: var(--warning);
+            color: var(--primary);
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 800;
+            width: 100%;
+            margin-bottom: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
     </style>
 </head>
 <body>
@@ -229,7 +330,15 @@
         <!-- Equipos Section -->
         <div class="card scan-area">
             <div class="section-title">🔌 Escaneo de Equipos</div>
-            <input type="text" id="scanInput" placeholder="Escanee Serial o MAC..." autocomplete="off">
+            
+            <button class="scan-btn-trigger" onclick="openScanner()">
+                📷 ABRIR CÁMARA PARA ESCANEAR
+            </button>
+
+            <div style="display: flex; gap: 8px;">
+                <input type="text" id="scanInput" placeholder="Entrada manual (SN/MAC)..." autocomplete="off">
+            </div>
+
             <p style="font-size: 11px; color: #999; margin-top: 10px;">
                 Válido para ONTs, Decos y equipos serializados.
             </p>
@@ -265,7 +374,27 @@
     </div>
 
     <div class="footer-action">
-        <button class="submit-btn" id="submitBtn" onclick="enviarReporte()">📤 ENVIAR A BODEGA</button>
+        <button class="submit-btn" id="submitBtn" onclick="enviarReporte()">📤 FINALIZAR CARGA A BODEGA</button>
+    </div>
+
+    <!-- Scanner Modal -->
+    <div id="scanModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span style="font-weight: 800;">📷 ESCANEANDO EQUIPO</span>
+                <button onclick="closeScanner()" style="background:none; border:none; color:white; font-size:24px;">&times;</button>
+            </div>
+            <div class="camera-container">
+                <video id="scanVideo"></video>
+                <div class="scan-overlay">
+                    <div class="scan-frame"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal btn-switch" onclick="switchCamera()">🔄 Cambiar Cámara</button>
+                <button class="btn-modal btn-close" onclick="closeScanner()">Cerrar</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -296,53 +425,132 @@
             const movil = this.value;
             console.log("Móvil seleccionado:", movil);
             if (DETAILS_MOVILES[movil] && DETAILS_MOVILES[movil].conductor) {
-                const conductor = DETAILS_MOVILES[movil].conductor;
+                const conductor = DETAILS_MOVILES[movil].conductor.trim();
                 console.log("Auto-llenando técnico:", conductor);
-                tecnicoSelect.value = conductor;
+                
+                // Buscar coincidencia en el select (ignorando mayúsculas/minúsculas)
+                let found = false;
+                Array.from(tecnicoSelect.options).forEach(opt => {
+                    if (opt.value.trim().toUpperCase() === conductor.toUpperCase()) {
+                        tecnicoSelect.value = opt.value;
+                        found = true;
+                    }
+                });
+                
+                if (!found) {
+                    console.warn("Conductor no encontrado en la lista de técnicos:", conductor);
+                }
             }
         });
 
-        // Manejar Escaneo de Equipos
+        // Manejar Escaneo de Equipos (Entrada Manual)
         scanInput.addEventListener('keypress', async function(e) {
             if (e.key === 'Enter') {
                 const sn = this.value.trim().toUpperCase();
-                this.value = '';
                 if (!sn) return;
-
-                if (SCANNED_ITEMS.some(i => i.serial === sn)) {
-                    alert('Este serial ya está en la lista.');
-                    return;
-                }
-
-                try {
-                    const movil = movilSelect.value || 'BODEGA';
-                    this.disabled = true;
-                    this.placeholder = 'Validando SN...';
-                    
-                    const res = await fetch(`/api/validar_serial?serial=${sn}&movil=${movil}`);
-                    const data = await res.json();
-
-                    if (data.exito) {
-                        SCANNED_ITEMS.push({
-                            sku: data.sku,
-                            serial: sn,
-                            nombre: data.nombre || SKU_NAMES[data.sku] || 'Equipo',
-                            cantidad: 1,
-                            is_serialized: true
-                        });
-                        updateUI();
-                    } else {
-                        alert('⚠️ Error: ' + data.mensaje);
-                    }
-                } catch (err) {
-                    alert('Error de conexión al servidor.');
-                } finally {
-                    this.disabled = false;
-                    this.placeholder = 'Escanee Serial o MAC...';
-                    this.focus();
-                }
+                await processScannedCode(sn);
+                this.value = '';
             }
         });
+
+        // Lógica de procesamiento de código común
+        async function processScannedCode(sn) {
+            if (SCANNED_ITEMS.some(i => i.serial === sn)) {
+                alert('Este serial ya está en la lista.');
+                return;
+            }
+
+            try {
+                const movil = movilSelect.value || 'BODEGA';
+                document.body.style.cursor = 'wait';
+                
+                const res = await fetch(`/api/validar_serial?serial=${sn}&movil=${movil}`);
+                const data = await res.json();
+
+                if (data.exito) {
+                    SCANNED_ITEMS.push({
+                        sku: data.sku,
+                        serial: sn,
+                        nombre: data.nombre || SKU_NAMES[data.sku] || 'Equipo',
+                        cantidad: 1,
+                        is_serialized: true
+                    });
+                    updateUI();
+                    
+                    // Feedback visual si estamos en el modal
+                    const video = document.getElementById('scanVideo');
+                    video.style.filter = 'brightness(2) contrast(1.5)';
+                    setTimeout(() => video.style.filter = '', 300);
+                    
+                    return true;
+                } else {
+                    alert('⚠️ Error: ' + data.mensaje);
+                    return false;
+                }
+            } catch (err) {
+                alert('Error de conexión al servidor.');
+                return false;
+            } finally {
+                document.body.style.cursor = 'default';
+            }
+        }
+
+        // ─── LÓGICA DE CÁMARA (ZXing) ───
+        let codeReader = null;
+        let selectedDeviceId = null;
+        let videoDevices = [];
+
+        async function openScanner() {
+            document.getElementById('scanModal').classList.add('active');
+            
+            try {
+                codeReader = new ZXing.BrowserMultiFormatReader();
+                videoDevices = await codeReader.listVideoInputDevices();
+                
+                if (videoDevices.length > 0) {
+                    // Preferir cámara trasera
+                    const backCamera = videoDevices.find(device => /back|rear|trasera|environment/i.test(device.label));
+                    selectedDeviceId = backCamera ? backCamera.deviceId : videoDevices[0].deviceId;
+                    
+                    startDecoding();
+                } else {
+                    alert('No se detectaron cámaras.');
+                    closeScanner();
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error al acceder a la cámara.');
+                closeScanner();
+            }
+        }
+
+        function startDecoding() {
+            codeReader.decodeFromVideoDevice(selectedDeviceId, 'scanVideo', (result, err) => {
+                if (result) {
+                    console.log("Código detectado:", result.text);
+                    processScannedCode(result.text.trim().toUpperCase());
+                }
+            });
+        }
+
+        function switchCamera() {
+            if (videoDevices.length < 2) return;
+            
+            const currentIndex = videoDevices.findIndex(d => d.deviceId === selectedDeviceId);
+            const nextIndex = (currentIndex + 1) % videoDevices.length;
+            selectedDeviceId = videoDevices[nextIndex].deviceId;
+            
+            codeReader.reset();
+            startDecoding();
+        }
+
+        function closeScanner() {
+            if (codeReader) {
+                codeReader.reset();
+                codeReader = null;
+            }
+            document.getElementById('scanModal').classList.remove('active');
+        }
 
         // Actualizar cantidades de materiales manuales
         function updateMaterialQty(sku, qty) {
