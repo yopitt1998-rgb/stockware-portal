@@ -347,22 +347,6 @@
     <div class="container">
         <h1>Reporte de Consumo</h1>
 
-        <!-- Botón de Acceso Rápido Plan B (Lunes) -->
-        <a href="/modo_lunes" style="
-            display: block;
-            text-align: center;
-            background: #f39c12;
-            color: white;
-            text-decoration: none;
-            padding: 15px;
-            border-radius: 12px;
-            font-weight: 800;
-            margin-bottom: 20px;
-            font-size: 16px;
-            box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
-            border: 2px solid #e67e22;
-        ">📅 IR AL MODO LUNES (PLAN B)</a>
-
         <div class="alert {% if db_status == 'OK' %}alert-success{% else %}alert-error{% endif %}"
             style="display: block; margin-bottom: 20px;">
             <b>ESTADO:</b> {{ db_status }}<br>
