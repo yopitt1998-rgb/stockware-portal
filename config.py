@@ -166,9 +166,6 @@ PRODUCTOS_INICIALES = [
     ("T_PLAYPRO", "8-1-902", "024"),         # STB OTT RETAIL Z11B
     ("T_PLAY", "8-1-903", "025"),            # STBs OTT AOSP DUAL BAND Z4
     ("E_T_PLAY", "8-1-904", "023"),          # Dongle OTT Retail Z11D
-    ("FIBRA_PRECON", "7-2-192", "026"),      # Fibra Preconectizada (Nueva)
-    ("FIBRA_PRECON_L", "7-2-198", "027"),    # Fibra Preconectizada Larga (Nueva)
-    ("ROSET_FO", "8-1-92", "028"),           # Roseta Fibra Optica (Nueva)
 ]
 
 # UI Colors
