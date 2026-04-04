@@ -390,8 +390,8 @@ def api_validar_serial():
     movil = request.args.get('movil', '').strip()
     sku = request.args.get('sku', '').strip()
     
-    if not serial or not movil or not sku:
-        return jsonify({"exito": False, "mensaje": "Falta serial, móvil o SKU de referencia."})
+    if not serial or not movil:
+        return jsonify({"exito": False, "mensaje": "Falta serial o móvil para validación."})
         
     conn = None
     try:
@@ -423,17 +423,23 @@ def api_validar_serial():
             
         db_sku, db_ubicacion, db_estado = result
         
+        # Obtener nombre del producto
+        run_query(cursor, "SELECT nombre FROM productos WHERE sku = ? LIMIT 1", (db_sku,))
+        n_res = cursor.fetchone()
+        db_nombre = n_res[0] if n_res else "Equipo Serializado"
+
         if db_ubicacion != 'BODEGA':
-            return jsonify({"exito": False, "mensaje": f"El equipo no está en BODEGA (Ubicación actual: {db_ubicacion})."})
+            return jsonify({"exito": False, "mensaje": f"El equipo {db_nombre} ({db_sku}) no está en BODEGA (Ubicación actual: {db_ubicacion})."})
             
-        if db_sku != sku:
-            # Obtener nombre real para mensaje de error más claro si es posible
-            run_query(cursor, "SELECT nombre FROM productos WHERE sku = ?", (db_sku,))
-            n = cursor.fetchone()
-            nombre_err = n[0] if n else "Otro producto"
-            return jsonify({"exito": False, "mensaje": f"El serial corresponde a: {nombre_err} (SKU: {db_sku}), pero se esperaba este producto (SKU: {sku})."})
+        if sku and db_sku != sku:
+            return jsonify({"exito": False, "mensaje": f"El serial corresponde a: {db_nombre} (SKU: {db_sku}), pero se esperaba este producto (SKU: {sku})."})
             
-        return jsonify({"exito": True, "mensaje": "Validado"})
+        return jsonify({
+            "exito": True, 
+            "mensaje": "Validado",
+            "sku": db_sku,
+            "nombre": db_nombre
+        })
         
     except Exception as e:
         return jsonify({"exito": False, "mensaje": f"Error verificando: {e}"})
