@@ -381,8 +381,6 @@
                     <option value="{{ movil }}">{{ movil }}</option>
                     {% endfor %}
                 </select>
-                <div id="lbl_tecnico"
-                    style="margin-top: 5px; font-weight: bold; color: var(--accent); font-size: 13px;"></div>
             </div>
 
             <div class="form-group" id="group_paquete" style="display:none;">
@@ -469,21 +467,25 @@
             // Auto-completar conductor/ayudante
             try {
                 const d = DETAILS_MOVILES[movil];
-                const lblTecnico = document.getElementById('lbl_tecnico');
                 if (d) {
-                    // Set selected index for technician and assistant
                     const selectTecnico = document.getElementById('tecnico');
                     const selectAyudante = document.getElementById('ayudante');
                     
-                    if (d.conductor) selectTecnico.value = d.conductor;
-                    else selectTecnico.selectedIndex = 0;
-                    
-                    if (d.ayudante) selectAyudante.value = d.ayudante;
-                    else selectAyudante.selectedIndex = 0;
+                    const setOrAddOption = (el, name) => {
+                        if (!name) { el.selectedIndex = 0; return; }
+                        const n = name.trim();
+                        let f = false;
+                        Array.from(el.options).forEach(o => {
+                            if (o.value.trim().toUpperCase() === n.toUpperCase()) { el.value = o.value; f = true; }
+                        });
+                        if (!f) {
+                            const opt = document.createElement('option');
+                            opt.value = n; opt.text = n; el.add(opt); el.value = n;
+                        }
+                    };
 
-                    if (lblTecnico) lblTecnico.innerText = d.conductor ? `👤 Técnico: ${d.conductor}` : '👤 Sin técnico asignado';
-                } else {
-                    if (lblTecnico) lblTecnico.innerText = '';
+                    setOrAddOption(selectTecnico, d.conductor);
+                    setOrAddOption(selectAyudante, d.ayudante);
                 }
             } catch (e) { console.error('Autocompletado:', e); }
 
