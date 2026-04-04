@@ -438,7 +438,12 @@
                 });
                 
                 if (!found) {
-                    console.warn("Conductor no encontrado en la lista de técnicos:", conductor);
+                    console.log("Conductor no encontrado. Agregándolo dinámicamente...");
+                    const newOpt = document.createElement('option');
+                    newOpt.value = conductor;
+                    newOpt.text = conductor;
+                    tecnicoSelect.add(newOpt);
+                    tecnicoSelect.value = conductor;
                 }
             }
         });

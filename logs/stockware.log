@@ -19182,3 +19182,17 @@ AttributeError: 'ModernInventarioApp' object has no attribute 'switch_to_tab'
 2026-04-02 13:31:56 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
 2026-04-02 13:31:59 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
 2026-04-02 13:32:00 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-04 09:12:04 | INFO     | __main__             | Inicializando app_inventario...
+2026-04-04 09:12:06 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-04-04 09:12:09 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-04 09:12:18 | INFO     | data_layer.core      | ✅ Etapa 1 completada: tablas verificadas/creadas.
+2026-04-04 09:12:20 | INFO     | data_layer.core      | ✅ Etapa 2 completada: migraciones de columnas aplicadas.
+2026-04-04 09:12:23 | INFO     | data_layer.core      | ✅ Etapa 3 completada: índices de rendimiento verificados.
+2026-04-04 09:12:24 | INFO     | data_layer.core      | ✅ Etapa 4 completada: móviles verificados.
+2026-04-04 09:12:24 | INFO     | data_layer.core      | 🎉 Base de datos inicializada correctamente.
+2026-04-04 09:12:25 | INFO     | data_layer.reminders | Bootstrap Start
+2026-04-04 09:12:25 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-04-04 09:12:25 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-04-04 09:12:34 | WARNING  | utils.db_connector   | ⚠️ [POOL] Error de conexión para test, reintentando una vez: Failed getting connection; pool exhausted
+2026-04-04 09:12:40 | WARNING  | utils.db_connector   | ⚠️ [POOL] Error de conexión para test, reintentando una vez: Failed getting connection; pool exhausted
+2026-04-04 09:48:33 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
