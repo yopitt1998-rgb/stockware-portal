@@ -3,19 +3,20 @@ from tkinter import ttk
 class Styles:
     """Manages the application styles and colors."""
     
-    # Colores modernos
-    PRIMARY_COLOR = '#2c3e50'
-    SECONDARY_COLOR = '#3498db'
-    ACCENT_COLOR = '#e74c3c'
-    SUCCESS_COLOR = '#27ae60'
-    DANGER_COLOR = '#e74c3c'   # Alias de ACCENT_COLOR
-    WARNING_COLOR = '#f39c12'
-    INFO_COLOR = '#17a2b8'
-    LIGHT_BG = '#ecf0f1'
-    BG_COLOR = '#ecf0f1' # Alias para compatibilidad
-    DARK_TEXT = '#2c3e50'
-    LIGHT_TEXT = '#ecf0f1'
-    TEXT_COLOR = '#2c3e50' # Alias para compatibilidad
+    # Colores Premium (Slate & Indigo Palette)
+    PRIMARY_COLOR = '#0f172a'   # Slate 900
+    SECONDARY_COLOR = '#4f46e5' # Indigo 600
+    ACCENT_COLOR = '#f43f5e'    # Rose 500
+    SUCCESS_COLOR = '#10b981'   # Emerald 500
+    DANGER_COLOR = '#f43f5e'    # Rose 500
+    WARNING_COLOR = '#f59e0b'   # Amber 500
+    INFO_COLOR = '#0ea5e9'      # Sky 500
+    LIGHT_BG = '#f8fafc'        # Slate 50
+    BG_COLOR = '#f8fafc'
+    DARK_TEXT = '#1e293b'       # Slate 800
+    LIGHT_TEXT = '#f8fafc'
+    TEXT_COLOR = '#1e293b'
+    BORDER_COLOR = '#e2e8f0'    # Slate 200
 
     @classmethod
     def setup_styles(cls):
@@ -87,13 +88,28 @@ class Styles:
                     background='white',
                     fieldbackground='white',
                     foreground=cls.DARK_TEXT,
-                    font=('Segoe UI', 11),
-                    rowheight=35)
+                    font=('Segoe UI Variable', 10),
+                    rowheight=40,
+                    borderwidth=0)
         
         style.configure('Modern.Treeview.Heading',
                     background=cls.PRIMARY_COLOR,
                     foreground='white',
-                    font=('Segoe UI', 10, 'bold'))
+                    font=('Segoe UI Variable', 10, 'bold'),
+                    padding=(10, 5))
         
         style.map('Modern.Treeview',
-                background=[('selected', cls.SECONDARY_COLOR)])
+                background=[('selected', cls.SECONDARY_COLOR)],
+                foreground=[('selected', 'white')])
+        
+        # Estilo para Notebook
+        style.configure('TNotebook', background=cls.LIGHT_BG, borderwidth=0)
+        style.configure('TNotebook.Tab', 
+                        padding=(20, 8), 
+                        font=('Segoe UI Variable', 10),
+                        background='#e2e8f0', 
+                        foreground=cls.DARK_TEXT)
+        style.map('TNotebook.Tab',
+                  background=[('selected', 'white')],
+                  foreground=[('selected', cls.SECONDARY_COLOR)],
+                  expand=[('selected', [1, 1, 1, 0])])

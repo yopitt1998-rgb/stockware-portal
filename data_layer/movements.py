@@ -490,7 +490,7 @@ def obtener_movimientos_por_rango(fecha_inicio, fecha_fin):
     finally:
         if conn: close_connection(conn)
 
-def registrar_abasto_batch(items_abasto, fecha_evento, numero_abasto=None, existing_conn=None):
+def registrar_abasto_batch(items_abasto, fecha_evento, numero_abasto=None, existing_conn=None, sucursal_context=None):
     """
     Registra múltiples items de abasto en una sola transacción.
     """

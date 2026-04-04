@@ -1048,16 +1048,16 @@ def identificar_codigo_escaneado_gui(codigo):
         # Búsqueda unificada con UNION ALL para máxima velocidad (1 round-trip)
         # Prioridades: 1. Serial, 2. Codigo Barra, 3. Maestro, 4. SKU
         sql = """
-            SELECT sku, ubicacion, 1 as priority, 1 as is_serial FROM series_registradas 
+            SELECT sku, ubicacion, 1 as priority, 1 as is_serial, paquete FROM series_registradas 
             WHERE UPPER(serial_number) = ? OR UPPER(mac_number) = ?
             UNION ALL
-            SELECT sku, NULL as ubicacion, 2 as priority, 0 as is_serial FROM productos 
+            SELECT sku, NULL as ubicacion, 2 as priority, 0 as is_serial, NULL as paquete FROM productos 
             WHERE codigo_barra = ? OR codigo_barra = ?
             UNION ALL
-            SELECT sku, NULL as ubicacion, 3 as priority, 0 as is_serial FROM productos 
+            SELECT sku, NULL as ubicacion, 3 as priority, 0 as is_serial, NULL as paquete FROM productos 
             WHERE codigo_barra_maestro IN (?, ?, ?)
             UNION ALL
-            SELECT sku, NULL as ubicacion, 4 as priority, 0 as is_serial FROM productos 
+            SELECT sku, NULL as ubicacion, 4 as priority, 0 as is_serial, NULL as paquete FROM productos 
             WHERE sku = ? OR sku = ?
             ORDER BY priority ASC LIMIT 1
         """
@@ -1072,14 +1072,14 @@ def identificar_codigo_escaneado_gui(codigo):
         result = cursor.fetchone()
         
         if result:
-            # Result: (sku, ubicacion, priority, is_serial)
-            return result[0], bool(result[3]), result[1]
+            # Result: (sku, ubicacion, priority, is_serial, paquete)
+            return result[0], bool(result[3]), result[1], result[4]
             
-        return None, False, None
+        return None, False, None, None
         
     except Exception as e:
         logger.error(f"Error en identificar_codigo_escaneado_gui: {e}")
-        return None, False, None
+        return None, False, None, None
     finally:
         if conn: close_connection(conn)
 
@@ -1137,13 +1137,13 @@ def obtener_diccionarios_escaneo(sucursal_context=None):
             cursor = conn.cursor()
 
         # 1. Cargar Seriales (MAC y Serial)
-        sql_seriales = "SELECT sku, serial_number, mac_number, ubicacion FROM series_registradas WHERE sucursal = ?"
+        sql_seriales = "SELECT sku, serial_number, mac_number, ubicacion, paquete FROM series_registradas WHERE sucursal = ?"
         run_query(cursor, sql_seriales, (sucursal_target,))
-        for sku, s_num, m_num, ubicacion in cursor.fetchall():
+        for sku, s_num, m_num, ubicacion, paquete in cursor.fetchall():
             if s_num and s_num.strip():
-                serial_cache[s_num.strip().upper()] = (sku, ubicacion)
+                serial_cache[s_num.strip().upper()] = (sku, ubicacion, paquete)
             if m_num and m_num.strip():
-                serial_cache[m_num.strip().upper()] = (sku, ubicacion)
+                serial_cache[m_num.strip().upper()] = (sku, ubicacion, paquete)
 
         # 2. Cargar Códigos de Barra de Productos
         sql_barcodes = "SELECT sku, codigo_barra_maestro, codigo_barra FROM productos WHERE ubicacion = 'BODEGA'"
@@ -1392,3 +1392,33 @@ def verificar_seriales_bodega(seriales, sucursal_context='CHIRIQUI', target_db=N
     finally:
         if conn: close_connection(conn)
 
+
+def obtener_todos_los_seriales_sucursal(sucursal_context=None):
+    """
+    Obtiene un set de todos los seriales y mac_numbers existentes en la sucursal actual.
+    Optimizado para validación rápida en memoria durante escaneos masivos (Abastos).
+    """
+    try:
+        from config import CURRENT_CONTEXT
+        sucursal = sucursal_context or CURRENT_CONTEXT.get('BRANCH', 'CHIRIQUI')
+        
+        with db_session() as (conn, cursor):
+            # Obtener seriales y MACs
+            sql = """
+                SELECT serial_number, mac_number 
+                FROM series_registradas 
+                WHERE sucursal = ? OR (sucursal IS NULL AND ? = 'CHIRIQUI')
+            """
+            run_query(cursor, sql, (sucursal, sucursal))
+            rows = cursor.fetchall()
+            
+            # Crear un set para búsqueda O(1)
+            seriales = set()
+            for s, m in rows:
+                if s: seriales.add(s.strip().upper())
+                if m: seriales.add(m.strip().upper())
+            
+            return seriales
+    except Exception as e:
+        logger.error(f"Error cargando caché de seriales: {e}")
+        return set()

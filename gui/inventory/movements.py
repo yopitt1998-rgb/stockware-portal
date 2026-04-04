@@ -1048,9 +1048,10 @@ class MobileReturnWindow:
                      'PERSONALIZADO': item[7]
                  }
         
-        # 2. Obtener Consumos Reportados para Auditar (Auditoría de Consumo)
-        # BUG FIX: Pedir todos para asegurar que se vea todo lo reportado hoy, incluso si ya fue validado.
-        pendientes = obtener_consumos_pendientes(moviles_filtro=[movil], estado='TODOS')
+        # BUG FIX: Usamos 'PENDIENTE' en lugar de None o 'TODOS'. 
+        # Los registros 'AUTO_APROBADO' (de la web) ya están descontados del Gross (asignacion_moviles).
+        # Si los incluimos aquí, se restan dos veces.
+        pendientes = obtener_consumos_pendientes(moviles_filtro=[movil], estado='PENDIENTE')
         
         # Mapping para robustez si cambian los índices en database.py
         IDX_SKU = 2
@@ -1152,23 +1153,21 @@ class MobileReturnWindow:
             # --- NUEVA LÓGICA DE VISIBILIDAD ESTRICTA PERO SEGURA ---
             if paquete_filtro != "TODOS":
                 # REGLA 1: Solo mostrar si pertenece al paquete seleccionado O tiene stock personalizado O hay movimiento
-                # Rule 1: Skip if not in package, not personalized, and NO MOVEMENT
-                # (Shared materials should only show if they have movement or belong to the package context)
                 has_perso = (info.get("PERSONALIZADO", 0) if info else 0) > 0
                 has_movimiento = (qty_app > 0 or qty_excel > 0)
                 
-                if not is_in_package and not has_perso:
-                    if not is_shared or not has_movimiento:
+                # Rule 1: Si hay movimiento (Render o Excel), MOSTRAR SIEMPRE
+                if has_movimiento:
+                    pass # Show it
+                elif not is_in_package and not has_perso:
+                    if not is_shared:
                         continue
                 
-                # Rule 2: Hide if no movement AND no assigned stock in this view
-                if qty_app == 0 and qty_excel == 0:
+                # Rule 2: Hide if no movement AND no assigned stock in this view (already handled by Rule 1 pass)
+                if not has_movimiento:
                     stock_en_p = info.get(paquete_filtro, 0) if info else 0
                     if stock_en_p == 0 and not has_perso:
                          if not is_shared:
-                             continue
-                         else:
-                             # Shared materials: only show if they have movement (covered by Rule 1 mostly)
                              continue
 
             diff = qty_excel - qty_app
@@ -1199,7 +1198,7 @@ class MobileReturnWindow:
         orden_deseado = [
             "4-3-42", "2-5-02", "2-7-07", "1-4-61", "4-3-18", "1-8-40", 
             "4-2-41", "2-7-11", "4-4-644", "4-4-656", "4-4-647", "4-4-646", 
-            "8-1-902", "8-1-903", "8-1-904", "U4-4-633", "4-4-654"
+            "8-1-902", "8-1-903", "8-1-904", "U4-4-633"
         ]
         
         def sort_key(s):
@@ -1224,19 +1223,30 @@ class MobileReturnWindow:
                 name = self._prod_name_map.get(sku, "Material Extra (No Asignado)")
             
             # --- LÓGICA DE CÁLCULO DE EXPECTED (CORREGIDA) ---
-            # 1. Obtener Stock Bruto (Base)
+            # 1. Obtener Stock Bruto (Base que se le entregó)
             if paquete_filtro == "TODOS":
                 gross = info.get('total', 0) if info else 0
+                # Consumo reportado total para este SKU
+                prod_consumo_data = self.session_data.get('consumo_app', {}).get(sku, {})
+                consumed_total = sum(prod_consumo_data.values())
             else:
                 # Paquete específico: Sumamos lo del paquete + Personalizado + NINGUNO (Puente)
-                # El stock 'NINGUNO' es stock base que no tiene etiqueta pero reside en el móvil.
                 gross = (info.get(paquete_filtro, 0) if info else 0) + \
                         (info.get("PERSONALIZADO", 0) if info else 0) + \
                         (info.get("NINGUNO", 0) if info else 0)
+                
+                # Consumo reportado para este contexto (Paquete + Sin Etiqueta)
+                prod_consumo_data = self.session_data.get('consumo_app', {}).get(sku, {})
+                consumed_total = prod_consumo_data.get(paquete_filtro, 0) + \
+                                 prod_consumo_data.get('NINGUNO', 0) + \
+                                 prod_consumo_data.get('SIN_PAQUETE', 0)
             
-            # ELIMINADO: Ya no restamos consumos_pendientes (consumed_total) porque la tabla 
-            # asignacion_moviles ya se descuenta cuando el técnico reporta en la App.
-            expected = gross
+            # --- LÓGICA DE CÁLCULO DE EXPECTED (CORREGIDA) ---
+            # gross: Saldo al iniciar el día (ej. 60)
+            # consumed_total: Suma de consumos reportados hoy (ej. 16)
+            # expected: Lo que debería quedar (60 - 16 = 44)
+            # Antes el programa restaba consumos manuales localmente además de lo de Render, causando doble resta.
+            expected = max(0, gross - consumed_total)
 
             # Si es equipo, intentar poner la MAC en el nombre para facilitar identificación
             display_name = name
@@ -1412,17 +1422,18 @@ class MobileReturnWindow:
         # 1. Búsqueda ultra-rápida en diccionarios de memoria (INSTANTÁNEO)
         # A) Es un Serial
         if 'g_seriales' in self.session_data and code in self.session_data['g_seriales']:
-            sku_found, ubicacion = self.session_data['g_seriales'][code]
+            sku_found, ubicacion, paquete_found = self.session_data['g_seriales'][code]
             is_serial = True
         
         # B) Es un Código de Barras Maestro o Legacy
         elif 'g_barcodes' in self.session_data and code in self.session_data['g_barcodes']:
             sku_found = self.session_data['g_barcodes'][code]
             is_serial = False
+            paquete_found = None
 
         # 2. Búsqueda remota (Fallback solo si no está en caché)
         if not sku_found:
-            sku_found, is_serial, ubicacion = identificar_codigo_escaneado_gui(code)
+            sku_found, is_serial, ubicacion, paquete_found = identificar_codigo_escaneado_gui(code)
         
         # 3. Si no encontró en base de datos, quizás el técnico digitó un SKU directamente
         if not sku_found:
@@ -1434,9 +1445,10 @@ class MobileReturnWindow:
                  sku_found = code
                  is_serial = False
                  ubicacion = None
+                 paquete_found = None
 
         # 3. Mandar el resultado de vuelta al hilo principal de Tkinter
-        self.ventana.after(0, self._procesar_resultado_scan, code, movil, sku_found, is_serial, ubicacion)
+        self.ventana.after(0, self._procesar_resultado_scan, code, movil, sku_found, is_serial, ubicacion, paquete_found)
 
     def on_tree_item_click(self, event):
         """Al hacer click en un item de la lista física, abrir el diálogo de cantidad (ídem escaneo maestro)"""
@@ -1459,7 +1471,7 @@ class MobileReturnWindow:
         # Usamos el SKU como 'code' para que el log/UI sea coherente
         self._procesar_resultado_scan(sku, movil, sku, is_serial=False, ubicacion=None)
 
-    def _procesar_resultado_scan(self, code, movil, sku_found, is_serial, ubicacion):
+    def _procesar_resultado_scan(self, code, movil, sku_found, is_serial, ubicacion, paquete_orig=None):
         # Desbloquear entry
         self.entry_scan.config(state='normal')
         self.entry_scan.delete(0, tk.END)
@@ -1468,6 +1480,26 @@ class MobileReturnWindow:
         if sku_found:
             # Validaciones para equipos (Seriales)
             if is_serial:
+                # --- VALIDACIÓN DE PAQUETE (NUEVO) ---
+                paquete_actual_filtro = self.paquete_combo.get()
+                if paquete_actual_filtro != "TODOS":
+                    # Normalizar paquete encontrado para comparación
+                    pq_found = str(paquete_orig).strip().upper() if paquete_orig else "NINGUNO"
+                    pq_filter = str(paquete_actual_filtro).strip().upper()
+                    
+                    if pq_found != pq_filter:
+                        # Si no coincide exactamente, pero el equipo es NINGUNO y el filtro es algo específico,
+                        # o viceversa, mostramos el error para evitar cruces.
+                        messagebox.showerror(
+                            "Paquete Incorrecto",
+                            f"El equipo escaneado ({code}) pertenece al '{pq_found}',\npero usted tiene seleccionado el '{pq_filter}'.\n\nCambie el filtro o escanee el equipo correcto.",
+                            parent=self.ventana
+                        )
+                        self.entry_scan.config(bg='#f39c12') # Naranja (advertencia de flujo)
+                        self.ventana.after(1200, lambda: self.entry_scan.config(bg='#e8f0fe'))
+                        self.entry_scan.focus_set()
+                        return
+
                 if ubicacion != movil and ubicacion != 'FALTANTE':
                     logger.warning(f"⚠️ Serial '{code}' registrado en {ubicacion}, pero se está retornando desde {movil}")
                     messagebox.showerror(

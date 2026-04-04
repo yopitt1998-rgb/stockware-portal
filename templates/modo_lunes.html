@@ -3,37 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>StockWare - Interfaz de Lunes (Plan B)</title>
+    <title>StockWare - Plan B (Lunes)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #2c3e50;
-            --accent: #e67e22;
+            --accent: #3498db;
             --success: #27ae60;
-            --bg: #f5f6fa;
-            --dark: #2f3640;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --bg: #f4f7f6;
+            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
         * { box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', sans-serif;
             background: var(--bg);
             margin: 0;
             padding: 0;
-            color: var(--dark);
+            color: #333;
+            padding-bottom: 80px;
         }
 
-        .header {
+        /* Navbar */
+        .navbar {
             background: var(--primary);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             color: white;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+            border-radius: 0 0 15px 15px;
         }
+
+        .nav-brand { font-size: 20px; font-weight: 800; }
+        .nav-links { display: flex; gap: 10px; }
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            background: rgba(255,255,255,0.1);
+        }
+        .nav-link.active { background: var(--warning); }
 
         .container {
             max-width: 600px;
-            margin: 20px auto;
-            padding: 0 15px 100px;
+            margin: auto;
+            padding: 0 15px;
         }
 
         .card {
@@ -41,317 +67,383 @@
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.06);
+            box-shadow: var(--card-shadow);
+        }
+
+        h1 { font-size: 20px; color: var(--primary); margin: 0 0 15px 0; text-align: center; }
+        .section-title {
+            font-size: 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 14px; }
+        label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 13px; color: #666; }
         select, input {
             width: 100%;
             padding: 12px;
-            border: 2px solid #dfe6e9;
+            border: 1px solid #ddd;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 15px;
+            outline: none;
         }
+        select:focus, input:focus { border-color: var(--accent); }
 
+        /* Scanning Area */
+        .scan-area {
+            background: #fffbe6;
+            border: 2px dashed #ffe58f;
+            text-align: center;
+        }
         #scanInput {
-            background: #fff9db;
-            border-color: #f1c40f;
+            background: white;
+            border: 2px solid var(--warning);
             font-weight: bold;
             font-family: monospace;
             text-align: center;
-            font-size: 1.2rem;
+            font-size: 18px;
         }
 
-        .item-list {
-            margin-top: 10px;
+        /* Material Manual Area */
+        .material-manual-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 50px;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        .add-small-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 48px;
+            border-radius: 8px;
+            font-size: 20px;
+            cursor: pointer;
         }
 
+        /* List Styling */
         .scanned-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: white;
-            padding: 12px 15px;
-            border-radius: 8px;
+            padding: 12px;
+            border-radius: 10px;
             border-left: 5px solid var(--success);
-            margin-bottom: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-
-        .item-details { flex: 1; }
-        .item-name { font-weight: bold; display: block; }
-        .item-sn { font-size: 0.85rem; color: #7f8c8d; font-family: monospace; }
-        
+        .item-info { flex: 1; }
+        .item-name { font-weight: 700; display: block; font-size: 14px; }
+        .item-meta { font-size: 12px; color: #888; font-family: monospace; }
         .remove-btn {
-            background: #ff7675;
-            color: white;
+            background: none;
             border: none;
-            padding: 8px 12px;
-            border-radius: 6px;
+            color: var(--danger);
+            font-size: 18px;
             cursor: pointer;
+            padding: 5px 10px;
         }
 
-        .footer {
+        /* Floating footer */
+        .footer-action {
             position: fixed;
             bottom: 0;
+            left: 0;
             width: 100%;
             background: white;
             padding: 15px;
-            box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: center;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            z-index: 1001;
         }
-
         .submit-btn {
             background: var(--success);
             color: white;
             border: none;
             width: 100%;
             max-width: 570px;
-            padding: 16px;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: bold;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 800;
             cursor: pointer;
+            box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
         }
+        .submit-btn:disabled { background: #ccc; box-shadow: none; }
 
-        .back-link {
-            display: block;
-            text-align: center;
-            margin-top: 10px;
-            color: var(--primary);
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-
-        #empty-state {
-            text-align: center;
-            color: #bdc3c7;
-            padding: 40px 0;
-        }
+        #empty-state { text-align: center; color: #aaa; padding: 30px; font-style: italic; font-size: 14px; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h1>🗓️ Interfaz de Lunes</h1>
-    <p>Consumo Directo desde Bodega (Plan B)</p>
-</div>
+    <nav class="navbar">
+        <div class="nav-brand">🚀 StockWare</div>
+        <div class="nav-links">
+            <a href="/" class="nav-link">Reporte Diario</a>
+            <a href="/modo_lunes" class="nav-link active">Plan B (Lunes)</a>
+        </div>
+    </nav>
 
-{% if db_status != 'OK' %}
-<div style="background: #f8d7da; color: #721c24; padding: 15px; margin: 10px; border-radius: 8px; text-align: center; border: 1px solid #f5c6cb;">
-    <b>⚠️ ERROR:</b> {{ db_status }}<br>
-    <small>{{ error_detail }}</small>
-</div>
-{% endif %}
+    <div class="container">
+        <h1>🗓️ Plan B: Registro Directo</h1>
 
-<div class="container">
-    <div class="card">
-        <div class="form-group">
-            <label>Móvil:</label>
-            <select id="movil">
-                <option value="">-- Seleccionar --</option>
-                {% for m in moviles %}
-                <option value="{{ m }}">{{ m }}</option>
-                {% endfor %}
-            </select>
+        {% if db_status != 'OK' %}
+        <div style="background: var(--danger); color: white; padding: 12px; border-radius: 10px; margin-bottom: 20px; font-size: 13px;">
+            <b>⚠️ ERROR DATABASE:</b> {{ error_detail }}
         </div>
-        <div class="form-group">
-            <label>Técnico:</label>
-            <select id="tecnico">
-                <option value="">-- Seleccionar --</option>
-                {% for t in tecnicos %}
-                <option value="{{ t[1] }}">{{ t[1] }}</option>
-                {% endfor %}
-            </select>
+        {% endif %}
+
+        <div class="card">
+            <div class="section-title">👤 Datos del Reporte</div>
+            <div class="form-group">
+                <label>Móvil:</label>
+                <select id="movil">
+                    <option value="">-- Seleccionar Unidad --</option>
+                    {% for m in moviles %}
+                    <option value="{{ m }}">{{ m }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Técnico Responsable:</label>
+                <select id="tecnico">
+                    <option value="">-- Seleccionar Técnico --</option>
+                    {% for t in tecnicos %}
+                    <option value="{{ t[1] }}">{{ t[1] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Contrato / Ticket / OS:</label>
+                <input type="text" id="contrato" placeholder="Ej: 10023456" autocomplete="off">
+            </div>
         </div>
-        <div class="form-group">
-            <label>N° Contrato / Ticket:</label>
-            <input type="text" id="contrato" placeholder="Ej: P-102030">
+
+        <!-- Equipos Section -->
+        <div class="card scan-area">
+            <div class="section-title">🔌 Escaneo de Equipos</div>
+            <input type="text" id="scanInput" placeholder="Escanee Serial o MAC..." autocomplete="off">
+            <p style="font-size: 11px; color: #999; margin-top: 10px;">
+                Válido para ONTs, Decos y equipos serializados.
+            </p>
         </div>
+
+        <!-- Materiales Section -->
+        <div class="card">
+            <div class="section-title">🛠️ Agregar Material Manual</div>
+            <div class="material-manual-grid">
+                <div class="form-group" style="margin-bottom:0">
+                    <label>Material:</label>
+                    <select id="manual_sku">
+                        <option value="">-- Seleccionar --</option>
+                        {% for m in materiales %}
+                        <option value="{{ m.sku }}">{{ m.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                    <label>Cant:</label>
+                    <input type="number" id="manual_qty" min="1" value="1">
+                </div>
+                <button class="add-small-btn" onclick="addManualItem()">+</button>
+            </div>
+        </div>
+
+        <div class="section-title" style="margin-top: 25px;">📝 Resumen de Carga Directa</div>
+        <div id="empty-state">No hay items en la lista.</div>
+        <div id="scanned-list" class="item-list"></div>
     </div>
 
-    <div class="card">
-        <label>📸 ESCANEE EL EQUIPO AQUÍ:</label>
-        <input type="text" id="scanInput" placeholder="Apunta el scanner..." autofocus>
-        <p style="font-size: 11px; color: #7f8c8d; margin-top: 10px; text-align: center;">
-            El sistema detectará el equipo automáticamente al escanear el serial/MAC.
-        </p>
+    <div class="footer-action">
+        <button class="submit-btn" id="submitBtn" onclick="enviarReporte()">📤 ENVIAR A BODEGA</button>
     </div>
 
-    <div id="empty-state">No hay equipos escaneados aún.</div>
-    <div class="item-list" id="scanned-list"></div>
+    <script>
+        const SCANNED_ITEMS = []; // { sku, serial, nombre, cantidad, is_serialized }
+        const SKU_NAMES = {};
+        
+        // Cargar nombres de equipos de Jinja
+        {% for e in equipos %}
+        SKU_NAMES["{{ e.sku }}"] = "{{ e.nombre }}";
+        {% endfor %}
+        // Cargar nombres de materiales de Jinja
+        {% for m in materiales %}
+        SKU_NAMES["{{ m.sku }}"] = "{{ m.nombre }}";
+        {% endfor %}
 
-    <a href="/" class="back-link">← Volver al formulario normal</a>
-</div>
+        const DETAILS_MOVILES = {{ details_moviles | safe }};
 
-<div class="footer">
-    <button class="submit-btn" id="submitBtn" onclick="enviarReporte()">📤 ENVIAR REPORTE</button>
-</div>
+        // UI Elements
+        const scanInput = document.getElementById('scanInput');
+        const listContainer = document.getElementById('scanned-list');
+        const emptyState = document.getElementById('empty-state');
+        const movilSelect = document.getElementById('movil');
+        const tecnicoSelect = document.getElementById('tecnico');
 
-<script>
-    const SCANNED_ITEMS = []; // Array de { sku, serial, nombre }
-    const SKU_TO_NAME = {{ productos | tojson }}.reduce((acc, p) => {
-        acc[p.sku] = p.nombre;
-        return acc;
-    }, {});
-    
-    // Datos de móviles para auto-completar técnico
-    const DETAILS_MOVILES = {{ details_moviles | safe }};
-
-    const scanInput = document.getElementById('scanInput');
-    const scannedList = document.getElementById('scanned-list');
-    const emptyState = document.getElementById('empty-state');
-    const movilSelect = document.getElementById('movil');
-    const tecnicoInput = document.getElementById('tecnico');
-
-    // Auto-completar técnico al cambiar móvil
-    movilSelect.addEventListener('change', function() {
-        const movil = this.value;
-        if (DETAILS_MOVILES[movil]) {
-            tecnicoInput.value = DETAILS_MOVILES[movil].conductor || '';
-        }
-    });
-
-    // Manejar escaneo
-    scanInput.addEventListener('keypress', async function(e) {
-        if (e.key === 'Enter') {
-            const sn = this.value.trim().toUpperCase();
-            this.value = '';
-            if (!sn) return;
-
-            // Evitar duplicados en la lista actual
-            if (SCANNED_ITEMS.some(item => item.serial === sn)) {
-                alert('Este serial ya está en la lista.');
-                return;
+        // Auto-completar técnico
+        movilSelect.addEventListener('change', function() {
+            const movil = this.value;
+            if (DETAILS_MOVILES[movil] && DETAILS_MOVILES[movil].conductor) {
+                tecnicoSelect.value = DETAILS_MOVILES[movil].conductor;
             }
+        });
 
-            try {
-                this.disabled = true;
-                this.placeholder = 'Validando...';
-                
-                // Validar serial en BODEGA
-                // Reutilizamos el endpoint existente o uno simplificado
-                const movil = document.getElementById('movil').value;
-                if (!movil) {
-                    alert('Selecciona un móvil primero.');
-                    this.disabled = false;
-                    this.placeholder = 'Apunta el scanner...';
+        // Manejar Escaneo de Equipos
+        scanInput.addEventListener('keypress', async function(e) {
+            if (e.key === 'Enter') {
+                const sn = this.value.trim().toUpperCase();
+                this.value = '';
+                if (!sn) return;
+
+                if (SCANNED_ITEMS.some(i => i.serial === sn)) {
+                    alert('Este serial ya está en la lista.');
                     return;
                 }
 
-                const res = await fetch(`/api/validar_serial?serial=${sn}&movil=${movil}`);
-                const data = await res.json();
+                try {
+                    const movil = movilSelect.value || 'BODEGA';
+                    this.disabled = true;
+                    this.placeholder = 'Validando SN...';
+                    
+                    const res = await fetch(`/api/validar_serial?serial=${sn}&movil=${movil}`);
+                    const data = await res.json();
 
-                if (data.exito) {
-                    // Agregar a la lista
-                    SCANNED_ITEMS.push({
-                        sku: data.sku,
-                        serial: sn,
-                        nombre: data.nombre || SKU_TO_NAME[data.sku] || 'Equipo Desconocido'
-                    });
-                    renderList();
-                } else {
-                    alert('Error: ' + data.mensaje);
+                    if (data.exito) {
+                        SCANNED_ITEMS.push({
+                            sku: data.sku,
+                            serial: sn,
+                            nombre: data.nombre || SKU_NAMES[data.sku] || 'Equipo',
+                            cantidad: 1,
+                            is_serialized: true
+                        });
+                        updateUI();
+                    } else {
+                        alert('⚠️ Error: ' + data.mensaje);
+                    }
+                } catch (err) {
+                    alert('Error de conexión al servidor.');
+                } finally {
+                    this.disabled = false;
+                    this.placeholder = 'Escanee Serial o MAC...';
+                    this.focus();
                 }
-            } catch (err) {
-                alert('Error de conexión.');
-            } finally {
-                this.disabled = false;
-                this.placeholder = 'Apunta el scanner...';
-                this.focus();
             }
-        }
-    });
-
-    function renderList() {
-        if (SCANNED_ITEMS.length > 0) {
-            emptyState.style.display = 'none';
-        } else {
-            emptyState.style.display = 'block';
-        }
-
-        scannedList.innerHTML = '';
-        SCANNED_ITEMS.forEach((item, index) => {
-            const div = document.createElement('div');
-            div.className = 'scanned-item';
-            div.innerHTML = `
-                <div class="item-details">
-                    <span class="item-name">${item.nombre}</span>
-                    <span class="item-sn">${item.serial}</span>
-                </div>
-                <button class="remove-btn" onclick="removeItem(${index})">Eliminar</button>
-            `;
-            scannedList.appendChild(div);
         });
-    }
 
-    function removeItem(index) {
-        SCANNED_ITEMS.splice(index, 1);
-        renderList();
-    }
+        // Agregar Material Manual
+        function addManualItem() {
+            const sku = document.getElementById('manual_sku').value;
+            const qty = parseInt(document.getElementById('manual_qty').value);
+            
+            if (!sku) { alert('Seleccione un material.'); return; }
+            if (isNaN(qty) || qty <= 0) { alert('Ingrese una cantidad válida.'); return; }
 
-    async function enviarReporte() {
-        const movil = document.getElementById('movil').value;
-        const tecnico = document.getElementById('tecnico').value;
-        const contrato = document.getElementById('contrato').value;
-
-        if (!movil || !tecnico || !contrato) {
-            alert('Por favor complete todos los campos.');
-            return;
-        }
-
-        if (SCANNED_ITEMS.length === 0) {
-            alert('No hay equipos escaneados.');
-            return;
-        }
-
-        const btn = document.getElementById('submitBtn');
-        btn.disabled = true;
-        btn.innerText = 'Procesando...';
-
-        try {
-            // Agrupar por SKU para el backend
-            const materiales = [];
-            const grouped = SCANNED_ITEMS.reduce((acc, item) => {
-                if (!acc[item.sku]) acc[item.sku] = [];
-                acc[item.sku].push(item.serial);
-                return acc;
-            }, {});
-
-            for (const sku in grouped) {
-                materiales.push({
+            // Si ya existe el material no serializado, sumamos
+            const existing = SCANNED_ITEMS.find(i => i.sku === sku && !i.is_serialized);
+            if (existing) {
+                existing.cantidad += qty;
+            } else {
+                SCANNED_ITEMS.push({
                     sku: sku,
-                    cantidad: grouped[sku].length,
-                    seriales: grouped[sku]
+                    nombre: SKU_NAMES[sku] || 'Material',
+                    cantidad: qty,
+                    serial: null,
+                    is_serialized: false
                 });
             }
-
-            const response = await fetch('/registrar_lunes', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    movil, tecnico, contrato, materiales
-                })
-            });
-
-            const result = await response.json();
-            if (result.exito) {
-                alert('✅ Éxito: ' + result.mensaje);
-                window.location.href = '/'; // Volver al inicio
-            } else {
-                alert('❌ Error: ' + result.mensaje);
-                btn.disabled = false;
-                btn.innerText = '📤 ENVIAR REPORTE';
-            }
-        } catch (err) {
-            alert('Error de red.');
-            btn.disabled = false;
-            btn.innerText = '📤 ENVIAR REPORTE';
+            updateUI();
         }
-    }
-</script>
 
+        function updateUI() {
+            if (SCANNED_ITEMS.length > 0) {
+                emptyState.style.display = 'none';
+            } else {
+                emptyState.style.display = 'block';
+            }
+
+            listContainer.innerHTML = '';
+            SCANNED_ITEMS.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'scanned-item';
+                const meta = item.is_serialized ? `SN: ${item.serial}` : `Cant: ${item.cantidad}`;
+                div.innerHTML = `
+                    <div class="item-info">
+                        <span class="item-name">${item.nombre}</span>
+                        <span class="item-meta">${meta}</span>
+                    </div>
+                    <button class="remove-btn" onclick="removeItem(${index})">✕</button>
+                `;
+                listContainer.appendChild(div);
+            });
+        }
+
+        function removeItem(index) {
+            SCANNED_ITEMS.splice(index, 1);
+            updateUI();
+        }
+
+        async function enviarReporte() {
+            const movil = movilSelect.value;
+            const tecnico = tecnicoSelect.value;
+            const contrato = document.getElementById('contrato').value.trim();
+
+            if (!movil || !tecnico || !contrato) {
+                alert('Faltan datos (Móvil, Técnico o Contrato).');
+                return;
+            }
+            if (SCANNED_ITEMS.length === 0) {
+                alert('No hay items para enviar.');
+                return;
+            }
+
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = 'PROCESANDO REGISTRO...';
+
+            try {
+                // Agrupar para el backend
+                const resumen = [];
+                // Serializados individuales
+                SCANNED_ITEMS.filter(i => i.is_serialized).forEach(i => {
+                    resumen.push({ sku: i.sku, cantidad: 1, seriales: [i.serial] });
+                });
+                // No serializados agrupados
+                const nonSerialized = SCANNED_ITEMS.filter(i => !i.is_serialized);
+                nonSerialized.forEach(i => {
+                    resumen.push({ sku: i.sku, cantidad: i.cantidad, seriales: null });
+                });
+
+                const response = await fetch('/registrar_lunes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        movil, tecnico, contrato, materiales: resumen
+                    })
+                });
+
+                const result = await response.json();
+                if (result.exito) {
+                    alert('📦 REGISTRO EXITOSO\n\nEl material ha sido descontado de Bodega y registrado en el historial.');
+                    window.location.href = '/';
+                } else {
+                    alert('❌ ERROR: ' + result.mensaje);
+                    btn.disabled = false;
+                    btn.innerText = '📤 ENVIAR A BODEGA';
+                }
+            } catch (err) {
+                alert('Error de red al procesar el reporte.');
+                btn.disabled = false;
+                btn.innerText = '📤 ENVIAR A BODEGA';
+            }
+        }
+    </script>
 </body>
 </html>
+

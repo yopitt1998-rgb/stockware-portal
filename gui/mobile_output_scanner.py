@@ -378,7 +378,7 @@ class MobileOutputScannerWindow:
 
             # 1. Intentar reconocer como serial/MAC en memoria caché (INSTANTÁNEO)
             if hasattr(self, 'serial_cache') and codigo in self.serial_cache:
-                sku_serial, ub = self.serial_cache[codigo]
+                sku_serial, ub, *extra = self.serial_cache[codigo]
                 sku = sku_serial
                 origen_serial = True
                 nombre_serial = codigo

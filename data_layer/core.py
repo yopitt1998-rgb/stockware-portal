@@ -54,63 +54,74 @@ def run_query(cursor, query, params=None):
         logger.error(f"   Params: {params}")
         raise e
 
-def inicializar_bd():
-    """Crea la BD y las tablas necesarias. Compatible con SQLite y MySQL."""
-    conn = None
-    try:
-        conn = get_db_connection()
-        # Usar cursores con buffer para MySQL por defecto
+def _get_sql_types():
+    """Retorna tipos SQL compatibles según el motor de BD configurado."""
+    return {
+        'AUTOINC':  "AUTO_INCREMENT" if DB_TYPE == 'MYSQL' else "AUTOINCREMENT",
+        'LONGTEXT': "LONGTEXT"       if DB_TYPE == 'MYSQL' else "TEXT",
+        'INT':      "INT"            if DB_TYPE == 'MYSQL' else "INTEGER",
+    }
+
+
+def _make_column_helpers(cursor):
+    """
+    Devuelve funciones auxiliares (check_column, add_column, add_index)
+    ligadas al cursor activo. Se llaman desde las sub-funciones de init.
+    """
+    _cache = {}
+
+    def _get_cols(table):
+        if table in _cache:
+            return _cache[table]
         if DB_TYPE == 'MYSQL':
-            cursor = conn.cursor(buffered=True)
+            cursor.execute(f"SHOW COLUMNS FROM {table}")
+            cols = [r[0] for r in cursor.fetchall()]
         else:
-            cursor = conn.cursor()
-        
-        # Auxiliares para compatibilidad
-        AUTOINC = "AUTO_INCREMENT" if DB_TYPE == 'MYSQL' else "AUTOINCREMENT"
-        TEXT_TYPE = "VARCHAR(255)" if DB_TYPE == 'MYSQL' else "TEXT"
-        LONGTEXT = "LONGTEXT" if DB_TYPE == 'MYSQL' else "TEXT"
-        INT_TYPE = "INT" if DB_TYPE == 'MYSQL' else "INTEGER"
-        
-        # Cache de columnas para optimizar velocidad en MySQL (Punto 3 - Latencia)
-        table_columns_cache = {}
+            cursor.execute(f"PRAGMA table_info({table})")
+            cols = [r[1] for r in cursor.fetchall()]
+        _cache[table] = cols
+        return cols
 
-        def get_all_columns(table):
-            if table in table_columns_cache:
-                return table_columns_cache[table]
-            
-            if DB_TYPE == 'MYSQL':
-                cursor.execute(f"SHOW COLUMNS FROM {table}")
-                cols = [row[0] for row in cursor.fetchall()]
-            else:
-                cursor.execute(f"PRAGMA table_info({table})")
-                cols = [row[1] for row in cursor.fetchall()]
-            
-            table_columns_cache[table] = cols
-            return cols
-
-        def check_column_exists(table, column):
-            try:
-                columns = get_all_columns(table)
-                return column in columns
-            except Exception as e:
-                logger.warning(f"⚠️ Error verificando columna {column} en tabla {table}: {e}")
-                return False
-
-        def add_column_if_missing(table, column, type, default=None):
-            if not check_column_exists(table, column):
-                alter_query = f"ALTER TABLE {table} ADD COLUMN {column} {type}"
+    def add_col(table, column, col_type, default=None):
+        try:
+            if column not in _get_cols(table):
+                sql = f"ALTER TABLE {table} ADD COLUMN {column} {col_type}"
                 if default is not None:
-                    alter_query += f" DEFAULT {default}"
-                cursor.execute(alter_query)
-                logger.info(f"🆕 Columna {column} añadida a {table}")
-                # Limpiar cache para forzar recarga si se añade otra
-                if table in table_columns_cache:
-                    del table_columns_cache[table]
+                    sql += f" DEFAULT {default}"
+                cursor.execute(sql)
+                logger.info(f"🆕 Columna '{column}' añadida a '{table}'")
+                _cache.pop(table, None)
+        except Exception as e:
+            logger.warning(f"⚠️ add_col({table}.{column}): {e}")
 
-        # 1. TABLA PRODUCTOS
-        q_prod = f"""
+    def add_idx(name, table, cols):
+        """Añade un índice MySQL de forma segura e idempotente."""
+        if DB_TYPE != 'MYSQL':
+            return
+        import re
+        if not re.match(r'^[a-zA-Z0-9_,\s]+$', f"{name}{table}{cols}"):
+            return
+        try:
+            cursor.execute(f"CREATE INDEX {name} ON {table}({cols})")
+        except Exception as e:
+            if "1061" not in str(e) and "Duplicate" not in str(e):
+                logger.warning(f"⚠️ Índice {name} en {table}: {e}")
+
+    return add_col, add_idx
+
+
+# ─────────────────────────────────────────────────────────
+# ETAPA 1 — Crear tablas
+# ─────────────────────────────────────────────────────────
+def _crear_tablas(cursor, T):
+    """Crea todas las tablas del esquema si no existen (idempotente)."""
+    AUTOINC, LONGTEXT, INT = T['AUTOINC'], T['LONGTEXT'], T['INT']
+
+    # productos
+    try:
+        cursor.execute(f"""
             CREATE TABLE IF NOT EXISTS productos (
-                id {INT_TYPE} {AUTOINC} PRIMARY KEY,
+                id {INT} {AUTOINC} PRIMARY KEY,
                 nombre VARCHAR(255) NOT NULL,
                 sku VARCHAR(50) NOT NULL,
                 cantidad INTEGER NOT NULL DEFAULT 0,
@@ -123,254 +134,155 @@ def inicializar_bd():
                 sucursal VARCHAR(50) DEFAULT 'CHIRIQUI',
                 UNIQUE (sku, ubicacion, sucursal)
             )
-        """
+        """)
+    except Exception:
         try:
-            cursor.execute(q_prod)
-        except Exception as e:
-            # Si falla (posiblemente por UNIQUE con columna inexistente), intentamos crearla básica
-            logger.info("🔧 Re-intentando creación de tabla productos...")
-            try:
-                cursor.execute(f"CREATE TABLE IF NOT EXISTS productos (id {INT_TYPE} {AUTOINC} PRIMARY KEY, sku VARCHAR(50) NOT NULL, ubicacion VARCHAR(50) NOT NULL)")
-            except: pass
-        
-        # Primero añadimos la columna para que el resto sea posible
-        add_column_if_missing('productos', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'")
-        add_column_if_missing('productos', 'minimo_stock', 'INTEGER', 10)
-        add_column_if_missing('productos', 'categoria', 'VARCHAR(100)', "'General'")
-        add_column_if_missing('productos', 'marca', 'VARCHAR(100)', "'N/A'")
-        add_column_if_missing('productos', 'secuencia_vista', 'VARCHAR(20)')
-        add_column_if_missing('productos', 'codigo_barra', 'VARCHAR(100)') # Código de barra individual (equipos)
-        add_column_if_missing('productos', 'codigo_barra_maestro', 'VARCHAR(100)') # Código de barra maestro (SKU)
-        add_column_if_missing('productos', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'")
-        
-        # MIGRACIÓN: Asegurar que filas existentes tengan sucursal
-        try:
-            run_query(cursor, "UPDATE productos SET sucursal = 'CHIRIQUI' WHERE sucursal IS NULL")
-        except: pass
+            cursor.execute(f"CREATE TABLE IF NOT EXISTS productos (id {INT} {AUTOINC} PRIMARY KEY, sku VARCHAR(50) NOT NULL, ubicacion VARCHAR(50) NOT NULL)")
+        except Exception: pass
 
-        # MIGRACIÓN: Corregir UNIQUE KEY en productos (MySQL)
-        if DB_TYPE == 'MYSQL':
-            try:
-                # Comprobar si el índice existe bajo el nombre 'sku' o 'sku_ubic_suc'
-                cursor.execute("SHOW INDEX FROM productos WHERE Key_name IN ('sku', 'sku_ubic_suc')")
-                idx_data = cursor.fetchall()
-                # Si es el antiguo (2 columnas) o no tiene el formato correcto
-                if idx_data and len(idx_data) < 3: 
-                     logger.info("🔧 Migrando índice de productos para incluir sucursal...")
-                     try: cursor.execute("ALTER TABLE productos DROP INDEX sku")
-                     except: pass
-                     try: cursor.execute("ALTER TABLE productos DROP INDEX sku_ubic_suc")
-                     except: pass
-                     cursor.execute("ALTER TABLE productos ADD UNIQUE KEY sku_ubic_suc (sku, ubicacion, sucursal)")
-            except: pass
-        
-        # 2. TABLA ASIGNACION_MOVILES
-        cursor.execute(f"""
-            CREATE TABLE IF NOT EXISTS asignacion_moviles (
-                id {INT_TYPE} {AUTOINC} PRIMARY KEY,
-                sku_producto VARCHAR(50) NOT NULL,
-                movil VARCHAR(100) NOT NULL,
-                paquete VARCHAR(50),
-                cantidad INTEGER NOT NULL DEFAULT 0,
-                sucursal VARCHAR(50) DEFAULT 'CHIRIQUI',
-                UNIQUE (sku_producto, movil, paquete, sucursal)
-            )
-        """)
-        add_column_if_missing('asignacion_moviles', 'paquete', 'VARCHAR(50)')
-        add_column_if_missing('asignacion_moviles', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'")
-        
-        # MIGRACIÓN: Asegurar que filas existentes tengan sucursal
-        try:
-            run_query(cursor, "UPDATE asignacion_moviles SET sucursal = 'CHIRIQUI' WHERE sucursal IS NULL")
-        except: pass
+    # asignacion_moviles
+    cursor.execute(f"""
+        CREATE TABLE IF NOT EXISTS asignacion_moviles (
+            id {INT} {AUTOINC} PRIMARY KEY,
+            sku_producto VARCHAR(50) NOT NULL,
+            movil VARCHAR(100) NOT NULL,
+            paquete VARCHAR(50),
+            cantidad INTEGER NOT NULL DEFAULT 0,
+            sucursal VARCHAR(50) DEFAULT 'CHIRIQUI',
+            UNIQUE (sku_producto, movil, paquete, sucursal)
+        )
+    """)
 
-        # --- MIGRACIÓN: Corregir Índice Único en asignacion_moviles (MySQL) ---
-        if DB_TYPE == 'MYSQL':
-            try:
-                # Comprobar si existe el índice antiguo restrictivo
-                cursor.execute("SHOW INDEX FROM asignacion_moviles WHERE Key_name = 'sku_producto'")
-                idx_data = cursor.fetchall()
-                if idx_data and len(idx_data) < 3:
-                     logger.info("🔧 Migrando índice de asignacion_moviles para soportar múltiples paquetes...")
-                     cursor.execute("ALTER TABLE asignacion_moviles DROP INDEX sku_producto")
-                     cursor.execute("ALTER TABLE asignacion_moviles ADD UNIQUE KEY sku_movil_paquete_suc (sku_producto, movil, paquete, sucursal)")
-                     logger.info("✅ Índice migrado exitosamente (con sucursal).")
-            except Exception as e:
-                logger.warning(f"⚠️ Error en migración de índice asignacion_moviles: {e}")
-        
-        cursor.execute(f"""
-            CREATE TABLE IF NOT EXISTS movimientos (
-                id {INT_TYPE} PRIMARY KEY {AUTOINC},
-                sku_producto VARCHAR(50) NOT NULL,
-                tipo_movimiento VARCHAR(50) NOT NULL,
-                cantidad_afectada INTEGER NOT NULL,
-                movil_afectado VARCHAR(100),
-                fecha_movimiento DATETIME DEFAULT CURRENT_TIMESTAMP,
-                fecha_evento DATE,
-                paquete_asignado VARCHAR(50),
-                documento_referencia {LONGTEXT},
-                observaciones {LONGTEXT},
-                sucursal VARCHAR(50) DEFAULT 'CHIRIQUI'
-            )
-        """)
-        add_column_if_missing('movimientos', 'movil_afectado', 'VARCHAR(100)')
-        add_column_if_missing('movimientos', 'paquete_asignado', 'VARCHAR(50)')
-        add_column_if_missing('movimientos', 'documento_referencia', LONGTEXT)
-        add_column_if_missing('movimientos', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'") # Nueva: Para aislamiento
-        
-        # MIGRACIÓN: Asegurar que filas existentes tengan sucursal
-        try:
-            run_query(cursor, "UPDATE movimientos SET sucursal = 'CHIRIQUI' WHERE sucursal IS NULL")
-        except: pass
+    # movimientos
+    cursor.execute(f"""
+        CREATE TABLE IF NOT EXISTS movimientos (
+            id {INT} PRIMARY KEY {AUTOINC},
+            sku_producto VARCHAR(50) NOT NULL,
+            tipo_movimiento VARCHAR(50) NOT NULL,
+            cantidad_afectada INTEGER NOT NULL,
+            movil_afectado VARCHAR(100),
+            fecha_movimiento DATETIME DEFAULT CURRENT_TIMESTAMP,
+            fecha_evento DATE,
+            paquete_asignado VARCHAR(50),
+            documento_referencia {LONGTEXT},
+            observaciones {LONGTEXT},
+            sucursal VARCHAR(50) DEFAULT 'CHIRIQUI'
+        )
+    """)
 
-        # MIGRACIÓN: Renombrar CALCAMONIA a Sticker (SKU 2-7-07)
-        try:
-            run_query(cursor, "UPDATE productos SET nombre = 'Sticker' WHERE sku = '2-7-07'")
-        except: pass
-        
-        # 4. TABLA PRESTAMOS
-        cursor.execute(f"""
-            CREATE TABLE IF NOT EXISTS prestamos_activos (
-                id {INT_TYPE} PRIMARY KEY {AUTOINC},
-                sku VARCHAR(50) NOT NULL,
-                nombre_producto VARCHAR(255) NOT NULL,
-                cantidad_prestada INTEGER NOT NULL,
-                fecha_prestamo DATE NOT NULL,
-                fecha_devolucion DATE,
-                estado VARCHAR(20) DEFAULT 'ACTIVO',
-                observaciones {LONGTEXT}
-            )
-        """)
-        
-        # 5. TABLA RECORDATORIOS
-        cursor.execute(f"""
-            CREATE TABLE IF NOT EXISTS recordatorios_pendientes (
-                id {INT_TYPE} PRIMARY KEY {AUTOINC},
-                movil VARCHAR(100) NOT NULL,
-                paquete VARCHAR(50) NOT NULL,
-                tipo_recordatorio VARCHAR(50) NOT NULL,
-                fecha_recordatorio DATE NOT NULL,
-                fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-                completado INTEGER DEFAULT 0,
-                fecha_completado DATETIME
-            )
-        """)
-        
-        # 6. TABLA CONFIGURACION
-        cursor.execute(f"""
-            CREATE TABLE IF NOT EXISTS configuracion (
-                id_config {INT_TYPE} PRIMARY KEY,
-                nombre_empresa VARCHAR(255),
-                rut VARCHAR(50),
-                direccion VARCHAR(255),
-                telefono VARCHAR(50),
-                email VARCHAR(100),
-                logo_path {LONGTEXT}
-            )
-        """)
-        
-        # Inicializar configuración si está vacía
-        cursor.execute("SELECT COUNT(*) FROM configuracion")
-        if cursor.fetchone()[0] == 0:
-            cursor.execute("INSERT INTO configuracion (id_config, nombre_empresa) VALUES (1, 'Mi Empresa')")
-            logger.info("⚙️ Configuración inicial creada.")
-        
-        # 7. TABLA MOVILES
-        cursor.execute(f"""
-            CREATE TABLE IF NOT EXISTS moviles (
-                id {INT_TYPE} PRIMARY KEY {AUTOINC},
-                nombre VARCHAR(100) NOT NULL UNIQUE,
-                patente VARCHAR(20),
-                conductor VARCHAR(255),
-                ayudante VARCHAR(255),
-                activo INTEGER DEFAULT 1,
-                fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
-        add_column_if_missing('moviles', 'ayudante', 'VARCHAR(255)')
-        
-        # 9. TABLA CONSUMOS PENDIENTES (Portal Móvil)
-        cursor.execute(f"""
-            CREATE TABLE IF NOT EXISTS consumos_pendientes (
-                id {INT_TYPE} PRIMARY KEY {AUTOINC},
-                movil VARCHAR(100) NOT NULL,
-                sku VARCHAR(50) NOT NULL,
-                cantidad INTEGER NOT NULL,
-                tecnico_nombre VARCHAR(255),
-                ayudante_nombre VARCHAR(255),
-                ticket VARCHAR(255),
-                colilla VARCHAR(255),
-                num_contrato VARCHAR(255),
-                fecha DATE,
-                estado VARCHAR(20) DEFAULT 'PENDIENTE',
-                fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
-                sucursal VARCHAR(50) DEFAULT 'CHIRIQUI'
-            )
-        """)
-        add_column_if_missing('consumos_pendientes', 'colilla', 'VARCHAR(255)')
-        add_column_if_missing('consumos_pendientes', 'num_contrato', 'VARCHAR(255)')
-        add_column_if_missing('consumos_pendientes', 'ayudante_nombre', 'VARCHAR(255)')
-        add_column_if_missing('consumos_pendientes', 'seriales_usados', LONGTEXT)
-        add_column_if_missing('consumos_pendientes', 'paquete', 'VARCHAR(50)', "'NINGUNO'")
-        add_column_if_missing('consumos_pendientes', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'")
+    # prestamos_activos
+    cursor.execute(f"""
+        CREATE TABLE IF NOT EXISTS prestamos_activos (
+            id {INT} PRIMARY KEY {AUTOINC},
+            sku VARCHAR(50) NOT NULL,
+            nombre_producto VARCHAR(255) NOT NULL,
+            cantidad_prestada INTEGER NOT NULL,
+            fecha_prestamo DATE NOT NULL,
+            fecha_devolucion DATE,
+            estado VARCHAR(20) DEFAULT 'ACTIVO',
+            observaciones {LONGTEXT}
+        )
+    """)
 
-        # 11. TABLA TECNICOS (NUEVO)
-        cursor.execute(f"""
-            CREATE TABLE IF NOT EXISTS tecnicos (
-                id {INT_TYPE} PRIMARY KEY {AUTOINC},
-                nombre VARCHAR(255) NOT NULL UNIQUE,
-                activo INTEGER DEFAULT 1,
-                fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
+    # recordatorios_pendientes
+    cursor.execute(f"""
+        CREATE TABLE IF NOT EXISTS recordatorios_pendientes (
+            id {INT} PRIMARY KEY {AUTOINC},
+            movil VARCHAR(100) NOT NULL,
+            paquete VARCHAR(50) NOT NULL,
+            tipo_recordatorio VARCHAR(50) NOT NULL,
+            fecha_recordatorio DATE NOT NULL,
+            fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+            completado INTEGER DEFAULT 0,
+            fecha_completado DATETIME
+        )
+    """)
 
-        # 10. TABLA FALTANTES (NUEVO - Historial de Discrepancias)
-        cursor.execute(f"""
-            CREATE TABLE IF NOT EXISTS faltantes_registrados (
-                id {INT_TYPE} PRIMARY KEY {AUTOINC},
-                movil VARCHAR(100) NOT NULL,
-                sku VARCHAR(50) NOT NULL,
-                cantidad INTEGER NOT NULL,
-                fecha_audit DATETIME DEFAULT CURRENT_TIMESTAMP,
-                sucursal VARCHAR(50) DEFAULT 'CHIRIQUI',
-                paquete VARCHAR(100) DEFAULT 'NINGUNO',
-                observaciones {LONGTEXT}
-            )
-        """)
-        
-        cursor.execute(f"""
-            CREATE TABLE IF NOT EXISTS seriales_faltantes_detalle (
-                id {INT_TYPE} PRIMARY KEY {AUTOINC},
-                faltante_id {INT_TYPE} NOT NULL,
-                serial VARCHAR(255) NOT NULL,
-                FOREIGN KEY (faltante_id) REFERENCES faltantes_registrados(id)
-            )
-        """)
+    # configuracion
+    cursor.execute(f"""
+        CREATE TABLE IF NOT EXISTS configuracion (
+            id_config {INT} PRIMARY KEY,
+            nombre_empresa VARCHAR(255),
+            rut VARCHAR(50),
+            direccion VARCHAR(255),
+            telefono VARCHAR(50),
+            email VARCHAR(100),
+            logo_path {LONGTEXT}
+        )
+    """)
+    cursor.execute("SELECT COUNT(*) FROM configuracion")
+    if cursor.fetchone()[0] == 0:
+        cursor.execute("INSERT INTO configuracion (id_config, nombre_empresa) VALUES (1, 'Mi Empresa')")
 
-        # Helper para añadir índices en MySQL (Defensivo)
-        def add_mysql_index(name, table, cols):
-            """Añade un índice MySQL de forma segura."""
-            if DB_TYPE != 'MYSQL': 
-                return  # Skip if not MySQL
-            
-            # Validar que los nombres solo contengan caracteres alfanuméricos y guiones bajos
-            import re
-            if not re.match(r'^[a-zA-Z0-9_,\s]+$', f"{name}{table}{cols}"):
-                logger.warning(f"⚠️ Nombres de índice/tabla/columnas contienen caracteres no válidos")
-                return
-            
-            try:
-                cursor.execute(f"CREATE INDEX {name} ON {table}({cols})")
-            except Exception as e:
-                # Ignorar si ya existe o hay error de duplicado
-                if "1061" in str(e) or "Duplicate" in str(e): 
-                    pass
-                else:
-                    logger.warning(f"⚠️ No se pudo crear índice {name} en {table}: {e}")
+    # moviles
+    cursor.execute(f"""
+        CREATE TABLE IF NOT EXISTS moviles (
+            id {INT} PRIMARY KEY {AUTOINC},
+            nombre VARCHAR(100) NOT NULL UNIQUE,
+            patente VARCHAR(20),
+            conductor VARCHAR(255),
+            ayudante VARCHAR(255),
+            activo INTEGER DEFAULT 1,
+            fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
 
-        q_series = f"""
+    # consumos_pendientes
+    cursor.execute(f"""
+        CREATE TABLE IF NOT EXISTS consumos_pendientes (
+            id {INT} PRIMARY KEY {AUTOINC},
+            movil VARCHAR(100) NOT NULL,
+            sku VARCHAR(50) NOT NULL,
+            cantidad INTEGER NOT NULL,
+            tecnico_nombre VARCHAR(255),
+            ayudante_nombre VARCHAR(255),
+            ticket VARCHAR(255),
+            colilla VARCHAR(255),
+            num_contrato VARCHAR(255),
+            fecha DATE,
+            estado VARCHAR(20) DEFAULT 'PENDIENTE',
+            fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+            sucursal VARCHAR(50) DEFAULT 'CHIRIQUI'
+        )
+    """)
+
+    # tecnicos
+    cursor.execute(f"""
+        CREATE TABLE IF NOT EXISTS tecnicos (
+            id {INT} PRIMARY KEY {AUTOINC},
+            nombre VARCHAR(255) NOT NULL UNIQUE,
+            activo INTEGER DEFAULT 1,
+            fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    # faltantes_registrados
+    cursor.execute(f"""
+        CREATE TABLE IF NOT EXISTS faltantes_registrados (
+            id {INT} PRIMARY KEY {AUTOINC},
+            movil VARCHAR(100) NOT NULL,
+            sku VARCHAR(50) NOT NULL,
+            cantidad INTEGER NOT NULL,
+            fecha_audit DATETIME DEFAULT CURRENT_TIMESTAMP,
+            sucursal VARCHAR(50) DEFAULT 'CHIRIQUI',
+            paquete VARCHAR(100) DEFAULT 'NINGUNO',
+            observaciones {LONGTEXT}
+        )
+    """)
+    cursor.execute(f"""
+        CREATE TABLE IF NOT EXISTS seriales_faltantes_detalle (
+            id {INT} PRIMARY KEY {AUTOINC},
+            faltante_id {INT} NOT NULL,
+            serial VARCHAR(255) NOT NULL,
+            FOREIGN KEY (faltante_id) REFERENCES faltantes_registrados(id)
+        )
+    """)
+
+    # series_registradas
+    try:
+        cursor.execute(f"""
             CREATE TABLE IF NOT EXISTS series_registradas (
-                id {INT_TYPE} PRIMARY KEY {AUTOINC},
+                id {INT} PRIMARY KEY {AUTOINC},
                 sku VARCHAR(50) NOT NULL,
                 serial_number VARCHAR(100) NOT NULL,
                 mac_number VARCHAR(100),
@@ -381,119 +293,225 @@ def inicializar_bd():
                 sucursal VARCHAR(50) DEFAULT 'CHIRIQUI',
                 paquete VARCHAR(50)
             )
-        """
+        """)
+    except Exception:
         try:
-            cursor.execute(q_series)
+            cursor.execute(f"CREATE TABLE IF NOT EXISTS series_registradas (id {INT} PRIMARY KEY {AUTOINC}, sku VARCHAR(50) NOT NULL, serial_number VARCHAR(100) NOT NULL)")
+        except Exception: pass
+
+    logger.info("✅ Etapa 1 completada: tablas verificadas/creadas.")
+
+
+# ─────────────────────────────────────────────────────────
+# ETAPA 2 — Migraciones de columnas e índices únicos
+# ─────────────────────────────────────────────────────────
+def _ejecutar_migraciones(cursor, T, add_col):
+    """Añade columnas faltantes y actualiza índices únicos obsoletos."""
+    LONGTEXT = T['LONGTEXT']
+
+    # productos
+    add_col('productos', 'sucursal',            'VARCHAR(50)',  "'CHIRIQUI'")
+    add_col('productos', 'minimo_stock',         'INTEGER',      10)
+    add_col('productos', 'categoria',            'VARCHAR(100)', "'General'")
+    add_col('productos', 'marca',                'VARCHAR(100)', "'N/A'")
+    add_col('productos', 'secuencia_vista',      'VARCHAR(20)')
+    add_col('productos', 'codigo_barra',         'VARCHAR(100)')
+    add_col('productos', 'codigo_barra_maestro', 'VARCHAR(100)')
+    try: run_query(cursor, "UPDATE productos SET sucursal = 'CHIRIQUI' WHERE sucursal IS NULL")
+    except Exception: pass
+
+    # Migrar índice único de productos (MySQL)
+    if DB_TYPE == 'MYSQL':
+        try:
+            cursor.execute("SHOW INDEX FROM productos WHERE Key_name IN ('sku', 'sku_ubic_suc')")
+            idx = cursor.fetchall()
+            if idx and len(idx) < 3:
+                logger.info("🔧 Migrando índice de productos para incluir sucursal...")
+                for name in ('sku', 'sku_ubic_suc'):
+                    try: cursor.execute(f"ALTER TABLE productos DROP INDEX {name}")
+                    except Exception: pass
+                cursor.execute("ALTER TABLE productos ADD UNIQUE KEY sku_ubic_suc (sku, ubicacion, sucursal)")
+        except Exception: pass
+
+    # asignacion_moviles
+    add_col('asignacion_moviles', 'paquete',   'VARCHAR(50)')
+    add_col('asignacion_moviles', 'sucursal',  'VARCHAR(50)', "'CHIRIQUI'")
+    try: run_query(cursor, "UPDATE asignacion_moviles SET sucursal = 'CHIRIQUI' WHERE sucursal IS NULL")
+    except Exception: pass
+    if DB_TYPE == 'MYSQL':
+        try:
+            cursor.execute("SHOW INDEX FROM asignacion_moviles WHERE Key_name = 'sku_producto'")
+            idx = cursor.fetchall()
+            if idx and len(idx) < 3:
+                logger.info("🔧 Migrando índice de asignacion_moviles...")
+                cursor.execute("ALTER TABLE asignacion_moviles DROP INDEX sku_producto")
+                cursor.execute("ALTER TABLE asignacion_moviles ADD UNIQUE KEY sku_movil_paquete_suc (sku_producto, movil, paquete, sucursal)")
         except Exception as e:
-            logger.info("🔧 Re-intentando creación de tabla series_registradas...")
-            try:
-                cursor.execute(f"CREATE TABLE IF NOT EXISTS series_registradas (id {INT_TYPE} PRIMARY KEY {AUTOINC}, sku VARCHAR(50) NOT NULL, serial_number VARCHAR(100) NOT NULL)")
-            except: pass
+            logger.warning(f"⚠️ Índice asignacion_moviles: {e}")
 
-        add_column_if_missing('series_registradas', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'")
-        add_column_if_missing('series_registradas', 'paquete', 'VARCHAR(50)')
-        add_column_if_missing('series_registradas', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'")
-        run_query(cursor, "UPDATE series_registradas SET sucursal = 'CHIRIQUI' WHERE sucursal IS NULL")
+    # movimientos
+    add_col('movimientos', 'movil_afectado',      'VARCHAR(100)')
+    add_col('movimientos', 'paquete_asignado',     'VARCHAR(50)')
+    add_col('movimientos', 'documento_referencia', LONGTEXT)
+    add_col('movimientos', 'sucursal',             'VARCHAR(50)', "'CHIRIQUI'")
+    try: run_query(cursor, "UPDATE movimientos SET sucursal = 'CHIRIQUI' WHERE sucursal IS NULL")
+    except Exception: pass
+    try: run_query(cursor, "UPDATE productos SET nombre = 'Sticker' WHERE sku = '2-7-07'")
+    except Exception: pass
 
-        # MIGRACIÓN: Corregir UNIQUE KEY en series_registradas (MySQL)
+    # moviles
+    add_col('moviles', 'ayudante', 'VARCHAR(255)')
+
+    # consumos_pendientes
+    add_col('consumos_pendientes', 'colilla',        'VARCHAR(255)')
+    add_col('consumos_pendientes', 'num_contrato',   'VARCHAR(255)')
+    add_col('consumos_pendientes', 'ayudante_nombre','VARCHAR(255)')
+    add_col('consumos_pendientes', 'seriales_usados', LONGTEXT)
+    add_col('consumos_pendientes', 'paquete',        'VARCHAR(50)', "'NINGUNO'")
+    add_col('consumos_pendientes', 'sucursal',       'VARCHAR(50)', "'CHIRIQUI'")
+
+    # series_registradas
+    add_col('series_registradas', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'")
+    add_col('series_registradas', 'paquete',  'VARCHAR(50)')
+    add_col('series_registradas', 'estado',   'VARCHAR(50)', "'DISPONIBLE'")
+    try: run_query(cursor, "UPDATE series_registradas SET sucursal = 'CHIRIQUI' WHERE sucursal IS NULL")
+    except Exception: pass
+    if DB_TYPE == 'MYSQL':
+        try:
+            cursor.execute("SHOW CREATE TABLE series_registradas")
+            create_sql = cursor.fetchone()[1]
+            if 'UNIQUE KEY `serial_number` (`serial_number`)' in create_sql:
+                logger.info("🔧 Migrando índice de series_registradas para incluir sucursal...")
+                cursor.execute("ALTER TABLE series_registradas DROP INDEX serial_number")
+                cursor.execute("ALTER TABLE series_registradas ADD UNIQUE KEY sn_sucursal (serial_number, sucursal)")
+            if 'UNIQUE KEY `mac_number` (`mac_number`)' in create_sql:
+                cursor.execute("ALTER TABLE series_registradas DROP INDEX mac_number")
+                cursor.execute("ALTER TABLE series_registradas ADD UNIQUE KEY mac_sucursal (mac_number, sucursal)")
+        except Exception: pass
+
+    # faltantes_registrados — columna paquete
+    try:
         if DB_TYPE == 'MYSQL':
-            try:
-                # El serial_number antiguo era UNIQUE globalmente. Ahora debe ser por sucursal.
-                cursor.execute("SHOW CREATE TABLE series_registradas")
-                create_sql = cursor.fetchone()[1]
-                if 'UNIQUE KEY `serial_number` (`serial_number`)' in create_sql:
-                     logger.info("🔧 Migrando índice de series_registradas para incluir sucursal...")
-                     cursor.execute("ALTER TABLE series_registradas DROP INDEX serial_number")
-                     cursor.execute("ALTER TABLE series_registradas ADD UNIQUE KEY sn_sucursal (serial_number, sucursal)")
-                
-                if 'UNIQUE KEY `mac_number` (`mac_number`)' in create_sql:
-                     cursor.execute("ALTER TABLE series_registradas DROP INDEX mac_number")
-                     cursor.execute("ALTER TABLE series_registradas ADD UNIQUE KEY mac_sucursal (mac_number, sucursal)")
-            except: pass
-        add_column_if_missing('series_registradas', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'") # Aislamiento
-        
-        # MySQL Session: Aumentar límite de GROUP_CONCAT para evitar truncamiento de series (61 -> ilimitado)
-        if DB_TYPE == 'MYSQL':
-            try:
-                cursor.execute("SET SESSION group_concat_max_len = 1000000")
-            except: pass
-        add_mysql_index('idx_series_serial', 'series_registradas', 'serial_number')
-        add_mysql_index('idx_series_sku', 'series_registradas', 'sku')
-
-        # INDICES GLOBALES
-        if DB_TYPE == 'SQLITE':
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_productos_sku ON productos(sku)")
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_productos_codigo_maestro ON productos(codigo_barra_maestro)")  # NUEVO
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_mov_sku_tipo ON movimientos(sku_producto, tipo_movimiento)")
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_mov_fecha ON movimientos(fecha_evento)")
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_mov_fecha_tipo ON movimientos(fecha_evento, tipo_movimiento)")  # NUEVO: índice compuesto
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_asig_sku ON asignacion_moviles(sku_producto)")
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_asig_movil ON asignacion_moviles(movil)")  # NUEVO: para filtros por móvil
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_cons_fecha ON consumos_pendientes(fecha)")
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_cons_estado ON consumos_pendientes(estado)")
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_cons_movil ON consumos_pendientes(movil)")  # NUEVO: para filtros por móvil
+            cursor.execute("SELECT COUNT(*) FROM information_schema.columns WHERE table_name = 'faltantes_registrados' AND column_name = 'paquete'")
+            if cursor.fetchone()[0] == 0:
+                cursor.execute("ALTER TABLE faltantes_registrados ADD COLUMN paquete VARCHAR(100) DEFAULT 'NINGUNO'")
         else:
-            add_mysql_index('idx_productos_sku', 'productos', 'sku')
-            add_mysql_index('idx_productos_codigo_maestro', 'productos', 'codigo_barra_maestro')  # NUEVO
-            add_mysql_index('idx_mov_sku_tipo', 'movimientos', 'sku_producto, tipo_movimiento')
-            add_mysql_index('idx_mov_fecha', 'movimientos', 'fecha_evento')
-            add_mysql_index('idx_mov_fecha_tipo', 'movimientos', 'fecha_evento, tipo_movimiento')  # NUEVO: índice compuesto
-            add_mysql_index('idx_asig_sku', 'asignacion_moviles', 'sku_producto')
-            add_mysql_index('idx_asig_movil', 'asignacion_moviles', 'movil')  # NUEVO: para filtros por móvil
-            add_mysql_index('idx_cons_fecha', 'consumos_pendientes', 'fecha')
-            add_mysql_index('idx_cons_estado', 'consumos_pendientes', 'estado')
-            add_mysql_index('idx_cons_movil', 'consumos_pendientes', 'movil')  # NUEVO: para filtros por móvil
+            cursor.execute("PRAGMA table_info(faltantes_registrados)")
+            if 'paquete' not in [c[1] for c in cursor.fetchall()]:
+                cursor.execute("ALTER TABLE faltantes_registrados ADD COLUMN paquete TEXT DEFAULT 'NINGUNO'")
+    except Exception as e:
+        logger.warning(f"⚠️ Migración faltantes_registrados.paquete: {e}")
+
+    logger.info("✅ Etapa 2 completada: migraciones de columnas aplicadas.")
 
 
-        # MIGRACIÓN AUTOMÁTICA DE MÓVILES (Asegurar que todos existan)
+# ─────────────────────────────────────────────────────────
+# ETAPA 3 — Índices de rendimiento
+# ─────────────────────────────────────────────────────────
+def _actualizar_indices(cursor, add_idx):
+    """Crea índices de rendimiento para las tablas de mayor consulta (No bloqueante)."""
+    if DB_TYPE == 'MYSQL':
+        try: 
+            cursor.execute("SET SESSION wait_timeout = 60")
+            cursor.execute("SET SESSION group_concat_max_len = 1000000")
+        except Exception: pass
+
+    if DB_TYPE == 'SQLITE':
+        indices = [
+            ("idx_productos_sku", "productos", "sku"),
+            ("idx_productos_codigo_maestro", "productos", "codigo_barra_maestro"),
+            ("idx_mov_sku_tipo", "movimientos", "sku_producto, tipo_movimiento"),
+            ("idx_mov_fecha", "movimientos", "fecha_evento"),
+            ("idx_mov_fecha_tipo", "movimientos", "fecha_evento, tipo_movimiento"),
+            ("idx_asig_sku", "asignacion_moviles", "sku_producto"),
+            ("idx_asig_movil", "asignacion_moviles", "movil"),
+            ("idx_cons_fecha", "consumos_pendientes", "fecha"),
+            ("idx_cons_estado", "consumos_pendientes", "estado"),
+            ("idx_cons_movil", "consumos_pendientes", "movil"),
+            ("idx_series_serial", "series_registradas", "serial_number"),
+            ("idx_series_sku", "series_registradas", "sku"),
+        ]
+        for name, table, cols in indices:
+            try: cursor.execute(f"CREATE INDEX IF NOT EXISTS {name} ON {table}({cols})")
+            except Exception: pass
+    else:
+        add_idx('idx_productos_sku',            'productos',            'sku')
+        add_idx('idx_productos_codigo_maestro', 'productos',            'codigo_barra_maestro')
+        add_idx('idx_mov_sku_tipo',             'movimientos',          'sku_producto, tipo_movimiento')
+        add_idx('idx_mov_fecha',                'movimientos',          'fecha_evento')
+        add_idx('idx_mov_fecha_tipo',           'movimientos',          'fecha_evento, tipo_movimiento')
+        add_idx('idx_asig_sku',                 'asignacion_moviles',   'sku_producto')
+        add_idx('idx_asig_movil',               'asignacion_moviles',   'movil')
+        add_idx('idx_cons_fecha',               'consumos_pendientes',  'fecha')
+        add_idx('idx_cons_estado',              'consumos_pendientes',  'estado')
+        add_idx('idx_cons_movil',               'consumos_pendientes',  'movil')
+        add_idx('idx_series_serial',            'series_registradas',   'serial_number')
+        add_idx('idx_series_sku',               'series_registradas',   'sku')
+
+    logger.info("✅ Etapa 3 completada: índices de rendimiento verificados.")
+
+
+# ─────────────────────────────────────────────────────────
+# ETAPA 4 — Poblar móviles iniciales
+# ─────────────────────────────────────────────────────────
+def _poblar_moviles(cursor):
+    """Asegura que todos los móviles configurados existan (Operación ligera)."""
+    try:
         from config import ALL_MOVILES
-        logger.info(f"⚙️ Verificando {len(ALL_MOVILES)} móviles...")
-        
+        if not ALL_MOVILES: return
         if DB_TYPE == 'MYSQL':
-            # Preparar valores para inserción masiva
-            # MySQL: INSERT IGNORE INTO ... VALUES (%s, 1), (%s, 1), ...
             placeholders = ", ".join(["(%s, 1)"] * len(ALL_MOVILES))
-            query = f"INSERT IGNORE INTO moviles (nombre, activo) VALUES {placeholders}"
-            try:
-                # Usar un timeout específico si es soportado, o confiar en el global
-                cursor.execute(query, tuple(ALL_MOVILES))
-                logger.info("✅ Migración de móviles completada.")
-            except Exception as e:
-                logger.warning(f"⚠️ Error en migración masiva MySQL: {e}")
-                # Fallback uno a uno si la masiva falla o es lenta (opcional)
+            cursor.execute(f"INSERT IGNORE INTO moviles (nombre, activo) VALUES {placeholders}", tuple(ALL_MOVILES))
         else:
-            # SQLite: INSERT OR IGNORE
             for mv in ALL_MOVILES:
-                try:
-                    run_query(cursor, "INSERT OR IGNORE INTO moviles (nombre, activo) VALUES (?, 1)", (mv,))
-                except: pass
+                try: run_query(cursor, "INSERT OR IGNORE INTO moviles (nombre, activo) VALUES (?, 1)", (mv,))
+                except Exception: pass
+        logger.info("✅ Etapa 4 completada: móviles verificados.")
+    except Exception as e:
+        logger.warning(f"⚠️ Etapa 4 no crítica: {e}")
 
-        # Migración faltantes_registrados: añadir paquete
-        try:
-            if DB_TYPE == 'MYSQL':
-                cursor.execute("SELECT COUNT(*) FROM information_schema.columns WHERE table_name = 'faltantes_registrados' AND column_name = 'paquete'")
-                if cursor.fetchone()[0] == 0:
-                    cursor.execute("ALTER TABLE faltantes_registrados ADD COLUMN paquete VARCHAR(100) DEFAULT 'NINGUNO'")
-            else:
-                cursor.execute("PRAGMA table_info(faltantes_registrados)")
-                cols = [c[1] for c in cursor.fetchall()]
-                if 'paquete' not in cols:
-                    cursor.execute("ALTER TABLE faltantes_registrados ADD COLUMN paquete TEXT DEFAULT 'NINGUNO'")
-        except Exception as e:
-            logger.warning(f"Error migrando faltantes_registrados (paquete): {e}")
+
+# ─────────────────────────────────────────────────────────
+# PUNTO DE ENTRADA PÚBLICO
+# ─────────────────────────────────────────────────────────
+def inicializar_bd():
+    """
+    Orquesta la inicialización completa de la base de datos (Resiliente).
+    Si ocurre un error de conexión, informa al usuario sin colgar la App.
+    """
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(buffered=True) if DB_TYPE == 'MYSQL' else conn.cursor()
+
+        T = _get_sql_types()
+        add_col, add_idx = _make_column_helpers(cursor)
+
+        # Ejecución por etapas (Optimizado)
+        _crear_tablas(cursor, T)
+        _ejecutar_migraciones(cursor, T, add_col)
+        
+        # Etapas no críticas que pueden fallar por red lenta
+        try: _actualizar_indices(cursor, add_idx)
+        except Exception as e: logger.warning(f"⚠️ Índices: {e}")
+        
+        try: _poblar_moviles(cursor)
+        except Exception as e: logger.warning(f"⚠️ Móviles: {e}")
 
         conn.commit()
+        logger.info("🎉 Base de datos inicializada correctamente.")
         return True
-        
+
     except Exception as e:
         engine = "MySQL" if DB_TYPE == 'MYSQL' else "SQLite"
-        import traceback
-        traceback.print_exc()
-        print(f"❌ Error de {engine} al inicializar la base de datos:\n\n{e}")
-        safe_messagebox("Error Crítico", f"❌ Error de {engine} al inicializar la base de datos:\n\n{e}")
-        raise e
+        logger.error(f"❌ Error crítico en inicializar_bd: {e}")
+        safe_messagebox("Error de Inicio", f"❌ Error de {engine} al inicializar la base de datos:\n\n{e}\n\nVerifique su conexión.")
+        return False
     finally:
-        if conn: close_connection(conn)
+        if conn:
+            close_connection(conn)
+
+
 
 def poblar_datos_iniciales():
     """Inserta los productos de la lista inicial si no existen, con stock 0, solo en BODEGA."""

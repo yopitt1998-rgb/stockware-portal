@@ -199,13 +199,10 @@ class ReversoConsumoScannerWindow:
             # OPTIMIZACIÓN: Una sola conexión para todo el batch
             for item_id, serial, sku, ubicacion in items:
                 try:
-                    # 1. Determinar el contexto de sucursal para este item
-                    # (Ya lo tenemos en el bucle superior, pero aseguramos por item si fuera necesario)
-                    
-                    # 2. Revertir en series_registradas
+                    # 1. Revertir en series_registradas
                     run_query(cursor, "UPDATE series_registradas SET ubicacion = 'BODEGA', estado = 'DISPONIBLE', movil = NULL, paquete = 'NINGUNO' WHERE (serial_number = %s OR mac_number = %s) AND sucursal = %s", (serial, serial, sucursal))
                     
-                    # 3. Sincronizar stocks contables
+                    # 2. Sincronizar stocks contables
                     # Si estaba en un estado final (Consumido/Faltante/Descarte), sumamos a Bodega
                     if ubicacion in ('CONSUMIDO', 'DESCARTE', 'FALTANTE'):
                         run_query(cursor, "UPDATE productos SET cantidad = cantidad + 1 WHERE sku = %s AND ubicacion = 'BODEGA' AND sucursal = %s", (sku, sucursal))
@@ -223,7 +220,32 @@ class ReversoConsumoScannerWindow:
                          # Sumar a Bodega
                          run_query(cursor, "UPDATE productos SET cantidad = cantidad + 1 WHERE sku = %s AND ubicacion = 'BODEGA' AND sucursal = %s", (sku, sucursal))
                     
-                    # 4. Registrar el movimiento - PASAMOS LA CONEXIÓN EXISTENTE PARA VELOCIDAD
+                    # 3. LIMPIEZA DE AUDITORÍA (NUEVO)
+                    
+                    # A. Limpiar en consumos_pendientes (Si existe un reporte de este serial)
+                    # Usamos LIKE para encontrar el serial en la lista de seriales_usados
+                    try:
+                        run_query(cursor, "DELETE FROM consumos_pendientes WHERE (seriales_usados LIKE %s OR seriales_usados = %s) AND sucursal = %s", (f"%{serial}%", serial, sucursal))
+                    except Exception as e:
+                        logger.warning(f"⚠️ Error limpiando consumos_pendientes para {serial}: {e}")
+
+                    # B. Limpiar en faltantes_registrados
+                    try:
+                        # Buscar si el serial está en el detalle de faltantes
+                        run_query(cursor, "SELECT faltante_id FROM seriales_faltantes_detalle WHERE serial = %s", (serial,))
+                        f_row = cursor.fetchone()
+                        if f_row:
+                            id_faltante = f_row[0]
+                            # Eliminar detalle
+                            run_query(cursor, "DELETE FROM seriales_faltantes_detalle WHERE serial = %s", (serial,))
+                            # Decrementar cabecera
+                            run_query(cursor, "UPDATE faltantes_registrados SET cantidad = cantidad - 1 WHERE id = %s", (id_faltante,))
+                            # Eliminar cabecera si llegó a 0
+                            run_query(cursor, "DELETE FROM faltantes_registrados WHERE id = %s AND cantidad <= 0", (id_faltante,))
+                    except Exception as e:
+                        logger.warning(f"⚠️ Error limpiando faltantes para {serial}: {e}")
+
+                    # 4. Registrar el movimiento
                     registrar_movimiento_gui(
                         sku, "ENTRADA", 1, None, date.today().isoformat(), "NINGUNO", 
                         observaciones=f"Reverso a Bodega desde {ubicacion} - Serial: {serial}", 
@@ -285,8 +307,27 @@ class ReversoConsumoScannerWindow:
             if ubicacion in ('CONSUMIDO', 'DESCARTE', 'FALTANTE'):
                 run_query(cursor, "UPDATE productos SET cantidad = cantidad + 1 WHERE sku = %s AND ubicacion = 'BODEGA' AND sucursal = %s", (sku, sucursal))
             
-            # 4. Registrar el movimiento (ENTRADA a bodega no requiere movil_afectado)
-            # Pasamos None en movil_afectado para evitar que falle la validación de móviles en registrar_movimiento_gui
+            # 4. LIMPIEZA DE AUDITORÍA (NUEVO)
+            
+            # A. Consumos Pendientes
+            try:
+                run_query(cursor, "DELETE FROM consumos_pendientes WHERE (seriales_usados LIKE %s OR seriales_usados = %s) AND sucursal = %s", (f"%{serial}%", serial, sucursal))
+            except Exception as e:
+                logger.warning(f"⚠️ Error limpiando consumos_pendientes para {serial}: {e}")
+
+            # B. Faltantes
+            try:
+                run_query(cursor, "SELECT faltante_id FROM seriales_faltantes_detalle WHERE serial = %s", (serial,))
+                f_row = cursor.fetchone()
+                if f_row:
+                    id_f = f_row[0]
+                    run_query(cursor, "DELETE FROM seriales_faltantes_detalle WHERE serial = %s", (serial,))
+                    run_query(cursor, "UPDATE faltantes_registrados SET cantidad = cantidad - 1 WHERE id = %s", (id_f,))
+                    run_query(cursor, "DELETE FROM faltantes_registrados WHERE id = %s AND cantidad <= 0", (id_f,))
+            except Exception as e:
+                logger.warning(f"⚠️ Error limpiando faltantes para {serial}: {e}")
+
+            # 5. Registrar el movimiento
             registrar_movimiento_gui(
                 sku, 
                 "ENTRADA", 
@@ -295,7 +336,9 @@ class ReversoConsumoScannerWindow:
                 date.today().isoformat(), 
                 "NINGUNO", 
                 observaciones=f"Reverso a Bodega desde {ubicacion} - Serial: {serial}", 
-                seriales=[serial]
+                seriales=[serial],
+                sucursal_context=sucursal,
+                existing_conn=conn
             )
             
             conn.commit()

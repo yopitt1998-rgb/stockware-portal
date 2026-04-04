@@ -49,42 +49,54 @@ def get_db_connection(target_db=None):
     # 2. Conectar según tipo de BD
     if DB_TYPE == 'MYSQL':
         try:
-            # Implementar pooling: crear pool por BD si no existe
             if db_name not in _mysql_pools:
                 logger.info(f"🔌 [POOL] Creando pool de conexiones para MySQL -> DB: {db_name}")
                 _mysql_pools[db_name] = pooling.MySQLConnectionPool(
                     pool_name=f"pool_{db_name.replace('-', '_')}",
-                    pool_size=3,  # Desktop app, single user
+                    pool_size=3,
                     pool_reset_session=True,
                     host=MYSQL_HOST,
                     user=MYSQL_USER,
                     password=MYSQL_PASS,
                     database=db_name,
                     port=MYSQL_PORT,
-                    connect_timeout=60,  # Increased for slow cloud responses
-                    use_pure=True        # Avoid C extension issues
+                    connect_timeout=30,
+                    use_pure=True
                 )
 
-            # Obtener conexión del pool y verificar que esté viva
-            try:
-                conn = _mysql_pools[db_name].get_connection()
-                # Ping para detectar si la conexión expiró (ej: 8h sin usar en TiDB)
-                conn.ping(reconnect=True, attempts=3, delay=2)
-                return conn
-            except (mysql.connector.errors.PoolError,
-                    mysql.connector.errors.OperationalError,
-                    mysql.connector.errors.InterfaceError) as dead_err:
-                # Pool muerto — destruirlo y recrear en el próximo intento
-                logger.warning(f"⚠️ [POOL] Conexión expirada para {db_name}, reiniciando pool: {dead_err}")
-                try:
-                    del _mysql_pools[db_name]
-                except KeyError:
-                    pass
-                # Reintentar recursivamente (solo 1 nivel, ya que ahora el pool no existe)
-                return get_db_connection(target_db=target_db)
+            # Obtener conexión del pool
+            return _mysql_pools[db_name].get_connection()
 
+        except (mysql.connector.errors.PoolError,
+                mysql.connector.errors.OperationalError,
+                mysql.connector.errors.InterfaceError) as err:
+            logger.warning(f"⚠️ [POOL] Error de conexión para {db_name}, reintentando una vez: {err}")
+            # Limpiar pool si falló
+            if db_name in _mysql_pools:
+                try: del _mysql_pools[db_name]
+                except: pass
+            
+            # Un solo reintento directo
+            try:
+                if db_name not in _mysql_pools:
+                    _mysql_pools[db_name] = pooling.MySQLConnectionPool(
+                        pool_name=f"pool_{db_name.replace('-', '_')}_retry",
+                        pool_size=3,
+                        pool_reset_session=True,
+                        host=MYSQL_HOST,
+                        user=MYSQL_USER,
+                        password=MYSQL_PASS,
+                        database=db_name,
+                        port=MYSQL_PORT,
+                        connect_timeout=30,
+                        use_pure=True
+                    )
+                return _mysql_pools[db_name].get_connection()
+            except Exception as e:
+                logger.error(f"❌ [DB] Error fatal conectando a {db_name}: {e}")
+                raise e
         except Exception as e:
-            logger.error(f"❌ Error conectando a MySQL ({db_name}): {e}")
+            logger.error(f"❌ Error inesperado conectando a MySQL ({db_name}): {e}")
             raise e
     else:
         # SQLite

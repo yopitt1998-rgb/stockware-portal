@@ -87,8 +87,7 @@ PAQUETES_MATERIALES = {
         ("4-3-42", 60),     # TENSOR_FO
         ("U4-4-633", 1),    # HG8247W5 (con serial)
         ("4-4-644", 6),     # ONT HUAWEI EchoLife EG8145V5 (con serial)
-        ("4-4-654", 1),     # O_EG8041X6 (con serial)
-        ("4-4-656", 4),     # O_EG8041X6 (con serial)
+        ("4-4-656", 5),     # O_EG8041X6 WIFI 6 (Unificado)
         ("4-4-646", 2),     # R_K562E_10 (con serial)
         ("4-4-647", 2),     # R_AS5113 (con serial)
         ("8-1-902", 2),     # A_W541_2.4 (con serial)
@@ -106,8 +105,7 @@ PAQUETES_MATERIALES = {
         ("4-3-42", 60),     # TENSOR_FO
         ("U4-4-633", 1),    # HG8247W5 (con serial)
         ("4-4-644", 6),     # ONT HUAWEI EchoLife EG8145V5 (con serial)
-        ("4-4-654", 1),     # O_EG8041X6 (con serial)
-        ("4-4-656", 4),     # O_EG8041X6 (con serial)
+        ("4-4-656", 5),     # O_EG8041X6 WIFI 6 (Unificado)
         ("4-4-646", 2),     # R_K562E_10 (con serial)
         ("4-4-647", 2),     # R_AS5113 (con serial)
         ("8-1-902", 2),     # A_W541_2.4 (con serial)
@@ -140,7 +138,7 @@ PRESTAMOS_SANTIAGO = []
 
 # List of SKUs that have physical barcodes on the device
 PRODUCTOS_CON_CODIGO_BARRA = [
-    "U4-4-633", "4-4-644", "4-4-654", "4-4-656", 
+    "U4-4-633", "4-4-644", "4-4-656", 
     "4-4-646", "4-4-647", "8-1-902", "8-1-903", "8-1-904"
 ]
 
@@ -162,8 +160,7 @@ PRODUCTOS_INICIALES = [
     ("TENSOR_FO", "4-3-42", "015"),          # TENSOR P/ FIBRA DROP
     ("HG8247W5", "U4-4-633", "016"),         # ONT HUAWEI ECHOLIFE HG8247W5
     ("O_EG8145V5", "4-4-644", "018"),        # ONT HUAWEI EchoLife EG8145V5
-    ("O_EG8041X6", "4-4-654", "019"),        # ONT HUAWEI EchoLife EGX6
-    ("O_EG8041X6", "4-4-656", "020"),        # Huawei OptiXstar EG8041X6-10 (Nota: Mismo nombre corto en imagen)
+    ("O_EG8041X6", "4-4-656", "020"),        # Huawei OptiXstar EG8041X6-10 (Unificado WiFi 6)
     ("R_K562E_10", "4-4-646", "021"),        # Huawei OptiXstar K562e-10
     ("WIFI_NET", "4-4-647", "022"),          # Broadband Network Terminal
     ("T_PLAYPRO", "8-1-902", "024"),         # STB OTT RETAIL Z11B

@@ -533,11 +533,11 @@ def obtener_consumos_pendientes(fecha_inicio=None, fecha_fin=None, estado=None, 
         def build_query(table_type):
             if table_type == 'consumos':
                 sql = """
-                    SELECT c.id, c.movil, c.sku, COALESCE(p.nombre, '(SKU sin maestro)') as nombre, c.cantidad, c.tecnico_nombre, c.ticket, 
+                    SELECT c.id, c.movil, c.sku, COALESCE(p.nombre, '(No en Bodega/Render)') as nombre, c.cantidad, c.tecnico_nombre, c.ticket, 
                            c.fecha, c.colilla, c.num_contrato, c.ayudante_nombre, c.seriales_usados, c.paquete, c.estado
                     FROM consumos_pendientes c
                     LEFT JOIN productos p ON c.sku = p.sku AND p.ubicacion = 'BODEGA' 
-                    AND (p.sucursal = c.sucursal OR p.sucursal IS NULL)
+                    AND (p.sucursal = c.sucursal OR p.sucursal = ? OR p.sucursal IS NULL)
                     WHERE 1=1
                 """
                 table_alias = "c"
@@ -564,6 +564,8 @@ def obtener_consumos_pendientes(fecha_inicio=None, fecha_fin=None, estado=None, 
 
 
             q_params = []
+            if table_type == 'consumos':
+                q_params.append(sucursal_actual)
             
             # Filtro por móviles de la sucursal (o filtro manual)
             if target_moviles:

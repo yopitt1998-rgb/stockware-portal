@@ -456,13 +456,66 @@
 
 <body>
 
-    <div class="header">
-        <div class="header-left">
-            <span class="logo">📋 StockWare</span>
-            <span class="page-title">/ Auditoría de Terreno y Retorno</span>
+    <style>
+        /* New Nav Styles (Shared) */
+        .navbar {
+            background: #2c3e50; /* Same as index.html var(--primary) */
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+            border-radius: 0 0 15px 15px;
+        }
+
+        .nav-brand {
+            font-size: 20px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .nav-link.active {
+            background: #f39c12; /* Warning color index.html */
+            color: white;
+        }
+    </style>
+
+    <nav class="navbar">
+        <div class="nav-brand">🚀 StockWare</div>
+        <div class="nav-links">
+            <a href="/" class="nav-link">Reporte Diario</a>
+            <a href="/modo_lunes" class="nav-link">Plan B (Lunes)</a>
+            <a href="/auditoria" class="nav-link active">Auditoría</a>
         </div>
-        <a href="/" class="btn-back">← Volver al Portal</a>
-    </div>
+    </nav>
+
 
     <div class="container">
 

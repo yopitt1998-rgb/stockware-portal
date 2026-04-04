@@ -142,8 +142,17 @@ class DashboardTab:
     def create_quick_actions(self, parent):
         quick_actions_frame = ttk.Frame(parent, style='Modern.TFrame')
         quick_actions_frame.pack(fill='x', padx=20, pady=10)
+
+        header_frame = tk.Frame(quick_actions_frame, bg='#f8fafc')
+        header_frame.pack(fill='x', pady=(0, 10))
         
-        ttk.Label(quick_actions_frame, text="ACCIONES RÁPIDAS:", style='Subtitle.TLabel').pack(anchor='w', pady=(0, 10))
+        ttk.Label(header_frame, text="ACCIONES RÁPIDAS:", style='Subtitle.TLabel').pack(side='left')
+        
+        btn_refresh = tk.Button(header_frame, text="🔄 Sincronizar", 
+                              command=self.main_app.refresh_app_cache,
+                              font=('Segoe UI', 8, 'bold'), bg='#e2e8f0', fg='#475569',
+                              relief='flat', padx=8, pady=2, cursor='hand2')
+        btn_refresh.pack(side='right')
         
         # DETECTAR MODO SANTIAGO
         import os
@@ -222,6 +231,8 @@ class DashboardTab:
 
     def actualizar_metricas(self):
         """Actualiza las métricas y la tabla en un hilo separado para no bloquear la UI"""
+        self.main_app.set_status("🔄 Actualizando dashboard...")
+        
         def run_update():
             try:
                 # 1. Obtener métricas pesadas
@@ -234,18 +245,22 @@ class DashboardTab:
                 datos_charts = obtener_stock_actual_y_moviles()
                 
                 # Programar actualización de la UI en el hilo principal
-                self.main_app.master.after(0, lambda: self._aplicar_actualizacion_ui(estadisticas, movimientos, datos_charts))
+                def _success():
+                    self._aplicar_actualizacion_ui(estadisticas, movimientos, datos_charts)
+                    self.main_app.set_status("✅ Dashboard actualizado", timeout=2000)
+                
+                self.main_app.master.after(0, _success)
             except Exception as e:
+                self.main_app.set_status(f"⚠️ Error actualizando dashboard: {e}", timeout=5000)
                 print(f"⚠️ Error al actualizar dashboard: {e}")
-                # Mostrar error visual en los labels para que el usuario sepa que no hay conexión
+                
+                # Mostrar error visual en los labels
                 def _mostrar_error_conexion():
                     if not self.notebook.winfo_exists():
                         return
                     for key, lbl in self.metric_labels.items():
-                        try:
-                            lbl.config(text="⚠️")
-                        except Exception:
-                            pass
+                        try: lbl.config(text="⚠️")
+                        except: pass
                     if self.dashboard_table and self.dashboard_table.winfo_exists():
                         for child in self.dashboard_table.get_children():
                             self.dashboard_table.delete(child)

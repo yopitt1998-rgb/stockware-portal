@@ -42,7 +42,6 @@ SKU_TO_EXCEL_NAME = {
     "4-3-42": "TENSOR_FO",
     "U4-4-633": "HG8247W5",
     "4-4-644": "O_EG8145V5",
-    "4-4-654": "O_EG8041X6",
     "4-4-656": "O_EG8041X6",
     "4-4-646": "R_K562E_10",
     "4-4-647": "WIFI_NET",
@@ -210,20 +209,35 @@ def modo_lunes():
     status = "OK"
     error_detail = ""
     productos_equipos = []
+    productos_materiales = []
     
     try:
         from config import PRODUCTOS_INICIALES, PRODUCTOS_CON_CODIGO_BARRA
         from database import obtener_todos_los_skus_para_movimiento
         
-        # Filtramos solo los equipos (seriales) para la interfaz de lunes
+        # Obtenemos stock actual para mostrar referencias si es necesario
+        raw_stock = obtener_todos_los_skus_para_movimiento()
+        stock_map = {sku: qty for _, sku, qty in raw_stock}
+
         for name_excel, sku, _ in PRODUCTOS_INICIALES:
+            # Filtramos SKU 4-4-654 como en el index
+            if sku == '4-4-654': continue
+            
+            p_data = {
+                "nombre": name_excel,
+                "sku": sku,
+                "stock_bodega": stock_map.get(sku, 0)
+            }
+            
             if sku in PRODUCTOS_CON_CODIGO_BARRA:
-                productos_equipos.append({
-                    "nombre": name_excel,
-                    "sku": sku
-                })
+                productos_equipos.append(p_data)
+            else:
+                productos_materiales.append(p_data)
                 
-        moviles = obtener_nombres_moviles()
+        # FILTRAR: Solo móviles que NO están en Santiago (Chiriquí)
+        moviles_total = obtener_nombres_moviles()
+        moviles = [m for m in moviles_total if m not in MOVILES_SANTIAGO]
+        
         details_moviles = obtener_detalles_moviles()
         tecnicos = obtener_tecnicos(solo_activos=True)
             
@@ -238,7 +252,8 @@ def modo_lunes():
         return render_template('modo_lunes.html',
                                hoy=date.today().isoformat(),
                                moviles=moviles,
-                               productos=productos_equipos,
+                               equipos=productos_equipos,
+                               materiales=productos_materiales,
                                details_moviles=json.dumps(details_moviles),
                                tecnicos=tecnicos,
                                sku_to_excel_name=json.dumps(SKU_TO_EXCEL_NAME),
@@ -247,6 +262,7 @@ def modo_lunes():
     except Exception as template_err:
         logger.error(f"Error renderizando modo_lunes.html: {template_err}")
         return f"<h1>⚠️ Error Modo Lunes</h1><p>Status: {status}</p><p>Detail: {error_detail}</p><p>Template: {str(template_err)}</p>"
+
 
 @app.route('/registrar_lunes', methods=['POST'])
 def registrar_lunes_post():

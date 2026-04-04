@@ -5988,3 +5988,78 @@ _tkinter.TclError: invalid command name ".!toplevel2.!toplevel2.!treeview"
 2026-03-28 15:37:13 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
 2026-03-28 15:37:13 | ERROR    | database             | ❌ Error en obtener_estadisticas_reales: Can not reconnect to MySQL after 1 attempt(s): 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
 2026-03-28 15:37:13 | ERROR    | utils.db_connector   | Error conectando a MySQL (test): Can not reconnect to MySQL after 1 attempt(s): 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-03-31 12:05:49 | ERROR    | data_layer.inventory | Error en registrar_movimiento_gui para SKU : SKU no puede estar vacío
+2026-03-31 15:54:38 | ERROR    | data_layer.inventory | Error en sincronización post-bulk: name 'sincronizar_stock_bodega_serializado' is not defined
+2026-04-01 10:21:58 | ERROR    | data_layer.inventory | Error en sincronización post-bulk: name 'sincronizar_stock_bodega_serializado' is not defined
+2026-04-01 10:45:38 | CRITICAL | data_layer.reminders | FATAL BOOTSTRAP ERROR: 'ModernInventarioApp' object has no attribute 'tab_manager'
+2026-04-01 10:45:38 | CRITICAL | data_layer.reminders | Traceback (most recent call last):
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 526, in bootstrap_app
+    app = ModernInventarioApp(root)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 106, in __init__
+    self.create_modern_gui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 362, in create_modern_gui
+    self.tab_manager.load_tab("Dashboard")
+    ^^^^^^^^^^^^^^^^
+AttributeError: 'ModernInventarioApp' object has no attribute 'tab_manager'
+
+2026-04-01 12:23:21 | CRITICAL | data_layer.reminders | FATAL BOOTSTRAP ERROR: 'ModernInventarioApp' object has no attribute 'tab_manager'
+2026-04-01 12:23:21 | CRITICAL | data_layer.reminders | Traceback (most recent call last):
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 594, in bootstrap_app
+    app = ModernInventarioApp(root)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 115, in __init__
+    self.tab_manager.load_tab("Dashboard")
+    ^^^^^^^^^^^^^^^^
+AttributeError: 'ModernInventarioApp' object has no attribute 'tab_manager'
+
+2026-04-01 12:24:13 | CRITICAL | data_layer.reminders | FATAL BOOTSTRAP ERROR: 'ModernInventarioApp' object has no attribute 'tab_manager'
+2026-04-01 12:24:13 | CRITICAL | data_layer.reminders | Traceback (most recent call last):
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 594, in bootstrap_app
+    app = ModernInventarioApp(root)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 115, in __init__
+    self.tab_manager.load_tab("Dashboard")
+    ^^^^^^^^^^^^^^^^
+AttributeError: 'ModernInventarioApp' object has no attribute 'tab_manager'
+
+2026-04-01 12:32:30 | CRITICAL | data_layer.reminders | FATAL BOOTSTRAP ERROR: 'ModernInventarioApp' object has no attribute 'tab_manager'
+2026-04-01 12:32:30 | CRITICAL | data_layer.reminders | Traceback (most recent call last):
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 594, in bootstrap_app
+    app = ModernInventarioApp(root)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 115, in __init__
+    self.tab_manager.load_tab("Dashboard")
+    ^^^^^^^^^^^^^^^^
+AttributeError: 'ModernInventarioApp' object has no attribute 'tab_manager'
+
+2026-04-01 13:10:16 | CRITICAL | data_layer.reminders | FATAL BOOTSTRAP ERROR: 'ModernInventarioApp' object has no attribute 'tab_manager'
+2026-04-01 13:10:16 | CRITICAL | data_layer.reminders | Traceback (most recent call last):
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 594, in bootstrap_app
+    app = ModernInventarioApp(root)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 115, in __init__
+    self.tab_manager.load_tab("Dashboard")
+    ^^^^^^^^^^^^^^^^
+AttributeError: 'ModernInventarioApp' object has no attribute 'tab_manager'
+
+2026-04-01 13:12:23 | CRITICAL | data_layer.reminders | FATAL BOOTSTRAP ERROR: 'ModernInventarioApp' object has no attribute 'tab_manager'
+2026-04-01 13:12:23 | CRITICAL | data_layer.reminders | Traceback (most recent call last):
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 592, in bootstrap_app
+    app = ModernInventarioApp(root)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\app_inventario.py", line 115, in __init__
+    self.tab_manager.load_tab("Dashboard")
+    ^^^^^^^^^^^^^^^^
+AttributeError: 'ModernInventarioApp' object has no attribute 'tab_manager'
+
+2026-04-02 13:18:09 | ERROR    | data_layer.reminders | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\dashboard.py", line 173, in <lambda>
+    ("📜 Registro Global", lambda: self.main_app.switch_to_tab("Registro Global"), '#6f42c1')
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ModernInventarioApp' object has no attribute 'switch_to_tab'
+

@@ -40,6 +40,11 @@ from gui.utils import darken_color
 from gui.keyboard_shortcuts import setup_keyboard_shortcuts
 from gui.theme_manager import create_theme_manager
 from gui.styles import Styles
+from gui.tab_manager import TabManager
+from gui.services.notification_service import NotificationService
+from gui.services.cache_service import CacheService
+from gui.components.log_viewer import LogViewerWindow
+from functools import wraps
 
 
 
@@ -76,11 +81,26 @@ class ModernInventarioApp:
         self.master.title(f"🚀 StockWare - Gestión de Inventario{branch_display}")
         self.master.configure(bg='#f8f9fa')
         
+        # Initialize Services
+        self.cache_service = CacheService()
+        
         # CONFIGURAR ICONO - NUEVO: Agregar ícono del programa
         self.configurar_icono()
         
         # Configurar estilos modernos
-        self.setup_styles()
+        Styles.setup_styles()
+        
+        # Color attributes for easier access (compatibility)
+        self.primary_color = Styles.PRIMARY_COLOR
+        self.secondary_color = Styles.SECONDARY_COLOR
+        self.accent_color = Styles.ACCENT_COLOR
+        self.success_color = Styles.SUCCESS_COLOR
+        self.warning_color = Styles.WARNING_COLOR
+        self.info_color = Styles.INFO_COLOR
+        self.light_bg = Styles.LIGHT_BG
+        self.dark_text = Styles.DARK_TEXT
+        self.light_text = Styles.LIGHT_TEXT
+        self.text_color = Styles.TEXT_COLOR
         
         # CORRECCIÓN: Mantener ventana principal en pantalla completa
         try: 
@@ -91,41 +111,34 @@ class ModernInventarioApp:
         # Crear interfaz moderna
         self.create_modern_gui()
         
-        # Inicializar mejoras de UX
-        self.theme_manager = create_theme_manager(self.master)
+        # CARGAR DASHBOARD INMEDIATAMENTE (Para que no esté vacío al inicio)
+        self.tab_manager.load_tab("Dashboard")
+        
+        # Sincronizar Cache al inicio
+        self.refresh_app_cache()
+        
+        # Initialize keyboard shortcuts
         self.keyboard_shortcuts = setup_keyboard_shortcuts(self.master, self)
         
         # Mostrar alerta de recordatorios al iniciar (en segundo plano)
         self.master.after(1000, lambda: threading.Thread(target=self.mostrar_alerta_inicial, daemon=True).start())
 
     def mostrar_alerta_inicial(self):
-        """Muestra una alerta con los recordatorios pendientes para hoy al iniciar la aplicación"""
-        fecha_hoy = date.today().isoformat()
-        recordatorios = obtener_recordatorios_pendientes(fecha_hoy)
+        """Muestra una alerta con los recordatorios para hoy"""
+        mensaje = NotificationService.get_todays_reminders_message()
+        if mensaje:
+            self.master.after(0, lambda: self.mostrar_alerta_recordatorios_unica(mensaje))
+
+    def refresh_app_cache(self):
+        """Refresca los datos en caché y actualiza la barra de estado"""
+        self.set_status("🔄 Sincronizando datos...", is_busy=True)
+        def on_done(success, error=None):
+            if success:
+                self.set_status("✅ Sincronización exitosa", timeout=3000)
+            else:
+                self.set_status(f"⚠️ Error de sincronización: {error}", timeout=5000)
         
-        if not recordatorios:
-            return
-        
-        # Contar recordatorios por tipo
-        retornos_pendientes = [r for r in recordatorios if r[3] == 'RETORNO']
-        conciliaciones_pendientes = [r for r in recordatorios if r[3] == 'CONCILIACION']
-        
-        mensaje = "🔔 RECORDATORIOS PENDIENTES PARA HOY:\n\n"
-        
-        if retornos_pendientes:
-            mensaje += f"🔄 RETORNOS PENDIENTES: {len(retornos_pendientes)}\n"
-            for r in retornos_pendientes:
-                mensaje += f"   • {r[1]} - Paquete {r[2]}\n"
-            mensaje += "\n"
-        
-        if conciliaciones_pendientes:
-            mensaje += f"⚖️ CONCILIACIONES PENDIENTES: {len(conciliaciones_pendientes)}\n"
-            for r in conciliaciones_pendientes:
-                mensaje += f"   • {r[1]} - Paquete {r[2]}\n"
-        
-        # Mostrar alerta solo si hay recordatorios pendientes
-        if retornos_pendientes or conciliaciones_pendientes:
-            self.mostrar_alerta_recordatorios_unica(mensaje)
+        self.cache_service.refresh_cache(callback=on_done)
 
     def mostrar_alerta_recordatorios_unica(self, mensaje):
         """Muestra una alerta única con los recordatorios pendientes (solo se muestra una vez)"""
@@ -133,7 +146,7 @@ class ModernInventarioApp:
         ventana_alerta = tk.Toplevel(self.master)
         ventana_alerta.title("🔔 Recordatorios Pendientes - Hoy")
         ventana_alerta.geometry("500x400")
-        ventana_alerta.configure(bg='#FFF3E0')
+        ventana_alerta.configure(bg=self.light_bg)
         ventana_alerta.resizable(False, False)
         
         # Centrar la ventana
@@ -144,20 +157,20 @@ class ModernInventarioApp:
         
         # Icono y título
         tk.Label(ventana_alerta, text="🔔", font=('Segoe UI', 48), 
-                bg='#FFF3E0', fg=self.warning_color).pack(pady=(20, 10))
+                bg=self.light_bg, fg=self.warning_color).pack(pady=(20, 10))
         
         tk.Label(ventana_alerta, text="RECORDATORIOS PENDIENTES PARA HOY", 
-                font=('Segoe UI', 16, 'bold'), bg='#FFF3E0', fg=self.warning_color).pack()
+                font=('Segoe UI', 16, 'bold'), bg=self.light_bg, fg=self.warning_color).pack()
         
         # Mensaje
-        frame_mensaje = tk.Frame(ventana_alerta, bg='#FFF3E0', padx=20, pady=20)
+        frame_mensaje = tk.Frame(ventana_alerta, bg=self.light_bg, padx=20, pady=20)
         frame_mensaje.pack(fill='both', expand=True)
         
         tk.Label(frame_mensaje, text=mensaje, font=('Segoe UI', 11),
-                bg='#FFF3E0', fg=self.dark_text, justify='left').pack(anchor='w')
+                bg=self.light_bg, fg=self.dark_text, justify='left').pack(anchor='w')
         
         # Botones - CORREGIDO: Los botones ahora funcionan correctamente
-        frame_botones = tk.Frame(ventana_alerta, bg='#FFF3E0')
+        frame_botones = tk.Frame(ventana_alerta, bg=self.light_bg)
         frame_botones.pack(pady=(0, 20))
         
         # Botón "Ir a Recordatorios" - CORREGIDO
@@ -237,97 +250,6 @@ class ModernInventarioApp:
         except Exception as e:
             logger.error(f"Error al cargar el ícono: {e}")
 
-    def setup_styles(self):
-        """Configura estilos modernos para la aplicación"""
-        style = ttk.Style()
-        style.theme_use('clam')
-        
-        # Colores modernos
-        self.primary_color = '#2c3e50'
-        self.secondary_color = '#3498db'
-        self.accent_color = '#e74c3c'
-        self.success_color = '#27ae60'
-        self.warning_color = '#f39c12'
-        self.info_color = '#17a2b8'
-        self.light_bg = '#ecf0f1'
-        self.dark_text = '#2c3e50'
-        self.light_text = '#ecf0f1'
-        self.text_color = '#2c3e50' # Alias para compatibilidad
-        
-        # Configurar estilos
-        style.configure('Modern.TFrame', background=self.light_bg)
-        style.configure('Header.TFrame', background=self.primary_color)
-        style.configure('Card.TFrame', background='white', relief='raised', borderwidth=0)
-        
-        style.configure('Title.TLabel', 
-                       background=self.primary_color, 
-                       foreground='white',
-                       font=('Segoe UI', 18, 'bold'))
-        
-        style.configure('Subtitle.TLabel',
-                       background=self.light_bg,
-                       foreground=self.dark_text,
-                       font=('Segoe UI', 12, 'bold'))
-        
-        style.configure('Modern.TButton',
-                       background=self.secondary_color,
-                       foreground='white',
-                       font=('Segoe UI', 10, 'bold'),
-                       borderwidth=0,
-                       focuscolor='none',
-                       padding=(15, 8))
-        
-        style.map('Modern.TButton',
-                 background=[('active', '#2980b9'), ('pressed', '#21618c')])
-        
-        style.configure('Success.TButton',
-                       background=self.success_color,
-                       foreground='white',
-                       font=('Segoe UI', 10, 'bold'))
-        
-        style.map('Success.TButton',
-                 background=[('active', '#219a52'), ('pressed', '#1e7e48')])
-        
-        style.configure('Warning.TButton',
-                       background=self.warning_color,
-                       foreground='white',
-                       font=('Segoe UI', 10, 'bold'))
-        
-        style.configure('Danger.TButton',
-                       background=self.accent_color,
-                       foreground='white',
-                       font=('Segoe UI', 10, 'bold'))
-        
-        style.configure('Info.TButton',
-                       background=self.info_color,
-                       foreground='white',
-                       font=('Segoe UI', 10, 'bold'))
-        
-        style.configure('Modern.TEntry',
-                       fieldbackground='white',
-                       borderwidth=1,
-                       relief='flat',
-                       padding=(8, 6))
-        
-        style.configure('Modern.TCombobox',
-                       fieldbackground='white',
-                       background=self.secondary_color,
-                       arrowcolor='white')
-        
-        style.configure('Modern.Treeview',
-                       background='white',
-                       fieldbackground='white',
-                       foreground=self.dark_text,
-                       font=('Segoe UI', 11),
-                       rowheight=35)
-        
-        style.configure('Modern.Treeview.Heading',
-                       background=self.primary_color,
-                       foreground='white',
-                       font=('Segoe UI', 10, 'bold'))
-        
-        style.map('Modern.Treeview',
-                 background=[('selected', self.secondary_color)])
 
     def create_modern_gui(self):
         """Crea la interfaz gráfica moderna"""
@@ -337,7 +259,7 @@ class ModernInventarioApp:
         header_frame.pack_propagate(False)
         
         # Frame Principal
-        main_frame = tk.Frame(self.master, bg='#f8f9fa')
+        main_frame = tk.Frame(self.master, bg=self.light_bg)
         main_frame.pack(fill='both', expand=True)
 
         # Configurar Grid
@@ -345,7 +267,7 @@ class ModernInventarioApp:
         main_frame.rowconfigure(0, weight=1)
 
         # Sidebar Navigation
-        self.sidebar = tk.Frame(main_frame, bg='#2c3e50', width=220)
+        self.sidebar = tk.Frame(main_frame, bg=self.primary_color, width=220)
         self.sidebar.grid(row=0, column=0, sticky='ns')
         self.sidebar.pack_propagate(False)
 
@@ -456,133 +378,78 @@ class ModernInventarioApp:
             
             data['frame'] = frame # Referencia al frame (aunque no esté en el notebook)
 
-        # BIND EVENTO DE CAMBIO DE PESTAÑA
-        self.main_notebook.bind("<<NotebookTabChanged>>", self.on_tab_changed)
+        # BARRA DE ESTADO (NUEVO)
+        self.status_bar_frame = tk.Frame(main_frame, bg='#e2e8f0', height=25)
+        self.status_bar_frame.grid(row=1, column=0, columnspan=2, sticky='ew')
         
-        # CARGAR DASHBOARD INMEDIATAMENTE (Para que no esté vacío al inicio)
-        self.load_tab("Dashboard")
+        self.status_label = tk.Label(self.status_bar_frame, text="Listo", 
+                                    bg='#e2e8f0', fg='#475569', font=('Segoe UI', 8),
+                                    padx=10)
+        self.status_label.pack(side='left')
+        
+        self.sync_info_label = tk.Label(self.status_bar_frame, text="", 
+                                       bg='#e2e8f0', fg='#64748b', font=('Segoe UI', 8, 'italic'),
+                                       padx=10)
+        self.sync_info_label.pack(side='right')
+        
+        # Botón de logs al final del sidebar (NUEVO)
+        btn_logs = tk.Button(self.sidebar, text="  🔍  Logs del Sistema", anchor='w',
+                            font=('Segoe UI', 9), bg=self.primary_color, fg='#94a3b8',
+                            activebackground='#334155', activeforeground='white',
+                            relief='flat', bd=0, padx=20, pady=8,
+                            command=self.show_log_viewer)
+        btn_logs.pack(side='bottom', fill='x', pady=10)
+
+        # INICIALIZAR EL GESTOR DE PESTAÑAS (DEBE IR AL FINAL DE create_modern_gui)
+        self.tab_manager = TabManager(self)
+
+    def show_log_viewer(self):
+        """Abre la ventana del visor de logs."""
+        LogViewerWindow(self.master)
+
+    def set_status(self, text, is_busy=False, timeout=None):
+        """Actualiza el mensaje de la barra de estado."""
+        self.status_label.config(text=text)
+        if is_busy:
+            self.master.config(cursor="wait")
+        else:
+            self.master.config(cursor="")
+            
+        if timeout:
+            self.master.after(timeout, lambda: self.status_label.config(text="Listo"))
+
+    @staticmethod
+    def wait_cursor(func):
+        """Decorador para mostrar el cursor de espera durante una operación."""
+        @wraps(func)
+        def wrapper(self, *args, **kwargs):
+            self.master.config(cursor="wait")
+            self.master.update_idletasks()
+            try:
+                return func(self, *args, **kwargs)
+            finally:
+                self.master.config(cursor="")
+        return wrapper
+
 
     def create_sidebar_header(self):
-        header = tk.Frame(self.sidebar, bg='#2c3e50', pady=20)
+        header = tk.Frame(self.sidebar, bg=self.primary_color, pady=20)
         header.pack(fill='x')
         
         tk.Label(header, text="STOCKWARE", font=('Segoe UI', 16, 'bold'), 
-                bg='#2c3e50', fg='white').pack()
+                bg=self.primary_color, fg='white').pack()
         tk.Label(header, text="Enterprise Edition", font=('Segoe UI', 8), 
-                bg='#2c3e50', fg='#bdc3c7').pack()
+                bg=self.primary_color, fg='#bdc3c7').pack()
 
     def create_nav_button(self, text, icon, tab_name):
         btn = tk.Button(self.sidebar, text=f"  {icon}  {text}", anchor='w',
-                       font=('Segoe UI', 11), bg='#2c3e50', fg='#ecf0f1',
+                       font=('Segoe UI', 11), bg=self.primary_color, fg='#ecf0f1',
                        activebackground='#34495e', activeforeground='white',
                        relief='flat', bd=0, padx=20, pady=12,
-                       command=lambda: self.switch_to_tab(tab_name))
+                       command=lambda: self.tab_manager.switch_to_tab(tab_name))
         btn.pack(fill='x', pady=2)
         return btn
 
-    def switch_to_tab(self, tab_name):
-        # Encontrar índice
-        for i, name in enumerate(self.tabs_data.keys()):
-            if name == tab_name:
-                self.main_notebook.select(i)
-                break
-                
-    def on_tab_changed(self, event):
-        # Identificar pestaña actual
-        try:
-            current_tab_index = self.main_notebook.index(self.main_notebook.select())
-            tab_name = self.main_notebook.tab(current_tab_index, "text")
-            
-            # Actualizar estilo botones
-            for name, btn in self.nav_buttons.items():
-                if name == tab_name:
-                    btn.configure(bg='#34495e', fg='#3498db', font=('Segoe UI', 11, 'bold'))
-                else:
-                    btn.configure(bg='#2c3e50', fg='#ecf0f1', font=('Segoe UI', 11))
-                    
-            # Cargar módulo si no está cargado
-            self.load_tab(tab_name)
-        except Exception:
-            pass
-
-    def load_tab(self, tab_name):
-        data = self.tabs_data.get(tab_name)
-        if not data: return
-        
-        if data['loaded']:
-            return # Ya cargado
-            
-        # =================================================================
-        # ADAPTER: Inyectar método .add() al frame contenedor
-        # =================================================================
-        # Esto permite que los tabs (Dashboard, etc.) usen este frame como si fuera 
-        # un Notebook (llamando a .add) y como master (para crear widgets hijos).
-        if not hasattr(data['frame'], 'add'):
-            def _fake_add(self, child, **kwargs):
-                child.pack(fill='both', expand=True)
-            
-            # Monkey-patch del método add en la instancia del frame
-            import types
-            data['frame'].add = types.MethodType(_fake_add, data['frame'])
-
-        # Mostrar indicador de carga inmediato antes del import (que puede tardar)
-        loading_label = tk.Label(data['frame'],
-                                  text="⏳  Cargando...",
-                                  font=('Segoe UI', 18, 'bold'),
-                                  fg='#3498db', bg='#ecf0f1')
-        loading_label.place(relx=0.5, rely=0.5, anchor='center')
-        data['frame'].update_idletasks()  # Forzar redibujado inmediato antes de la carga
-
-        logger.info(f"Lazy loading tab: {tab_name}...")
-        
-        try:
-            import importlib
-            module = importlib.import_module(data['module'])
-            cls = getattr(module, data['class'])
-            
-            # Quitar indicador de carga
-            if loading_label.winfo_exists():
-                loading_label.destroy()
-            
-            # Limpiar cualquier cosa previa en el frame (no debería haber)
-            for widget in data['frame'].winfo_children():
-                widget.destroy()
-                
-            # Instanciar clase dentro del frame placeholder
-            instance = None
-            
-            # TABS ESTÁNDAR
-            # Pasamos data['frame'] que ahora tiene .add() y es un Widget válido
-            instance = cls(data['frame'], self)
-                
-            # Si la instancia es un Widget (como Reportes o Recordatorios que heredan de Frame),
-            # necesitamos empacarla dentro del placeholder.
-            # Los controladores (Dashboard, Inventario) no son widgets, sus vistas se empacan vía Adapter.
-            if isinstance(instance, tk.Widget):
-                instance.pack(fill='both', expand=True)
-            
-            # Guardar referencia
-            setattr(self, f"{data['class'].lower()}", instance) 
-            
-            # Mapeos específicos legado
-            if tab_name == "Dashboard": self.dashboard_tab = instance
-            elif tab_name == "Inventario": self.inventory_tab = instance
-            elif tab_name == "Historial": self.audit_tab = instance
-            elif tab_name == "Productos": self.products_tab = instance
-            elif tab_name == "Configuración": self.settings_tab = instance
-            elif tab_name == "Registro Global": self.history_tab = instance
-            
-            data['loaded'] = True
-            logger.info(f"Tab {tab_name} loaded successfully.")
-            
-        except Exception as e:
-            if loading_label.winfo_exists():
-                loading_label.destroy()
-
-            logger.error(f"Error loading tab {tab_name}: {e}")
-            import traceback
-            traceback.print_exc()
-            tk.Label(data['frame'], text=f"Error cargando módulo:\n{e}", fg='red').pack()
 
 
 
@@ -590,7 +457,7 @@ class ModernInventarioApp:
         """Ejecuta una acción del tab de inventario, cargándolo si es necesario"""
         try:
             # Asegurar que Inventario esté cargado
-            self.load_tab("Inventario")
+            self.tab_manager.load_tab("Inventario")
             
             # Obtener referencia
             if not hasattr(self, 'inventory_tab'):
@@ -626,7 +493,7 @@ class BranchSelectorWindow:
         
         root.title("Seleccionar Sucursal")
         root.geometry("400x350")
-        root.configure(bg='#2c3e50')
+        root.configure(bg=Styles.PRIMARY_COLOR)
         
         # Centrar
         root.withdraw()
@@ -635,18 +502,18 @@ class BranchSelectorWindow:
         y = (root.winfo_screenheight() - 350) // 2
         root.geometry(f"+{x}+{y}")
         root.deiconify()
-
+ 
         # UI
-        main_frame = tk.Frame(root, bg='#2c3e50', padx=20, pady=20)
+        main_frame = tk.Frame(root, bg=Styles.PRIMARY_COLOR, padx=20, pady=20)
         main_frame.pack(fill='both', expand=True)
-
-        tk.Label(main_frame, text="STOCKWARE", font=('Segoe UI', 20, 'bold'), fg='#ecf0f1', bg='#2c3e50').pack(pady=(10, 5))
-        tk.Label(main_frame, text="Seleccione su Ubicación", font=('Segoe UI', 12), fg='#bdc3c7', bg='#2c3e50').pack(pady=(0, 20))
+ 
+        tk.Label(main_frame, text="STOCKWARE", font=('Segoe UI', 20, 'bold'), fg='#ecf0f1', bg=Styles.PRIMARY_COLOR).pack(pady=(10, 5))
+        tk.Label(main_frame, text="Seleccione su Ubicación", font=('Segoe UI', 12), fg='#bdc3c7', bg=Styles.PRIMARY_COLOR).pack(pady=(0, 20))
 
         # Botón CHIRIQUÍ
         btn_chiriqui = tk.Button(main_frame, text="📍 CHIRIQUÍ\n(Bodega Principal)", 
                                 command=lambda: self.seleccionar("CHIRIQUI"),
-                                bg='#3498db', fg='white', font=('Segoe UI', 12, 'bold'),
+                                bg=Styles.SECONDARY_COLOR, fg='white', font=('Segoe UI', 12, 'bold'),
                                 relief='flat', pady=10, cursor='hand2')
         btn_chiriqui.pack(fill='x', pady=10)
 
@@ -657,7 +524,7 @@ class BranchSelectorWindow:
                                 relief='flat', pady=10, cursor='hand2')
         btn_santiago.pack(fill='x', pady=10)
 
-        tk.Label(main_frame, text="v2.5.0 Enterprise", font=('Segoe UI', 8), fg='#7f8c8d', bg='#2c3e50').pack(side='bottom', pady=10)
+        tk.Label(main_frame, text="v2.5.0 Enterprise", font=('Segoe UI', 8), fg='#7f8c8d', bg=Styles.PRIMARY_COLOR).pack(side='bottom', pady=10)
 
     def seleccionar(self, sucursal):
         set_branch_context(sucursal)
@@ -686,46 +553,44 @@ def main():
     iniciar_aplicacion_principal()
 
 def iniciar_aplicacion_principal():
-    """Inicia el flujo normal Login -> App, una vez configurada la sucursal"""
+    """Inicia el flujo normal -> App. La conexión DB se realiza en segundo plano."""
     root = tk.Tk()
-    root.withdraw() # Ocultar ventana principal hasta login
-    
-    # 1. VERIFICAR DB
-    db_existe = os.path.exists(DATABASE_NAME) # Nota: Esto verifica la SQLite local base, para MySQL no importa tanto
-    # Si estamos en modo Local-Santiago, quizá debamos checkear esa DB.
-    # Pero `inicializar_bd` usará `get_db_connection` que ya conoce el contexto.
-    
-    try:
-        inicializar_bd()
-    except Exception as e:
-        messagebox.showerror("Error de Inicio", f"No se pudo conectar a la Base de Datos:\\n{e}")
-        root.destroy()
-        return
+    root.withdraw()
 
-    # Si es SQLite y no existía, poblar (Solo para la default por ahora)
-    # Mejorar lógica si se requiere poblar Santiago independiente.
-    
-    # 3. EJECUTAR LIMPIEZA EN SEGUNDO PLANO
+    # --- PANTALLA DE CARGA (Splash) ---
+    splash = tk.Toplevel(root)
+    splash.overrideredirect(True)  # Sin bordes
+    splash.configure(bg='#2c3e50')
+    sw, sh = 360, 200
+    x = (splash.winfo_screenwidth() - sw) // 2
+    y = (splash.winfo_screenheight() - sh) // 2
+    splash.geometry(f"{sw}x{sh}+{x}+{y}")
+
+    tk.Label(splash, text="🚀 StockWare", font=('Segoe UI', 22, 'bold'),
+             bg='#2c3e50', fg='white').pack(pady=(30, 5))
+    tk.Label(splash, text="Conectando a la base de datos...", font=('Segoe UI', 10),
+             bg='#2c3e50', fg='#95a5a6').pack()
+    splash_status = tk.Label(splash, text="⏳ Iniciando...", font=('Segoe UI', 9),
+                             bg='#2c3e50', fg='#3498db')
+    splash_status.pack(pady=5)
+    tk.Label(splash, text="v2.5.0 Enterprise", font=('Segoe UI', 8),
+             bg='#2c3e50', fg='#566573').pack(side='bottom', pady=10)
+    splash.lift()
+    splash.update()
+
     def iniciar_tareas_segundo_plano():
         def run_optimization():
             try:
-                # logger.info("Ejecutando tareas de optimización en segundo plano...")
-                # verificar_y_corregir_duplicados_completo(silent=True)
-                pass # Desactivado temporalmente para agilizar inicio
+                pass  # Desactivado temporalmente para agilizar inicio
             except Exception as e:
                 logger.error(f"Error en tareas de optimización: {e}")
-        
         thread = threading.Thread(target=run_optimization, daemon=True)
         thread.start()
-    
+
     def bootstrap_app():
         logger.info("Bootstrap Start")
         try:
             logger.info("[INIT] Iniciando aplicación principal")
-            
-            logger.info("Local Web Server is disabled. Using Render Portal.")
-            
-            # Inicializar App principal (SIN importar módulos GUI pesados aún)
             logger.debug("Instantiating ModernInventarioApp...")
             app = ModernInventarioApp(root)
             logger.debug("App Instantiated. Deiconifying root.")
@@ -737,30 +602,60 @@ def iniciar_aplicacion_principal():
             messagebox.showerror("Fatal Error", msg)
             root.destroy()
             return
-            
+
         root.deiconify()
-        
+
         def on_closing():
             if messagebox.askokcancel("Salir", "¿Está seguro que desea salir de la aplicación?"):
                 root.destroy()
-        
+
         root.protocol("WM_DELETE_WINDOW", on_closing)
 
-    # Iniciar aplicación directamente (login removido)
-    logger.info("Iniciando aplicación sin sistema de login")
-    root.after(100, bootstrap_app)
- 
-    
+    def _init_db_en_background():
+        """Ejecuta la inicialización de DB en hilo secundario y luego lanza la app."""
+        db_ok = False
+        error_msg = None
+        try:
+            root.after(0, lambda: splash_status.config(text="🔌 Conectando a MySQL..."))
+            inicializar_bd()
+            db_ok = True
+        except Exception as e:
+            error_msg = str(e)
+            logger.error(f"Error en inicializar_bd: {e}")
+
+        def _continuar():
+            try:
+                splash.destroy()
+            except Exception:
+                pass
+
+            if not db_ok:
+                messagebox.showerror(
+                    "Error de Conexión",
+                    f"No se pudo conectar a la Base de Datos:\n\n{error_msg}\n\n"
+                    "Verifique su conexión a Internet y vuelva a intentarlo."
+                )
+                root.destroy()
+                return
+
+            # DB lista — lanzar app
+            bootstrap_app()
+
+        root.after(0, _continuar)
+
+    hilo_db = threading.Thread(target=_init_db_en_background, daemon=True)
+    hilo_db.start()
+
     # MANEJADOR GLOBAL DE EXCEPCIONES GUI
     def report_callback_exception(exc, val, tb):
         import traceback
         err_msg = "".join(traceback.format_exception(exc, val, tb))
         logger.error(f"UNHANDLED GUI EXCEPTION:\n{err_msg}")
         messagebox.showerror("Error Inesperado", f"Se ha producido un error inesperado:\n\n{val}\n\nRevise el log para más detalles.")
-        
+
     root.report_callback_exception = report_callback_exception
 
-    root.after(1000, iniciar_tareas_segundo_plano)
+    root.after(2000, iniciar_tareas_segundo_plano)
     root.mainloop()
 
 if __name__ == "__main__":

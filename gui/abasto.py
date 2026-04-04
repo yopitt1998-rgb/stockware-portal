@@ -17,7 +17,8 @@ from database import (
     actualizar_movimiento_abasto,
     verificar_serie_existe,
     registrar_series_bulk,
-    obtener_sku_por_codigo_barra # NUEVO
+    obtener_sku_por_codigo_barra,
+    obtener_todos_los_seriales_sucursal # NUEVO
 )
 
 class SerialCaptureDialog:
@@ -32,6 +33,11 @@ class SerialCaptureDialog:
         self.series_capturadas = []
         self.cancelado = False
         self.allow_existing = allow_existing
+        
+        # --- CACHÉ LOCAL PARA ESCANEO RÁPIDO ---
+        self.existing_serials_cache = set()
+        self.cache_listo = False
+        self._iniciar_carga_cache()
         
         # UI
         header = tk.Frame(self.top, bg=Styles.PRIMARY_COLOR, pady=10)
@@ -99,6 +105,23 @@ class SerialCaptureDialog:
         self.top.transient(parent)
         self.top.wait_window()
         
+    def _iniciar_carga_cache(self):
+        """Carga todos los seriales de la sucursal en un set para validación instantánea"""
+        def cargar():
+            try:
+                seriales = obtener_todos_los_seriales_sucursal()
+                self.existing_serials_cache = seriales
+                self.cache_listo = True
+                logger.info(f"🚀 Caché de seriales cargado: {len(seriales)} registros.")
+                # Feedback sutil en UI si sigue abierta
+                try:
+                    self.lbl_help.config(text="✅ Escáner Optimizado (Instantáneo)", fg=Styles.SUCCESS_COLOR)
+                except: pass
+            except Exception as e:
+                logger.error(f"Error cargando caché en SerialCaptureDialog: {e}")
+        
+        threading.Thread(target=cargar, daemon=True).start()
+
     def procesar_serie(self, event):
         val = self.entry_serie.get().strip().upper()
         if not val: return
@@ -106,20 +129,32 @@ class SerialCaptureDialog:
         # El usuario solicitó que SOLO se capture el SERIAL para equipos en Abasto.
         # Se elimina la lógica de requires_mac que obligaba a pedir MAC después del Serial.
         
-        # Verificar si ya se escaneó en esta sesión
+        # 1. Verificar si ya se escaneó en ESTA sesión (Carrito)
         if any(s['serial'] == val for s in self.series_capturadas):
             messagebox.showwarning("Duplicado", f"El Serial '{val}' ya ha sido escaneado en esta sesión.", parent=self.top)
             self.entry_serie.delete(0, tk.END)
             return
             
-        exists, msg = verificar_serie_existe(val)
-        if exists:
-            messagebox.showerror("Error", f"El Serial/MAC '{val}' ya existe en el sistema.\n{msg}", parent=self.top)
-            self.entry_serie.delete(0, tk.END)
-            return
+        # 2. Verificar contra Base de Datos (usando Caché local para velocidad)
+        if not self.allow_existing:
+            if val in self.existing_serials_cache:
+                messagebox.showerror("Error", f"El Serial/MAC '{val}' ya existe en el sistema.", parent=self.top)
+                self.entry_serie.delete(0, tk.END)
+                return
+            
+            # Fallback de seguridad si el caché no ha terminado de cargar
+            if not self.cache_listo:
+                exists, msg = verificar_serie_existe(val)
+                if exists:
+                    messagebox.showerror("Error", f"El Serial/MAC '{val}' ya existe en el sistema.\n{msg}", parent=self.top)
+                    self.entry_serie.delete(0, tk.END)
+                    return
             
         # Guardar como serial simple (la MAC será None por defecto en Abasto)
         self.series_capturadas.append({'serial': val, 'mac': None})
+        # Agregar al caché local para evitar duplicados inmediatos si el usuario escanea lo mismo dos veces
+        self.existing_serials_cache.add(val)
+        
         self.listbox.insert(tk.END, f"{len(self.series_capturadas)}. {val}")
         self.update_progress()
         self.entry_serie.delete(0, tk.END)
