@@ -178,9 +178,26 @@
             box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
         }
         .submit-btn:disabled { background: #ccc; box-shadow: none; }
-        .input-group { display: flex; gap: 8px; width: 100%; }
-        .input-group input { flex: 1; }
-        .btn-add { background: var(--success); color: white; border: none; padding: 0 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .input-group { display: flex; gap: 10px; width: 100%; margin-top: 5px; }
+        .input-group input { flex: 1; height: 50px; font-size: 16px; border: 2px solid #ddd; }
+        .btn-add { 
+            background: #2c3e50; 
+            color: white; 
+            border: none; 
+            padding: 0 20px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 130px;
+            font-size: 14px;
+        }
+        .btn-add:active { transform: scale(0.95); }
+        .btn-add:disabled { background: #95a5a6; opacity: 0.7; cursor: not-allowed; }
+        .btn-add.loading { background: #3498db; }
 
         #empty-state { text-align: center; color: #aaa; padding: 30px; font-style: italic; font-size: 14px; }
 
@@ -370,8 +387,9 @@
             </button>
 
             <div class="input-group">
-                <input type="text" id="scanInput" placeholder="Entrada manual (SN/MAC)..." autocomplete="off">
-                <button class="btn-add" onclick="validateManualInput()">Añadir ➕</button>
+                <input type="text" id="scanInput" placeholder="Escribir Serial / MAC..." autocomplete="off" 
+                       onfocus="this.select()">
+                <button id="btnValidate" class="btn-add" onclick="validateManualInput()">VALIDAR ✅</button>
             </div>
 
             <p style="font-size: 11px; color: #999; margin-top: 10px;">
@@ -485,10 +503,24 @@
         });
 
         async function validateManualInput() {
+            const btn = document.getElementById('btnValidate');
             const sn = scanInput.value.trim().toUpperCase();
             if (!sn) return;
-            await processScannedCode(sn);
-            scanInput.value = '';
+
+            btn.disabled = true;
+            btn.innerHTML = 'BUSCANDO... ⏳';
+            btn.classList.add('loading');
+
+            const success = await processScannedCode(sn);
+            
+            btn.disabled = false;
+            btn.innerHTML = 'VALIDAR ✅';
+            btn.classList.remove('loading');
+
+            if (success) {
+                scanInput.value = '';
+                scanInput.focus();
+            }
         }
 
         // Manejar Escaneo de Equipos (Entrada Manual con Enter)
