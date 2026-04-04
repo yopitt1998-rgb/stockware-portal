@@ -236,23 +236,26 @@
         </div>
 
         <!-- Materiales Section -->
-        <div class="card">
-            <div class="section-title">🛠️ Agregar Material Manual</div>
-            <div class="material-manual-grid">
-                <div class="form-group" style="margin-bottom:0">
-                    <label>Material:</label>
-                    <select id="manual_sku">
-                        <option value="">-- Seleccionar --</option>
-                        {% for m in materiales %}
-                        <option value="{{ m.sku }}">{{ m.nombre }}</option>
-                        {% endfor %}
-                    </select>
+        <div class="card" style="padding: 0;">
+            <div class="section-title" style="padding: 15px 15px 0 15px;">🛠️ Listado de Materiales</div>
+            <div id="material-list">
+                {% for m in materiales %}
+                <div class="scanned-item" style="border-left: 5px solid #2980b9; margin: 10px;">
+                    <div class="item-info">
+                        <span class="item-name">{{ m.nombre }}</span>
+                        <span class="item-meta">{{ m.sku }} | Stock: {{ m.stock_bodega }}</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="number" 
+                               class="qty-input-manual" 
+                               data-sku="{{ m.sku }}" 
+                               min="0" 
+                               placeholder="0" 
+                               style="width: 70px; padding: 8px; border: 1px solid #ddd; border-radius: 5px; text-align: center;"
+                               onchange="updateMaterialQty('{{ m.sku }}', this.value)">
+                    </div>
                 </div>
-                <div class="form-group" style="margin-bottom:0">
-                    <label>Cant:</label>
-                    <input type="number" id="manual_qty" min="1" value="1">
-                </div>
-                <button class="add-small-btn" onclick="addManualItem()">+</button>
+                {% endfor %}
             </div>
         </div>
 
@@ -268,6 +271,7 @@
     <script>
         const SCANNED_ITEMS = []; // { sku, serial, nombre, cantidad, is_serialized }
         const SKU_NAMES = {};
+        const CART_NON_SERIALIZED = {}; // { sku: cantidad }
         
         // Cargar nombres de equipos de Jinja
         {% for e in equipos %}
@@ -287,11 +291,14 @@
         const movilSelect = document.getElementById('movil');
         const tecnicoSelect = document.getElementById('tecnico');
 
-        // Auto-completar técnico
+        // Auto-completar técnico al seleccionar móvil
         movilSelect.addEventListener('change', function() {
             const movil = this.value;
+            console.log("Móvil seleccionado:", movil);
             if (DETAILS_MOVILES[movil] && DETAILS_MOVILES[movil].conductor) {
-                tecnicoSelect.value = DETAILS_MOVILES[movil].conductor;
+                const conductor = DETAILS_MOVILES[movil].conductor;
+                console.log("Auto-llenando técnico:", conductor);
+                tecnicoSelect.value = conductor;
             }
         });
 
@@ -337,26 +344,13 @@
             }
         });
 
-        // Agregar Material Manual
-        function addManualItem() {
-            const sku = document.getElementById('manual_sku').value;
-            const qty = parseInt(document.getElementById('manual_qty').value);
-            
-            if (!sku) { alert('Seleccione un material.'); return; }
-            if (isNaN(qty) || qty <= 0) { alert('Ingrese una cantidad válida.'); return; }
-
-            // Si ya existe el material no serializado, sumamos
-            const existing = SCANNED_ITEMS.find(i => i.sku === sku && !i.is_serialized);
-            if (existing) {
-                existing.cantidad += qty;
+        // Actualizar cantidades de materiales manuales
+        function updateMaterialQty(sku, qty) {
+            const q = parseInt(qty) || 0;
+            if (q > 0) {
+                CART_NON_SERIALIZED[sku] = q;
             } else {
-                SCANNED_ITEMS.push({
-                    sku: sku,
-                    nombre: SKU_NAMES[sku] || 'Material',
-                    cantidad: qty,
-                    serial: null,
-                    is_serialized: false
-                });
+                delete CART_NON_SERIALIZED[sku];
             }
             updateUI();
         }
@@ -372,11 +366,10 @@
             SCANNED_ITEMS.forEach((item, index) => {
                 const div = document.createElement('div');
                 div.className = 'scanned-item';
-                const meta = item.is_serialized ? `SN: ${item.serial}` : `Cant: ${item.cantidad}`;
                 div.innerHTML = `
                     <div class="item-info">
                         <span class="item-name">${item.nombre}</span>
-                        <span class="item-meta">${meta}</span>
+                        <span class="item-meta">SN: ${item.serial}</span>
                     </div>
                     <button class="remove-btn" onclick="removeItem(${index})">✕</button>
                 `;
@@ -395,52 +388,58 @@
             const contrato = document.getElementById('contrato').value.trim();
 
             if (!movil || !tecnico || !contrato) {
-                alert('Faltan datos (Móvil, Técnico o Contrato).');
-                return;
-            }
-            if (SCANNED_ITEMS.length === 0) {
-                alert('No hay items para enviar.');
+                alert('⚠️ Faltan datos (Móvil, Técnico o Contrato).');
                 return;
             }
 
-            const btn = document.getElementById('submitBtn');
+            // Agrupar para el backend
+            const materiales_final = [];
+            
+            // 1. Equipos Serializados (individuales)
+            SCANNED_ITEMS.forEach(i => {
+                materiales_final.push({ sku: i.sku, cantidad: 1, seriales: [i.serial] });
+            });
+            
+            // 2. Materiales No Serializados (agrupados por cantidad)
+            for (const sku in CART_NON_SERIALIZED) {
+                materiales_final.push({ 
+                    sku: sku, 
+                    cantidad: CART_NON_SERIALIZED[sku], 
+                    seriales: null 
+                });
+            }
+
+            if (materiales_final.length === 0) {
+                alert('⚠️ No hay materiales ni equipos para enviar.');
+                return;
+            }
+
+            const btn = document.querySelector('.submit-btn');
             btn.disabled = true;
             btn.innerText = 'PROCESANDO REGISTRO...';
 
             try {
-                // Agrupar para el backend
-                const resumen = [];
-                // Serializados individuales
-                SCANNED_ITEMS.filter(i => i.is_serialized).forEach(i => {
-                    resumen.push({ sku: i.sku, cantidad: 1, seriales: [i.serial] });
-                });
-                // No serializados agrupados
-                const nonSerialized = SCANNED_ITEMS.filter(i => !i.is_serialized);
-                nonSerialized.forEach(i => {
-                    resumen.push({ sku: i.sku, cantidad: i.cantidad, seriales: null });
-                });
-
                 const response = await fetch('/registrar_lunes', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        movil, tecnico, contrato, materiales: resumen
+                        movil, tecnico, contrato, materiales: materiales_final
                     })
                 });
 
                 const result = await response.json();
                 if (result.exito) {
-                    alert('📦 REGISTRO EXITOSO\n\nEl material ha sido descontado de Bodega y registrado en el historial.');
-                    window.location.href = '/';
+                    alert('✅ REGISTRO EXITOSO\n\nEl material ha sido descontado de Bodega y registrado en el historial.');
+                    window.location.href = '/auditoria'; // Redirigir a auditoría para verificar
                 } else {
                     alert('❌ ERROR: ' + result.mensaje);
                     btn.disabled = false;
-                    btn.innerText = '📤 ENVIAR A BODEGA';
+                    btn.innerText = '📤 FINALIZAR CARGA';
                 }
             } catch (err) {
                 alert('Error de red al procesar el reporte.');
                 btn.disabled = false;
-                btn.innerText = '📤 ENVIAR A BODEGA';
+                btn.innerText = '📤 FINALIZAR CARGA';
             }
         }
     </script>
