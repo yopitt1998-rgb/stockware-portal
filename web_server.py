@@ -276,6 +276,7 @@ def registrar_lunes_post():
         materiales = data.get('materiales', [])
         movil = data.get('movil')
         tecnico = data.get('tecnico')
+        ayudante = data.get('ayudante')
         ticket = data.get('contrato')
         fecha = data.get('fecha', date.today().isoformat())
 
@@ -303,6 +304,7 @@ def registrar_lunes_post():
                 cantidad=cantidad,
                 movil=movil,
                 tecnico=tecnico,
+                ayudante=ayudante,
                 ticket=ticket,
                 fecha_evento=fecha,
                 seriales=seriales,

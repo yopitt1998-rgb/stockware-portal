@@ -178,6 +178,9 @@
             box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
         }
         .submit-btn:disabled { background: #ccc; box-shadow: none; }
+        .input-group { display: flex; gap: 8px; width: 100%; }
+        .input-group input { flex: 1; }
+        .btn-add { background: var(--success); color: white; border: none; padding: 0 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
         #empty-state { text-align: center; color: #aaa; padding: 30px; font-style: italic; font-size: 14px; }
 
@@ -344,6 +347,15 @@
                 </select>
             </div>
             <div class="form-group">
+                <label>Técnico 2 (Ayudante):</label>
+                <select id="ayudante">
+                    <option value="">-- Seleccionar Ayudante --</option>
+                    {% for t in tecnicos %}
+                    <option value="{{ t[1] }}">{{ t[1] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
                 <label>Contrato / Ticket / OS:</label>
                 <input type="text" id="contrato" placeholder="Ej: 10023456" autocomplete="off">
             </div>
@@ -357,8 +369,9 @@
                 📷 ABRIR CÁMARA PARA ESCANEAR
             </button>
 
-            <div style="display: flex; gap: 8px;">
+            <div class="input-group">
                 <input type="text" id="scanInput" placeholder="Entrada manual (SN/MAC)..." autocomplete="off">
+                <button class="btn-add" onclick="validateManualInput()">Añadir ➕</button>
             </div>
 
             <p style="font-size: 11px; color: #999; margin-top: 10px;">
@@ -448,37 +461,40 @@
         movilSelect.addEventListener('change', function() {
             const movil = this.value;
             console.log("Móvil seleccionado:", movil);
-            if (DETAILS_MOVILES[movil] && DETAILS_MOVILES[movil].conductor) {
-                const conductor = DETAILS_MOVILES[movil].conductor.trim();
-                console.log("Auto-llenando técnico:", conductor);
-                
-                // Buscar coincidencia en el select (ignorando mayúsculas/minúsculas)
-                let found = false;
-                Array.from(tecnicoSelect.options).forEach(opt => {
-                    if (opt.value.trim().toUpperCase() === conductor.toUpperCase()) {
-                        tecnicoSelect.value = opt.value;
-                        found = true;
+            if (DETAILS_MOVILES[movil]) {
+                const d = DETAILS_MOVILES[movil];
+                const selectTecnico = document.getElementById('tecnico');
+                const selectAyudante = document.getElementById('ayudante');
+
+                const setOrAdd = (el, name) => {
+                    if (!name) { el.selectedIndex = 0; return; }
+                    const n = name.trim();
+                    let f = false;
+                    Array.from(el.options).forEach(o => {
+                        if (o.value.trim().toUpperCase() === n.toUpperCase()) { el.value = o.value; f = true; }
+                    });
+                    if (!f) {
+                        const opt = document.createElement('option');
+                        opt.value = n; opt.text = n; el.add(opt); el.value = n;
                     }
-                });
-                
-                if (!found) {
-                    console.log("Conductor no encontrado. Agregándolo dinámicamente...");
-                    const newOpt = document.createElement('option');
-                    newOpt.value = conductor;
-                    newOpt.text = conductor;
-                    tecnicoSelect.add(newOpt);
-                    tecnicoSelect.value = conductor;
-                }
+                };
+
+                setOrAdd(selectTecnico, d.conductor);
+                setOrAdd(selectAyudante, d.ayudante);
             }
         });
 
-        // Manejar Escaneo de Equipos (Entrada Manual)
+        async function validateManualInput() {
+            const sn = scanInput.value.trim().toUpperCase();
+            if (!sn) return;
+            await processScannedCode(sn);
+            scanInput.value = '';
+        }
+
+        // Manejar Escaneo de Equipos (Entrada Manual con Enter)
         scanInput.addEventListener('keypress', async function(e) {
             if (e.key === 'Enter') {
-                const sn = this.value.trim().toUpperCase();
-                if (!sn) return;
-                await processScannedCode(sn);
-                this.value = '';
+                await validateManualInput();
             }
         });
 
@@ -660,7 +676,11 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        movil, tecnico, contrato, materiales: materiales_final
+                        movil, 
+                        tecnico, 
+                        ayudante: document.getElementById('ayudante').value,
+                        contrato: contrato, 
+                        materiales: materiales_final
                     })
                 });
 
