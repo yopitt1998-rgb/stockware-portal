@@ -1670,15 +1670,12 @@ class MobileReturnWindow:
                         seriales=seriales_escaneados
                     )
                     
-                    if ok: 
+                    if ok:
                         exitos_retorno += fisico
-                        # ACTUALIZAR UBICACIÓN DE SERIALES EXPLÍCITAMENTE (Seguridad Extra)
-                        if seriales_escaneados:
-                            from database import actualizar_ubicacion_serial
+                        # NUEVO: Actualizar caché global de memoria para sincronía inmediata con Salida Redireccionada
+                        if seriales_escaneados and 'g_seriales' in self.session_data:
                             for s in seriales_escaneados:
-                                actualizar_ubicacion_serial(s, 'BODEGA', paquete='NINGUNO', existing_conn=conn)
-                                # NUEVO: Actualizar caché global de seriales
-                                if 'g_seriales' in self.session_data and s in self.session_data['g_seriales']:
+                                if s in self.session_data['g_seriales']:
                                     val = list(self.session_data['g_seriales'][s])
                                     if len(val) > 1: val[1] = 'BODEGA'
                                     self.session_data['g_seriales'][s] = tuple(val)

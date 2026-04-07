@@ -199,16 +199,9 @@ class ReversoConsumoScannerWindow:
             # OPTIMIZACIÓN: Una sola conexión para todo el batch
             for item_id, serial, sku, ubicacion in items:
                 try:
-                    # 1. Revertir en series_registradas
-                    run_query(cursor, "UPDATE series_registradas SET ubicacion = 'BODEGA', estado = 'DISPONIBLE', movil = NULL, paquete = 'NINGUNO' WHERE (serial_number = %s OR mac_number = %s) AND sucursal = %s", (serial, serial, sucursal))
-                    
                     # 2. Sincronizar stocks contables
-                    # Si estaba en un estado final (Consumido/Faltante/Descarte), sumamos a Bodega
-                    if ubicacion in ('CONSUMIDO', 'DESCARTE', 'FALTANTE'):
-                        run_query(cursor, "UPDATE productos SET cantidad = cantidad + 1 WHERE sku = %s AND ubicacion = 'BODEGA' AND sucursal = %s", (sku, sucursal))
-                    
-                    # SI ESTABA EN UNA MÓVIL (ASIGNADO): Restar de la móvil y sumar a Bodega
-                    elif str(ubicacion).startswith('Movil') or str(ubicacion).startswith('Móvil'):
+                    # SI ESTABA EN UNA MÓVIL (ASIGNADO): Restar de la móvil
+                    if str(ubicacion).startswith('Movil') or str(ubicacion).startswith('Móvil'):
                          # Restar de asignacion_moviles (usamos la lógica de ANY package)
                          run_query(cursor, """
                              UPDATE asignacion_moviles SET cantidad = cantidad - 1 
@@ -216,32 +209,31 @@ class ReversoConsumoScannerWindow:
                              ORDER BY (CASE WHEN paquete = 'NINGUNO' THEN 1 ELSE 0 END) ASC
                              LIMIT 1
                          """, (sku, ubicacion, sucursal))
-                         
-                         # Sumar a Bodega
-                         run_query(cursor, "UPDATE productos SET cantidad = cantidad + 1 WHERE sku = %s AND ubicacion = 'BODEGA' AND sucursal = %s", (sku, sucursal))
+                    
+                    # El incremento de stock en BODEGA y la actualización del SERIAL se delegan 
+                    # a registrar_movimiento_gui al final para evitar duplicidad.
                     
                     # 3. LIMPIEZA DE AUDITORÍA (NUEVO)
                     
                     # A. Limpiar en consumos_pendientes (Si existe un reporte de este serial)
-                    # Usamos LIKE para encontrar el serial en la lista de seriales_usados
                     try:
-                        run_query(cursor, "DELETE FROM consumos_pendientes WHERE (seriales_usados LIKE %s OR seriales_usados = %s) AND sucursal = %s", (f"%{serial}%", serial, sucursal))
+                        run_query(cursor, "DELETE FROM consumos_pendientes WHERE (seriales_usados LIKE ? OR seriales_usados = ?) AND sucursal = ?", (f"%{serial}%", serial, sucursal))
                     except Exception as e:
                         logger.warning(f"⚠️ Error limpiando consumos_pendientes para {serial}: {e}")
 
                     # B. Limpiar en faltantes_registrados
                     try:
                         # Buscar si el serial está en el detalle de faltantes
-                        run_query(cursor, "SELECT faltante_id FROM seriales_faltantes_detalle WHERE serial = %s", (serial,))
+                        run_query(cursor, "SELECT faltante_id FROM seriales_faltantes_detalle WHERE serial = ? OR serial = ?", (serial, serial))
                         f_row = cursor.fetchone()
                         if f_row:
                             id_faltante = f_row[0]
                             # Eliminar detalle
-                            run_query(cursor, "DELETE FROM seriales_faltantes_detalle WHERE serial = %s", (serial,))
+                            run_query(cursor, "DELETE FROM seriales_faltantes_detalle WHERE serial = ? OR serial = ?", (serial, serial))
                             # Decrementar cabecera
-                            run_query(cursor, "UPDATE faltantes_registrados SET cantidad = cantidad - 1 WHERE id = %s", (id_faltante,))
+                            run_query(cursor, "UPDATE faltantes_registrados SET cantidad = cantidad - 1 WHERE id = ?", (id_faltante,))
                             # Eliminar cabecera si llegó a 0
-                            run_query(cursor, "DELETE FROM faltantes_registrados WHERE id = %s AND cantidad <= 0", (id_faltante,))
+                            run_query(cursor, "DELETE FROM faltantes_registrados WHERE id = ? AND cantidad <= 0", (id_faltante,))
                     except Exception as e:
                         logger.warning(f"⚠️ Error limpiando faltantes para {serial}: {e}")
 

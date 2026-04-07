@@ -144,7 +144,7 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
                 elif tipo_movimiento == 'SALIDA_MOVIL' and movil_afectado:
                     for s in seriales:
                         run_query(cursor, "UPDATE series_registradas SET ubicacion = ?, paquete = ?, estado = 'ASIGNADO' WHERE (serial_number = ? OR mac_number = ?) AND sucursal = ?", (movil_afectado, paquete_asignado or 'NINGUNO', s, s, sucursal))
-                elif tipo_movimiento == 'RETORNO_MOVIL':
+                elif tipo_movimiento in ('RETORNO_MOVIL', 'ENTRADA', 'ABASTO', 'ENTRADA_AJUSTE'):
                     for s in seriales:
                         # 1. ACTUALIZAR UBICACIÓN Y ESTADO
                         run_query(cursor, "UPDATE series_registradas SET ubicacion = 'BODEGA', paquete = 'NINGUNO', estado = 'DISPONIBLE' WHERE (serial_number = ? OR mac_number = ?) AND sucursal = ?", (s, s, sucursal))
