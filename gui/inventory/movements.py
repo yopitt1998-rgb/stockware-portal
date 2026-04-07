@@ -917,26 +917,9 @@ class MobileReturnWindow:
         self.paquete_combo.pack(side='left', padx=5)
         self.paquete_combo.bind("<<ComboboxSelected>>", lambda e: self.update_consumo_ui())
 
-        # SECCIÓN 2: AUDITORÍA DE CONSUMO (Left)
-        left_panel = tk.LabelFrame(main_frame, text="2. Auditoría de Consumo (Activaciones vs App)", bg='white', font=('Segoe UI', 10, 'bold'), width=500)
-        left_panel.pack(side='left', fill='both', expand=True, padx=(0, 10), pady=5)
-        
-        self.btn_import_excel = tk.Button(left_panel, text="📥 Cargar Excel Activaciones", bg=Styles.INFO_COLOR, fg='white', font=('Segoe UI', 9), command=self.load_excel_activations)
-        self.btn_import_excel.pack(pady=5)
-        
-        self.tree_consumo = ttk.Treeview(left_panel, columns=('Producto', 'App', 'Excel', 'Dif'), show='headings')
-        self.tree_consumo.heading('Producto', text='Producto'); self.tree_consumo.column('Producto', width=150)
-        self.tree_consumo.heading('App', text='App'); self.tree_consumo.column('App', width=50, anchor='center')
-        self.tree_consumo.heading('Excel', text='Activ.'); self.tree_consumo.column('Excel', width=50, anchor='center')
-        self.tree_consumo.heading('Dif', text='Estado'); self.tree_consumo.column('Dif', width=80, anchor='center')
-        self.tree_consumo.pack(fill='both', expand=True, padx=5, pady=5)
-        
-        self.tree_consumo.tag_configure('ok', background='#d4edda')
-        self.tree_consumo.tag_configure('error', background='#f8d7da')
-
-        # SECCIÓN 3: AUDITORÍA FÍSICA (Right)
-        right_panel = tk.LabelFrame(main_frame, text="3. Auditoría Física (Stock Esperado vs Real)", bg='white', font=('Segoe UI', 10, 'bold'))
-        right_panel.pack(side='right', fill='both', expand=True, padx=(10, 0), pady=5)
+        # SECCIÓN 3: AUDITORÍA (Panel Principal)
+        right_panel = tk.LabelFrame(main_frame, text="2. Auditoría Física (Stock Esperado vs Real)", bg='white', font=('Segoe UI', 10, 'bold'))
+        right_panel.pack(fill='both', expand=True, padx=5, pady=5)
         
         scan_frame = tk.Frame(right_panel, bg='white')
         scan_frame.pack(fill='x', pady=5)
@@ -1015,7 +998,6 @@ class MobileReturnWindow:
         self.session_data['excel_data'] = []
         self.session_data['g_seriales'] = {} # Reset global serials cache
         self.session_data['g_barcodes'] = {} # Reset global barcodes cache
-        for i in self.tree_consumo.get_children(): self.tree_consumo.delete(i)
         for i in self.tree_fisico.get_children(): self.tree_fisico.delete(i)
         self.btn_procesar.config(state='normal', text='⚙️ Procesar')
 
@@ -1094,11 +1076,13 @@ class MobileReturnWindow:
         self.update_fisico_ui()
 
     def update_consumo_ui(self):
-        for i in self.tree_consumo.get_children(): self.tree_consumo.delete(i)
-        
+        """Calcula el consumo verificado basándose únicamente en lo reportado por la App."""
         paquete_filtro = self.paquete_combo.get()
         from config import MATERIALES_COMPARTIDOS, PAQUETES_MATERIALES
         
+        # Limpiar consumos verificados anteriores
+        self.session_data['consumo_verificado'] = {}
+
         # Mapeo global de nombres para items extra
         if not hasattr(self, '_prod_name_map'):
             self._prod_name_map = {p[1]: p[0] for p in self.productos}
@@ -1108,31 +1092,16 @@ class MobileReturnWindow:
         if paquete_filtro != "TODOS":
             skus_paquete = [sku for sku, cant in PAQUETES_MATERIALES.get(paquete_filtro, [])]
         
-        # Incluimos TODOS los SKUs que tengan algún dato: App, Excel O Stock Asignado
+        # Incluimos TODOS los SKUs que tengan algún dato: App O Stock Asignado
         all_skus = (set(self.session_data['consumo_app'].keys()) | 
-                    set([x['sku'] for x in self.session_data['excel_data']]) |
                     set(self.session_data['stock_teorico'].keys()))
         
         for sku in sorted(all_skus):
-            # Filtrado por paquete
-            is_shared = sku in MATERIALES_COMPARTIDOS
-            is_in_package = sku in skus_paquete
-            
-            if paquete_filtro != "TODOS" and not is_shared and not is_in_package:
-                continue
-
-            name = "Desconocido"
-            info = self.session_data['stock_teorico'].get(sku)
-            if info:
-                name = info['name']
-            else:
-                name = self._prod_name_map.get(sku, "Material Extra (No Asignado)")
-            
             # Sumar consumo: Paquete Específico + Consumos sin paquete (viniendo de Render)
             prod_consumo_data = self.session_data['consumo_app'].get(sku, {})
             qty_app_total = sum(prod_consumo_data.values()) # Total móvil
             
-            if paquete_filtro == "TODOS" or is_shared:
+            if paquete_filtro == "TODOS" or sku in MATERIALES_COMPARTIDOS:
                 qty_app = qty_app_total
             else:
                 # Si filtramos por un paquete, sumamos el de ese paquete + lo que no tiene etiqueta (App Render)
@@ -1140,15 +1109,9 @@ class MobileReturnWindow:
                           prod_consumo_data.get('NINGUNO', 0) + \
                           prod_consumo_data.get('SIN_PAQUETE', 0)
             
-            qty_excel_total = 0
-            for item in self.session_data['excel_data']:
-                if item['sku'] == sku: qty_excel_total += item['qty']
-            
-            qty_excel = qty_excel_total
-            
             # Almacenar el total verificado para la auditoría física. 
-            # IMPORTANTE: Usamos el Máximo entre lo que dice la App y lo que dice Excel.
-            self.session_data['consumo_verificado'][sku] = max(qty_app, qty_excel)
+            # El usuario ya no usa Excel, así que el consumo de la App es la VERDAD.
+            self.session_data['consumo_verificado'][sku] = qty_app
 
             # --- NUEVA LÓGICA DE VISIBILIDAD ESTRICTA PERO SEGURA ---
             if paquete_filtro != "TODOS":
@@ -1365,35 +1328,7 @@ class MobileReturnWindow:
         
         tk.Button(popup, text="Cerrar", command=popup.destroy, bg=Styles.SECONDARY_COLOR, fg='white', font=('Segoe UI', 10, 'bold'), pady=8).pack(fill='x', padx=20, pady=15)
 
-    def load_excel_activations(self):
-        filename = filedialog.askopenfilename(filetypes=[("Excel", "*.xlsx *.xls")], parent=self.ventana)
-        if not filename: return
-        try:
-            df = pd.read_excel(filename)
-            map_sku = {}
-            for n, s, _ in PRODUCTOS_INICIALES:
-                key = str(n).upper().strip().replace(' ', '').replace('_', '')
-                map_sku[key] = s
-            found_data = []
-            for col in df.columns:
-                col_u = str(col).upper().strip().replace(' ', '').replace('_', '')
-                sku_target = map_sku.get(col_u)
-                if not sku_target:
-                     for k, s in map_sku.items():
-                         if k in col_u or col_u in k:
-                             sku_target = s
-                             break
-                if sku_target:
-                    try:
-                        qty_col = pd.to_numeric(df[col], errors='coerce').fillna(0).sum()
-                        if qty_col > 0: found_data.append({'sku': sku_target, 'qty': int(qty_col)})
-                    except: pass
-            
-            self.session_data['excel_data'] = found_data
-            self.update_consumo_ui()
-            messagebox.showinfo("Carga Excel", f"Se detectaron {len(found_data)} productos con consumo en el Excel.", parent=self.ventana)
-        except Exception as e:
-            messagebox.showerror("Error Excel", f"Fallo al leer Excel: {e}", parent=self.ventana)
+
 
     def on_scan(self, event):
         code = self.entry_scan.get().strip().upper()
