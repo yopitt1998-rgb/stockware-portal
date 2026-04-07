@@ -53,7 +53,7 @@ def get_db_connection(target_db=None):
                 logger.info(f"🔌 [POOL] Creando pool de conexiones para MySQL -> DB: {db_name}")
                 _mysql_pools[db_name] = pooling.MySQLConnectionPool(
                     pool_name=f"pool_{db_name.replace('-', '_')}",
-                    pool_size=3,
+                    pool_size=15,
                     pool_reset_session=True,
                     host=MYSQL_HOST,
                     user=MYSQL_USER,
@@ -81,7 +81,7 @@ def get_db_connection(target_db=None):
                 if db_name not in _mysql_pools:
                     _mysql_pools[db_name] = pooling.MySQLConnectionPool(
                         pool_name=f"pool_{db_name.replace('-', '_')}_retry",
-                        pool_size=3,
+                        pool_size=15,
                         pool_reset_session=True,
                         host=MYSQL_HOST,
                         user=MYSQL_USER,

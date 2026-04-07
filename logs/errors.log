@@ -6063,3 +6063,324 @@ Traceback (most recent call last):
                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AttributeError: 'ModernInventarioApp' object has no attribute 'switch_to_tab'
 
+2026-04-06 14:13:54 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 2013: Lost connection to MySQL server during query
+2026-04-06 14:13:54 | ERROR    | data_layer.core      |    Query: SELECT COUNT(*) FROM prestamos_activos WHERE estado = 'ACTIVO'
+2026-04-06 14:13:54 | ERROR    | data_layer.core      |    Params: None
+2026-04-06 14:13:54 | ERROR    | data_layer.inventory | ❌ Error en obtener_estadisticas_reales: 2013: Lost connection to MySQL server during query
+2026-04-06 14:20:47 | ERROR    | gui.inventory.movements | Error parseando feedback final de retorno: cannot access local variable 'on_loaded' where it is not associated with a value
+2026-04-06 16:10:26 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-04-06 16:17:54 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-04-06 16:18:00 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-04-06 16:18:07 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
+2026-04-06 16:18:12 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-07 requiere serial: Not all parameters were used in the SQL statement
+2026-04-06 16:18:16 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-11 requiere serial: Not all parameters were used in the SQL statement
+2026-04-06 16:18:26 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-2-41 requiere serial: Not all parameters were used in the SQL statement
+2026-04-06 16:18:33 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-18 requiere serial: Not all parameters were used in the SQL statement
+2026-04-06 16:18:39 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-42 requiere serial: Not all parameters were used in the SQL statement
+2026-04-06 16:21:08 | ERROR    | utils.db_connector   | ❌ Error inesperado conectando a MySQL (test): 3024: 
+    The Read Operation timed out. As a consequence the current connection has been closed to avoid
+    any unstable behaviour, consider using the reconnect() option and continue with the current
+    session's workflow.
+    
+2026-04-06 16:21:08 | ERROR    | data_layer.inventory | [ERROR] obtener_detalles_serial: 3024: 
+    The Read Operation timed out. As a consequence the current connection has been closed to avoid
+    any unstable behaviour, consider using the reconnect() option and continue with the current
+    session's workflow.
+    
+2026-04-06 16:33:39 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-06 16:33:39 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-06 16:33:39 | ERROR    | data_layer.core      |    Params: ('485754431F6C63AF', '485754431F6C63AF', 'CHIRIQUI')
+2026-04-06 16:33:39 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-06 16:33:39 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-06 16:33:39 | ERROR    | data_layer.core      |    Params: ('485754430196ECAF', '485754430196ECAF', 'CHIRIQUI')
+2026-04-06 16:33:40 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-06 16:33:40 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-06 16:33:40 | ERROR    | data_layer.core      |    Params: ('485754432B1CBCAF', '485754432B1CBCAF', 'CHIRIQUI')
+2026-04-06 16:33:45 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-06 16:33:45 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-06 16:33:45 | ERROR    | data_layer.core      |    Params: ('48575443EB372FB4', '48575443EB372FB4', 'CHIRIQUI')
+2026-04-06 16:33:46 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-06 16:33:46 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-06 16:33:46 | ERROR    | data_layer.core      |    Params: ('48575443EB3406B4', '48575443EB3406B4', 'CHIRIQUI')
+2026-04-06 16:33:46 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-06 16:33:46 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-06 16:33:46 | ERROR    | data_layer.core      |    Params: ('48575443A8C388B3', '48575443A8C388B3', 'CHIRIQUI')
+2026-04-06 16:33:47 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-06 16:33:47 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-06 16:33:47 | ERROR    | data_layer.core      |    Params: ('F895224B77B5', 'F895224B77B5', 'CHIRIQUI')
+2026-04-06 16:34:06 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-06 16:34:06 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-06 16:34:06 | ERROR    | data_layer.core      |    Params: ('GZ24050182608668', 'GZ24050182608668', 'CHIRIQUI')
+2026-04-06 16:34:21 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-06 16:34:21 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-06 16:34:21 | ERROR    | data_layer.core      |    Params: ('Z4EF21E04254', 'Z4EF21E04254', 'CHIRIQUI')
+2026-04-06 16:38:41 | ERROR    | utils.db_connector   | ❌ Error inesperado conectando a MySQL (test): 3024: 
+    The Read Operation timed out. As a consequence the current connection has been closed to avoid
+    any unstable behaviour, consider using the reconnect() option and continue with the current
+    session's workflow.
+    
+2026-04-06 16:39:06 | ERROR    | data_layer.reminders | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\tab_manager.py", line 32, in on_tab_changed
+    self.load_tab(tab_name)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\tab_manager.py", line 79, in load_tab
+    instance = cls(data['frame'], self.app)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\settings.py", line 20, in __init__
+    self.cargar_datos()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\settings.py", line 214, in cargar_datos
+    config = obtener_configuracion()
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\data_layer\core.py", line 617, in obtener_configuracion
+    conn = get_db_connection()
+           ^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\utils\db_connector.py", line 54, in get_db_connection
+    _mysql_pools[db_name] = pooling.MySQLConnectionPool(
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\johni\Documents\GestorInventario_MySQL\.venv\Lib\site-packages\mysql\connector\pooling.py", line 490, in __init__
+    self.add_connection()
+  File "C:\Users\johni\Documents\GestorInventario_MySQL\.venv\Lib\site-packages\mysql\connector\pooling.py", line 609, in add_connection
+    if self._cnx_queue.full():
+       ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\queue.py", line 111, in full
+    def full(self):
+    
+KeyboardInterrupt
+
+2026-04-06 16:42:06 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-04-06 16:42:12 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-04-06 16:42:16 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
+2026-04-06 16:42:20 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-07 requiere serial: Not all parameters were used in the SQL statement
+2026-04-06 16:42:23 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-11 requiere serial: Not all parameters were used in the SQL statement
+2026-04-06 16:42:27 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-2-41 requiere serial: Not all parameters were used in the SQL statement
+2026-04-06 16:42:31 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-18 requiere serial: Not all parameters were used in the SQL statement
+2026-04-06 16:42:34 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-42 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 07:00:38 | ERROR    | data_layer.inventory | Error en sincronización post-bulk: name 'sincronizar_stock_bodega_serializado' is not defined
+2026-04-07 07:00:45 | ERROR    | data_layer.reminders | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 34, in <lambda>
+    ventana.after(0, lambda: _finalizar_carga(ventana, frame_carga, callback_exito, datos))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 47, in _finalizar_carga
+    callback_exito(datos)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\abasto_scanner.py", line 478, in on_complete
+    self.limpiar_carrito()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\abasto_scanner.py", line 435, in limpiar_carrito
+    for item in self.tabla_carrito.get_children():
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\ttk.py", line 1198, in get_children
+    self.tk.call(self._w, "children", item or '') or ())
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: invalid command name ".!toplevel2.!notebook.!frame.!frame.!frame2.!canvas.!frame.!labelframe.!treeview"
+
+2026-04-07 07:13:02 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:13:02 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:13:02 | ERROR    | data_layer.core      |    Params: ('4857544301B962AF', '4857544301B962AF', 'CHIRIQUI')
+2026-04-07 07:13:02 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:13:02 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:13:02 | ERROR    | data_layer.core      |    Params: ('4857544301C4EDAF', '4857544301C4EDAF', 'CHIRIQUI')
+2026-04-07 07:13:02 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:13:02 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:13:02 | ERROR    | data_layer.core      |    Params: ('485754432B2770AF', '485754432B2770AF', 'CHIRIQUI')
+2026-04-07 07:13:07 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:13:07 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:13:07 | ERROR    | data_layer.core      |    Params: ('48575443EB36B1B4', '48575443EB36B1B4', 'CHIRIQUI')
+2026-04-07 07:13:08 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:13:08 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:13:08 | ERROR    | data_layer.core      |    Params: ('4857544372E32BB3', '4857544372E32BB3', 'CHIRIQUI')
+2026-04-07 07:13:08 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:13:08 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:13:08 | ERROR    | data_layer.core      |    Params: ('4857544372DFDCB3', '4857544372DFDCB3', 'CHIRIQUI')
+2026-04-07 07:13:13 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:13:13 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:13:13 | ERROR    | data_layer.core      |    Params: ('2150084158EGR2000124', '2150084158EGR2000124', 'CHIRIQUI')
+2026-04-07 07:13:13 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:13:13 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:13:13 | ERROR    | data_layer.core      |    Params: ('2150084158EGQ4000849', '2150084158EGQ4000849', 'CHIRIQUI')
+2026-04-07 07:13:16 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:13:16 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:13:16 | ERROR    | data_layer.core      |    Params: ('485754430AB18AB5', '485754430AB18AB5', 'CHIRIQUI')
+2026-04-07 07:13:19 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:13:19 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:13:19 | ERROR    | data_layer.core      |    Params: ('GZ24050182609961', 'GZ24050182609961', 'CHIRIQUI')
+2026-04-07 07:13:19 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:13:19 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:13:19 | ERROR    | data_layer.core      |    Params: ('GZ24050182607486', 'GZ24050182607486', 'CHIRIQUI')
+2026-04-07 07:13:22 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:13:22 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:13:22 | ERROR    | data_layer.core      |    Params: ('Z4EF21E04198', 'Z4EF21E04198', 'CHIRIQUI')
+2026-04-07 07:13:22 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:13:22 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:13:22 | ERROR    | data_layer.core      |    Params: ('Z4EF21E01287', 'Z4EF21E01287', 'CHIRIQUI')
+2026-04-07 07:13:25 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:13:25 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:13:25 | ERROR    | data_layer.core      |    Params: ('GZ25040112715199', 'GZ25040112715199', 'CHIRIQUI')
+2026-04-07 07:13:26 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:13:26 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:13:26 | ERROR    | data_layer.core      |    Params: ('GZ25040112723814', 'GZ25040112723814', 'CHIRIQUI')
+2026-04-07 07:13:26 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:13:26 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:13:26 | ERROR    | data_layer.core      |    Params: ('GZ25040112720399', 'GZ25040112720399', 'CHIRIQUI')
+2026-04-07 07:13:26 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:13:26 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:13:26 | ERROR    | data_layer.core      |    Params: ('GZ25040112719788', 'GZ25040112719788', 'CHIRIQUI')
+2026-04-07 07:13:27 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:13:27 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:13:27 | ERROR    | data_layer.core      |    Params: ('GZ25040112721640', 'GZ25040112721640', 'CHIRIQUI')
+2026-04-07 07:13:27 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:13:27 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:13:27 | ERROR    | data_layer.core      |    Params: ('GZ25040112723439', 'GZ25040112723439', 'CHIRIQUI')
+2026-04-07 07:13:33 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:13:33 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:13:33 | ERROR    | data_layer.core      |    Params: ('485754435BD8A0A7', '485754435BD8A0A7', 'CHIRIQUI')
+2026-04-07 07:22:26 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-11 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 07:22:31 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-42 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 07:37:31 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:37:31 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:37:31 | ERROR    | data_layer.core      |    Params: ('485754432B8E2AAF', '485754432B8E2AAF', 'CHIRIQUI')
+2026-04-07 07:37:32 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:37:32 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:37:32 | ERROR    | data_layer.core      |    Params: ('485754432B9423AF', '485754432B9423AF', 'CHIRIQUI')
+2026-04-07 07:37:36 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:37:36 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:37:36 | ERROR    | data_layer.core      |    Params: ('48575443EB2AACB4', '48575443EB2AACB4', 'CHIRIQUI')
+2026-04-07 07:37:37 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:37:37 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:37:37 | ERROR    | data_layer.core      |    Params: ('48575443EB2C60B4', '48575443EB2C60B4', 'CHIRIQUI')
+2026-04-07 07:37:37 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:37:37 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:37:37 | ERROR    | data_layer.core      |    Params: ('48575443EB36D4B4', '48575443EB36D4B4', 'CHIRIQUI')
+2026-04-07 07:37:37 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:37:37 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:37:37 | ERROR    | data_layer.core      |    Params: ('4857544372E631B3', '4857544372E631B3', 'CHIRIQUI')
+2026-04-07 07:37:42 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:37:42 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:37:42 | ERROR    | data_layer.core      |    Params: ('2150084158EGR2000106', '2150084158EGR2000106', 'CHIRIQUI')
+2026-04-07 07:37:42 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:37:42 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:37:42 | ERROR    | data_layer.core      |    Params: ('2150084158AGQ4010307', '2150084158AGQ4010307', 'CHIRIQUI')
+2026-04-07 07:37:45 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:37:45 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:37:45 | ERROR    | data_layer.core      |    Params: ('485754430AB19AB5', '485754430AB19AB5', 'CHIRIQUI')
+2026-04-07 07:37:45 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:37:45 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:37:45 | ERROR    | data_layer.core      |    Params: ('485754430AB080B5', '485754430AB080B5', 'CHIRIQUI')
+2026-04-07 07:37:48 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:37:48 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:37:48 | ERROR    | data_layer.core      |    Params: ('GZ24050182606202', 'GZ24050182606202', 'CHIRIQUI')
+2026-04-07 07:37:49 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:37:49 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:37:49 | ERROR    | data_layer.core      |    Params: ('GZ25020071200539', 'GZ25020071200539', 'CHIRIQUI')
+2026-04-07 07:37:52 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:37:52 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:37:52 | ERROR    | data_layer.core      |    Params: ('Z4EF21E03232', 'Z4EF21E03232', 'CHIRIQUI')
+2026-04-07 07:37:53 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:37:53 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:37:53 | ERROR    | data_layer.core      |    Params: ('Z4EF21E03894', 'Z4EF21E03894', 'CHIRIQUI')
+2026-04-07 07:37:55 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:37:55 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:37:55 | ERROR    | data_layer.core      |    Params: ('GZ25040112705274', 'GZ25040112705274', 'CHIRIQUI')
+2026-04-07 07:37:56 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:37:56 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:37:56 | ERROR    | data_layer.core      |    Params: ('GZ25040112710566', 'GZ25040112710566', 'CHIRIQUI')
+2026-04-07 07:37:56 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:37:56 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:37:56 | ERROR    | data_layer.core      |    Params: ('GZ25040112703217', 'GZ25040112703217', 'CHIRIQUI')
+2026-04-07 07:37:56 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:37:56 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:37:56 | ERROR    | data_layer.core      |    Params: ('GZ25040112705063', 'GZ25040112705063', 'CHIRIQUI')
+2026-04-07 07:37:57 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:37:57 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:37:57 | ERROR    | data_layer.core      |    Params: ('GZ25040112702982', 'GZ25040112702982', 'CHIRIQUI')
+2026-04-07 07:38:02 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:38:02 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:38:02 | ERROR    | data_layer.core      |    Params: ('485754435C176DA7', '485754435C176DA7', 'CHIRIQUI')
+2026-04-07 07:46:47 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:46:47 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:46:47 | ERROR    | data_layer.core      |    Params: ('485754432B2F83AF', '485754432B2F83AF', 'CHIRIQUI')
+2026-04-07 07:46:47 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:46:47 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:46:47 | ERROR    | data_layer.core      |    Params: ('4857544301C196AF', '4857544301C196AF', 'CHIRIQUI')
+2026-04-07 07:46:47 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:46:47 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:46:47 | ERROR    | data_layer.core      |    Params: ('4857544301B923AF', '4857544301B923AF', 'CHIRIQUI')
+2026-04-07 07:46:52 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:46:52 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:46:52 | ERROR    | data_layer.core      |    Params: ('48575443A8BEDBB3', '48575443A8BEDBB3', 'CHIRIQUI')
+2026-04-07 07:46:52 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:46:52 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:46:52 | ERROR    | data_layer.core      |    Params: ('48575443EB2E8CB4', '48575443EB2E8CB4', 'CHIRIQUI')
+2026-04-07 07:46:53 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:46:53 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:46:53 | ERROR    | data_layer.core      |    Params: ('48575443EB3718B4', '48575443EB3718B4', 'CHIRIQUI')
+2026-04-07 07:46:57 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:46:57 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:46:57 | ERROR    | data_layer.core      |    Params: ('2150084158EGR1000477', '2150084158EGR1000477', 'CHIRIQUI')
+2026-04-07 07:47:02 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:47:02 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:47:02 | ERROR    | data_layer.core      |    Params: ('GZ24050182606032', 'GZ24050182606032', 'CHIRIQUI')
+2026-04-07 07:47:05 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:47:05 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:47:05 | ERROR    | data_layer.core      |    Params: ('Z4EF21E03889', 'Z4EF21E03889', 'CHIRIQUI')
+2026-04-07 07:47:05 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:47:05 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:47:05 | ERROR    | data_layer.core      |    Params: ('Z4EF21E02152', 'Z4EF21E02152', 'CHIRIQUI')
+2026-04-07 07:47:08 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:47:08 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:47:08 | ERROR    | data_layer.core      |    Params: ('GZ25040112706556', 'GZ25040112706556', 'CHIRIQUI')
+2026-04-07 07:47:08 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:47:08 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:47:08 | ERROR    | data_layer.core      |    Params: ('GZ25040112723230', 'GZ25040112723230', 'CHIRIQUI')
+2026-04-07 07:47:13 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:47:13 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:47:13 | ERROR    | data_layer.core      |    Params: ('485754432AEBBFA7', '485754432AEBBFA7', 'CHIRIQUI')
+2026-04-07 07:57:01 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:57:01 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:57:01 | ERROR    | data_layer.core      |    Params: ('4857544301C4CAAF', '4857544301C4CAAF', 'CHIRIQUI')
+2026-04-07 07:57:05 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:57:05 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:57:05 | ERROR    | data_layer.core      |    Params: ('48575443A8C6BCB3', '48575443A8C6BCB3', 'CHIRIQUI')
+2026-04-07 07:57:05 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:57:05 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:57:05 | ERROR    | data_layer.core      |    Params: ('48575443E0C96DB4', '48575443E0C96DB4', 'CHIRIQUI')
+2026-04-07 07:57:06 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:57:06 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:57:06 | ERROR    | data_layer.core      |    Params: ('48575443EB33BBB4', '48575443EB33BBB4', 'CHIRIQUI')
+2026-04-07 07:57:09 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:57:09 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:57:09 | ERROR    | data_layer.core      |    Params: ('2150084158EGR1000924', '2150084158EGR1000924', 'CHIRIQUI')
+2026-04-07 07:57:09 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:57:09 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:57:09 | ERROR    | data_layer.core      |    Params: ('2150084158EGR1000630', '2150084158EGR1000630', 'CHIRIQUI')
+2026-04-07 07:57:12 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:57:12 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:57:12 | ERROR    | data_layer.core      |    Params: ('485754430AA74CB5', '485754430AA74CB5', 'CHIRIQUI')
+2026-04-07 07:57:15 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:57:15 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:57:15 | ERROR    | data_layer.core      |    Params: ('GZ25020071201856', 'GZ25020071201856', 'CHIRIQUI')
+2026-04-07 07:57:15 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:57:15 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:57:15 | ERROR    | data_layer.core      |    Params: ('GZ25020071202592', 'GZ25020071202592', 'CHIRIQUI')
+2026-04-07 07:57:18 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:57:18 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:57:18 | ERROR    | data_layer.core      |    Params: ('Z4EF21E03890', 'Z4EF21E03890', 'CHIRIQUI')
+2026-04-07 07:57:18 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:57:18 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:57:18 | ERROR    | data_layer.core      |    Params: ('Z4EF21E04650', 'Z4EF21E04650', 'CHIRIQUI')
+2026-04-07 07:57:21 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:57:21 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:57:21 | ERROR    | data_layer.core      |    Params: ('GZ25040112718312', 'GZ25040112718312', 'CHIRIQUI')
+2026-04-07 07:57:21 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:57:21 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:57:21 | ERROR    | data_layer.core      |    Params: ('GZ25040112715136', 'GZ25040112715136', 'CHIRIQUI')
+2026-04-07 07:57:25 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
+2026-04-07 07:57:25 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
+2026-04-07 07:57:25 | ERROR    | data_layer.core      |    Params: ('485754435148B1A5', '485754435148B1A5', 'CHIRIQUI')

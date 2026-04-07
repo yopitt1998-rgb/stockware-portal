@@ -16,12 +16,13 @@ logger = get_logger(__name__)
 
 
 class MobileOutputScannerWindow:
-    def __init__(self, master_app, mode='SALIDA_MOVIL', prefill_items=None, initial_movil=None, initial_package=None):
+    def __init__(self, master_app, mode='SALIDA_MOVIL', prefill_items=None, initial_movil=None, initial_package=None, preloaded_data=None):
         self.master_app = master_app
         self.mode = mode
         self.prefill_items = prefill_items 
         self.initial_movil = initial_movil
         self.initial_package = initial_package
+        self.preloaded_data = preloaded_data
         self.window = tk.Toplevel(master_app.master)
         
         # Configurar título y colores según modo
@@ -72,23 +73,6 @@ class MobileOutputScannerWindow:
                 )
         
     def load_initial_data(self):
-        def load():
-            from database import obtener_nombres_moviles, obtener_todos_los_skus_para_movimiento, obtener_diccionarios_escaneo
-            from config import CURRENT_CONTEXT
-            branch = CURRENT_CONTEXT.get('BRANCH', 'CHIRIQUI')
-            
-            # Cargar móviles
-            moviles = obtener_nombres_moviles()
-            
-            # Cargar productos para validación rápida
-            prods = obtener_todos_los_skus_para_movimiento()
-            cache = {sku: {'nombre': nombre, 'stock': stock} for nombre, sku, stock in prods}
-            
-            # Cargar cachés de escaneo rápido
-            seriales, barcodes = obtener_diccionarios_escaneo(sucursal_context=branch)
-            
-            return moviles, cache, seriales, barcodes
-            
         def on_loaded(result):
             moviles, cache, seriales, barcodes = result
             self.combo_movil['values'] = moviles
@@ -105,6 +89,39 @@ class MobileOutputScannerWindow:
             elif self.mode == 'DEVOLUCION_SANTIAGO':
                 self.combo_movil.set("CHIRIQUI")
                 self.combo_movil.configure(state='disabled')
+
+        if self.preloaded_data:
+            # USAR DATOS YA CARGADOS (Instantáneo)
+            moviles = self.preloaded_data.get('moviles', [])
+            cache = self.preloaded_data.get('cache', {})
+            seriales = self.preloaded_data.get('seriales', {})
+            barcodes = self.preloaded_data.get('barcodes', {})
+            
+            # Si faltan móviles, cargarlos
+            if not moviles:
+                 from database import obtener_nombres_moviles
+                 moviles = obtener_nombres_moviles()
+            
+            # Simular carga finalizada
+            on_loaded((moviles, cache, seriales, barcodes))
+            return
+
+        def load():
+            from database import obtener_nombres_moviles, obtener_todos_los_skus_para_movimiento, obtener_diccionarios_escaneo
+            from config import CURRENT_CONTEXT
+            branch = CURRENT_CONTEXT.get('BRANCH', 'CHIRIQUI')
+            
+            # Cargar móviles
+            moviles = obtener_nombres_moviles()
+            
+            # Cargar productos para validación rápida
+            prods = obtener_todos_los_skus_para_movimiento()
+            cache = {sku: {'nombre': nombre, 'stock': stock} for nombre, sku, stock in prods}
+            
+            # Cargar cachés de escaneo rápido
+            seriales, barcodes = obtener_diccionarios_escaneo(sucursal_context=branch)
+            
+            return moviles, cache, seriales, barcodes
             
         mostrar_cargando_async(self.window, load, on_loaded, self.window)
 
@@ -385,18 +402,9 @@ class MobileOutputScannerWindow:
                 ubicacion_actual = ub
                 logger.debug(f"Cache Hit: Serial {codigo} -> SKU {sku} (Ubicación: {ub})")
             
-            # 2. Búsqueda remota (Fallback) solo si no está en caché
-            elif obtener_sku_por_serial:
-                try:
-                    sku_serial, existe, ub = obtener_sku_por_serial(codigo)
-                    if existe:
-                        sku = sku_serial
-                        origen_serial = True
-                        nombre_serial = codigo
-                        ubicacion_actual = ub
-                        logger.info(f"Fallback remoto: Serial {codigo} -> SKU {sku} (Ubicación: {ub})")
-                except Exception as e:
-                    logger.error(f"Error en auto-reconocimiento remoto de serial: {e}")
+            # OPTIMIZACIÓN: Se elimina el Fallback remoto por lentitud. 
+            # Si el serial no está en el caché (que contiene TODO lo de la sucursal), es porque no existe.
+            # No consultar a la web evita esperas de 2 segundos en escaneos fallidos.
 
             # 3. Si no es serial, buscar por SKU/Barcode
             if not origen_serial:
@@ -406,15 +414,17 @@ class MobileOutputScannerWindow:
                 elif hasattr(self, 'barcode_cache') and codigo in self.barcode_cache:
                     sku = self.barcode_cache[codigo]
                     logger.debug(f"Cache Hit: Barcode {codigo} -> SKU {sku}")
-                # Búsqueda remota de barcode (Fallback)
-                elif obtener_sku_por_codigo_barra:
-                    try:
-                        sku_found = obtener_sku_por_codigo_barra(codigo)
-                        if sku_found:
-                            sku = sku_found
-                            logger.info(f"Fallback remoto: Barcode {codigo} -> SKU {sku}")
-                    except Exception as e:
-                        logger.error(f"Error buscando por código de barra remoto: {e}")
+                # OPTIMIZACIÓN: Se elimina el Fallback remoto por lentitud. 
+                # Si el código de barras no está en el b_cache ni serial_cache, no existe en la sucursal.
+                pass
+                # if obtener_sku_por_codigo_barra:
+                #     try:
+                #         sku_found = obtener_sku_por_codigo_barra(codigo)
+                #         if sku_found:
+                #             sku = sku_found
+                #             logger.info(f"Fallback remoto: Barcode {codigo} -> SKU {sku}")
+                #     except Exception as e:
+                #         logger.error(f"Error buscando por código de barra remoto: {e}")
 
             return sku, origen_serial, nombre_serial, ubicacion_actual
 

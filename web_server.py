@@ -920,26 +920,29 @@ def api_comparar_excel():
         target_db = None
         pass
 
-        conn = get_db_connection(target_db=target_db)
-        cursor = conn.cursor()
+        try:
+            conn = get_db_connection(target_db=target_db)
+            cursor = conn.cursor()
 
-        if movil:
-            run_query(cursor, """
-                SELECT sku, SUM(cantidad) as total
-                FROM consumos_pendientes
-                WHERE fecha = ? AND movil = ?
-                GROUP BY sku
-            """, (fecha, movil))
-        else:
-            run_query(cursor, """
-                SELECT sku, SUM(cantidad) as total
-                FROM consumos_pendientes
-                WHERE fecha = ?
-                GROUP BY sku
-            """, (fecha,))
+            if movil:
+                run_query(cursor, """
+                    SELECT sku, SUM(cantidad) as total
+                    FROM consumos_pendientes
+                    WHERE fecha = ? AND movil = ?
+                    GROUP BY sku
+                """, (fecha, movil))
+            else:
+                run_query(cursor, """
+                    SELECT sku, SUM(cantidad) as total
+                    FROM consumos_pendientes
+                    WHERE fecha = ?
+                    GROUP BY sku
+                """, (fecha,))
 
-        consumos_db = {row[0]: row[1] for row in cursor.fetchall()}
-        conn.close()
+            consumos_db = {row[0]: row[1] for row in cursor.fetchall()}
+        finally:
+            if conn:
+                conn.close()
 
         return jsonify({
             "headers": headers,

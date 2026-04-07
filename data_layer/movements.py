@@ -146,7 +146,25 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
                         run_query(cursor, "UPDATE series_registradas SET ubicacion = ?, paquete = ?, estado = 'ASIGNADO' WHERE (serial_number = ? OR mac_number = ?) AND sucursal = ?", (movil_afectado, paquete_asignado or 'NINGUNO', s, s, sucursal))
                 elif tipo_movimiento == 'RETORNO_MOVIL':
                     for s in seriales:
+                        # 1. ACTUALIZAR UBICACIÓN Y ESTADO
                         run_query(cursor, "UPDATE series_registradas SET ubicacion = 'BODEGA', paquete = 'NINGUNO', estado = 'DISPONIBLE' WHERE (serial_number = ? OR mac_number = ?) AND sucursal = ?", (s, s, sucursal))
+                        
+                        # 2. LIMPIEZA DE FALTANTES (NUEVO)
+                        # Si el equipo estaba marcado como FALTANTE, debemos limpiar ese registro para que no aparezca en reportes
+                        try:
+                            # Buscar si existe en el detalle de seriales faltantes
+                            run_query(cursor, "SELECT faltante_id FROM seriales_faltantes_detalle WHERE serial = ? OR serial = ?", (s, s))
+                            f_row = cursor.fetchone()
+                            if f_row:
+                                id_f = f_row[0]
+                                # Eliminar del detalle
+                                run_query(cursor, "DELETE FROM seriales_faltantes_detalle WHERE serial = ? OR serial = ?", (s, s))
+                                # Decrementar la cabecera
+                                run_query(cursor, "UPDATE faltantes_registrados SET cantidad = cantidad - 1 WHERE id = ?", (id_f,))
+                                # Eliminar cabecera si llegó a 0
+                                run_query(cursor, "DELETE FROM faltantes_registrados WHERE id = ? AND cantidad <= 0", (id_f,))
+                        except Exception as e_f:
+                            logger.warning(f"⚠️ Error limpiando faltante para serial {s}: {e_f}")
 
             if cantidad_descarte_cambio > 0:
                 run_query(cursor, "SELECT sku FROM productos WHERE sku = ? AND ubicacion = ? AND sucursal = ?", (sku, UBICACION_DESCARTE, sucursal))
@@ -160,7 +178,9 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
 
             if movil_afectado and cantidad_asignacion_cambio != 0:
                  is_shared = sku in MATERIALES_COMPARTIDOS
-                 if (tipo_movimiento in ('CONSUMO_MOVIL', 'RETORNO_MOVIL')) and cantidad_asignacion_cambio < 0 and (not paquete_asignado or is_shared):
+                 # MEJORA: Para Retorno y Consumo, siempre intentar drenar de CUALQUIER paquete disponible en el móvil
+                 # para evitar que queden residuos teóricos en paquetes distintos al seleccionado en la UI.
+                 if (tipo_movimiento in ('CONSUMO_MOVIL', 'RETORNO_MOVIL')) and cantidad_asignacion_cambio < 0:
                      sql_rows = "SELECT COALESCE(paquete, 'NINGUNO'), cantidad FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND sucursal = ? AND cantidad > 0 ORDER BY cantidad DESC"
                      run_query(cursor, sql_rows, (sku, movil_afectado, sucursal))
                      filas_con_stock = cursor.fetchall()

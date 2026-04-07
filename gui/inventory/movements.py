@@ -1418,6 +1418,7 @@ class MobileReturnWindow:
         sku_found = None
         is_serial = False
         ubicacion = None
+        paquete_found = None
 
         # 1. Búsqueda ultra-rápida en diccionarios de memoria (INSTANTÁNEO)
         # A) Es un Serial
@@ -1431,9 +1432,10 @@ class MobileReturnWindow:
             is_serial = False
             paquete_found = None
 
-        # 2. Búsqueda remota (Fallback solo si no está en caché)
-        if not sku_found:
-            sku_found, is_serial, ubicacion, paquete_found = identificar_codigo_escaneado_gui(code)
+        # 2. OPTIMIZACIÓN: Se elimina el Fallback remoto por lentitud.
+        # Si no esta en el g_seriales/g_barcodes de la sucursal, es porque no existe.
+        # evitamos esperar un timeout de internet para decir "No encontrado".
+        pass 
         
         # 3. Si no encontró en base de datos, quizás el técnico digitó un SKU directamente
         if not sku_found:
@@ -1675,6 +1677,17 @@ class MobileReturnWindow:
                             from database import actualizar_ubicacion_serial
                             for s in seriales_escaneados:
                                 actualizar_ubicacion_serial(s, 'BODEGA', paquete='NINGUNO', existing_conn=conn)
+                                # NUEVO: Actualizar caché global de seriales
+                                if 'g_seriales' in self.session_data and s in self.session_data['g_seriales']:
+                                    val = list(self.session_data['g_seriales'][s])
+                                    if len(val) > 1: val[1] = 'BODEGA'
+                                    self.session_data['g_seriales'][s] = tuple(val)
+                        
+                        # NUEVO: Actualizar stock de BODEGA en la lista de productos de sesión
+                        for idx_prod, p_data in enumerate(self.productos):
+                            if p_data[1] == sku_p:
+                                self.productos[idx_prod] = (p_data[0], p_data[1], p_data[2] + fisico)
+                                break
                     else: 
                         errors.append(f"Retorno {sku_p}: {msg}")
 
@@ -1716,6 +1729,14 @@ class MobileReturnWindow:
                         paquete=paquete_objetivo,
                         existing_conn=conn
                     )
+                    
+                    # NUEVO: Actualizar seriales a FALTANTE en la caché global
+                    if seriales_faltantes and 'g_seriales' in self.session_data:
+                        for s in seriales_faltantes:
+                            if s in self.session_data['g_seriales']:
+                                val = list(self.session_data['g_seriales'][s])
+                                if len(val) > 1: val[1] = 'FALTANTE'
+                                self.session_data['g_seriales'][s] = tuple(val)
 
             # 3. Limpieza Residual (borra el stock teórico restante del móvil)
             from database import resetear_stock_movil
@@ -1840,7 +1861,13 @@ class MobileReturnWindow:
                             self.master_app, mode='SALIDA_MOVIL',
                             prefill_items=faltantes_para_rellenar,
                             initial_movil=movil,
-                            initial_package=paquete_nombre
+                            initial_package=paquete_nombre,
+                            preloaded_data={
+                                'seriales': self.session_data.get('g_seriales', {}),
+                                'barcodes': self.session_data.get('g_barcodes', {}),
+                                'moviles': self.movil_combo['values'],
+                                'cache': {s_sku: {'nombre': s_nombre, 'stock': s_stock} for s_nombre, s_sku, s_stock in self.productos}
+                            }
                         )
                         # Destruir DESPUÉS de abrir Salida
                         if self.on_close_callback: self.on_close_callback()
