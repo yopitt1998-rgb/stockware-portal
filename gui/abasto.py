@@ -156,6 +156,7 @@ class SerialCaptureDialog:
         self.existing_serials_cache.add(val)
         
         self.listbox.insert(tk.END, f"{len(self.series_capturadas)}. {val}")
+        self.listbox.see(tk.END) # Auto-scroll al final para ver el último escaneado
         self.update_progress()
         self.entry_serie.delete(0, tk.END)
         
@@ -589,14 +590,21 @@ class AbastoWindow:
             sucursal = 'SANTIAGO' if os.environ.get('SANTIAGO_DIRECT_MODE') == '1' else 'CHIRIQUI'
             
             # --- VALIDACIÓN DE SERIES ---
+            items_finales_ajustados = []
             for sku, qty in items_to_save:
                 if sku in PRODUCTOS_CON_CODIGO_BARRA:
-                    if sku not in self.series_capturadas or len(self.series_capturadas[sku]) != qty:
+                    cant_scanned = len(self.series_capturadas.get(sku, []))
+                    if sku not in self.series_capturadas or cant_scanned == 0:
                         mostrar_mensaje_emergente(self.window, "Error", 
                             f"El producto {sku} requiere escaneo de series.\n\n"
                             f"Por favor, ingrese la cantidad y presione Enter para escanear las series.", 
                             "error")
                         return
+                    
+                    if cant_scanned < qty:
+                        # Si escaneó menos de lo que dijo, ajustar cantidad automáticamente
+                        logger.info(f"⚠️ Ajustando cantidad de {sku}: de {qty} a {cant_scanned} por escaneo parcial.")
+                        qty = cant_scanned
                     
                     for item in self.series_capturadas[sku]:
                         series_globales.append({
@@ -605,9 +613,11 @@ class AbastoWindow:
                             'mac': item.get('mac'),
                             'ubicacion': 'BODEGA'
                         })
+                
+                items_finales_ajustados.append((sku, qty))
 
             # --- REGISTRO DE MOVIMIENTOS ---
-            for sku, qty in items_to_save:
+            for sku, qty in items_finales_ajustados:
                 ok, msg = registrar_movimiento_gui(
                     sku, 'ABASTO', qty, None, fecha, 
                     documento_referencia=ref, observaciones=obs,
