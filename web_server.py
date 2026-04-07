@@ -694,6 +694,7 @@ def registrar_bulk():
         return jsonify({"exito": False, "mensaje": "Sin datos"})
 
     from database import get_db_connection, run_query
+    import json
     conn = None
     try:
         # LÓGICA DE ENRUTAMIENTO (NUEVO)

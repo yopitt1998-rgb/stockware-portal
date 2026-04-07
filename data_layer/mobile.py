@@ -1,5 +1,6 @@
 import mysql.connector
 import os
+import json
 from datetime import datetime, date, timedelta
 
 from utils.logger import get_logger
@@ -1239,6 +1240,14 @@ def resetear_stock_movil(movil, paquete):
         run_query(cursor, sql_mov, (total_items, movil, paquete, observacion))
         
         conn.commit()
+        
+        # NUEVO: Sincronizar stock en la tabla productos para los seriales que regresaron a BODEGA
+        try:
+            from data_layer.movements import sincronizar_stock_bodega_serializado
+            sincronizar_stock_bodega_serializado(sucursal_context=sucursal_active)
+        except Exception as e_sync:
+            logger.error(f"Error en sincronización post-reset móvil: {e_sync}")
+
         logger.info(f"🧹 Móvil {movil} ({paquete}) limpiado: {total_items} registros eliminados.")
         return True, f"Se ha limpiado el {movil} ({paquete}) correctamente. Se eliminaron registros de {total_items} unidades de stock."
         
@@ -1375,6 +1384,7 @@ def registrar_consumo_directo(sku, cantidad, movil, tecnico, ayudante=None, tick
     """
     Registra un consumo directo desde BODEGA para la sucursal de Santiago o Móvil.
     """
+    import json
     conn = None
     try:
         conn = get_db_connection(target_db=target_db)
