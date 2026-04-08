@@ -6384,3 +6384,177 @@ _tkinter.TclError: invalid command name ".!toplevel2.!notebook.!frame.!frame.!fr
 2026-04-07 07:57:25 | ERROR    | data_layer.core      | ❌ Error SQL ejecución: 1054 (42S22): Unknown column 'sucursal' in 'where clause'
 2026-04-07 07:57:25 | ERROR    | data_layer.core      |    Query: SELECT faltante_id FROM seriales_faltantes_detalle WHERE (serial = %s OR serial = %s) AND sucursal = %s
 2026-04-07 07:57:25 | ERROR    | data_layer.core      |    Params: ('485754435148B1A5', '485754435148B1A5', 'CHIRIQUI')
+2026-04-07 10:16:43 | ERROR    | data_layer.inventory | Error en sincronización post-bulk: name 'sincronizar_stock_bodega_serializado' is not defined
+2026-04-07 11:33:50 | ERROR    | data_layer.inventory | Error en sincronización post-bulk: name 'sincronizar_stock_bodega_serializado' is not defined
+2026-04-07 11:47:25 | ERROR    | data_layer.inventory | Error en sincronización post-bulk: name 'sincronizar_stock_bodega_serializado' is not defined
+2026-04-07 12:06:39 | ERROR    | data_layer.inventory | Error en sincronización post-bulk: name 'sincronizar_stock_bodega_serializado' is not defined
+2026-04-07 12:22:41 | ERROR    | data_layer.reminders | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 34, in <lambda>
+    ventana.after(0, lambda: _finalizar_carga(ventana, frame_carga, callback_exito, datos))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 47, in _finalizar_carga
+    callback_exito(datos)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1075, in _on_data_loaded
+    self.update_consumo_ui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1119, in update_consumo_ui
+    has_perso = (info.get("PERSONALIZADO", 0) if info else 0) > 0
+                                                 ^^^^
+NameError: name 'info' is not defined
+
+2026-04-07 12:25:29 | ERROR    | data_layer.reminders | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 34, in <lambda>
+    ventana.after(0, lambda: _finalizar_carga(ventana, frame_carga, callback_exito, datos))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 47, in _finalizar_carga
+    callback_exito(datos)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1075, in _on_data_loaded
+    self.update_consumo_ui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1119, in update_consumo_ui
+    has_perso = (info.get("PERSONALIZADO", 0) if info else 0) > 0
+                                                 ^^^^
+NameError: name 'info' is not defined
+
+2026-04-07 12:26:37 | ERROR    | data_layer.reminders | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 918, in <lambda>
+    self.paquete_combo.bind("<<ComboboxSelected>>", lambda e: self.update_consumo_ui())
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1119, in update_consumo_ui
+    has_perso = (info.get("PERSONALIZADO", 0) if info else 0) > 0
+                                                 ^^^^
+NameError: name 'info' is not defined
+
+2026-04-07 12:26:57 | ERROR    | data_layer.reminders | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 34, in <lambda>
+    ventana.after(0, lambda: _finalizar_carga(ventana, frame_carga, callback_exito, datos))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 47, in _finalizar_carga
+    callback_exito(datos)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1075, in _on_data_loaded
+    self.update_consumo_ui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1119, in update_consumo_ui
+    has_perso = (info.get("PERSONALIZADO", 0) if info else 0) > 0
+                                                 ^^^^
+NameError: name 'info' is not defined
+
+2026-04-07 12:27:06 | ERROR    | data_layer.reminders | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 34, in <lambda>
+    ventana.after(0, lambda: _finalizar_carga(ventana, frame_carga, callback_exito, datos))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 47, in _finalizar_carga
+    callback_exito(datos)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1075, in _on_data_loaded
+    self.update_consumo_ui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1119, in update_consumo_ui
+    has_perso = (info.get("PERSONALIZADO", 0) if info else 0) > 0
+                                                 ^^^^
+NameError: name 'info' is not defined
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 918, in <lambda>
+    self.paquete_combo.bind("<<ComboboxSelected>>", lambda e: self.update_consumo_ui())
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1119, in update_consumo_ui
+    has_perso = (info.get("PERSONALIZADO", 0) if info else 0) > 0
+                                                 ^^^^
+NameError: name 'info' is not defined
+
+2026-04-07 12:40:21 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:40:26 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:40:30 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:40:34 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-07 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:40:39 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-11 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:40:42 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-2-41 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:40:46 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-18 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:40:50 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-42 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:54:29 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:54:34 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:54:38 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:54:45 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-07 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:54:49 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-11 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:54:53 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-2-41 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:54:58 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-18 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:55:02 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-42 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:38:05 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:38:10 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:38:14 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:38:19 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-07 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:38:23 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-11 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:38:26 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-2-41 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:38:30 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-18 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:38:33 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-42 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:55:22 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:55:26 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:55:30 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:55:36 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-07 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:55:47 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-11 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:55:51 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-2-41 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:55:56 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-18 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:56:01 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-42 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:17:22 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:17:50 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:17:55 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:17:59 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:18:03 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-07 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:18:07 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-11 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:18:11 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-2-41 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:18:15 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-18 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:18:20 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-42 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:38:29 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:38:34 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:38:39 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:38:43 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-07 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:38:48 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-11 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:38:52 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-2-41 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:38:59 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-18 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:39:05 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-42 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 15:54:53 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 15:54:57 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 15:55:01 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 15:55:05 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-07 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 15:55:09 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-11 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 15:55:12 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-2-41 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 15:55:16 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-18 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 15:55:19 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-42 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 16:05:00 | ERROR    | data_layer.inventory | Error en sincronización post-bulk: name 'sincronizar_stock_bodega_serializado' is not defined
+2026-04-08 10:22:07 | ERROR    | data_layer.inventory | Error en sincronización post-bulk: name 'sincronizar_stock_bodega_serializado' is not defined
+2026-04-08 10:32:42 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-04-08 10:32:51 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-04-08 10:32:58 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
+2026-04-08 10:33:05 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-07 requiere serial: Not all parameters were used in the SQL statement
+2026-04-08 10:33:12 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-11 requiere serial: Not all parameters were used in the SQL statement
+2026-04-08 10:33:17 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-2-41 requiere serial: Not all parameters were used in the SQL statement
+2026-04-08 10:33:24 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-18 requiere serial: Not all parameters were used in the SQL statement
+2026-04-08 10:33:28 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-42 requiere serial: Not all parameters were used in the SQL statement

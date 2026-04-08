@@ -299,6 +299,13 @@ class ModernInventarioApp:
                 "class": "SantiagoDanadosTab",
                 "icon": "📑",
                 "btn_text": "Bajas"
+            },
+            "Auditoría Bodega": {
+                "loaded": False,
+                "module": "gui.warehouse_audit",
+                "class": "WarehouseAuditTab",
+                "icon": "🏢",
+                "btn_text": "Auditoría Bodega"
             }
         }
 

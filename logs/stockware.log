@@ -20224,3 +20224,838 @@ _tkinter.TclError: invalid command name ".!toplevel2.!notebook.!frame.!frame.!fr
 2026-04-07 08:00:14 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
 2026-04-07 08:00:15 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
 2026-04-07 08:00:15 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-07 09:43:47 | INFO     | __main__             | Inicializando app_inventario...
+2026-04-07 09:43:48 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-04-07 09:43:52 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-07 09:44:19 | INFO     | data_layer.core      | ✅ Etapa 1 completada: tablas verificadas/creadas.
+2026-04-07 09:44:21 | INFO     | data_layer.core      | ✅ Etapa 2 completada: migraciones de columnas aplicadas.
+2026-04-07 09:44:24 | INFO     | data_layer.core      | ✅ Etapa 3 completada: índices de rendimiento verificados.
+2026-04-07 09:44:25 | INFO     | data_layer.core      | ✅ Etapa 4 completada: móviles verificados.
+2026-04-07 09:44:25 | INFO     | data_layer.core      | 🎉 Base de datos inicializada correctamente.
+2026-04-07 09:44:26 | INFO     | data_layer.reminders | Bootstrap Start
+2026-04-07 09:44:26 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-04-07 09:44:26 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-04-07 09:45:15 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-07 09:45:45 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-04-07 09:45:51 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 09:45:52 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 09:45:58 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 09:45:59 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 09:46:03 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 09:46:05 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 10:01:46 | INFO     | gui.abasto           | 🚀 Caché de seriales cargado: 3250 registros.
+2026-04-07 10:09:10 | INFO     | gui.abasto           | 🚀 Caché de seriales cargado: 3250 registros.
+2026-04-07 10:12:21 | INFO     | gui.abasto           | 🚀 Caché de seriales cargado: 3250 registros.
+2026-04-07 10:16:43 | ERROR    | data_layer.inventory | Error en sincronización post-bulk: name 'sincronizar_stock_bodega_serializado' is not defined
+2026-04-07 10:16:56 | INFO     | data_layer.inventory | 🔎 Buscando equipo global: '4857544301B379AF' en sucursal: 'CHIRIQUI'
+2026-04-07 10:16:56 | INFO     | data_layer.inventory | ✅ Resultado encontrado: 4-4-644 (BODEGA)
+2026-04-07 10:17:05 | INFO     | data_layer.inventory | 🔎 Buscando equipo global: '48575443EB2B7EB4' en sucursal: 'CHIRIQUI'
+2026-04-07 10:17:05 | INFO     | data_layer.inventory | ✅ Resultado encontrado: 4-4-656 (CONSUMIDO)
+2026-04-07 10:17:14 | INFO     | data_layer.inventory | 🔎 Buscando equipo global: '4857544301850BAF' en sucursal: 'CHIRIQUI'
+2026-04-07 10:17:14 | INFO     | data_layer.inventory | ✅ Resultado encontrado: 4-4-644 (CONSUMIDO)
+2026-04-07 10:17:14 | INFO     | data_layer.inventory |    [PLAN C] Heurística aplicada: Movil=Movil 203, Contrato=None, Fecha=2026-04-07
+2026-04-07 10:28:57 | INFO     | data_layer.inventory | 🔎 Buscando equipo global: '48575443EB2B7EB4' en sucursal: 'CHIRIQUI'
+2026-04-07 10:28:58 | INFO     | data_layer.inventory | ✅ Resultado encontrado: 4-4-656 (BODEGA)
+2026-04-07 10:29:29 | INFO     | gui.abasto           | 🚀 Caché de seriales cargado: 3273 registros.
+2026-04-07 10:29:40 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': "4'4'656", 'mac': None}
+2026-04-07 10:31:13 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': 'F4E45104F0E2', 'mac': None}
+2026-04-07 10:31:29 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': '9848740BB858', 'mac': None}
+2026-04-07 10:34:43 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': '1C73E2D7BFB2', 'mac': None}
+2026-04-07 10:34:46 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': '9848740BABCB', 'mac': None}
+2026-04-07 10:36:52 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': 'F4E45104CAE6', 'mac': None}
+2026-04-07 11:05:51 | INFO     | __main__             | Inicializando app_inventario...
+2026-04-07 11:05:52 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-04-07 11:05:54 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-07 11:06:33 | INFO     | data_layer.core      | ✅ Etapa 1 completada: tablas verificadas/creadas.
+2026-04-07 11:06:47 | INFO     | data_layer.core      | ✅ Etapa 2 completada: migraciones de columnas aplicadas.
+2026-04-07 11:06:53 | INFO     | data_layer.core      | ✅ Etapa 3 completada: índices de rendimiento verificados.
+2026-04-07 11:06:54 | INFO     | data_layer.core      | ✅ Etapa 4 completada: móviles verificados.
+2026-04-07 11:06:54 | INFO     | data_layer.core      | 🎉 Base de datos inicializada correctamente.
+2026-04-07 11:06:58 | INFO     | data_layer.reminders | Bootstrap Start
+2026-04-07 11:06:58 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-04-07 11:06:58 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-04-07 11:08:25 | INFO     | gui.abasto           | 🚀 Caché de seriales cargado: 3273 registros.
+2026-04-07 11:09:26 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': 'F4E45104EB81', 'mac': None}
+2026-04-07 11:09:45 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': '9848740BA070', 'mac': None}
+2026-04-07 11:11:19 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': 'F4E45104CAE6', 'mac': None}
+2026-04-07 11:11:59 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': 'F4E45104FD6F', 'mac': None}
+2026-04-07 11:13:50 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': '9848740BA89B', 'mac': None}
+2026-04-07 11:14:39 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': '9848740BACEC', 'mac': None}
+2026-04-07 11:19:11 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-07 11:19:41 | INFO     | data_layer.core      | ✅ Etapa 1 completada: tablas verificadas/creadas.
+2026-04-07 11:19:44 | INFO     | data_layer.core      | ✅ Etapa 2 completada: migraciones de columnas aplicadas.
+2026-04-07 11:19:47 | INFO     | data_layer.core      | ✅ Etapa 3 completada: índices de rendimiento verificados.
+2026-04-07 11:19:48 | INFO     | data_layer.core      | ✅ Etapa 4 completada: móviles verificados.
+2026-04-07 11:19:48 | INFO     | data_layer.core      | 🎉 Base de datos inicializada correctamente.
+2026-04-07 11:26:27 | INFO     | gui.abasto           | 🚀 Caché de seriales cargado: 3273 registros.
+2026-04-07 11:26:49 | INFO     | gui.abasto           | 🚀 Caché de seriales cargado: 3273 registros.
+2026-04-07 11:27:34 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': 'A070B784B497', 'mac': None}
+2026-04-07 11:27:47 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': '9848740BB2D5', 'mac': None}
+2026-04-07 11:28:13 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': 'F4E45104F0E2', 'mac': None}
+2026-04-07 11:28:26 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': '9848740BB858', 'mac': None}
+2026-04-07 11:28:59 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': '9848743FA47F', 'mac': None}
+2026-04-07 11:29:13 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': '9848740BB638', 'mac': None}
+2026-04-07 11:30:28 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': '9848740BA03D', 'mac': None}
+2026-04-07 11:30:42 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': 'F4E45104235B', 'mac': None}
+2026-04-07 11:31:26 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': '9848740BAF94', 'mac': None}
+2026-04-07 11:31:58 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': '9848740BB35D', 'mac': None}
+2026-04-07 11:32:14 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': '9848740BB1E7', 'mac': None}
+2026-04-07 11:32:42 | INFO     | gui.abasto           | 🚀 Caché de seriales cargado: 3273 registros.
+2026-04-07 11:33:50 | ERROR    | data_layer.inventory | Error en sincronización post-bulk: name 'sincronizar_stock_bodega_serializado' is not defined
+2026-04-07 11:34:07 | INFO     | data_layer.inventory | 🔎 Buscando equipo global: 'GZ25040112711735' en sucursal: 'CHIRIQUI'
+2026-04-07 11:34:07 | INFO     | data_layer.inventory | ✅ Resultado encontrado: 8-1-904 (FALTANTE)
+2026-04-07 11:34:08 | INFO     | data_layer.inventory |    [PLAN C] Heurística aplicada: Movil=Movil 203, Contrato=None, Fecha=2026-04-07
+2026-04-07 11:34:58 | INFO     | data_layer.inventory | 🔎 Buscando equipo global: '485754430E70E5B5' en sucursal: 'CHIRIQUI'
+2026-04-07 11:34:58 | WARNING  | data_layer.inventory | ❌ No se encontró resultado para '485754430E70E5B5' con sucursal 'CHIRIQUI'
+2026-04-07 11:35:06 | INFO     | data_layer.inventory | 🔎 Buscando equipo global: '485754430E76C1B5' en sucursal: 'CHIRIQUI'
+2026-04-07 11:35:07 | INFO     | data_layer.inventory | ✅ Resultado encontrado: 4-4-646 (BODEGA)
+2026-04-07 11:35:26 | INFO     | data_layer.inventory | 🔎 Buscando equipo global: '485754430AAC0EB5' en sucursal: 'CHIRIQUI'
+2026-04-07 11:35:26 | WARNING  | data_layer.inventory | ❌ No se encontró resultado para '485754430AAC0EB5' con sucursal 'CHIRIQUI'
+2026-04-07 11:35:34 | INFO     | data_layer.inventory | 🔎 Buscando equipo global: '485754430AB8E6B5' en sucursal: 'CHIRIQUI'
+2026-04-07 11:35:34 | WARNING  | data_layer.inventory | ❌ No se encontró resultado para '485754430AB8E6B5' con sucursal 'CHIRIQUI'
+2026-04-07 11:36:54 | INFO     | gui.abasto           | 🚀 Caché de seriales cargado: 3300 registros.
+2026-04-07 11:40:24 | INFO     | gui.abasto           | 🚀 Caché de seriales cargado: 3300 registros.
+2026-04-07 11:47:25 | ERROR    | data_layer.inventory | Error en sincronización post-bulk: name 'sincronizar_stock_bodega_serializado' is not defined
+2026-04-07 12:00:12 | INFO     | gui.abasto           | 🚀 Caché de seriales cargado: 3385 registros.
+2026-04-07 12:06:39 | ERROR    | data_layer.inventory | Error en sincronización post-bulk: name 'sincronizar_stock_bodega_serializado' is not defined
+2026-04-07 12:22:41 | ERROR    | data_layer.reminders | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 34, in <lambda>
+    ventana.after(0, lambda: _finalizar_carga(ventana, frame_carga, callback_exito, datos))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 47, in _finalizar_carga
+    callback_exito(datos)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1075, in _on_data_loaded
+    self.update_consumo_ui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1119, in update_consumo_ui
+    has_perso = (info.get("PERSONALIZADO", 0) if info else 0) > 0
+                                                 ^^^^
+NameError: name 'info' is not defined
+
+2026-04-07 12:24:18 | INFO     | __main__             | Inicializando app_inventario...
+2026-04-07 12:24:19 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-04-07 12:24:20 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-07 12:24:40 | INFO     | data_layer.core      | ✅ Etapa 1 completada: tablas verificadas/creadas.
+2026-04-07 12:24:43 | INFO     | data_layer.core      | ✅ Etapa 2 completada: migraciones de columnas aplicadas.
+2026-04-07 12:24:46 | INFO     | data_layer.core      | ✅ Etapa 3 completada: índices de rendimiento verificados.
+2026-04-07 12:24:47 | INFO     | data_layer.core      | ✅ Etapa 4 completada: móviles verificados.
+2026-04-07 12:24:47 | INFO     | data_layer.core      | 🎉 Base de datos inicializada correctamente.
+2026-04-07 12:24:48 | INFO     | data_layer.reminders | Bootstrap Start
+2026-04-07 12:24:48 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-04-07 12:24:48 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-04-07 12:25:29 | ERROR    | data_layer.reminders | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 34, in <lambda>
+    ventana.after(0, lambda: _finalizar_carga(ventana, frame_carga, callback_exito, datos))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 47, in _finalizar_carga
+    callback_exito(datos)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1075, in _on_data_loaded
+    self.update_consumo_ui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1119, in update_consumo_ui
+    has_perso = (info.get("PERSONALIZADO", 0) if info else 0) > 0
+                                                 ^^^^
+NameError: name 'info' is not defined
+
+2026-04-07 12:26:37 | ERROR    | data_layer.reminders | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 918, in <lambda>
+    self.paquete_combo.bind("<<ComboboxSelected>>", lambda e: self.update_consumo_ui())
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1119, in update_consumo_ui
+    has_perso = (info.get("PERSONALIZADO", 0) if info else 0) > 0
+                                                 ^^^^
+NameError: name 'info' is not defined
+
+2026-04-07 12:26:57 | ERROR    | data_layer.reminders | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 34, in <lambda>
+    ventana.after(0, lambda: _finalizar_carga(ventana, frame_carga, callback_exito, datos))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 47, in _finalizar_carga
+    callback_exito(datos)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1075, in _on_data_loaded
+    self.update_consumo_ui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1119, in update_consumo_ui
+    has_perso = (info.get("PERSONALIZADO", 0) if info else 0) > 0
+                                                 ^^^^
+NameError: name 'info' is not defined
+
+2026-04-07 12:27:06 | ERROR    | data_layer.reminders | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 34, in <lambda>
+    ventana.after(0, lambda: _finalizar_carga(ventana, frame_carga, callback_exito, datos))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\utils.py", line 47, in _finalizar_carga
+    callback_exito(datos)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1075, in _on_data_loaded
+    self.update_consumo_ui()
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1119, in update_consumo_ui
+    has_perso = (info.get("PERSONALIZADO", 0) if info else 0) > 0
+                                                 ^^^^
+NameError: name 'info' is not defined
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 918, in <lambda>
+    self.paquete_combo.bind("<<ComboboxSelected>>", lambda e: self.update_consumo_ui())
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\inventory\movements.py", line 1119, in update_consumo_ui
+    has_perso = (info.get("PERSONALIZADO", 0) if info else 0) > 0
+                                                 ^^^^
+NameError: name 'info' is not defined
+
+2026-04-07 12:38:29 | INFO     | __main__             | Inicializando app_inventario...
+2026-04-07 12:38:29 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-04-07 12:38:31 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-07 12:38:54 | INFO     | data_layer.core      | ✅ Etapa 1 completada: tablas verificadas/creadas.
+2026-04-07 12:38:59 | INFO     | data_layer.core      | ✅ Etapa 2 completada: migraciones de columnas aplicadas.
+2026-04-07 12:39:02 | INFO     | data_layer.core      | ✅ Etapa 3 completada: índices de rendimiento verificados.
+2026-04-07 12:39:03 | INFO     | data_layer.core      | ✅ Etapa 4 completada: móviles verificados.
+2026-04-07 12:39:03 | INFO     | data_layer.core      | 🎉 Base de datos inicializada correctamente.
+2026-04-07 12:39:05 | INFO     | data_layer.reminders | Bootstrap Start
+2026-04-07 12:39:05 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-04-07 12:39:05 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-04-07 12:40:02 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-07 12:40:21 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:40:23 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-4-61 (Equipos individuales o Material agrupado)
+2026-04-07 12:40:26 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:40:27 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-8-40 (Equipos individuales o Material agrupado)
+2026-04-07 12:40:30 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:40:32 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-5-02 (Equipos individuales o Material agrupado)
+2026-04-07 12:40:34 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-07 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:40:35 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-07 (Equipos individuales o Material agrupado)
+2026-04-07 12:40:39 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-11 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:40:40 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-11 (Equipos individuales o Material agrupado)
+2026-04-07 12:40:42 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-2-41 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:40:43 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-2-41 (Equipos individuales o Material agrupado)
+2026-04-07 12:40:46 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-18 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:40:47 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-18 (Equipos individuales o Material agrupado)
+2026-04-07 12:40:50 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-42 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:40:51 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-42 (Equipos individuales o Material agrupado)
+2026-04-07 12:42:36 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 12:42:40 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 12:42:46 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 12:42:57 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 12:43:01 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 12:43:12 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 12:43:13 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 12:43:14 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 12:43:17 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 12:43:23 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-07 12:44:16 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-07 12:44:34 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-902 (Equipos individuales o Material agrupado)
+2026-04-07 12:44:38 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-902 (Equipos individuales o Material agrupado)
+2026-04-07 12:44:50 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): U4-4-633 (Equipos individuales o Material agrupado)
+2026-04-07 12:45:02 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-07 12:45:08 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-903 (Equipos individuales o Material agrupado)
+2026-04-07 12:45:10 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-903 (Equipos individuales o Material agrupado)
+2026-04-07 12:45:24 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 12:45:30 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 12:45:36 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 12:45:49 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 12:45:51 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 12:45:56 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 12:46:09 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-07 12:54:17 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-07 12:54:23 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-04-07 12:54:29 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:54:31 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-4-61 (Equipos individuales o Material agrupado)
+2026-04-07 12:54:34 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:54:35 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-8-40 (Equipos individuales o Material agrupado)
+2026-04-07 12:54:38 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:54:39 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-5-02 (Equipos individuales o Material agrupado)
+2026-04-07 12:54:45 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-07 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:54:46 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-07 (Equipos individuales o Material agrupado)
+2026-04-07 12:54:49 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-11 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:54:50 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-11 (Equipos individuales o Material agrupado)
+2026-04-07 12:54:53 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-2-41 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:54:54 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-2-41 (Equipos individuales o Material agrupado)
+2026-04-07 12:54:58 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-18 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:54:59 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-18 (Equipos individuales o Material agrupado)
+2026-04-07 12:55:02 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-42 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 12:55:03 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-42 (Equipos individuales o Material agrupado)
+2026-04-07 12:56:29 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 12:56:30 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 12:56:33 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 12:56:35 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 12:56:44 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-903 (Equipos individuales o Material agrupado)
+2026-04-07 12:56:47 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-903 (Equipos individuales o Material agrupado)
+2026-04-07 12:57:01 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-07 12:57:09 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-07 12:57:16 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): U4-4-633 (Equipos individuales o Material agrupado)
+2026-04-07 12:57:24 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-902 (Equipos individuales o Material agrupado)
+2026-04-07 12:57:31 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-902 (Equipos individuales o Material agrupado)
+2026-04-07 12:57:46 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-07 12:57:53 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-07 12:58:23 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 12:58:28 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 12:58:32 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 12:58:36 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 12:58:41 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 12:58:45 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 12:58:55 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 13:27:25 | INFO     | __main__             | Inicializando app_inventario...
+2026-04-07 13:27:25 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-04-07 13:27:27 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-07 13:27:46 | INFO     | data_layer.core      | ✅ Etapa 1 completada: tablas verificadas/creadas.
+2026-04-07 13:27:49 | INFO     | data_layer.core      | ✅ Etapa 2 completada: migraciones de columnas aplicadas.
+2026-04-07 13:27:52 | INFO     | data_layer.core      | ✅ Etapa 3 completada: índices de rendimiento verificados.
+2026-04-07 13:27:52 | INFO     | data_layer.core      | ✅ Etapa 4 completada: móviles verificados.
+2026-04-07 13:27:53 | INFO     | data_layer.core      | 🎉 Base de datos inicializada correctamente.
+2026-04-07 13:27:54 | INFO     | data_layer.reminders | Bootstrap Start
+2026-04-07 13:27:54 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-04-07 13:27:54 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-04-07 13:32:58 | INFO     | __main__             | Inicializando app_inventario...
+2026-04-07 13:32:58 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-04-07 13:33:00 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-07 13:33:19 | INFO     | data_layer.core      | ✅ Etapa 1 completada: tablas verificadas/creadas.
+2026-04-07 13:33:22 | INFO     | data_layer.warehouse_audit | Tablas de Auditoría de Bodega verificadas/readas correctamente.
+2026-04-07 13:33:25 | INFO     | data_layer.core      | ✅ Etapa 2 completada: migraciones de columnas aplicadas.
+2026-04-07 13:33:27 | INFO     | data_layer.core      | ✅ Etapa 3 completada: índices de rendimiento verificados.
+2026-04-07 13:33:29 | INFO     | data_layer.core      | ✅ Etapa 4 completada: móviles verificados.
+2026-04-07 13:33:29 | INFO     | data_layer.core      | 🎉 Base de datos inicializada correctamente.
+2026-04-07 13:33:30 | INFO     | data_layer.reminders | Bootstrap Start
+2026-04-07 13:33:30 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-04-07 13:33:30 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-04-07 13:37:44 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-07 13:37:58 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PERSONALIZADO
+2026-04-07 13:38:00 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-04-07 13:38:03 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-07 13:38:05 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:38:07 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-4-61 (Equipos individuales o Material agrupado)
+2026-04-07 13:38:10 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:38:11 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-8-40 (Equipos individuales o Material agrupado)
+2026-04-07 13:38:14 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:38:15 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-5-02 (Equipos individuales o Material agrupado)
+2026-04-07 13:38:19 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-07 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:38:20 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-07 (Equipos individuales o Material agrupado)
+2026-04-07 13:38:23 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-11 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:38:24 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-11 (Equipos individuales o Material agrupado)
+2026-04-07 13:38:26 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-2-41 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:38:28 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-2-41 (Equipos individuales o Material agrupado)
+2026-04-07 13:38:30 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-18 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:38:31 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-18 (Equipos individuales o Material agrupado)
+2026-04-07 13:38:33 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-42 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:38:35 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-42 (Equipos individuales o Material agrupado)
+2026-04-07 13:41:44 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 13:41:46 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 13:41:48 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 13:41:50 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 13:41:52 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 13:41:54 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 13:42:00 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 13:42:09 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-903 (Equipos individuales o Material agrupado)
+2026-04-07 13:42:11 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-903 (Equipos individuales o Material agrupado)
+2026-04-07 13:42:18 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-902 (Equipos individuales o Material agrupado)
+2026-04-07 13:42:30 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-902 (Equipos individuales o Material agrupado)
+2026-04-07 13:42:45 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-07 13:42:52 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-07 13:43:05 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): U4-4-633 (Equipos individuales o Material agrupado)
+2026-04-07 13:43:50 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 13:43:58 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 13:44:14 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 13:44:26 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 13:44:50 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-07 13:45:02 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-07 13:51:12 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-07 13:51:17 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-04-07 13:51:29 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-07 13:51:31 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-04-07 13:51:38 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 13:51:43 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 13:51:45 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 13:52:19 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 13:52:36 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-07 13:52:40 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 13:53:27 | INFO     | data_layer.inventory | 🔎 Buscando equipo global: 'Z4EF21E02155' en sucursal: 'CHIRIQUI'
+2026-04-07 13:53:27 | INFO     | data_layer.inventory | ✅ Resultado encontrado: 8-1-903 (BODEGA)
+2026-04-07 13:55:22 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:55:23 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-4-61 (Equipos individuales o Material agrupado)
+2026-04-07 13:55:26 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:55:27 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-8-40 (Equipos individuales o Material agrupado)
+2026-04-07 13:55:30 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:55:31 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-5-02 (Equipos individuales o Material agrupado)
+2026-04-07 13:55:36 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-07 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:55:38 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-07 (Equipos individuales o Material agrupado)
+2026-04-07 13:55:47 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-11 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:55:48 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-11 (Equipos individuales o Material agrupado)
+2026-04-07 13:55:51 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-2-41 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:55:52 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-2-41 (Equipos individuales o Material agrupado)
+2026-04-07 13:55:56 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-18 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:55:57 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-18 (Equipos individuales o Material agrupado)
+2026-04-07 13:56:01 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-42 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 13:56:02 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-42 (Equipos individuales o Material agrupado)
+2026-04-07 13:56:53 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-07 13:57:19 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-902 (Equipos individuales o Material agrupado)
+2026-04-07 13:57:35 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-902 (Equipos individuales o Material agrupado)
+2026-04-07 13:58:20 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): U4-4-633 (Equipos individuales o Material agrupado)
+2026-04-07 13:58:43 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 13:58:44 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 13:58:50 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 13:58:55 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 13:59:28 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 13:59:41 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 13:59:42 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 13:59:53 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-07 14:00:00 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-07 14:17:17 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-07 14:17:22 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:17:23 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-4-61 (Equipos individuales o Material agrupado)
+2026-04-07 14:17:34 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PERSONALIZADO
+2026-04-07 14:17:36 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-07 14:17:42 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-07 14:17:45 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-04-07 14:17:47 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-07 14:17:50 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:17:52 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-4-61 (Equipos individuales o Material agrupado)
+2026-04-07 14:17:55 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:17:56 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-8-40 (Equipos individuales o Material agrupado)
+2026-04-07 14:17:59 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:18:00 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-5-02 (Equipos individuales o Material agrupado)
+2026-04-07 14:18:03 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-07 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:18:04 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-07 (Equipos individuales o Material agrupado)
+2026-04-07 14:18:07 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-11 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:18:08 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-11 (Equipos individuales o Material agrupado)
+2026-04-07 14:18:11 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-2-41 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:18:13 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-2-41 (Equipos individuales o Material agrupado)
+2026-04-07 14:18:15 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-18 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:18:16 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-18 (Equipos individuales o Material agrupado)
+2026-04-07 14:18:20 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-42 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:18:21 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-42 (Equipos individuales o Material agrupado)
+2026-04-07 14:18:33 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 14:18:35 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 14:18:39 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 14:18:57 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 14:19:04 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 14:19:10 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 14:19:16 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 14:19:44 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-07 14:19:50 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-07 14:20:01 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-07 14:20:13 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-07 14:20:27 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-902 (Equipos individuales o Material agrupado)
+2026-04-07 14:21:02 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-902 (Equipos individuales o Material agrupado)
+2026-04-07 14:21:11 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 14:21:12 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 14:21:12 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 14:21:27 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 14:21:45 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): U4-4-633 (Equipos individuales o Material agrupado)
+2026-04-07 14:22:03 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 14:22:05 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 14:22:08 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 14:22:24 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 14:28:21 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-07 14:28:50 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-04-07 14:28:53 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-07 14:38:29 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:38:30 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-4-61 (Equipos individuales o Material agrupado)
+2026-04-07 14:38:34 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:38:36 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-8-40 (Equipos individuales o Material agrupado)
+2026-04-07 14:38:39 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:38:41 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-5-02 (Equipos individuales o Material agrupado)
+2026-04-07 14:38:43 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-07 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:38:45 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-07 (Equipos individuales o Material agrupado)
+2026-04-07 14:38:48 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-11 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:38:49 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-11 (Equipos individuales o Material agrupado)
+2026-04-07 14:38:52 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-2-41 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:38:54 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-2-41 (Equipos individuales o Material agrupado)
+2026-04-07 14:38:59 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-18 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:39:00 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-18 (Equipos individuales o Material agrupado)
+2026-04-07 14:39:05 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-42 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 14:39:06 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-42 (Equipos individuales o Material agrupado)
+2026-04-07 14:39:18 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 14:39:20 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 14:39:23 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 14:39:25 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 14:39:33 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-902 (Equipos individuales o Material agrupado)
+2026-04-07 14:39:37 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-902 (Equipos individuales o Material agrupado)
+2026-04-07 14:39:46 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 14:39:55 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 14:40:28 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-07 14:40:34 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-07 14:40:42 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-07 14:40:50 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): U4-4-633 (Equipos individuales o Material agrupado)
+2026-04-07 14:41:07 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 14:41:09 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 14:41:17 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 14:41:19 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 14:41:32 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 14:41:43 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-07 15:54:40 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-07 15:54:47 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-04-07 15:54:53 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 15:54:54 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-4-61 (Equipos individuales o Material agrupado)
+2026-04-07 15:54:57 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 15:54:59 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-8-40 (Equipos individuales o Material agrupado)
+2026-04-07 15:55:01 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 15:55:03 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-5-02 (Equipos individuales o Material agrupado)
+2026-04-07 15:55:05 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-07 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 15:55:06 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-07 (Equipos individuales o Material agrupado)
+2026-04-07 15:55:09 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-11 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 15:55:10 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-11 (Equipos individuales o Material agrupado)
+2026-04-07 15:55:12 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-2-41 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 15:55:13 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-2-41 (Equipos individuales o Material agrupado)
+2026-04-07 15:55:16 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-18 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 15:55:17 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-18 (Equipos individuales o Material agrupado)
+2026-04-07 15:55:19 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-42 requiere serial: Not all parameters were used in the SQL statement
+2026-04-07 15:55:20 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-42 (Equipos individuales o Material agrupado)
+2026-04-07 15:55:30 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 15:55:32 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 15:55:36 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 15:55:40 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 15:55:45 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 15:55:51 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 15:55:56 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 15:56:08 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-07 15:56:19 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-902 (Equipos individuales o Material agrupado)
+2026-04-07 15:56:22 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-902 (Equipos individuales o Material agrupado)
+2026-04-07 15:56:30 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-07 15:56:48 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-07 15:56:59 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): U4-4-633 (Equipos individuales o Material agrupado)
+2026-04-07 15:57:08 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 15:57:09 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 15:57:10 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 15:57:11 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 15:57:12 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 15:57:13 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 15:57:35 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 15:57:37 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 15:57:40 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-07 15:57:54 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-07 15:58:09 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-07 15:58:33 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 15:58:33 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 15:59:46 | WARNING  | utils.db_connector   | Error cerrando conexión: MySQL Connection not available.
+2026-04-07 16:00:41 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-07 16:02:42 | INFO     | gui.abasto           | 🚀 Caché de seriales cargado: 3517 registros.
+2026-04-07 16:02:54 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': '2CD8AE04F99C', 'mac': None}
+2026-04-07 16:02:55 | INFO     | gui.abasto           | 🗑️ Serie eliminada: {'serial': '2CD8AE04CDFD', 'mac': None}
+2026-04-07 16:05:00 | ERROR    | data_layer.inventory | Error en sincronización post-bulk: name 'sincronizar_stock_bodega_serializado' is not defined
+2026-04-07 16:05:25 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-07 16:05:40 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:05:41 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:05:47 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:05:48 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:05:50 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:05:52 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:05:54 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:05:56 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:06:54 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-04-07 16:07:42 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:07:43 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:07:48 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:07:49 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:07:51 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:07:56 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:07:58 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:08:37 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-07 16:08:58 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:08:59 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:09:00 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:09:01 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:09:34 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-04-07 16:10:05 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:10:06 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:10:07 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:10:08 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:10:11 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:10:12 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:10:14 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:10:15 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:10:53 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-07 16:11:31 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:11:32 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:11:34 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:11:34 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:11:35 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:11:36 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:11:37 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:11:39 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:12:16 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-04-07 16:12:28 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:12:28 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:12:29 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-07 16:12:30 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-08 09:13:41 | INFO     | __main__             | Inicializando app_inventario...
+2026-04-08 09:13:42 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-04-08 09:13:47 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-08 09:14:08 | INFO     | data_layer.core      | ✅ Etapa 1 completada: tablas verificadas/creadas.
+2026-04-08 09:14:11 | INFO     | data_layer.warehouse_audit | Tablas de Auditoría de Bodega verificadas/readas correctamente.
+2026-04-08 09:14:14 | INFO     | data_layer.core      | ✅ Etapa 2 completada: migraciones de columnas aplicadas.
+2026-04-08 09:14:17 | INFO     | data_layer.core      | ✅ Etapa 3 completada: índices de rendimiento verificados.
+2026-04-08 09:14:18 | INFO     | data_layer.core      | ✅ Etapa 4 completada: móviles verificados.
+2026-04-08 09:14:18 | INFO     | data_layer.core      | 🎉 Base de datos inicializada correctamente.
+2026-04-08 09:14:19 | INFO     | data_layer.reminders | Bootstrap Start
+2026-04-08 09:14:19 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-04-08 09:14:19 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-04-08 09:24:11 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-08 09:24:32 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-08 09:24:33 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-08 09:24:34 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-08 09:24:36 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-08 09:24:37 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-08 09:24:39 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-08 09:24:41 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-08 09:56:42 | INFO     | __main__             | Inicializando app_inventario...
+2026-04-08 09:56:43 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-04-08 09:56:45 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-08 09:57:06 | INFO     | data_layer.core      | ✅ Etapa 1 completada: tablas verificadas/creadas.
+2026-04-08 09:57:08 | INFO     | data_layer.warehouse_audit | Tablas de Auditoría de Bodega verificadas/readas correctamente.
+2026-04-08 09:57:12 | INFO     | data_layer.core      | ✅ Etapa 2 completada: migraciones de columnas aplicadas.
+2026-04-08 09:57:14 | INFO     | data_layer.core      | ✅ Etapa 3 completada: índices de rendimiento verificados.
+2026-04-08 09:57:15 | INFO     | data_layer.core      | ✅ Etapa 4 completada: móviles verificados.
+2026-04-08 09:57:15 | INFO     | data_layer.core      | 🎉 Base de datos inicializada correctamente.
+2026-04-08 09:57:16 | INFO     | data_layer.reminders | Bootstrap Start
+2026-04-08 09:57:16 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-04-08 09:57:16 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-04-08 10:20:15 | INFO     | gui.abasto           | 🚀 Caché de seriales cargado: 3567 registros.
+2026-04-08 10:22:07 | ERROR    | data_layer.inventory | Error en sincronización post-bulk: name 'sincronizar_stock_bodega_serializado' is not defined
+2026-04-08 10:30:37 | INFO     | data_layer.inventory | Sincronizando stock serializado para sucursal: CHIRIQUI
+2026-04-08 10:30:37 | INFO     | data_layer.inventory | Stock sincronizado para U4-4-633 en CHIRIQUI: 9 -> 11
+2026-04-08 10:30:38 | INFO     | data_layer.inventory | Stock sincronizado para 4-4-644 en CHIRIQUI: 683 -> 687
+2026-04-08 10:30:38 | INFO     | data_layer.inventory | Stock sincronizado para 4-4-656 en CHIRIQUI: 455 -> 461
+2026-04-08 10:30:38 | INFO     | data_layer.inventory | Stock sincronizado para 4-4-646 en CHIRIQUI: 132 -> 142
+2026-04-08 10:30:39 | INFO     | data_layer.inventory | Stock sincronizado para 4-4-647 en CHIRIQUI: 78 -> 81
+2026-04-08 10:30:39 | INFO     | data_layer.inventory | Stock sincronizado para 8-1-902 en CHIRIQUI: 76 -> 83
+2026-04-08 10:30:40 | INFO     | data_layer.inventory | Stock sincronizado para 8-1-903 en CHIRIQUI: 0 -> 4
+2026-04-08 10:30:40 | INFO     | data_layer.inventory | Stock sincronizado para 8-1-904 en CHIRIQUI: 564 -> 571
+2026-04-08 10:30:41 | INFO     | data_layer.inventory | 🧹 Móvil Movil 200 (PAQUETE B) limpiado: 4 registros eliminados.
+2026-04-08 10:32:07 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-08 10:32:28 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-04-08 10:32:42 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-4-61 requiere serial: Not all parameters were used in the SQL statement
+2026-04-08 10:32:43 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-4-61 (Equipos individuales o Material agrupado)
+2026-04-08 10:32:51 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 1-8-40 requiere serial: Not all parameters were used in the SQL statement
+2026-04-08 10:32:52 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-8-40 (Equipos individuales o Material agrupado)
+2026-04-08 10:32:58 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-5-02 requiere serial: Not all parameters were used in the SQL statement
+2026-04-08 10:33:00 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-5-02 (Equipos individuales o Material agrupado)
+2026-04-08 10:33:05 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-07 requiere serial: Not all parameters were used in the SQL statement
+2026-04-08 10:33:06 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-07 (Equipos individuales o Material agrupado)
+2026-04-08 10:33:12 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 2-7-11 requiere serial: Not all parameters were used in the SQL statement
+2026-04-08 10:33:14 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-11 (Equipos individuales o Material agrupado)
+2026-04-08 10:33:17 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-2-41 requiere serial: Not all parameters were used in the SQL statement
+2026-04-08 10:33:19 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-2-41 (Equipos individuales o Material agrupado)
+2026-04-08 10:33:24 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-18 requiere serial: Not all parameters were used in the SQL statement
+2026-04-08 10:33:25 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-18 (Equipos individuales o Material agrupado)
+2026-04-08 10:33:28 | ERROR    | gui.mobile_output_scanner | Error verificando si el sku 4-3-42 requiere serial: Not all parameters were used in the SQL statement
+2026-04-08 10:33:30 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-42 (Equipos individuales o Material agrupado)
+2026-04-08 10:37:58 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-08 10:37:59 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-08 10:38:02 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-08 10:38:04 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-08 10:38:11 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-08 10:38:14 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-08 10:47:49 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-08 10:47:59 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-08 10:48:06 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-08 10:48:19 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-08 10:48:27 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-08 10:48:34 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-08 10:48:35 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-08 10:48:36 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-08 10:48:43 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): U4-4-633 (Equipos individuales o Material agrupado)
+2026-04-08 10:48:52 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-903 (Equipos individuales o Material agrupado)
+2026-04-08 10:48:53 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-903 (Equipos individuales o Material agrupado)
+2026-04-08 10:49:03 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-902 (Equipos individuales o Material agrupado)
+2026-04-08 10:49:18 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-902 (Equipos individuales o Material agrupado)
+2026-04-08 10:49:33 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-08 10:49:41 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-08 10:49:54 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-08 10:50:00 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-08 10:50:14 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-08 10:50:15 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-08 10:50:16 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-08 10:50:17 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-08 10:50:18 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-08 11:18:31 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-08 11:18:33 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-08 11:18:39 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-08 11:18:50 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-644 -> Qty: 1 (Serial)
+2026-04-08 11:19:41 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-902 -> Qty: 1 (Serial)
+2026-04-08 11:19:52 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-902 -> Qty: 1 (Serial)
+2026-04-08 11:19:59 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-903 -> Qty: 1 (Serial)
+2026-04-08 11:20:30 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-903 -> Qty: 1 (Serial)
+2026-04-08 11:20:42 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-647 -> Qty: 1 (Serial)
+2026-04-08 11:21:04 | INFO     | gui.inventory.movements | ✅ Auditado: U4-4-633 -> Qty: 1 (Serial)
+2026-04-08 11:21:14 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-646 -> Qty: 1 (Serial)
+2026-04-08 11:21:22 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-646 -> Qty: 1 (Serial)
+2026-04-08 11:21:39 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-08 11:21:41 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-08 11:21:43 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-08 11:22:16 | INFO     | gui.inventory.movements | ✅ Auditado: 4-3-42 -> Qty: 28 (Material)
+2026-04-08 11:22:21 | INFO     | gui.inventory.movements | ✅ Auditado: 2-5-02 -> Qty: 30 (Material)
+2026-04-08 11:22:26 | INFO     | gui.inventory.movements | ✅ Auditado: 2-7-07 -> Qty: 13 (Material)
+2026-04-08 11:22:32 | INFO     | gui.inventory.movements | ✅ Auditado: 1-4-61 -> Qty: 3 (Material)
+2026-04-08 11:22:38 | INFO     | gui.inventory.movements | ✅ Auditado: 4-3-18 -> Qty: 0 (Material)
+2026-04-08 11:22:45 | INFO     | gui.inventory.movements | ✅ Auditado: 1-8-40 -> Qty: 50 (Material)
+2026-04-08 11:22:51 | INFO     | gui.inventory.movements | ✅ Auditado: 2-7-11 -> Qty: 1 (Material)
+2026-04-08 11:22:59 | INFO     | data_layer.inventory | 🚩 Faltante registrado: Movil 204 - 4-3-42 x12 (CHIRIQUI)
+2026-04-08 11:23:03 | INFO     | data_layer.inventory | 🚩 Faltante registrado: Movil 204 - 2-7-07 x3 (CHIRIQUI)
+2026-04-08 11:23:05 | INFO     | data_layer.inventory | 🚩 Faltante registrado: Movil 204 - 4-3-18 x6 (CHIRIQUI)
+2026-04-08 11:23:09 | INFO     | data_layer.inventory | 🚩 Faltante registrado: Movil 204 - 2-7-11 x2 (CHIRIQUI)
+2026-04-08 11:23:13 | INFO     | data_layer.inventory | 🚩 Faltante registrado: Movil 204 - 4-4-644 x2 (CHIRIQUI)
+2026-04-08 11:23:17 | INFO     | data_layer.inventory | 🚩 Faltante registrado: Movil 204 - 4-4-656 x1 (CHIRIQUI)
+2026-04-08 11:23:20 | INFO     | data_layer.inventory | 🚩 Faltante registrado: Movil 204 - 4-4-647 x1 (CHIRIQUI)
+2026-04-08 11:23:35 | INFO     | data_layer.inventory | 🚩 Faltante registrado: Movil 204 - 8-1-904 x2 (CHIRIQUI)
+2026-04-08 11:23:43 | INFO     | data_layer.inventory | Sincronizando stock serializado para sucursal: CHIRIQUI
+2026-04-08 11:23:44 | INFO     | data_layer.inventory | Stock sincronizado para U4-4-633 en CHIRIQUI: 11 -> 12
+2026-04-08 11:23:44 | INFO     | data_layer.inventory | Stock sincronizado para 4-4-644 en CHIRIQUI: 682 -> 686
+2026-04-08 11:23:45 | INFO     | data_layer.inventory | Stock sincronizado para 4-4-656 en CHIRIQUI: 459 -> 462
+2026-04-08 11:23:45 | INFO     | data_layer.inventory | Stock sincronizado para 4-4-646 en CHIRIQUI: 142 -> 144
+2026-04-08 11:23:45 | INFO     | data_layer.inventory | Stock sincronizado para 4-4-647 en CHIRIQUI: 80 -> 81
+2026-04-08 11:23:46 | INFO     | data_layer.inventory | Stock sincronizado para 8-1-902 en CHIRIQUI: 83 -> 85
+2026-04-08 11:23:46 | INFO     | data_layer.inventory | Stock sincronizado para 8-1-903 en CHIRIQUI: 4 -> 6
+2026-04-08 11:23:47 | INFO     | data_layer.inventory | Stock sincronizado para 8-1-904 en CHIRIQUI: 566 -> 571
+2026-04-08 11:23:48 | INFO     | data_layer.inventory | 🧹 Móvil Movil 204 (PAQUETE A) limpiado: 66 registros eliminados.
+2026-04-08 11:23:56 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-11 (Equipos individuales o Material agrupado)
+2026-04-08 11:23:56 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-902 (Equipos individuales o Material agrupado)
+2026-04-08 11:23:56 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-18 (Equipos individuales o Material agrupado)
+2026-04-08 11:23:56 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-07 (Equipos individuales o Material agrupado)
+2026-04-08 11:23:56 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-5-02 (Equipos individuales o Material agrupado)
+2026-04-08 11:23:56 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-2-41 (Equipos individuales o Material agrupado)
+2026-04-08 11:23:56 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-08 11:23:57 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-08 11:23:57 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): U4-4-633 (Equipos individuales o Material agrupado)
+2026-04-08 11:23:57 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-8-40 (Equipos individuales o Material agrupado)
+2026-04-08 11:23:57 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-08 11:23:57 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-08 11:23:57 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-903 (Equipos individuales o Material agrupado)
+2026-04-08 11:23:57 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-42 (Equipos individuales o Material agrupado)
+2026-04-08 11:23:57 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-08 11:23:57 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-4-61 (Equipos individuales o Material agrupado)
+2026-04-08 11:23:57 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-08 11:24:35 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-08 11:24:37 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-08 11:24:50 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-08 11:24:58 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-08 11:25:04 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-08 11:25:09 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-08 11:25:16 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-08 11:26:02 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-08 11:26:09 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-08 11:26:10 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-08 11:26:11 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-08 11:26:12 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-08 11:26:14 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-08 11:35:26 | INFO     | __main__             | Inicializando app_inventario...
+2026-04-08 11:35:27 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-04-08 11:35:29 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-08 11:35:49 | INFO     | data_layer.core      | ✅ Etapa 1 completada: tablas verificadas/creadas.
+2026-04-08 11:35:51 | INFO     | data_layer.warehouse_audit | Tablas de Auditoría de Bodega verificadas/readas correctamente.
+2026-04-08 11:35:55 | INFO     | data_layer.core      | ✅ Etapa 2 completada: migraciones de columnas aplicadas.
+2026-04-08 11:35:59 | INFO     | data_layer.core      | ✅ Etapa 3 completada: índices de rendimiento verificados.
+2026-04-08 11:36:00 | INFO     | data_layer.core      | ✅ Etapa 4 completada: móviles verificados.
+2026-04-08 11:36:00 | INFO     | data_layer.core      | 🎉 Base de datos inicializada correctamente.
+2026-04-08 11:36:01 | INFO     | data_layer.reminders | Bootstrap Start
+2026-04-08 11:36:01 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-04-08 11:36:01 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-04-08 11:43:39 | INFO     | __main__             | Inicializando app_inventario...
+2026-04-08 11:43:40 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-04-08 11:43:41 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-08 11:44:02 | INFO     | data_layer.core      | ✅ Etapa 1 completada: tablas verificadas/creadas.
+2026-04-08 11:44:05 | INFO     | data_layer.warehouse_audit | Tablas de Auditoría de Bodega verificadas/readas correctamente.
+2026-04-08 11:44:08 | INFO     | data_layer.core      | ✅ Etapa 2 completada: migraciones de columnas aplicadas.
+2026-04-08 11:44:11 | INFO     | data_layer.core      | ✅ Etapa 3 completada: índices de rendimiento verificados.
+2026-04-08 11:44:12 | INFO     | data_layer.core      | ✅ Etapa 4 completada: móviles verificados.
+2026-04-08 11:44:12 | INFO     | data_layer.core      | 🎉 Base de datos inicializada correctamente.
+2026-04-08 11:44:13 | INFO     | data_layer.reminders | Bootstrap Start
+2026-04-08 11:44:13 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-04-08 11:44:13 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-04-08 11:50:00 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-903 -> Qty: 1 (Serial)
+2026-04-08 11:50:15 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-644 -> Qty: 1 (Serial)
+2026-04-08 11:50:20 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-644 -> Qty: 1 (Serial)
+2026-04-08 11:50:22 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-08 11:50:26 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-08 11:50:55 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-644 -> Qty: 1 (Serial)
+2026-04-08 11:51:01 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-08 11:51:14 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-08 11:51:29 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-647 -> Qty: 1 (Serial)
+2026-04-08 11:51:44 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-647 -> Qty: 1 (Serial)
+2026-04-08 11:52:01 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-902 -> Qty: 1 (Serial)
+2026-04-08 11:52:03 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-902 -> Qty: 1 (Serial)
+2026-04-08 11:52:11 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-646 -> Qty: 1 (Serial)
+2026-04-08 11:52:30 | INFO     | gui.inventory.movements | ✅ Auditado: U4-4-633 -> Qty: 1 (Serial)
+2026-04-08 11:52:42 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-08 11:52:43 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-08 11:52:44 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-08 11:53:20 | INFO     | gui.inventory.movements | ✅ Auditado: 4-3-42 -> Qty: 24 (Material)
+2026-04-08 11:53:24 | INFO     | gui.inventory.movements | ✅ Auditado: 2-5-02 -> Qty: 26 (Material)
+2026-04-08 11:53:29 | INFO     | gui.inventory.movements | ✅ Auditado: 2-7-07 -> Qty: 20 (Material)
+2026-04-08 11:53:34 | INFO     | gui.inventory.movements | ✅ Auditado: 1-4-61 -> Qty: 4 (Material)
+2026-04-08 11:53:44 | INFO     | gui.inventory.movements | ✅ Auditado: 4-3-18 -> Qty: 8 (Material)
+2026-04-08 11:53:57 | INFO     | gui.inventory.movements | ✅ Auditado: 1-8-40 -> Qty: 63 (Material)
+2026-04-08 11:54:05 | INFO     | gui.inventory.movements | ✅ Auditado: 4-2-41 -> Qty: 5 (Material)
+2026-04-08 11:54:11 | INFO     | gui.inventory.movements | ✅ Auditado: 2-7-11 -> Qty: 4 (Material)
+2026-04-08 11:54:28 | INFO     | data_layer.inventory | 🚩 Faltante registrado: Movil 202 - 4-3-42 x30 (CHIRIQUI)
+2026-04-08 11:54:31 | INFO     | data_layer.inventory | 🚩 Faltante registrado: Movil 202 - 2-5-02 x3 (CHIRIQUI)
+2026-04-08 11:54:33 | INFO     | data_layer.inventory | 🚩 Faltante registrado: Movil 202 - 2-7-07 x7 (CHIRIQUI)
+2026-04-08 11:54:37 | INFO     | data_layer.inventory | 🚩 Faltante registrado: Movil 202 - 4-3-18 x4 (CHIRIQUI)
+2026-04-08 11:54:42 | INFO     | data_layer.inventory | 🚩 Faltante registrado: Movil 202 - 2-7-11 x1 (CHIRIQUI)
+2026-04-08 11:54:48 | INFO     | data_layer.inventory | 🚩 Faltante registrado: Movil 202 - 4-4-644 x2 (CHIRIQUI)
+2026-04-08 11:54:58 | INFO     | data_layer.inventory | 🚩 Faltante registrado: Movil 202 - 4-4-646 x1 (CHIRIQUI)
+2026-04-08 11:55:03 | INFO     | data_layer.inventory | 🚩 Faltante registrado: Movil 202 - 8-1-903 x1 (CHIRIQUI)
+2026-04-08 11:55:09 | INFO     | data_layer.inventory | 🚩 Faltante registrado: Movil 202 - 8-1-904 x2 (CHIRIQUI)
+2026-04-08 11:55:13 | INFO     | data_layer.inventory | Sincronizando stock serializado para sucursal: CHIRIQUI
+2026-04-08 11:55:14 | INFO     | data_layer.inventory | Stock sincronizado para 4-4-656 en CHIRIQUI: 461 -> 462
+2026-04-08 11:55:17 | INFO     | data_layer.inventory | 🧹 Móvil Movil 202 (PAQUETE A) limpiado: 52 registros eliminados.
+2026-04-08 11:55:21 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-18 (Equipos individuales o Material agrupado)
+2026-04-08 11:55:21 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-11 (Equipos individuales o Material agrupado)
+2026-04-08 11:55:21 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-903 (Equipos individuales o Material agrupado)
+2026-04-08 11:55:21 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): U4-4-633 (Equipos individuales o Material agrupado)
+2026-04-08 11:55:21 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-08 11:55:21 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-08 11:55:21 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-902 (Equipos individuales o Material agrupado)
+2026-04-08 11:55:22 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-08 11:55:22 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-5-02 (Equipos individuales o Material agrupado)
+2026-04-08 11:55:22 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-08 11:55:22 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-07 (Equipos individuales o Material agrupado)
+2026-04-08 11:55:22 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-08 11:55:22 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-2-41 (Equipos individuales o Material agrupado)
+2026-04-08 11:55:22 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-4-61 (Equipos individuales o Material agrupado)
+2026-04-08 11:55:22 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-42 (Equipos individuales o Material agrupado)
+2026-04-08 11:55:22 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-8-40 (Equipos individuales o Material agrupado)
+2026-04-08 11:55:22 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-08 11:55:44 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-08 11:55:51 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-08 11:55:59 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-08 11:56:08 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-08 11:56:25 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-08 11:56:49 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-08 11:56:50 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-08 11:56:51 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-08 11:56:53 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-08 11:56:54 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-08 12:03:40 | INFO     | utils.db_connector   | 🔌 [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-08 12:03:59 | INFO     | data_layer.core      | ✅ Etapa 1 completada: tablas verificadas/creadas.
+2026-04-08 12:04:02 | INFO     | data_layer.warehouse_audit | Tablas de Auditoría de Bodega verificadas/readas correctamente.
+2026-04-08 12:04:05 | INFO     | data_layer.core      | ✅ Etapa 2 completada: migraciones de columnas aplicadas.
+2026-04-08 12:04:07 | INFO     | data_layer.core      | ✅ Etapa 3 completada: índices de rendimiento verificados.
+2026-04-08 12:04:08 | INFO     | data_layer.core      | ✅ Etapa 4 completada: móviles verificados.
+2026-04-08 12:04:08 | INFO     | data_layer.core      | 🎉 Base de datos inicializada correctamente.

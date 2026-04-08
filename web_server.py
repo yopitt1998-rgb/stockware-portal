@@ -61,11 +61,11 @@ else:
 
 # INICIALIZACIÓN DE BASE DE DATOS (MIGRACIONES)
 try:
-    print("🔧 Verificando esquema de base de datos...")
+    print("Verificando esquema de base de datos...")
     inicializar_bd()
-    print("✅ Base de Datos inicializada correctamente.")
+    print("Base de Datos inicializada correctamente.")
 except Exception as e:
-    print(f"⚠️ Error inicializando BD: {e}")
+    print(f"Error inicializando BD: {e}")
 
 @app.errorhandler(500)
 def handle_500_error(e):

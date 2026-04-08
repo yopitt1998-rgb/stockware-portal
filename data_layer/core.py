@@ -12,13 +12,19 @@ from utils.logger import get_logger
 logger = get_logger(__name__)
 from utils.validators import validate_sku, validate_quantity, validate_date, validate_movil, validate_tipo_movimiento, validate_observaciones, ValidationError
 from config import DATABASE_NAME, DB_TYPE, MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB, MYSQL_PORT, MOVILES_DISPONIBLES, MOVILES_SANTIAGO, UBICACION_DESCARTE, TIPO_MOVIMIENTO_DESCARTE, TIPOS_CONSUMO, TIPOS_ABASTO, PAQUETES_MATERIALES, PRODUCTOS_INICIALES, MATERIALES_COMPARTIDOS
-from utils.db_connector import get_db_connection, close_connection, db_session
+from utils.db_connector import get_db_connection, close_connection, db_session, run_query
 
 try:
     from tkinter import messagebox
     HAS_TK = True
 except ImportError:
     HAS_TK = False
+
+# Importar Auditoría de Bodega para inicialización
+try:
+    from data_layer.warehouse_audit import crear_tablas_auditoria
+except ImportError:
+    def crear_tablas_auditoria(): pass
 
 def safe_messagebox(title, message, type="error"):
     """Muestra un mensaje usando messagebox si está disponible, de lo contrario imprime en consola."""
@@ -32,27 +38,6 @@ def safe_messagebox(title, message, type="error"):
     else:
         logger.warning(f"[{title.upper()}] {message}")
 
-def run_query(cursor, query, params=None):
-    """
-    Ejecuta una consulta ajustando la sintaxis según el motor de DB.
-    Convierte '?' a '%s' si el motor es MySQL.
-    Registra errores de consulta.
-    """
-    if DB_TYPE == 'MYSQL':
-        # Reemplazo básico de placeholder para MySQL
-        query = query.replace('?', '%s')
-    
-    try:
-        if params:
-            cursor.execute(query, params)
-        else:
-            cursor.execute(query)
-        return cursor.rowcount
-    except Exception as e:
-        logger.error(f"❌ Error SQL ejecución: {e}")
-        logger.error(f"   Query: {query}")
-        logger.error(f"   Params: {params}")
-        raise e
 
 def _get_sql_types():
     """Retorna tipos SQL compatibles según el motor de BD configurado."""
@@ -489,6 +474,7 @@ def inicializar_bd():
 
         # Ejecución por etapas (Optimizado)
         _crear_tablas(cursor, T)
+        crear_tablas_auditoria() # NUEVO: Módulo de Auditoría independiente
         _ejecutar_migraciones(cursor, T, add_col)
         
         # Etapas no críticas que pueden fallar por red lenta

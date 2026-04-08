@@ -174,3 +174,25 @@ def db_session(target_db=None, existing_conn=None):
         # Solo cerramos la conexión si nosotros la creamos
         if we_created_conn and conn:
             close_connection(conn)
+
+def run_query(cursor, query, params=None):
+    """
+    Ejecuta una consulta ajustando la sintaxis según el motor de DB.
+    Convierte '?' a '%s' si el motor es MySQL.
+    Registra errores de consulta.
+    """
+    if DB_TYPE == 'MYSQL':
+        # Reemplazo básico de placeholder para MySQL
+        query = query.replace('?', '%s')
+    
+    try:
+        if params:
+            cursor.execute(query, params)
+        else:
+            cursor.execute(query)
+        return cursor.rowcount
+    except Exception as e:
+        logger.error(f"❌ Error SQL ejecución: {e}")
+        logger.error(f"   Query: {query}")
+        logger.error(f"   Params: {params}")
+        raise e

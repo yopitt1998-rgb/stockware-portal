@@ -1,5 +1,6 @@
 import tkinter as tk
 import threading
+import concurrent.futures
 
 from tkinter import ttk
 from .styles import Styles
@@ -17,6 +18,9 @@ class DashboardTab:
         self.main_app = main_app
         self.metric_labels = {}
         self.scroll_container = None
+        self.current_page = 0
+        self.page_size = 15
+        self.all_movimientos = []
         self.dashboard_table = None
         self.ax_bar = None
         self.fig_bar = None
@@ -232,6 +236,7 @@ class DashboardTab:
     def actualizar_metricas(self):
         """Actualiza las métricas y la tabla en un hilo separado para no bloquear la UI"""
         self.main_app.set_status("🔄 Actualizando dashboard...")
+        self.current_page = 0  # Reset pagination on refresh
         
         def run_update():
             try:
@@ -239,14 +244,16 @@ class DashboardTab:
                 estadisticas = obtener_estadisticas_reales()
                 
                 # 2. Obtener movimientos recientes
-                movimientos = obtener_ultimos_movimientos(15)
+                movimientos = obtener_ultimos_movimientos(100)  # fetch more for pagination
                 
                 # 3. Obtener datos para gráficos
                 datos_charts = obtener_stock_actual_y_moviles()
                 
                 # Programar actualización de la UI en el hilo principal
                 def _success():
-                    self._aplicar_actualizacion_ui(estadisticas, movimientos, datos_charts)
+                    self.all_movimientos = movimientos
+                    self._aplicar_actualizacion_ui(estadisticas, datos_charts)
+                    self._update_table_page()
                     self.main_app.set_status("✅ Dashboard actualizado", timeout=2000)
                 
                 self.main_app.master.after(0, _success)
@@ -270,10 +277,12 @@ class DashboardTab:
                         ))
                 self.main_app.master.after(0, _mostrar_error_conexion)
 
-        threading.Thread(target=run_update, daemon=True).start()
+        if not hasattr(self, '_executor'):
+            self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=2)
+        self._executor.submit(run_update)
 
-    def _aplicar_actualizacion_ui(self, estadisticas, movimientos, datos_charts):
-        """Aplica los datos obtenidos a los widgets de la interfaz"""
+    def _aplicar_actualizacion_ui(self, estadisticas, datos_charts):
+        """Aplica los datos obtenidos a los widgets de la interfaz (sin tabla)"""
         if not self.notebook.winfo_exists():
             return
 
@@ -290,14 +299,8 @@ class DashboardTab:
             self.metric_labels["bajo_stock"].config(text=str(estadisticas.get("bajo_stock", 0)))
 
         # Actualizar tabla
-        for item in self.dashboard_table.get_children():
-            self.dashboard_table.delete(item)
-            
-        if not movimientos:
-            self.dashboard_table.insert('', tk.END, values=("", "", "No hay movimientos recientes", "", "", ""))
-        else:
-            for row in movimientos:
-                self.dashboard_table.insert('', tk.END, values=row)
+        # Table will be populated via pagination method
+        self.dashboard_table.delete(*self.dashboard_table.get_children())
 
         # Actualizar gráficos
         self._actualizar_charts_ui(datos_charts)
@@ -348,31 +351,74 @@ class DashboardTab:
     def create_charts(self, parent):
         """Crea el área de gráficos"""
         charts_frame = ttk.Frame(parent, style='Modern.TFrame')
+        # Add pagination controls below the recent table
+        self._add_pagination_controls(parent)
         charts_frame.pack(fill='both', expand=True, padx=20, pady=10)
-        
+
         # Frame izquierdo (Barras) y derecho (Torta)
         self.fig_bar = plt.Figure(figsize=(5, 4), dpi=100)
         self.ax_bar = self.fig_bar.add_subplot(111)
-        
+
         self.fig_pie = plt.Figure(figsize=(4, 4), dpi=100)
         self.ax_pie = self.fig_pie.add_subplot(111)
-        
+
         # Canvas
         bar_frame = tk.Frame(charts_frame, bg='white', relief='raised', borderwidth=0, highlightthickness=1, highlightbackground='#ddd')
         bar_frame.pack(side='left', fill='both', expand=True, padx=(0, 10))
-        
+
         tk.Label(bar_frame, text="Top 5 Productos (Mayor Stock)", font=('Segoe UI', 12, 'bold'), bg='white', fg='#2c3e50').pack(pady=10)
-        
+
         self.canvas_bar = FigureCanvasTkAgg(self.fig_bar, master=bar_frame)
         self.canvas_bar.get_tk_widget().pack(fill='both', expand=True)
-        
+
         pie_frame = tk.Frame(charts_frame, bg='white', relief='raised', borderwidth=0, highlightthickness=1, highlightbackground='#ddd')
         pie_frame.pack(side='right', fill='both', expand=True, padx=(10, 0))
-        
+
         tk.Label(pie_frame, text="Distribución de Stock", font=('Segoe UI', 12, 'bold'), bg='white', fg='#2c3e50').pack(pady=10)
-        
+
         self.canvas_pie = FigureCanvasTkAgg(self.fig_pie, master=pie_frame)
         self.canvas_pie.get_tk_widget().pack(fill='both', expand=True)
+
+    def _add_pagination_controls(self, parent):
+        """Create Next/Prev buttons for recent movements pagination"""
+        nav_frame = ttk.Frame(parent, style='Modern.TFrame')
+        nav_frame.pack(fill='x', padx=20, pady=5)
+        btn_prev = tk.Button(nav_frame, text='← Anterior', command=self._prev_page, bg=Styles.SECONDARY_COLOR, fg='white', font=('Segoe UI', 9, 'bold'), relief='flat')
+        btn_prev.pack(side='left')
+        btn_next = tk.Button(nav_frame, text='Siguiente →', command=self._next_page, bg=Styles.SECONDARY_COLOR, fg='white', font=('Segoe UI', 9, 'bold'), relief='flat')
+        btn_next.pack(side='right')
+        self._prev_btn = btn_prev
+        self._next_btn = btn_next
+        self._update_pagination_buttons()
+
+    def _update_table_page(self):
+        """Refresh the recent movements table for the current page"""
+        self.dashboard_table.delete(*self.dashboard_table.get_children())
+        start = self.current_page * self.page_size
+        end = start + self.page_size
+        page_items = self.all_movimientos[start:end]
+        if not page_items:
+            self.dashboard_table.insert('', tk.END, values=("", "", "No hay movimientos", "", "", ""))
+        else:
+            for row in page_items:
+                self.dashboard_table.insert('', tk.END, values=row)
+        self._update_pagination_buttons()
+
+    def _prev_page(self):
+        if self.current_page > 0:
+            self.current_page -= 1
+            self._update_table_page()
+
+    def _next_page(self):
+        max_page = (len(self.all_movimientos) - 1) // self.page_size
+        if self.current_page < max_page:
+            self.current_page += 1
+            self._update_table_page()
+
+    def _update_pagination_buttons(self):
+        max_page = (len(self.all_movimientos) - 1) // self.page_size
+        self._prev_btn.config(state=('normal' if self.current_page > 0 else 'disabled'))
+        self._next_btn.config(state=('normal' if self.current_page < max_page else 'disabled'))
 
     def actualizar_charts(self):
         """Actualiza los datos de los gráficos"""

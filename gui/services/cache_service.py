@@ -1,4 +1,5 @@
 import threading
+import concurrent.futures
 import logging
 import time
 from datetime import datetime
@@ -64,8 +65,9 @@ class CacheService:
             finally:
                 self.is_syncing = False
 
-        thread = threading.Thread(target=run_sync, daemon=True)
-        thread.start()
+        if not hasattr(self, '_executor'):
+            self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=2)
+        self._executor.submit(run_sync)
 
     def get_products(self):
         return self.products

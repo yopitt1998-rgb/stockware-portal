@@ -1162,7 +1162,7 @@ def obtener_diccionarios_escaneo(sucursal_context=None):
     finally:
         if conn: close_connection(conn)
 
-def buscar_producto_por_codigo_barra_maestro(codigo_barra):
+def buscar_producto_por_codigo_barra_maestro(codigo_barra, sucursal_context=None):
     """
     Busca un producto por su código de barra maestro o por SKU.
     Incluye normalización automática de comillas/apóstrofes.
@@ -1187,6 +1187,9 @@ def buscar_producto_por_codigo_barra_maestro(codigo_barra):
         raw_code = str(codigo_barra).strip().upper()
         codigo = raw_code.replace("'", "-").replace("´", "-").replace("`", "-")
         
+        from config import CURRENT_CONTEXT
+        sucursal = sucursal_context or CURRENT_CONTEXT.get('BRANCH', 'CHIRIQUI')
+
         # Buscar por código de barra (maestro o legacy) O por SKU (case-insensitive)
         run_query(cursor, """
             SELECT p.sku, p.nombre, p.cantidad as stock
@@ -1195,8 +1198,9 @@ def buscar_producto_por_codigo_barra_maestro(codigo_barra):
                OR UPPER(TRIM(p.codigo_barra)) IN (?, ?)
                OR UPPER(TRIM(p.sku)) IN (?, ?))
                AND p.ubicacion = 'BODEGA'
+               AND p.sucursal = ?
             LIMIT 1
-        """, (codigo, raw_code, codigo, raw_code, codigo, raw_code))
+        """, (codigo, raw_code, codigo, raw_code, codigo, raw_code, sucursal))
         
         resultado = cursor.fetchone()
         if not resultado:
@@ -1240,7 +1244,7 @@ def obtener_producto_nombre(sku):
         if conn:
             close_connection(conn)
 
-def buscar_producto_por_mac(mac_address):
+def buscar_producto_por_mac(mac_address, sucursal_context=None):
     """
     Busca un producto por su MAC/serial en la tabla series_registradas.
     
@@ -1252,23 +1256,22 @@ def buscar_producto_por_mac(mac_address):
     """
     conn = None
     try:
-        conn = get_db_connection()
-        if DB_TYPE == 'MYSQL':
-            cursor = conn.cursor(buffered=True)
-        else:
-            cursor = conn.cursor()
-        
+        from config import CURRENT_CONTEXT
+        sucursal = sucursal_context or CURRENT_CONTEXT.get('BRANCH', 'CHIRIQUI')
+
         # Normalizar MAC (uppercase y trim)
         mac = mac_address.strip().upper()
         
         # Buscar en tabla series_registradas
+        # CLAVE: Unir con productos también filtrando por sucursal
         run_query(cursor, """
             SELECT s.sku, p.nombre, s.ubicacion, s.mac_number
             FROM series_registradas s
-            JOIN productos p ON s.sku = p.sku
+            JOIN productos p ON s.sku = p.sku AND s.sucursal = p.sucursal
             WHERE UPPER(TRIM(s.mac_number)) = ? AND s.estado = 'DISPONIBLE'
+              AND s.sucursal = ? AND p.ubicacion = 'BODEGA'
             LIMIT 1
-        """, (mac,))
+        """, (mac, sucursal))
         
         resultado = cursor.fetchone()
         if not resultado:

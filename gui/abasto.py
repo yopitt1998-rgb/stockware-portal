@@ -189,9 +189,9 @@ class SerialCaptureDialog:
         """Confirma que las series son correctas y cierra el diálogo"""
         # Verificar que se hayan capturado todas las series requeridas
         if len(self.series_capturadas) != self.cantidad_total:
-            result = messagebox.askyesno("Confirmar", 
-                f"Se requieren {self.cantidad_total} series pero solo se capturaron {len(self.series_capturadas)}.\n\n"
-                "¿Desea continuar de todas formas?", parent=self.top)
+            msg = f"Se declararon {self.cantidad_total} unidades pero se capturaron {len(self.series_capturadas)} seriales.\n\n"
+            msg += "¿Desea guardar el abasto con la cantidad realmente escaneada?"
+            result = messagebox.askyesno("Confirmar Diferencia", msg, parent=self.top)
             if not result:
                 return
         
@@ -601,9 +601,9 @@ class AbastoWindow:
                             "error")
                         return
                     
-                    if cant_scanned < qty:
-                        # Si escaneó menos de lo que dijo, ajustar cantidad automáticamente
-                        logger.info(f"⚠️ Ajustando cantidad de {sku}: de {qty} a {cant_scanned} por escaneo parcial.")
+                    if cant_scanned != qty:
+                        # La verdad absoluta es lo que se escaneó
+                        logger.info(f"⚠️ Ajustando cantidad de {sku}: de {qty} a {cant_scanned} por discrepancia en escaneo.")
                         qty = cant_scanned
                     
                     for item in self.series_capturadas[sku]:

@@ -67,16 +67,22 @@ class SantiagoConsumoTab:
         self.obs_entry = ttk.Entry(form_frame, font=('Segoe UI', 10))
         self.obs_entry.grid(row=1, column=3, padx=10, pady=10, sticky='ew')
 
-        # Search Layer
+        # Search & Scan Layer
         search_panel = tk.Frame(self.main_frame, bg='#f8f9fa')
         search_panel.pack(fill='x', pady=(20, 5))
         
-        tk.Label(search_panel, text=" Buscar Material: ", bg='#f8f9fa', font=('Segoe UI', 10, 'bold')).pack(side='left')
+        tk.Label(search_panel, text="🔫 ESCANEAR (MAC/Serial/Código):", bg='#f8f9fa', font=('Segoe UI', 10, 'bold'), fg='#27ae60').pack(side='left')
+        self.direct_scan_var = tk.StringVar()
+        self.direct_scan_entry = ttk.Entry(search_panel, textvariable=self.direct_scan_var, font=('Segoe UI', 12), width=25)
+        self.direct_scan_entry.pack(side='left', padx=10)
+        self.direct_scan_entry.bind('<Return>', lambda e: self.procesar_escaneo_directo())
+        self.direct_scan_entry.focus_set()
+
+        tk.Label(search_panel, text=" Buscar Material: ", bg='#f8f9fa', font=('Segoe UI', 10)).pack(side='left', padx=(30, 0))
         self.search_var = tk.StringVar()
         self.search_var.trace('w', self.filtrar_productos)
         self.search_entry = ttk.Entry(search_panel, textvariable=self.search_var, font=('Segoe UI', 12))
         self.search_entry.pack(side='left', fill='x', expand=True, padx=5)
-        self.search_entry.focus_set()
 
         # Treeview for Products in Warehouse
         tree_frame = tk.Frame(self.main_frame)
@@ -136,6 +142,56 @@ class SantiagoConsumoTab:
         # Estilos visuales para el árbol
         self.tree.tag_configure('equipo', foreground='#2980b9')
 
+    def procesar_escaneo_directo(self):
+        sn = self.direct_scan_var.get().strip().upper()
+        self.direct_scan_var.set("")
+        if not sn: return
+
+        movil = self.movil_combo.get()
+        tecnico = self.tecnico_entry.get().strip()
+        ticket = self.ticket_entry.get().strip()
+
+        if not tecnico or not ticket:
+            messagebox.showwarning("Campos Requeridos", "Debe completar el Técnico y el Ticket/Contrato antes de registrar.")
+            self.tecnico_entry.focus_set()
+            return
+
+        from database import obtener_sku_por_codigo_barra
+        # 1. Intentar identificar como código maestro de un MATERIAL
+        sku_material = obtener_sku_por_codigo_barra(sn)
+        if sku_material and sku_material not in PRODUCTOS_CON_CODIGO_BARRA:
+            nombre_prod = "Material"
+            stock = 0
+            if hasattr(self, 'all_products'):
+                for p in self.all_products:
+                    if p[1] == sku_material:
+                        nombre_prod, _, stock = p
+                        break
+            self.ventana_consumo(sku_material, nombre_prod, stock, movil, tecnico, ticket)
+            return
+
+        # 2. Si no es material, buscar serial/mac de EQUIPO
+        sku_db, loc = obtener_info_serial(sn)
+        if not sku_db:
+            messagebox.showerror("Error", f"El código '{sn}' no está registrado en el sistema.")
+            self.direct_scan_entry.focus_set()
+            return
+            
+        if loc != 'BODEGA':
+            messagebox.showerror("No Disponible", f"Este equipo está registrado en: {loc}.")
+            self.direct_scan_entry.focus_set()
+            return
+
+        nombre_prod = "Equipo"
+        stock = 1
+        if hasattr(self, 'all_products'):
+            for p in self.all_products:
+                if p[1] == sku_db:
+                    nombre_prod = p[0]
+                    break
+
+        self.ventana_consumo(sku_db, nombre_prod, stock, movil, tecnico, ticket, autollenar_serial=sn)
+
     def abrir_ventana_accion(self):
         selected = self.tree.selection()
         if not selected:
@@ -154,7 +210,7 @@ class SantiagoConsumoTab:
 
         self.ventana_consumo(sku, nombre, stock, movil, tecnico, ticket)
 
-    def ventana_consumo(self, sku, nombre, stock, movil, tecnico, ticket):
+    def ventana_consumo(self, sku, nombre, stock, movil, tecnico, ticket, autollenar_serial=None):
         vent = tk.Toplevel(self.app.master)
         vent.title(f"Registrar Consumo")
         vent.geometry("500x380")
@@ -188,6 +244,11 @@ class SantiagoConsumoTab:
             
             serial_entry = ttk.Entry(main, font=('Segoe UI', 14))
             serial_entry.pack(fill='x', pady=5)
+            
+            if autollenar_serial:
+                serial_entry.insert(0, autollenar_serial)
+                serial_entry.selection_range(0, tk.END)
+
             serial_entry.focus_set()
             
             def procesar_equipo(event=None):
@@ -224,6 +285,10 @@ class SantiagoConsumoTab:
                       relief='flat', pady=12, cursor='hand2')
             btn.pack(fill='x', pady=20)
             vent.bind('<Return>', procesar_equipo)
+            
+            if autollenar_serial:
+                # Dispara el proceso automáticamente una vez cargada la UI temporal
+                self.master.after(100, procesar_equipo)
             
         else:
             tk.Label(main, text=" CANTIDAD A CONSUMIR: ", font=('Segoe UI', 11, 'bold'), 

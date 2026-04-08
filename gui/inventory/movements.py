@@ -1083,14 +1083,6 @@ class MobileReturnWindow:
         # Limpiar consumos verificados anteriores
         self.session_data['consumo_verificado'] = {}
 
-        # Mapeo global de nombres para items extra
-        if not hasattr(self, '_prod_name_map'):
-            self._prod_name_map = {p[1]: p[0] for p in self.productos}
-
-        # Obtener SKUs del paquete seleccionado
-        skus_paquete = []
-        if paquete_filtro != "TODOS":
-            skus_paquete = [sku for sku, cant in PAQUETES_MATERIALES.get(paquete_filtro, [])]
         
         # Incluimos TODOS los SKUs que tengan algún dato: App O Stock Asignado
         all_skus = (set(self.session_data['consumo_app'].keys()) | 
@@ -1113,31 +1105,6 @@ class MobileReturnWindow:
             # El usuario ya no usa Excel, así que el consumo de la App es la VERDAD.
             self.session_data['consumo_verificado'][sku] = qty_app
 
-            # --- NUEVA LÓGICA DE VISIBILIDAD ESTRICTA PERO SEGURA ---
-            if paquete_filtro != "TODOS":
-                # REGLA 1: Solo mostrar si pertenece al paquete seleccionado O tiene stock personalizado O hay movimiento
-                has_perso = (info.get("PERSONALIZADO", 0) if info else 0) > 0
-                has_movimiento = (qty_app > 0 or qty_excel > 0)
-                
-                # Rule 1: Si hay movimiento (Render o Excel), MOSTRAR SIEMPRE
-                if has_movimiento:
-                    pass # Show it
-                elif not is_in_package and not has_perso:
-                    if not is_shared:
-                        continue
-                
-                # Rule 2: Hide if no movement AND no assigned stock in this view (already handled by Rule 1 pass)
-                if not has_movimiento:
-                    stock_en_p = info.get(paquete_filtro, 0) if info else 0
-                    if stock_en_p == 0 and not has_perso:
-                         if not is_shared:
-                             continue
-
-            diff = qty_excel - qty_app
-            status = "Correcto" if diff == 0 else f"Dif: {diff}"
-            tag = 'ok' if diff == 0 else 'error'
-            
-            self.tree_consumo.insert('', 'end', values=(name, qty_app, qty_excel, status), tags=(tag,))
 
         self.update_fisico_ui()
 
