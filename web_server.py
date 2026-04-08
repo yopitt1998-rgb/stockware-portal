@@ -61,9 +61,11 @@ else:
 
 # INICIALIZACIÓN DE BASE DE DATOS (MIGRACIONES)
 try:
-    print("Verificando esquema de base de datos...")
-    inicializar_bd()
-    print("Base de Datos inicializada correctamente.")
+    # Desactivado en web_server para evitar Timeout 521 en Render.
+    # El inicializar_bd() toma ~36s por red y Gunicorn mata el worker a los 30s.
+    # La inicialización ya se hace desde app_inventario.py (Desktop).
+    # inicializar_bd()
+    pass
 except Exception as e:
     print(f"Error inicializando BD: {e}")
 
