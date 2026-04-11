@@ -181,8 +181,16 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
                  # MEJORA: Para Retorno y Consumo, siempre intentar drenar de CUALQUIER paquete disponible en el móvil
                  # para evitar que queden residuos teóricos en paquetes distintos al seleccionado en la UI.
                  if (tipo_movimiento in ('CONSUMO_MOVIL', 'RETORNO_MOVIL')) and cantidad_asignacion_cambio < 0:
-                     sql_rows = "SELECT COALESCE(paquete, 'NINGUNO'), cantidad FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND sucursal = ? AND cantidad > 0 ORDER BY cantidad DESC"
-                     run_query(cursor, sql_rows, (sku, movil_afectado, sucursal))
+                     # CORRECCIÓN VITAL: Respetar la separación estricta de paquetes. 
+                     # Si se especifica un paquete, SOLO drenar de ese paquete o de los sin etiqueta ('NINGUNO', 'PERSONALIZADO').
+                     # NUNCA drenar del PAQUETE B si estamos auditando el PAQUETE A.
+                     if paquete_para_stock in ['PAQUETE A', 'PAQUETE B']:
+                         sql_rows = "SELECT COALESCE(paquete, 'NINGUNO'), cantidad FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND sucursal = ? AND cantidad > 0 AND (COALESCE(paquete, 'NINGUNO') = ? OR COALESCE(paquete, 'NINGUNO') IN ('NINGUNO', 'PERSONALIZADO')) ORDER BY CASE WHEN COALESCE(paquete, 'NINGUNO') = ? THEN 0 ELSE 1 END, cantidad DESC"
+                         run_query(cursor, sql_rows, (sku, movil_afectado, sucursal, paquete_para_stock, paquete_para_stock))
+                     else:
+                         sql_rows = "SELECT COALESCE(paquete, 'NINGUNO'), cantidad FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND sucursal = ? AND cantidad > 0 ORDER BY cantidad DESC"
+                         run_query(cursor, sql_rows, (sku, movil_afectado, sucursal))
+                         
                      filas_con_stock = cursor.fetchall()
                      pendiente_descontar = abs(cantidad_asignacion_cambio)
                      for fila_pq, fila_qty in filas_con_stock:
