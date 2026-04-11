@@ -1,3 +1,4 @@
+print(">>> LOADING WEB SERVER MODULE <<<")
 from flask import Flask, render_template, request, jsonify
 from datetime import date
 import socket
@@ -72,23 +73,28 @@ except Exception as e:
 @app.errorhandler(500)
 def handle_500_error(e):
     """Manejador global para errores de servidor (Evita páginas en blanco)"""
-    logger.error(f"💥 Error 500 detectado: {e}")
+    logger.error(f"Error 500 detectado: {e}")
     import traceback
     error_trace = traceback.format_exc()
     return f"""
     <html>
         <body style="font-family: sans-serif; padding: 20px; background: #fff5f5;">
-            <h1 style="color: #c53030;">🚀 StockWare: Error Crítico de Servidor</h1>
+            <h1 style="color: #c53030;">StockWare: Error Critico de Servidor</h1>
             <div style="background: white; border: 1px solid #feb2b2; padding: 15px; border-radius: 8px;">
                 <p><b>Mensaje:</b> {str(e)}</p>
                 <hr>
-                <p><b>Detalle Técnico:</b></p>
+                <p><b>Detalle Tecnico:</b></p>
                 <pre style="background: #f7fafc; padding: 10px; border-radius: 4px; overflow: auto;">{error_trace}</pre>
             </div>
-            <p><a href="/">🏠 Volver al inicio</a></p>
+            <p><a href="/">Volver al inicio</a></p>
         </body>
     </html>
     """, 500
+
+@app.route('/health')
+def health_check():
+    """Ruta de salud para Render"""
+    return jsonify({"status": "ok", "service": "stockware-portal"}), 200
 
 @app.route('/')
 def index():
@@ -595,16 +601,18 @@ def get_inventario_movil(movil):
         sucursal_ctx = 'SANTIAGO' if movil in MOVILES_SANTIAGO else 'CHIRIQUI'
 
         # Obtener TODAS las asignaciones del móvil (FILTRADO POR SUCURSAL)
+        # HAVING > 0: No mostrar ítems con cantidad 0 (evita registros residuales)
         sql_asignacion = """
             SELECT (SELECT p2.nombre FROM productos p2 WHERE p2.sku = a.sku_producto AND p2.sucursal = ? LIMIT 1) as nombre,
                    a.sku_producto, SUM(a.cantidad) as total, COALESCE(a.paquete, 'NINGUNO') as paquete
             FROM asignacion_moviles a
             WHERE a.movil = ? AND a.sucursal = ?
-            AND a.cantidad > 0
             GROUP BY a.sku_producto, COALESCE(a.paquete, 'NINGUNO')
+            HAVING SUM(a.cantidad) > 0
         """
         run_query(cursor, sql_asignacion, (sucursal_ctx, movil, sucursal_ctx))
         asignacion_rows = cursor.fetchall()
+        logger.info(f"[INVENTARIO API] Móvil={movil}, Sucursal={sucursal_ctx}, Items encontrados={len(asignacion_rows)}")
         
         # Agrupar por SKU para poder calcular totales de compartidos
         # Estructura: {sku: {paquete: cantidad, ...}}
@@ -623,15 +631,16 @@ def get_inventario_movil(movil):
             nombre_final = nombres_sku.get(sku, nombre or sku)
             
             if sku in PRODUCTOS_CON_CODIGO_BARRA:
-                # FILTRO CRÍTICO: Buscar seriales SOLO de este paquete específico para este SKU y SUCURSAL
+                # CORRECCIÓN: Buscar TODOS los seriales del móvil para este SKU, SIN filtrar por paquete.
+                # Un serial asignado al móvil debe mostrarse siempre, independiente del valor de 'paquete'
+                # en series_registradas, ya que a veces hay inconsistencia con asignacion_moviles.
                 sql_series = """
                     SELECT serial_number 
                     FROM series_registradas 
-                    WHERE sku = ? AND ubicacion = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?
+                    WHERE sku = ? AND ubicacion = ? AND sucursal = ?
                     ORDER BY serial_number
                 """
-                pq_query = paquete if paquete else 'NINGUNO'
-                run_query(cursor, sql_series, (sku, movil, pq_query, sucursal_ctx))
+                run_query(cursor, sql_series, (sku, movil, sucursal_ctx))
                 seriales = [row[0] for row in cursor.fetchall()]
                 
                 inventario.append({
@@ -710,6 +719,7 @@ def registrar_bulk():
             sucursal_ctx = 'CHIRIQUI'
 
         print(f"[ROUTING] Bulk de {movil} -> Sucursal: {sucursal_ctx} (DB: {target_db or 'Default'})")
+        logger.info(f"[CONSUMO WEB] Móvil={movil}, Sucursal={sucursal_ctx}, Items={len(data.get('materiales', []))}, Ticket={data.get('contrato')}")
             
         conn = get_db_connection(target_db=target_db)
         cursor = conn.cursor()

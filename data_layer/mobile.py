@@ -12,6 +12,7 @@ from utils.db_connector import get_db_connection, close_connection, db_session
 
 from data_layer.core import run_query, safe_messagebox
 from data_layer.inventory import *
+from data_layer.movements import registrar_movimiento_gui
 
 def diagnosticar_duplicados_movil(movil):
     """Diagnóstico: Identifica duplicados exactos en asignacion_moviles"""
@@ -96,11 +97,11 @@ def limpiar_duplicados_asignacion_moviles():
 
 def verificar_y_corregir_duplicados_completo(silent=False):
     """Realiza una limpieza completa de duplicados en todas las tablas."""
-    if not silent: logger.info("🔍 Iniciando verificación y corrección de duplicados...")
+    if not silent: logger.info("Iniciando verificacion y correccion de duplicados...")
     
     # 1. Limpiar duplicados en productos
     eliminados_prod, mensaje_prod = limpiar_productos_duplicados()
-    if not silent: logger.info(f"📦 Productos: {mensaje_prod}")
+    if not silent: logger.info(f"Productos: {mensaje_prod}")
     
     # 2. Limpiar duplicados en asignacion_moviles
     # Solo limpiamos esto SI detectamos que hay duplicados para evitar re-escritura total lenta
@@ -115,11 +116,11 @@ def verificar_y_corregir_duplicados_completo(silent=False):
 
     if tiene_duplicados:
         _, mensaje_asign = limpiar_duplicados_asignacion_moviles()
-        if not silent: logger.info(f"🚚 Asignación Móviles: {mensaje_asign}")
+        if not silent: logger.info(f"Asignacion Moviles: {mensaje_asign}")
     elif not silent:
-        logger.info("🚚 Asignación Móviles: No se encontraron duplicados.")
+        logger.info("Asignacion Moviles: No se encontraron duplicados.")
     
-    if not silent: logger.info("✅ Verificación completada.")
+    if not silent: logger.info("Verificacion completada.")
     return True
 
 def obtener_ultima_salida_movil(movil):
@@ -503,9 +504,11 @@ def eliminar_consumos_pendientes_por_movil(movil):
         conn = get_db_connection()
         if DB_TYPE == 'MYSQL':
             cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
         run_query(cursor, "DELETE FROM consumos_pendientes WHERE UPPER(movil) = UPPER(?)", (movil,))
         conn.commit()
-        logger.info(f"🧹 Consumos pendientes eliminados para el móvil: {movil}")
+        logger.info(f"Consumos pendientes eliminados para el movil: {movil}")
         return True, f"Consumos pendientes de {movil} eliminados."
     except Exception as e:
         logger.error(f"Error al eliminar consumos de {movil}: {e}")
@@ -716,7 +719,7 @@ def obtener_detalles_moviles():
         return {f[0]: {"conductor": f[1] or "", "ayudante": f[2] or ""} for f in filas}
         
     except Exception as e:
-        logger.error(f"⚠️ Error en obtener_detalles_moviles (usando fallback): {e}")
+        logger.error(f"Error en obtener_detalles_moviles (usando fallback): {e}")
         from config import MOVILES_DETAILS_FALLBACK
         return MOVILES_DETAILS_FALLBACK
     finally:
@@ -746,7 +749,7 @@ def obtener_inventario_movil(movil):
         return {row[0]: row[1] for row in resultados if row[1] > 0}
         
     except Exception as e:
-        logger.error(f"❌ Error al obtener inventario de {movil}: {e}")
+        logger.error(f"Error al obtener inventario de {movil}: {e}")
         return {}
     finally:
         if conn: close_connection(conn)
@@ -1336,7 +1339,7 @@ def registrar_danado_directo(sku, cantidad, tecnico, observaciones=None, seriale
                         run_query(cursor, "UPDATE asignacion_moviles SET cantidad = ? WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?",
                                        (nueva_qty, sku_real, loc_real, pq_real, sucursal))
                     else:
-                        run_query(cursor, "DELETE FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?",
+                        run_query(cursor, "UPDATE asignacion_moviles SET cantidad = 0 WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?",
                                        (sku_real, loc_real, pq_real, sucursal))
                 else:
                     logger.warning(f"Equipo {sn} en {loc_real} pero no hay stock en tabla asignacion_moviles.")
@@ -1524,8 +1527,10 @@ def registrar_faltante_audit(movil, sku, cantidad, seriales=None, sucursal=None,
                     run_query(cursor, "UPDATE asignacion_moviles SET cantidad = cantidad - ? WHERE id = ?", (a_restar, f_id))
                     pendiente -= a_restar
                 
-                # Opcional: eliminar filas con cantidad 0
-                run_query(cursor, "DELETE FROM asignacion_moviles WHERE cantidad <= 0 AND sku_producto = ? AND movil = ? AND sucursal = ?", (sku, movil, sucursal))
+                # IMPORTANTE: NO eliminar filas con cantidad 0.
+                # Eliminarlas causa que los equipos desaparezcan del portal Render
+                # al día siguiente cuando se procesan otros movimientos del mismo móvil.
+                # Las filas con cantidad=0 se filtran en la API de inventario.
         
         logger.info(f"🚩 Faltante registrado: {movil} - {sku} x{cantidad} ({sucursal})")
         if should_close:
@@ -1597,8 +1602,9 @@ def registrar_faltante_manual(movil, sku, cantidad, seriales=None, paquete=None,
                         run_query(cursor, "UPDATE asignacion_moviles SET cantidad = cantidad - ? WHERE id = ?", (a_quitar, f_id))
                         cant_a_descontar -= a_quitar
                 
-                # Limpiar
-                run_query(cursor, "DELETE FROM asignacion_moviles WHERE cantidad <= 0 AND sku_producto = ? AND movil = ? AND sucursal = ?", (sku, movil, sucursal))
+                # IMPORTANTE: NO eliminar filas con cantidad 0.
+                # Eliminarlas causa desaparición de equipos en el portal Render.
+                # Las filas con cantidad=0 se filtran en la API de inventario.
 
             logger.info(f"🚩 Faltante MANUAL registrado: {movil} - {sku} x{cantidad} en {paquete or 'NINGUNO'}")
             return True, "Faltante registrado correctamente"
