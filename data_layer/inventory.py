@@ -1,6 +1,13 @@
+import os
+import sys
+import csv
 import sqlite3
 import mysql.connector
-import os
+from datetime import date
+
+# Permitir ejecución directa del script agregando la raíz al PATH
+if __name__ == "__main__":
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from utils.logger import get_logger
 
@@ -10,6 +17,7 @@ from config import DATABASE_NAME, DB_TYPE, MYSQL_HOST, MYSQL_USER, MYSQL_PASS, M
 from utils.db_connector import get_db_connection, close_connection, db_session
 
 from data_layer.core import run_query, safe_messagebox
+from data_layer.movements import sincronizar_stock_bodega_serializado
 
 def limpiar_productos_duplicados():
     """Elimina productos duplicados manteniendo el registro más reciente"""
@@ -434,85 +442,71 @@ def obtener_reporte_abasto(fecha_inicio, fecha_fin):
         if conn: close_connection(conn)
 
 def obtener_estadisticas_reales():
-    """Obtiene estadísticas reales para el dashboard"""
+    """Obtiene estadísticas reales para el dashboard filtrando por sucursal actual"""
     conn = None
     try:
+        from config import CURRENT_CONTEXT
+        sucursal_target = CURRENT_CONTEXT.get('BRANCH', 'CHIRIQUI')
+        
         conn = get_db_connection()
         if DB_TYPE == 'MYSQL':
             cursor = conn.cursor(buffered=True)
         else:
             cursor = conn.cursor()
         
-        # DETERMINAR FILTRO DE SUCURSAL
-        import os
-        is_santiago = os.environ.get('SANTIAGO_DIRECT_MODE') == '1'
-        sucursal_target = 'SANTIAGO' if is_santiago else 'CHIRIQUI'
-        
-        # 1. Productos en Bodega (contar productos únicos en BODEGA de esta sucursal)
+        # 1. Productos en Bodega (contar SKUs únicos en BODEGA con stock > 0 en esta sucursal)
         run_query(cursor, """
             SELECT COUNT(DISTINCT sku) 
             FROM productos 
             WHERE ubicacion = 'BODEGA' AND cantidad > 0 AND sucursal = ?
         """, (sucursal_target,))
-        productos_bodega = cursor.fetchone()[0]
+        productos_bodega = cursor.fetchone()[0] or 0
         
-        # 2. Móviles Activos (contar móviles con productos asignados de esta sucursal)
-        if is_santiago:
-            moviles_activos = 0
-        else:
-            run_query(cursor, """
-                SELECT COUNT(DISTINCT movil) 
-                FROM asignacion_moviles am
-                JOIN (SELECT sku FROM productos WHERE sucursal = ? GROUP BY sku) p ON am.sku_producto = p.sku
-                WHERE cantidad > 0
-            """, (sucursal_target,))
-            moviles_activos = cursor.fetchone()[0]
+        # 2. Móviles Activos (móviles que tienen algo asignado de esta sucursal)
+        # Nota: En Santiago no hay móviles configurados de forma estándar si solo usan Abasto
+        run_query(cursor, """
+            SELECT COUNT(DISTINCT movil) 
+            FROM asignacion_moviles 
+            WHERE cantidad > 0 AND sucursal = ?
+        """, (sucursal_target,))
+        moviles_activos = cursor.fetchone()[0] or 0
         
-        # 3. Stock Total (suma de todo el stock en BODEGA de esta sucursal)
+        # 3. Stock Total (Suma de todas las unidades en BODEGA de esta sucursal)
         run_query(cursor, """
             SELECT SUM(cantidad) 
             FROM productos 
             WHERE ubicacion = 'BODEGA' AND sucursal = ?
         """, (sucursal_target,))
-        stock_total_result = cursor.fetchone()[0]
-        stock_total = stock_total_result if stock_total_result else 0
+        stock_total = cursor.fetchone()[0] or 0
         
-        # 4. Préstamos Activos (Solo Santiago verá préstamos santiago)
-        if is_santiago:
+        # 4. Préstamos Activos
+        if sucursal_target == 'SANTIAGO':
+            # Solo préstamos hechos en Santiago
             run_query(cursor, "SELECT COUNT(*) FROM movimientos WHERE tipo_movimiento = 'PRESTAMO_SANTIAGO' AND sucursal = 'SANTIAGO'")
-            prestamos_activos = cursor.fetchone()[0]
         else:
             run_query(cursor, "SELECT COUNT(*) FROM prestamos_activos WHERE estado = 'ACTIVO'")
-            prestamos_activos = cursor.fetchone()[0]
+        prestamos_activos = cursor.fetchone()[0] or 0
         
-        # 5. Productos con Bajo Stock (en esta sucursal)
+        # 5. Bajo Stock (Alertar si están por debajo del mínimo configurado)
         run_query(cursor, """
             SELECT COUNT(*) 
             FROM productos 
             WHERE ubicacion = 'BODEGA' AND cantidad < minimo_stock AND cantidad > 0 AND sucursal = ?
         """, (sucursal_target,))
-        bajo_stock = cursor.fetchone()[0]
+        bajo_stock = cursor.fetchone()[0] or 0
         
         return {
             "productos_bodega": productos_bodega,
             "moviles_activos": moviles_activos,
-            "stock_total": stock_total,
+            "stock_total": int(stock_total),
             "prestamos_activos": prestamos_activos,
             "bajo_stock": bajo_stock
         }
     except Exception as e:
-        logger.error(f"❌ Error en obtener_estadisticas_reales: {e}")
+        logger.error(f"Error en obtener_estadisticas_reales: {e}")
         return {
             "productos_bodega": 0, "moviles_activos": 0, "stock_total": 0,
             "prestamos_activos": 0, "bajo_stock": 0
-        }
-        return {
-            "productos_bodega": 0,
-            "moviles_activos": 0,
-            "stock_total": 0,
-            "stock_total": 0,
-            "prestamos_activos": 0,
-            "bajo_stock": 0
         }
     finally:
         if conn: close_connection(conn)
@@ -547,7 +541,7 @@ def buscar_equipo_global(termino, sucursal_context=None):
             cursor = conn.cursor()
         
         termino_clean = str(termino).strip().upper()
-        logger.info(f"🔎 Buscando equipo global: '{termino_clean}' en sucursal: '{sucursal_target}'")
+        logger.info(f"Buscando equipo global: '{termino_clean}' en sucursal: '{sucursal_target}'")
         
         sql = """
             SELECT 
@@ -563,17 +557,14 @@ def buscar_equipo_global(termino, sucursal_context=None):
               AND (UPPER(s.sucursal) = UPPER(?) OR (s.sucursal IS NULL AND UPPER(?) = 'CHIRIQUI'))
         """
         
-        if DB_TYPE == 'MYSQL':
-            sql = sql.replace('?', '%s')
-            
         run_query(cursor, sql, (termino_clean, termino_clean, sucursal_target, sucursal_target))
         res = cursor.fetchone()
         
         if not res:
-            logger.warning(f"❌ No se encontró resultado para '{termino_clean}' con sucursal '{sucursal_target}'")
+            logger.warning(f"No se encontro resultado para '{termino_clean}' con sucursal '{sucursal_target}'")
             return None
 
-        logger.info(f"✅ Resultado encontrado: {res[2]} ({res[4]})")
+        logger.info(f"Resultado encontrado: {res[2]} ({res[4]})")
         
         res_list = list(res)
         serial, mac, sku, nombre, ubicacion, estado, paquete = res_list
@@ -748,7 +739,7 @@ def registrar_series_bulk(series_data, fecha_ingreso=None, paquete=None, existin
             for suc in sucursales_afectadas:
                 sincronizar_stock_bodega_serializado(sucursal_context=suc)
         except Exception as e_sync:
-            logger.error(f"Error en sincronización post-bulk: {e_sync}")
+            logger.error(f"Error en sincronizacion post-bulk: {e_sync}")
 
         return True, f"{len(data_to_insert)} items registrados correctamente."
         
@@ -1262,22 +1253,23 @@ def buscar_producto_por_mac(mac_address, sucursal_context=None):
         # Normalizar MAC (uppercase y trim)
         mac = mac_address.strip().upper()
         
-        # Buscar en tabla series_registradas
-        # CLAVE: Unir con productos también filtrando por sucursal
-        run_query(cursor, """
-            SELECT s.sku, p.nombre, s.ubicacion, s.mac_number
-            FROM series_registradas s
-            JOIN productos p ON s.sku = p.sku AND s.sucursal = p.sucursal
-            WHERE UPPER(TRIM(s.mac_number)) = ? AND s.estado = 'DISPONIBLE'
-              AND s.sucursal = ? AND p.ubicacion = 'BODEGA'
-            LIMIT 1
-        """, (mac, sucursal))
-        
-        resultado = cursor.fetchone()
-        if not resultado:
-            return None
+        with db_session() as (conn, cursor):
+            # Buscar en tabla series_registradas
+            # CLAVE: Unir con productos también filtrando por sucursal
+            run_query(cursor, """
+                SELECT s.sku, p.nombre, s.ubicacion, s.mac_number
+                FROM series_registradas s
+                JOIN productos p ON s.sku = p.sku AND s.sucursal = p.sucursal
+                WHERE UPPER(TRIM(s.mac_number)) = ? AND s.estado = 'DISPONIBLE'
+                  AND s.sucursal = ? AND p.ubicacion = 'BODEGA'
+                LIMIT 1
+            """, (mac, sucursal))
             
-        sku, nombre, ubicacion, mac_number = resultado
+            resultado = cursor.fetchone()
+            if not resultado:
+                return None
+            
+            sku, nombre, ubicacion, mac_number = resultado
         
         # Verificar que esté en BODEGA
         if ubicacion != 'BODEGA':

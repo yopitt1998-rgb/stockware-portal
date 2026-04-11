@@ -631,16 +631,16 @@ def get_inventario_movil(movil):
             nombre_final = nombres_sku.get(sku, nombre or sku)
             
             if sku in PRODUCTOS_CON_CODIGO_BARRA:
-                # CORRECCIÓN: Buscar TODOS los seriales del móvil para este SKU, SIN filtrar por paquete.
-                # Un serial asignado al móvil debe mostrarse siempre, independiente del valor de 'paquete'
-                # en series_registradas, ya que a veces hay inconsistencia con asignacion_moviles.
+                # FILTRO CRÍTICO: Buscar seriales SOLO de este paquete específico para este SKU y SUCURSAL
+                # Restaurado a petición del usuario: Es vital mantener la separación estricta entre paquetes (días).
                 sql_series = """
                     SELECT serial_number 
                     FROM series_registradas 
-                    WHERE sku = ? AND ubicacion = ? AND sucursal = ?
+                    WHERE sku = ? AND ubicacion = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?
                     ORDER BY serial_number
                 """
-                run_query(cursor, sql_series, (sku, movil, sucursal_ctx))
+                pq_query = paquete if paquete else 'NINGUNO'
+                run_query(cursor, sql_series, (sku, movil, pq_query, sucursal_ctx))
                 seriales = [row[0] for row in cursor.fetchall()]
                 
                 inventario.append({

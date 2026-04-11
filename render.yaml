@@ -4,7 +4,7 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn wsgi_app:application
+    startCommand: gunicorn wsgi_app:application --bind 0.0.0.0:$PORT --timeout 90 --log-level debug
     envVars:
       - key: DB_TYPE
         value: MYSQL

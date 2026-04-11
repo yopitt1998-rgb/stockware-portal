@@ -1,8 +1,13 @@
+import os
+import sys
+
+# Permitir ejecucion directa del script agregando la raiz al PATH
+if __name__ == "__main__":
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import sqlite3
 import mysql.connector
 from mysql.connector import pooling
-import os
-import sys
 import csv
 import shutil
 from datetime import datetime, date, timedelta
@@ -74,10 +79,10 @@ def _make_column_helpers(cursor):
                 if default is not None:
                     sql += f" DEFAULT {default}"
                 cursor.execute(sql)
-                logger.info(f"🆕 Columna '{column}' añadida a '{table}'")
+                logger.info(f"Columna '{column}' añadida a '{table}'")
                 _cache.pop(table, None)
         except Exception as e:
-            logger.warning(f"⚠️ add_col({table}.{column}): {e}")
+            logger.warning(f"add_col({table}.{column}): {e}")
 
     def add_idx(name, table, cols):
         """Añade un índice MySQL de forma segura e idempotente."""
@@ -90,7 +95,7 @@ def _make_column_helpers(cursor):
             cursor.execute(f"CREATE INDEX {name} ON {table}({cols})")
         except Exception as e:
             if "1061" not in str(e) and "Duplicate" not in str(e):
-                logger.warning(f"⚠️ Índice {name} en {table}: {e}")
+                logger.warning(f"Indice {name} en {table}: {e}")
 
     return add_col, add_idx
 
@@ -284,7 +289,7 @@ def _crear_tablas(cursor, T):
             cursor.execute(f"CREATE TABLE IF NOT EXISTS series_registradas (id {INT} PRIMARY KEY {AUTOINC}, sku VARCHAR(50) NOT NULL, serial_number VARCHAR(100) NOT NULL)")
         except Exception: pass
 
-    logger.info("✅ Etapa 1 completada: tablas verificadas/creadas.")
+    logger.info("Etapa 1 completada: tablas verificadas/creadas.")
 
 
 # ─────────────────────────────────────────────────────────
@@ -311,7 +316,7 @@ def _ejecutar_migraciones(cursor, T, add_col):
             cursor.execute("SHOW INDEX FROM productos WHERE Key_name IN ('sku', 'sku_ubic_suc')")
             idx = cursor.fetchall()
             if idx and len(idx) < 3:
-                logger.info("🔧 Migrando índice de productos para incluir sucursal...")
+                logger.info("Migrando indice de productos para incluir sucursal...")
                 for name in ('sku', 'sku_ubic_suc'):
                     try: cursor.execute(f"ALTER TABLE productos DROP INDEX {name}")
                     except Exception: pass
@@ -328,11 +333,11 @@ def _ejecutar_migraciones(cursor, T, add_col):
             cursor.execute("SHOW INDEX FROM asignacion_moviles WHERE Key_name = 'sku_producto'")
             idx = cursor.fetchall()
             if idx and len(idx) < 3:
-                logger.info("🔧 Migrando índice de asignacion_moviles...")
+                logger.info("Migrando indice de asignacion_moviles...")
                 cursor.execute("ALTER TABLE asignacion_moviles DROP INDEX sku_producto")
                 cursor.execute("ALTER TABLE asignacion_moviles ADD UNIQUE KEY sku_movil_paquete_suc (sku_producto, movil, paquete, sucursal)")
         except Exception as e:
-            logger.warning(f"⚠️ Índice asignacion_moviles: {e}")
+            logger.warning(f"Indice asignacion_moviles: {e}")
 
     # movimientos
     add_col('movimientos', 'movil_afectado',      'VARCHAR(100)')
@@ -366,7 +371,7 @@ def _ejecutar_migraciones(cursor, T, add_col):
             cursor.execute("SHOW CREATE TABLE series_registradas")
             create_sql = cursor.fetchone()[1]
             if 'UNIQUE KEY `serial_number` (`serial_number`)' in create_sql:
-                logger.info("🔧 Migrando índice de series_registradas para incluir sucursal...")
+                logger.info("Migrando indice de series_registradas para incluir sucursal...")
                 cursor.execute("ALTER TABLE series_registradas DROP INDEX serial_number")
                 cursor.execute("ALTER TABLE series_registradas ADD UNIQUE KEY sn_sucursal (serial_number, sucursal)")
             if 'UNIQUE KEY `mac_number` (`mac_number`)' in create_sql:
@@ -385,9 +390,9 @@ def _ejecutar_migraciones(cursor, T, add_col):
             if 'paquete' not in [c[1] for c in cursor.fetchall()]:
                 cursor.execute("ALTER TABLE faltantes_registrados ADD COLUMN paquete TEXT DEFAULT 'NINGUNO'")
     except Exception as e:
-        logger.warning(f"⚠️ Migración faltantes_registrados.paquete: {e}")
+        logger.warning(f"Migracion faltantes_registrados.paquete: {e}")
 
-    logger.info("✅ Etapa 2 completada: migraciones de columnas aplicadas.")
+    logger.info("Etapa 2 completada: migraciones de columnas aplicadas.")
 
 
 # ─────────────────────────────────────────────────────────
@@ -433,7 +438,7 @@ def _actualizar_indices(cursor, add_idx):
         add_idx('idx_series_serial',            'series_registradas',   'serial_number')
         add_idx('idx_series_sku',               'series_registradas',   'sku')
 
-    logger.info("✅ Etapa 3 completada: índices de rendimiento verificados.")
+    logger.info("Etapa 3 completada: indices de rendimiento verificados.")
 
 
 # ─────────────────────────────────────────────────────────
@@ -451,9 +456,9 @@ def _poblar_moviles(cursor):
             for mv in ALL_MOVILES:
                 try: run_query(cursor, "INSERT OR IGNORE INTO moviles (nombre, activo) VALUES (?, 1)", (mv,))
                 except Exception: pass
-        logger.info("✅ Etapa 4 completada: móviles verificados.")
+        logger.info("Etapa 4 completada: moviles verificados.")
     except Exception as e:
-        logger.warning(f"⚠️ Etapa 4 no crítica: {e}")
+        logger.warning(f"Etapa 4 no critica: {e}")
 
 
 # ─────────────────────────────────────────────────────────
@@ -479,19 +484,19 @@ def inicializar_bd():
         
         # Etapas no críticas que pueden fallar por red lenta
         try: _actualizar_indices(cursor, add_idx)
-        except Exception as e: logger.warning(f"⚠️ Índices: {e}")
+        except Exception as e: logger.warning(f"Indices: {e}")
         
         try: _poblar_moviles(cursor)
-        except Exception as e: logger.warning(f"⚠️ Móviles: {e}")
+        except Exception as e: logger.warning(f"Moviles: {e}")
 
         conn.commit()
-        logger.info("🎉 Base de datos inicializada correctamente.")
+        logger.info("Base de datos inicializada correctamente.")
         return True
 
     except Exception as e:
         engine = "MySQL" if DB_TYPE == 'MYSQL' else "SQLite"
-        logger.error(f"❌ Error crítico en inicializar_bd: {e}")
-        safe_messagebox("Error de Inicio", f"❌ Error de {engine} al inicializar la base de datos:\n\n{e}\n\nVerifique su conexión.")
+        logger.error(f"Error critico en inicializar_bd: {e}")
+        safe_messagebox("Error de Inicio", f"Error de {engine} al inicializar la base de datos:\n\n{e}\n\nVerifique su conexión.")
         return False
     finally:
         if conn:
@@ -605,10 +610,7 @@ def obtener_configuracion():
             cursor = conn.cursor(dictionary=True)
         else:
             conn.row_factory = sqlite3.Row
-            if DB_TYPE == 'MYSQL':
-                cursor = conn.cursor(buffered=True)
-            else:
-                cursor = conn.cursor()
+            cursor = conn.cursor()
         
         run_query(cursor, "SELECT * FROM configuracion WHERE id_config = 1")
         row = cursor.fetchone()
@@ -660,10 +662,7 @@ def autenticar_usuario(username, password):
             cursor = conn.cursor(dictionary=True)
         else:
             conn.row_factory = sqlite3.Row
-            if DB_TYPE == 'MYSQL':
-                cursor = conn.cursor(buffered=True)
-            else:
-                cursor = conn.cursor()
+            cursor = conn.cursor()
         
         run_query(cursor, """
             SELECT id, usuario, rol 
@@ -673,10 +672,7 @@ def autenticar_usuario(username, password):
         
         row = cursor.fetchone()
         if row:
-            if DB_TYPE == 'MYSQL':
-                return row
-            else:
-                return dict(row)
+            return dict(row)
         return None
     except Exception as e:
         logger.error(f"Error en autenticación: {e}")

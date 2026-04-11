@@ -115,12 +115,20 @@ class TabManager:
 
     def switch_to_tab(self, tab_name):
         """Programmatically switch to a tab by name."""
-        for i, name in enumerate(self.tabs_data.keys()):
-            # Note: name here is the key in tabs_data, but notebook uses displayed text
-            # We need to match displayed text
-            try:
+        # Fix: Search through all available tabs in the notebook by their displayed text
+        try:
+            for i in range(self.main_notebook.index('end')):
                 if self.main_notebook.tab(i, "text") == tab_name:
                     self.main_notebook.select(i)
                     return
-            except Exception:
-                continue
+            
+            # Fallback for hidden tabs or button labels (btn_text)
+            for name, data in self.tabs_data.items():
+                if name == tab_name or data.get('btn_text') == tab_name:
+                    # If it's the specific tab name but not in notebook, it might be hidden
+                    if data.get('hidden'):
+                        logger.warning(f"Attempted to switch to hidden tab: {tab_name}")
+                        # We don't switch to it, but we could show a message or load it in background
+                    break
+        except Exception as e:
+            logger.error(f"Error switching to tab {tab_name}: {e}")

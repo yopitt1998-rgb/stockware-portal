@@ -50,7 +50,7 @@ def get_db_connection(target_db=None):
     if DB_TYPE == 'MYSQL':
         try:
             if db_name not in _mysql_pools:
-                logger.info(f"🔌 [POOL] Creando pool de conexiones para MySQL -> DB: {db_name}")
+                logger.info(f"[POOL] Creando pool de conexiones para MySQL -> DB: {db_name}")
                 _mysql_pools[db_name] = pooling.MySQLConnectionPool(
                     pool_name=f"pool_{db_name.replace('-', '_')}",
                     pool_size=10,
@@ -70,7 +70,7 @@ def get_db_connection(target_db=None):
         except (mysql.connector.errors.PoolError,
                 mysql.connector.errors.OperationalError,
                 mysql.connector.errors.InterfaceError) as err:
-            logger.warning(f"⚠️ [POOL] Error de conexión para {db_name}, reintentando una vez: {err}")
+            logger.warning(f"[POOL] Error de conexión para {db_name}, reintentando una vez: {err}")
             # Limpiar pool si falló
             if db_name in _mysql_pools:
                 try: del _mysql_pools[db_name]
@@ -93,10 +93,10 @@ def get_db_connection(target_db=None):
                     )
                 return _mysql_pools[db_name].get_connection()
             except Exception as e:
-                logger.error(f"❌ [DB] Error fatal conectando a {db_name}: {e}")
+                logger.error(f"[DB] Error fatal conectando a {db_name}: {e}")
                 raise e
         except Exception as e:
-            logger.error(f"❌ Error inesperado conectando a MySQL ({db_name}): {e}")
+            logger.error(f"Error inesperado conectando a MySQL ({db_name}): {e}")
             raise e
     else:
         # SQLite
@@ -192,7 +192,7 @@ def run_query(cursor, query, params=None):
             cursor.execute(query)
         return cursor.rowcount
     except Exception as e:
-        logger.error(f"❌ Error SQL ejecución: {e}")
+        logger.error(f"Error SQL ejecución: {e}")
         logger.error(f"   Query: {query}")
         logger.error(f"   Params: {params}")
         raise e

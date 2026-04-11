@@ -102,13 +102,29 @@ class Styles:
                 background=[('selected', cls.SECONDARY_COLOR)],
                 foreground=[('selected', 'white')])
         
-        # Estilo para Notebook
+        # Estilo para Notebook - ELIMINAR REMARCADO (Focus)
+        style.layout("TNotebook.Tab", [
+            ('Notebook.tab', {
+                'sticky': 'nswe', 
+                'children': [
+                    ('Notebook.padding', {
+                        'side': 'top', 
+                        'sticky': 'nswe', 
+                        'children': [
+                            ('Notebook.label', {'sticky': 'nswe'})
+                        ]
+                    })
+                ]
+            })
+        ])
+
         style.configure('TNotebook', background=cls.LIGHT_BG, borderwidth=0)
         style.configure('TNotebook.Tab', 
                         padding=(20, 8), 
                         font=('Segoe UI Variable', 10),
                         background='#e2e8f0', 
-                        foreground=cls.DARK_TEXT)
+                        foreground=cls.DARK_TEXT,
+                        focuscolor=cls.LIGHT_BG) # Asegurar que el color de foco sea invisible
         style.map('TNotebook.Tab',
                   background=[('selected', 'white')],
                   foreground=[('selected', cls.SECONDARY_COLOR)],

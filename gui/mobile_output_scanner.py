@@ -682,13 +682,20 @@ class MobileOutputScannerWindow:
         vals = self.tree.item(item_id[0])['values']
         sku = str(vals[0])
         nombre = str(vals[1])
+        series_str = str(vals[3])
 
         # Find actual item in internal list
         item_data = None
         for item in self.items_carrito:
             if item['sku'] == sku:
-                item_data = item
-                break
+                if item.get('seriales'):
+                    # Si tiene serial, verificar que corresponda a la fila seleccionada
+                    if item['seriales'][0] in series_str:
+                        item_data = item
+                        break
+                else:
+                    item_data = item
+                    break
         if not item_data: return
 
         cant_actual = item_data['cantidad']

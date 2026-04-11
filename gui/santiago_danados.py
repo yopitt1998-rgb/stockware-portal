@@ -45,9 +45,12 @@ class SantiagoDanadosTab:
         self.cargar_datos_iniciales()
 
     def setup_ui(self):
-        # Layout principal directamente sobre self.master (sin ScrollableFrame redundante)
-        self.main_frame = tk.Frame(self.master, bg='#f8f9fa', padx=20, pady=20)
-        self.main_frame.pack(fill='both', expand=True)
+        # Layout principal con ScrollableFrame para asegurar visibilidad en cualquier pantalla
+        self.scroll_container = ScrollableFrame(self.master, bg='#f8f9fa')
+        self.scroll_container.pack(fill='both', expand=True)
+        
+        self.main_frame = self.scroll_container.scrollable_frame
+        self.main_frame.configure(padx=20, pady=20)
 
         # Header
         header = tk.Frame(self.main_frame, bg='white', relief='flat', pady=15, padx=20)

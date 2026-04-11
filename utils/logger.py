@@ -1,8 +1,8 @@
 """
 Sistema de Logging Centralizado para StockWare
 
-Este módulo proporciona un sistema de logging robusto con:
-- Rotación automática de archivos
+Este modulo proporciona un sistema de logging robusto con:
+- Rotacion automatica de archivos
 - Niveles configurables por ambiente
 - Formato uniforme y legible
 - Logging a archivo y consola

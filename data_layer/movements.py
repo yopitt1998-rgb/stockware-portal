@@ -164,7 +164,7 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
                                 # Eliminar cabecera si llegó a 0
                                 run_query(cursor, "DELETE FROM faltantes_registrados WHERE id = ? AND cantidad <= 0", (id_f,))
                         except Exception as e_f:
-                            logger.warning(f"⚠️ Error limpiando faltante para serial {s}: {e_f}")
+                            logger.warning(f"Error limpiando faltante para serial {s}: {e_f}")
 
             if cantidad_descarte_cambio > 0:
                 run_query(cursor, "SELECT sku FROM productos WHERE sku = ? AND ubicacion = ? AND sucursal = ?", (sku, UBICACION_DESCARTE, sucursal))
@@ -193,7 +193,7 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
                          if nueva_qty_fila > 0:
                              run_query(cursor, "UPDATE asignacion_moviles SET cantidad = ? WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?", (nueva_qty_fila, sku, movil_afectado, fila_pq, sucursal))
                          else:
-                             run_query(cursor, "DELETE FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?", (sku, movil_afectado, fila_pq, sucursal))
+                             run_query(cursor, "UPDATE asignacion_moviles SET cantidad = 0 WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?", (sku, movil_afectado, fila_pq, sucursal))
                  else:
                      pq_actual = paquete_para_stock if paquete_para_stock else 'NINGUNO'
                      sql_sel = "SELECT SUM(cantidad) FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?"
@@ -204,14 +204,12 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
                      
                      if DB_TYPE == 'MYSQL':
                          sql_upsert = "INSERT INTO asignacion_moviles (sku_producto, movil, paquete, cantidad, sucursal) VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE cantidad = VALUES(cantidad)"
-                         if nueva_cantidad_asignacion > 0:
-                             cursor.execute(sql_upsert, (sku, movil_afectado, pq_actual, nueva_cantidad_asignacion, sucursal))
-                         else:
-                             run_query(cursor, "DELETE FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?", (sku, movil_afectado, pq_actual, sucursal))
+                         cursor.execute(sql_upsert, (sku, movil_afectado, pq_actual, nueva_cantidad_asignacion, sucursal))
                      else:
-                         run_query(cursor, "DELETE FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?", (sku, movil_afectado, pq_actual, sucursal))
+                         run_query(cursor, "UPDATE asignacion_moviles SET cantidad = 0 WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?", (sku, movil_afectado, pq_actual, sucursal))
                          if nueva_cantidad_asignacion > 0:
-                             run_query(cursor, "INSERT INTO asignacion_moviles (sku_producto, movil, paquete, cantidad, sucursal) VALUES (?, ?, ?, ?, ?)", (sku, movil_afectado, pq_actual, nueva_cantidad_asignacion, sucursal))
+                             run_query(cursor, "UPDATE asignacion_moviles SET cantidad = ? WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?", (nueva_cantidad_asignacion, sku, movil_afectado, pq_actual, sucursal))
+                             # Note: For SQLite we try update first, but the logic above already implies record management.
 
             sql_mov = "INSERT INTO movimientos (sku_producto, tipo_movimiento, cantidad_afectada, movil_afectado, fecha_evento, paquete_asignado, observaciones, documento_referencia, sucursal) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
             run_query(cursor, sql_mov, (sku, tipo_movimiento, cantidad_afectada, movil_afectado, fecha_evento, paquete_asignado, observaciones, documento_referencia, sucursal))
@@ -222,7 +220,7 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
         
         movil_msg = f" a/desde el {movil_afectado}" if movil_afectado else ""
         paquete_msg = f" (Paq: {paquete_asignado})" if paquete_asignado else ""
-        return True, f"✅ Movimiento {tipo_movimiento} registrado para SKU {sku} ({cantidad_afectada} unidades){movil_msg}{paquete_msg}."
+        return True, f"Movimiento {tipo_movimiento} registrado para SKU {sku} ({cantidad_afectada} unidades){movil_msg}{paquete_msg}."
 
     except Exception as e:
         logger.error(f"Error en registrar_movimiento_gui para SKU {sku}: {e}")
@@ -446,21 +444,21 @@ def actualizar_movimiento_abasto(id_movimiento, nueva_cantidad, nueva_referencia
         else:
             cursor = conn.cursor()
         
-        # 1. Obtener datos actuales del movimiento
-        run_query(cursor, "SELECT sku_producto, cantidad_afectada FROM movimientos WHERE id = ?", (id_movimiento,))
+        # 1. Obtener datos actuales del movimiento (incluye sucursal)
+        run_query(cursor, "SELECT sku_producto, cantidad_afectada, COALESCE(sucursal, 'CHIRIQUI') FROM movimientos WHERE id = ?", (id_movimiento,))
         resultado = cursor.fetchone()
         
         if not resultado:
             return False, "Movimiento no encontrado."
             
-        sku, cantidad_anterior = resultado
+        sku, cantidad_anterior, sucursal = resultado
         
         # 2. Calcular diferencia
         diferencia = nueva_cantidad - cantidad_anterior
         
-        # 3. Actualizar stock en Bodega
+        # 3. Actualizar stock en Bodega (FILTRADO POR SUCURSAL)
         if diferencia != 0:
-            run_query(cursor, "UPDATE productos SET cantidad = cantidad + ? WHERE sku = ? AND ubicacion = 'BODEGA'", (diferencia, sku))
+            run_query(cursor, "UPDATE productos SET cantidad = cantidad + ? WHERE sku = ? AND ubicacion = 'BODEGA' AND sucursal = ?", (diferencia, sku, sucursal))
             
         # 4. Actualizar movimiento
         run_query(cursor, """
@@ -589,6 +587,8 @@ def registrar_abasto_batch(items_abasto, fecha_evento, numero_abasto=None, exist
         
         # 3. Registrar todas las series
         if series_globales:
+            # Import local para romper dependencia circular (inventory ↔ movements)
+            from data_layer.inventory import registrar_series_bulk
             ok_s, msg_s = registrar_series_bulk(series_globales, fecha_ingreso=fecha_evento, paquete=None, existing_conn=conn)
             if not ok_s:
                 if not existing_conn: conn.rollback()
