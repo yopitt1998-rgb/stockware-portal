@@ -7,6 +7,7 @@ from .utils import mostrar_mensaje_emergente
 from datetime import datetime
 import os
 from gui.package_editor import PackageEditorDialog
+from gui.global_product_manager import GlobalProductManagerDialog
 
 class SettingsTab(tk.Frame):
     def __init__(self, master, main_app):
@@ -199,6 +200,20 @@ class SettingsTab(tk.Frame):
         
         tk.Button(paquetes_frame, text="⚙️ Configurar Paquetes", command=lambda: PackageEditorDialog(self),
                  bg='#2980b9', fg='white', font=('Segoe UI', 10, 'bold'),
+                 relief='flat', padx=20, pady=8, cursor='hand2').pack(side='right')
+
+        # --- SECCIÓN DE ASIGNACIÓN GLOBAL (NUEVO) ---
+        tk.Label(inner_content, text="🌐 ASIGNACIÓN GLOBAL DE PRODUCTOS", 
+                font=('Segoe UI', 13, 'bold'), bg='#f8f9fa', fg='#8e44ad').pack(pady=(30, 10), anchor='w')
+        
+        global_frame = tk.Frame(inner_content, bg='#F5EEF8', padx=20, pady=20, highlightthickness=1, highlightbackground='#D7BDE2')
+        global_frame.pack(fill='x')
+        
+        tk.Label(global_frame, text="Marca productos para que reflejen el stock total de la bodega en todos los móviles\nsin necesidad de asignarlos uno por uno. Ideal para fibra y consumibles.", 
+                font=('Segoe UI', 9), bg='#F5EEF8', justify='left').pack(side='left', fill='x', expand=True)
+        
+        tk.Button(global_frame, text="🌐 Administrar Globales", command=lambda: GlobalProductManagerDialog(self),
+                 bg='#8e44ad', fg='white', font=('Segoe UI', 10, 'bold'),
                  relief='flat', padx=20, pady=8, cursor='hand2').pack(side='right')
 
 

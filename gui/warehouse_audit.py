@@ -136,6 +136,9 @@ class WarehouseAuditTab:
 
     def _actualizar_tabla_ui(self, items, stock_actual_legacy):
         """Actualiza el Treeview con los datos cargados."""
+        if not self.tree.winfo_exists():
+            return
+            
         for i in self.tree.get_children():
             self.tree.delete(i)
             
@@ -360,11 +363,13 @@ class WarehouseAuditTab:
             
             def run_clear():
                 if limpiar_billing_sesion(self.id_sesion):
-                    self.parent.after(0, lambda: messagebox.showinfo("Éxito", "Datos de Billing limpiados correctamente."))
-                    self.cargar_datos() 
+                    if self.parent.winfo_exists():
+                        self.parent.after(0, lambda: messagebox.showinfo("Éxito", "Datos de Billing limpiados correctamente."))
+                        self.cargar_datos() 
                 else:
-                    self.parent.after(0, lambda: messagebox.showerror("Error", "No se pudieron limpiar los datos."))
-                    self.parent.after(0, lambda: self.root_app.set_status("Listo"))
+                    if self.parent.winfo_exists():
+                        self.parent.after(0, lambda: messagebox.showerror("Error", "No se pudieron limpiar los datos."))
+                        self.parent.after(0, lambda: self.root_app.set_status("Listo"))
 
             threading.Thread(target=run_clear, daemon=True).start()
 
@@ -1023,14 +1028,19 @@ class SessionHistoryDialog:
                 billing = [h for h in hist_completo if h[2] == 'BILLING']
                 
                 # Actualizar UI en el hilo principal
-                self.window.after(0, lambda: self._poblar_historial_ui(abastos, billing))
+                if self.window.winfo_exists():
+                    self.window.after(0, lambda: self._poblar_historial_ui(abastos, billing))
             except Exception as e:
                 logger.error(f"Error cargando historial de sesión: {e}")
-                self.window.after(0, lambda: messagebox.showerror("Error", f"No se pudo cargar el historial: {e}"))
+                if self.window.winfo_exists():
+                    self.window.after(0, lambda: messagebox.showerror("Error", f"No se pudo cargar el historial: {e}"))
 
         threading.Thread(target=run_load, daemon=True).start()
 
     def _poblar_historial_ui(self, abastos_data, billing_data):
+        if not self.tree_master.winfo_exists():
+            return
+            
         self.abastos_data = abastos_data
         self.billing_data = billing_data
         

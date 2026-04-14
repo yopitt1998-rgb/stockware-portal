@@ -560,14 +560,22 @@
                 // 3. Agregados (Compartidos Globales)
                 const mapCompartidos = {};
                 inventario.forEach(item => {
-                    if (compartidosCheck.includes(item.sku)) {
+                    const esGlobal = item.es_global || compartidosCheck.includes(item.sku);
+                    if (esGlobal) {
                         if (!mapCompartidos[item.sku]) {
                             mapCompartidos[item.sku] = JSON.parse(JSON.stringify(item));
                             mapCompartidos[item.sku].paquete = 'COMPARTIDO';
                             mapCompartidos[item.sku].cantidad_total = 0;
                             mapCompartidos[item.sku].seriales = [];
                         }
-                        mapCompartidos[item.sku].cantidad_total += (parseFloat(item.cantidad_total) || 0);
+                        // En materiales globales/compartidos, sumamos o tomamos el mayor
+                        // (En el caso de es_global el server ya envía el stock total de bodega)
+                        if (item.es_global) {
+                            mapCompartidos[item.sku].cantidad_total = item.cantidad_total;
+                        } else {
+                            mapCompartidos[item.sku].cantidad_total += (parseFloat(item.cantidad_total) || 0);
+                        }
+                        
                         if (item.seriales && Array.isArray(item.seriales)) {
                             item.seriales.forEach(s => {
                                 if (!mapCompartidos[item.sku].seriales.includes(s)) {

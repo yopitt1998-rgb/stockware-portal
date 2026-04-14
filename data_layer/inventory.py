@@ -66,6 +66,64 @@ def limpiar_productos_duplicados():
     finally:
         if conn: close_connection(conn)
 
+# ─────────────────────────────────────────────────────────
+# GESTIÓN DE PRODUCTOS GLOBALES (NUEVO)
+# ─────────────────────────────────────────────────────────
+
+def obtener_skus_globales(sucursal=None):
+    """Retorna una lista de SKUs marcados como globales para la sucursal actual."""
+    conn = None
+    try:
+        from config import CURRENT_CONTEXT
+        if not sucursal:
+            sucursal = CURRENT_CONTEXT.get('BRANCH', 'CHIRIQUI')
+            
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        run_query(cursor, "SELECT sku FROM productos_globales WHERE sucursal = ?", (sucursal,))
+        return [r[0] for r in cursor.fetchall()]
+    except Exception as e:
+        logger.error(f"Error obteniendo SKUs globales: {e}")
+        return []
+    finally:
+        if conn: close_connection(conn)
+
+def anadir_producto_global(sku, sucursal=None):
+    """Marca un SKU como global para todas las unidades móviles."""
+    conn = None
+    try:
+        from config import CURRENT_CONTEXT
+        if not sucursal:
+            sucursal = CURRENT_CONTEXT.get('BRANCH', 'CHIRIQUI')
+            
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        run_query(cursor, "INSERT IGNORE INTO productos_globales (sku, sucursal) VALUES (?, ?)", (sku, sucursal))
+        conn.commit()
+        return True, f"SKU {sku} ahora es Global."
+    except Exception as e:
+        return False, f"Error al añadir global: {e}"
+    finally:
+        if conn: close_connection(conn)
+
+def eliminar_producto_global(sku, sucursal=None):
+    """Elimina la marca global de un SKU."""
+    conn = None
+    try:
+        from config import CURRENT_CONTEXT
+        if not sucursal:
+            sucursal = CURRENT_CONTEXT.get('BRANCH', 'CHIRIQUI')
+            
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        run_query(cursor, "DELETE FROM productos_globales WHERE sku = ? AND sucursal = ?", (sku, sucursal))
+        conn.commit()
+        return True, f"SKU {sku} ya no es Global."
+    except Exception as e:
+        return False, f"Error al eliminar global: {e}"
+    finally:
+        if conn: close_connection(conn)
+
 def anadir_producto(nombre, sku, cantidad, ubicacion, secuencia_vista, minimo_stock=10, categoria='General', marca='N/A', fecha_evento=None):
     """Inserta un nuevo producto con datos enriquecidos."""
     conn = None
@@ -931,7 +989,7 @@ def obtener_todas_las_series_de_ubicacion(ubicacion, paquete=None):
         else:
             cursor = conn.cursor()
         
-        sql = "SELECT sku, serial_number, mac_number FROM series_registradas WHERE UPPER(TRIM(ubicacion)) = UPPER(TRIM(?)) AND estado = 'DISPONIBLE'"
+        sql = "SELECT sku, serial_number, mac_number, paquete FROM series_registradas WHERE UPPER(TRIM(ubicacion)) = UPPER(TRIM(?)) AND estado = 'DISPONIBLE'"
         params = [ubicacion]
         
         if paquete and paquete != "TODOS":
@@ -942,9 +1000,9 @@ def obtener_todas_las_series_de_ubicacion(ubicacion, paquete=None):
         rows = cursor.fetchall()
         
         result = {}
-        for sku, sn, mac in rows:
+        for sku, sn, mac, pq in rows:
             if sku not in result: result[sku] = []
-            result[sku].append((sn, mac))
+            result[sku].append((sn, mac, pq))
         return result
         
     except Exception as e:

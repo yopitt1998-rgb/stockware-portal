@@ -600,6 +600,10 @@ def get_inventario_movil(movil):
         # DETERMINAR FILTRO DE SUCURSAL
         sucursal_ctx = 'SANTIAGO' if movil in MOVILES_SANTIAGO else 'CHIRIQUI'
 
+        # 0. OBTENER SKUS GLOBALES (NUEVO)
+        run_query(cursor, "SELECT sku FROM productos_globales WHERE sucursal = ?", (sucursal_ctx,))
+        skus_globales = [r[0] for r in cursor.fetchall()]
+
         # Obtener TODAS las asignaciones del móvil (FILTRADO POR SUCURSAL)
         # HAVING > 0: No mostrar ítems con cantidad 0 (evita registros residuales)
         sql_asignacion = """
@@ -643,17 +647,56 @@ def get_inventario_movil(movil):
                 run_query(cursor, sql_series, (sku, movil, pq_query, sucursal_ctx))
                 seriales = [row[0] for row in cursor.fetchall()]
                 
+                # SI ES GLOBAL: Sobre-escribir cantidad con la de BODEGA
+                final_qty_s = len(seriales)
+                if sku in skus_globales:
+                     run_query(cursor, "SELECT cantidad FROM productos WHERE sku = ? AND ubicacion = 'BODEGA' AND sucursal = ? LIMIT 1", (sku, sucursal_ctx))
+                     res_b_s = cursor.fetchone()
+                     if res_b_s: final_qty_s = res_b_s[0]
+
                 inventario.append({
                     "sku": sku, "nombre": nombre_final, "paquete": paquete,
-                    "seriales": seriales, "cantidad_total": len(seriales),
-                    "tiene_series": True, "compartido": (sku in MATERIALES_COMPARTIDOS or paquete == 'PERSONALIZADO')
+                    "seriales": seriales, "cantidad_total": final_qty_s,
+                    "tiene_series": True, "compartido": (sku in MATERIALES_COMPARTIDOS or sku in skus_globales or paquete == 'PERSONALIZADO'),
+                    "es_global": sku in skus_globales
                 })
             else:
+                # SI ES GLOBAL: Sobre-escribir cantidad con la de BODEGA
+                final_qty_ns = cantidad
+                if sku in skus_globales:
+                     run_query(cursor, "SELECT cantidad FROM productos WHERE sku = ? AND ubicacion = 'BODEGA' AND sucursal = ? LIMIT 1", (sku, sucursal_ctx))
+                     res_b_ns = cursor.fetchone()
+                     if res_b_ns: final_qty_ns = res_b_ns[0]
+
                 inventario.append({
                     "sku": sku, "nombre": nombre_final, "paquete": paquete,
-                    "cantidad_total": cantidad, "tiene_series": False, 
-                    "compartido": (sku in MATERIALES_COMPARTIDOS or paquete == 'PERSONALIZADO')
+                    "cantidad_total": final_qty_ns, "tiene_series": False, 
+                    "compartido": (sku in MATERIALES_COMPARTIDOS or sku in skus_globales or paquete == 'PERSONALIZADO'),
+                    "es_global": sku in skus_globales
                 })
+
+        # --- SECCION: INYECTAR PRODUCTOS GLOBALES FALTANTES (NUEVO) ---
+        # Si un producto es global pero no tiene NINGUNA asignación en el móvil, 
+        # lo agregamos manualmente desde la bodega para que el técnico lo vea.
+        skus_en_inventario = {item['sku'] for item in inventario}
+        for g_sku in skus_globales:
+            if g_sku not in skus_en_inventario:
+                # Obtener stock de bodega
+                run_query(cursor, "SELECT nombre, cantidad FROM productos WHERE sku = ? AND ubicacion = 'BODEGA' AND sucursal = ?", (g_sku, sucursal_ctx))
+                res_g = cursor.fetchone()
+                if res_g:
+                    nombre_g, cant_g = res_g
+                    # Lo agregamos para ambos paquetes A y B
+                    for p_tag in ['PAQUETE A', 'PAQUETE B']:
+                        inventario.append({
+                            "sku": g_sku, 
+                            "nombre": SKU_TO_EXCEL_NAME.get(g_sku, nombre_g), 
+                            "paquete": p_tag,
+                            "cantidad_total": cant_g, 
+                            "tiene_series": False, 
+                            "compartido": True,
+                            "es_global": True
+                        })
         
         conn.close()
         return jsonify({

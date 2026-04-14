@@ -289,6 +289,16 @@ def _crear_tablas(cursor, T):
             cursor.execute(f"CREATE TABLE IF NOT EXISTS series_registradas (id {INT} PRIMARY KEY {AUTOINC}, sku VARCHAR(50) NOT NULL, serial_number VARCHAR(100) NOT NULL)")
         except Exception: pass
 
+    # productos_globales (NUEVO)
+    cursor.execute(f"""
+        CREATE TABLE IF NOT EXISTS productos_globales (
+            id {INT} PRIMARY KEY {AUTOINC},
+            sku VARCHAR(50) NOT NULL,
+            sucursal VARCHAR(50) DEFAULT 'CHIRIQUI',
+            UNIQUE (sku, sucursal)
+        )
+    """)
+
     logger.info("Etapa 1 completada: tablas verificadas/creadas.")
 
 

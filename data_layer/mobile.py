@@ -11,7 +11,7 @@ from config import DATABASE_NAME, DB_TYPE, MYSQL_HOST, MYSQL_USER, MYSQL_PASS, M
 from utils.db_connector import get_db_connection, close_connection, db_session
 
 from data_layer.core import run_query, safe_messagebox
-from data_layer.inventory import *
+from data_layer.inventory import sincronizar_stock_bodega_serializado, obtener_skus_globales
 from data_layer.movements import registrar_movimiento_gui
 
 def diagnosticar_duplicados_movil(movil):
@@ -275,6 +275,36 @@ def obtener_asignacion_movil_con_paquetes(movil):
                 saldos["SIN_PAQUETE"],
                 saldos["PERSONALIZADO"]
             ))
+
+        # --- SECCION: INYECCIÓN DE PRODUCTOS GLOBALES (NUEVO) ---
+        skus_globales = obtener_skus_globales(sucursal=sucursal_target)
+        # Evitar duplicar si ya estaba en la lista de asignación
+        skus_vistos = {item[1] for item in resultado}
+        
+        for g_sku in skus_globales:
+            if g_sku in skus_vistos:
+                # Si ya está asignado, opcionalmente podrías sobreescribir con el stock de bodega
+                # pero los productos globales NO deberían ser asignados manualmente.
+                # Vamos a actualizarlo para que refleje bodega si es global.
+                for i, row in enumerate(resultado):
+                    if row[1] == g_sku:
+                        # Obtener stock total en bodega para este sku
+                        run_query(cursor, "SELECT cantidad, nombre FROM productos WHERE sku = ? AND ubicacion = 'BODEGA' AND sucursal = ? LIMIT 1", (g_sku, sucursal_target))
+                        res_g = cursor.fetchone()
+                        if res_g:
+                            cant_g = res_g[0]
+                            nom_g = res_g[1]
+                            resultado[i] = (nom_g, g_sku, cant_g, cant_g, cant_g, cant_g, cant_g, cant_g)
+                continue
+            
+            # Si no estaba en asignación, agregarlo de la bodega
+            run_query(cursor, "SELECT cantidad, nombre FROM productos WHERE sku = ? AND ubicacion = 'BODEGA' AND sucursal = ? LIMIT 1", (g_sku, sucursal_target))
+            res_g = cursor.fetchone()
+            if res_g:
+                cant_g = res_g[0]
+                nom_g = res_g[1]
+                # En productos globales, el stock de bodega es el stock de TODOS los paquetes
+                resultado.append((nom_g, g_sku, cant_g, cant_g, cant_g, cant_g, cant_g, cant_g))
 
         return resultado
 

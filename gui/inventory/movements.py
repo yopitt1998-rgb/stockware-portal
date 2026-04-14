@@ -912,7 +912,8 @@ class MobileReturnWindow:
         self.entry_fecha.pack(side='left')
 
         tk.Label(top_panel, text="Filtrar por Paquete:", bg='white').pack(side='left', padx=(20, 10))
-        self.paquete_combo = ttk.Combobox(top_panel, values=["TODOS", "PAQUETE A", "PAQUETE B", "CARRO", "PERSONALIZADO", "NINGUNO"], state='readonly', width=15)
+        # REGLA ESTRICTA: Solo A, B y PERSONALIZADO (Como en Salida)
+        self.paquete_combo = ttk.Combobox(top_panel, values=["PAQUETE A", "PAQUETE B", "PERSONALIZADO"], state='readonly', width=15)
         self.paquete_combo.set("PAQUETE A")
         self.paquete_combo.pack(side='left', padx=5)
         self.paquete_combo.bind("<<ComboboxSelected>>", lambda e: self.update_consumo_ui())
@@ -1058,7 +1059,40 @@ class MobileReturnWindow:
         # OBTENIDAS TODAS LAS SERIES DE UNA VEZ (Punto de Optimización)
         series_cache = obtener_todas_las_series_de_ubicacion(movil)
         
+        # --- RECONCILIACIÓN DE EQUIPOS (Self-Healing) ---
+        # Si hay discrepancias entre la tabla agregada y los seriales reales, confiamos en los seriales.
+        from config import PRODUCTOS_CON_CODIGO_BARRA
+        for sku_s, items_s in series_cache.items():
+            if sku_s in PRODUCTOS_CON_CODIGO_BARRA:
+                if sku_s not in stock_actual:
+                    # Traer nombre si se puede
+                    from data_layer.inventory import obtener_producto_nombre
+                    name_p = getattr(self, '_prod_name_map', {}).get(sku_s) or obtener_producto_nombre(sku_s) or "Equipo"
+                    stock_actual[sku_s] = {
+                        'name': name_p, 'total': 0, 'PAQUETE A': 0, 'PAQUETE B': 0, 
+                        'CARRO': 0, 'NINGUNO': 0, 'PERSONALIZADO': 0
+                    }
+                
+                # Contar seriales por paquete
+                s_info = stock_actual[sku_s]
+                counts = {"PAQUETE A": 0, "PAQUETE B": 0, "CARRO": 0, "PERSONALIZADO": 0, "NINGUNO": 0}
+                for item_tup in items_s:
+                    # serie, mac, paquete
+                    pq_val = item_tup[2] if len(item_tup) > 2 else "NINGUNO"
+                    pq_norm = str(pq_val).strip().upper() if pq_val else "NINGUNO"
+                    if pq_norm in counts: counts[pq_norm] += 1
+                    else: counts["PERSONALIZADO"] += 1
+                
+                # Actualizar stock teórico para que al menos iguale a los seriales físicos registrados
+                s_info['PAQUETE A'] = max(s_info.get('PAQUETE A', 0), counts['PAQUETE A'])
+                s_info['PAQUETE B'] = max(s_info.get('PAQUETE B', 0), counts['PAQUETE B'])
+                s_info['CARRO'] = max(s_info.get('CARRO', 0), counts['CARRO'])
+                s_info['NINGUNO'] = max(s_info.get('NINGUNO', 0), counts['NINGUNO'])
+                s_info['PERSONALIZADO'] = max(s_info.get('PERSONALIZADO', 0), counts['PERSONALIZADO'])
+                s_info['total'] = max(s_info.get('total', 0), sum(counts.values()))
+
         # Cargar diccionarios globales de escaneo rápido
+        # ... (rest of code follows)
         from database import obtener_diccionarios_escaneo
         from config import CURRENT_CONTEXT
         branch = CURRENT_CONTEXT.get('BRANCH', 'CHIRIQUI')
@@ -1096,10 +1130,8 @@ class MobileReturnWindow:
             if paquete_filtro == "TODOS" or sku in MATERIALES_COMPARTIDOS:
                 qty_app = qty_app_total
             else:
-                # Si filtramos por un paquete, sumamos el de ese paquete + lo que no tiene etiqueta (App Render)
-                qty_app = prod_consumo_data.get(paquete_filtro, 0) + \
-                          prod_consumo_data.get('NINGUNO', 0) + \
-                          prod_consumo_data.get('SIN_PAQUETE', 0)
+                # REGLA ESTRICTA: Solo lo reportado para este paquete exacto
+                qty_app = prod_consumo_data.get(paquete_filtro, 0)
             
             # Almacenar el total verificado para la auditoría física. 
             # El usuario ya no usa Excel, así que el consumo de la App es la VERDAD.
@@ -1160,16 +1192,12 @@ class MobileReturnWindow:
                 prod_consumo_data = self.session_data.get('consumo_app', {}).get(sku, {})
                 consumed_total = sum(prod_consumo_data.values())
             else:
-                # Paquete específico: Sumamos lo del paquete + Personalizado + NINGUNO (Puente)
-                gross = (info.get(paquete_filtro, 0) if info else 0) + \
-                        (info.get("PERSONALIZADO", 0) if info else 0) + \
-                        (info.get("NINGUNO", 0) if info else 0)
+                # REGLA ESTRICTA: Solo lo que pertenece a este paquete
+                gross = info.get(paquete_filtro, 0) if info else 0
                 
-                # Consumo reportado para este contexto (Paquete + Sin Etiqueta)
+                # Consumo reportado estrictamente para este paquete
                 prod_consumo_data = self.session_data.get('consumo_app', {}).get(sku, {})
-                consumed_total = prod_consumo_data.get(paquete_filtro, 0) + \
-                                 prod_consumo_data.get('NINGUNO', 0) + \
-                                 prod_consumo_data.get('SIN_PAQUETE', 0)
+                consumed_total = prod_consumo_data.get(paquete_filtro, 0)
             
             # --- LÓGICA DE CÁLCULO DE EXPECTED (CORREGIDA) ---
             # gross: Saldo al iniciar el día (ej. 60)
@@ -1185,33 +1213,47 @@ class MobileReturnWindow:
                 series_data = self.session_data.get('series_cache', {}).get(sku, [])
                 
                 if series_data:
-                    # series_data es [(serial, mac), ...] - extraemos el mejor id para mostrar
+                    # series_data es [(serial, mac, paquete), ...]
                     ids_to_show = []
-                    for s, m in series_data:
+                    for item_data in series_data:
+                        if len(item_data) >= 3:
+                            s, m, pq = item_data[:3]
+                        elif len(item_data) >= 2:
+                            s, m = item_data[:2]
+                            pq = "NINGUNO"
+                        else:
+                            s = item_data[0]
+                            m, pq = "", "NINGUNO"
+                            
+                        # Filtrar seriales mostrados según el paquete seleccionado (ESTRICTO)
+                        if paquete_filtro != "TODOS":
+                            pq_norm = str(pq).strip().upper() if pq else "NINGUNO"
+                            if pq_norm != str(paquete_filtro).strip().upper():
+                                continue
+                                
                         best_id = m if m and str(m).strip() not in ['', 'N/A', 'None'] else s
                         ids_to_show.append(str(best_id))
                     
-                    macs_str = ", ".join(ids_to_show[:2])
-                    if len(ids_to_show) > 2: macs_str += "..."
-                    display_name = f"{name} ({macs_str})"
+                    if ids_to_show:
+                        macs_str = ", ".join(ids_to_show[:2])
+                        if len(ids_to_show) > 2: macs_str += "..."
+                        display_name = f"{name} ({macs_str})"
 
             scanned = self.session_data['stock_fisico_escaneado'].get(sku, 0)
             
-            # Lógica de filtrado de visualización (FILTRA RELEVANCIA)
+            # LÓGICA DE FILTRADO ESTRICTO (SOLO MOSTRAR RELEVANTE)
             if paquete_filtro != "TODOS":
-                # REGLA 1: Solo mostrar si pertenece al paquete seleccionado O tiene stock personalizado O NINGUNO
-                has_base_stock = ((info.get(paquete_filtro, 0) if info else 0) > 0 or 
-                                (info.get("PERSONALIZADO", 0) if info else 0) > 0 or
-                                (info.get("NINGUNO", 0) if info else 0) > 0)
+                # REGLA 1: Solo mostrar si pertenece al paquete seleccionado (ESTRICTO)
+                has_base_stock = (info.get(paquete_filtro, 0) if info else 0) > 0
                 
-                # Si no es del paquete ni tiene stock base, ocultar si no hay escaneo
+                # REGLA 2: Si no se espera nada Y no se ha escaneado nada, ocultamos la fila.
+                # Esto limpia "de todo" y solo deja lo que el técnico tiene pendiente de devolver.
+                if expected == 0 and scanned == 0:
+                    continue
+
+                # REGLA 3: Si no es del paquete y no tiene stock base (y no fue capturado por R2), ocultar
                 if not is_in_package and not has_base_stock:
                     if scanned == 0:
-                        continue
-
-                # REGLA 2: Ocultar si no se espera nada y no se escaneó nada
-                if expected == 0 and scanned == 0:
-                    if not is_in_package:
                         continue
 
             if scanned == expected:

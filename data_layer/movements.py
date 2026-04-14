@@ -73,11 +73,19 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
             else:
                 stock_bodega_actual, nombre_producto, secuencia_vista = resultado_bodega
             
+            # DETERMINAR SI ES GLOBAL (NUEVO)
+            from data_layer.inventory import obtener_skus_globales
+            skus_globales = obtener_skus_globales(sucursal=sucursal)
+            es_global = sku in skus_globales
+
             stock_asignado = 0
             if movil_afectado and tipo_movimiento in ('SALIDA_MOVIL', 'RETORNO_MOVIL', 'CONSUMO_MOVIL'):
-                 is_shared = sku in MATERIALES_COMPARTIDOS
+                 is_shared = sku in MATERIALES_COMPARTIDOS or es_global
                  
-                 if (tipo_movimiento in ('CONSUMO_MOVIL', 'RETORNO_MOVIL') and not paquete_asignado) or is_shared:
+                 if es_global:
+                     # Si es global, su "asignación" es el stock de bodega
+                     stock_asignado = stock_bodega_actual
+                 elif (tipo_movimiento in ('CONSUMO_MOVIL', 'RETORNO_MOVIL') and not paquete_asignado) or is_shared:
                      sql_asig = "SELECT COALESCE(SUM(cantidad), 0) FROM asignacion_moviles WHERE sku_producto = ? AND UPPER(TRIM(movil)) = UPPER(TRIM(?)) AND sucursal = ?"
                      run_query(cursor, sql_asig, (sku, movil_afectado, sucursal))
                      asignacion_actual = cursor.fetchone()
@@ -100,19 +108,34 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
                 else:
                     cantidad_bodega_cambio = cantidad_afectada
             elif tipo_movimiento == 'SALIDA_MOVIL':
+                if es_global:
+                    return False, f"El producto {sku} es GLOBAL. No requiere salida a móvil ya que se usa directo de bodega."
                 if stock_bodega_actual < cantidad_afectada:
                     return False, f"Stock insuficiente en Bodega para {nombre_producto}. Solo hay {stock_bodega_actual} unidades."
                 cantidad_bodega_cambio = -cantidad_afectada
                 cantidad_asignacion_cambio = cantidad_afectada
             elif tipo_movimiento == 'RETORNO_MOVIL':
-                cantidad_bodega_cambio = cantidad_afectada
-                cantidad_asignacion_cambio = -cantidad_afectada
+                if es_global:
+                    # En retorno global, solo aseguramos que el stock regrese a bodega si se registró como salida (aunque no debería)
+                    cantidad_bodega_cambio = cantidad_afectada
+                else:
+                    cantidad_bodega_cambio = cantidad_afectada
+                    cantidad_asignacion_cambio = -cantidad_afectada
             elif tipo_movimiento == 'CONSUMO_MOVIL':
-                if movil_afectado and stock_asignado < cantidad_afectada:
-                     return False, f"Error: El {movil_afectado} solo tiene {stock_asignado} unidades asignadas de '{nombre_producto}'."
-                cantidad_asignacion_cambio = -cantidad_afectada
+                if es_global:
+                    if stock_bodega_actual < cantidad_afectada:
+                        return False, f"Error: Stock GLOBAL insuficiente en BODEGA. Solo hay {stock_bodega_actual} unidades de '{nombre_producto}'."
+                    cantidad_bodega_cambio = -cantidad_afectada
+                else:
+                    if movil_afectado and stock_asignado < cantidad_afectada:
+                         return False, f"Error: El {movil_afectado} solo tiene {stock_asignado} unidades asignadas de '{nombre_producto}'."
+                    cantidad_asignacion_cambio = -cantidad_afectada
             elif tipo_movimiento == TIPO_MOVIMIENTO_DESCARTE: 
-                if movil_afectado:
+                if es_global:
+                    if stock_bodega_actual < cantidad_afectada:
+                        return False, f"Stock GLOBAL insuficiente para descarte. Solo hay {stock_bodega_actual} unidades de {nombre_producto}."
+                    cantidad_bodega_cambio = -cantidad_afectada
+                elif movil_afectado:
                     if stock_asignado < cantidad_afectada:
                         return False, f"Stock insuficiente en {movil_afectado} para descarte. Solo tiene {stock_asignado} unidades de {nombre_producto}."
                     cantidad_asignacion_cambio = -cantidad_afectada
@@ -138,7 +161,26 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
                                    (cantidad_bodega_cambio, sku, sucursal))
             
             if seriales:
-                if tipo_movimiento == 'CONSUMO_MOVIL' or tipo_movimiento == 'SALIDA':
+                # OPTIMIZACIÓN: Limpiar registros de 'FALTANTE' para cualquier serial que esté siendo operado.
+                # Si el equipo está siendo escaneado (ya sea para Salida, Retorno o Consumo), significa que NO falta.
+                for s in seriales:
+                    try:
+                        # Buscar si existe en el detalle de seriales faltantes
+                        run_query(cursor, "SELECT faltante_id FROM seriales_faltantes_detalle WHERE serial = ? OR serial = ?", (s, s))
+                        f_row = cursor.fetchone()
+                        if f_row:
+                            id_f = f_row[0]
+                            # Eliminar del detalle
+                            run_query(cursor, "DELETE FROM seriales_faltantes_detalle WHERE serial = ? OR serial = ?", (s, s))
+                            # Decrementar la cabecera
+                            run_query(cursor, "UPDATE faltantes_registrados SET cantidad = cantidad - 1 WHERE id = ?", (id_f,))
+                            # Eliminar cabecera si llegó a 0
+                            run_query(cursor, "DELETE FROM faltantes_registrados WHERE id = ? AND cantidad <= 0", (id_f,))
+                            logger.info(f"✨ Serial {s} recuperado automáticamente de estado FALTANTE.")
+                    except Exception as e_f:
+                        logger.warning(f"Error limpiando faltante para serial {s}: {e_f}")
+
+                if tipo_movimiento in ('CONSUMO_MOVIL', 'SALIDA'):
                     for s in seriales:
                         run_query(cursor, "UPDATE series_registradas SET estado = 'CONSUMIDO', ubicacion = 'CONSUMIDO' WHERE (serial_number = ? OR mac_number = ?) AND sucursal = ?", (s, s, sucursal))
                 elif tipo_movimiento == 'SALIDA_MOVIL' and movil_afectado:
@@ -146,25 +188,8 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
                         run_query(cursor, "UPDATE series_registradas SET ubicacion = ?, paquete = ?, estado = 'ASIGNADO' WHERE (serial_number = ? OR mac_number = ?) AND sucursal = ?", (movil_afectado, paquete_asignado or 'NINGUNO', s, s, sucursal))
                 elif tipo_movimiento in ('RETORNO_MOVIL', 'ENTRADA', 'ABASTO', 'ENTRADA_AJUSTE'):
                     for s in seriales:
-                        # 1. ACTUALIZAR UBICACIÓN Y ESTADO
+                        # ACTUALIZAR UBICACIÓN Y ESTADO A DISPONIBLE/BODEGA
                         run_query(cursor, "UPDATE series_registradas SET ubicacion = 'BODEGA', paquete = 'NINGUNO', estado = 'DISPONIBLE' WHERE (serial_number = ? OR mac_number = ?) AND sucursal = ?", (s, s, sucursal))
-                        
-                        # 2. LIMPIEZA DE FALTANTES (NUEVO)
-                        # Si el equipo estaba marcado como FALTANTE, debemos limpiar ese registro para que no aparezca en reportes
-                        try:
-                            # Buscar si existe en el detalle de seriales faltantes
-                            run_query(cursor, "SELECT faltante_id FROM seriales_faltantes_detalle WHERE serial = ? OR serial = ?", (s, s))
-                            f_row = cursor.fetchone()
-                            if f_row:
-                                id_f = f_row[0]
-                                # Eliminar del detalle
-                                run_query(cursor, "DELETE FROM seriales_faltantes_detalle WHERE serial = ? OR serial = ?", (s, s))
-                                # Decrementar la cabecera
-                                run_query(cursor, "UPDATE faltantes_registrados SET cantidad = cantidad - 1 WHERE id = ?", (id_f,))
-                                # Eliminar cabecera si llegó a 0
-                                run_query(cursor, "DELETE FROM faltantes_registrados WHERE id = ? AND cantidad <= 0", (id_f,))
-                        except Exception as e_f:
-                            logger.warning(f"Error limpiando faltante para serial {s}: {e_f}")
 
             if cantidad_descarte_cambio > 0:
                 run_query(cursor, "SELECT sku FROM productos WHERE sku = ? AND ubicacion = ? AND sucursal = ?", (sku, UBICACION_DESCARTE, sucursal))
