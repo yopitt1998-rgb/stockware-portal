@@ -124,11 +124,18 @@ def index():
             # FILTER: Remove SKU 4-4-654 as requested by user
             productos = [p for p in productos if p[1] != '4-4-654']
             
-            # MODIFICADO: Usar nombres del Excel en vez de nombres largos de BD
-            productos_excel = []
+            # MODIFICADO: Usar nombres del Excel y DE-DUPLICAR por nombre mostrado
+            consolidado = {} # nombre_excel -> {'sku': last_sku, 'cantidad': suma}
             for nombre_largo, sku, cantidad in productos:
-                nombre_excel = SKU_TO_EXCEL_NAME.get(sku, nombre_largo)  # Fallback a nombre largo si no está en mapeo
-                productos_excel.append((nombre_excel, sku, cantidad))
+                nombre_excel = SKU_TO_EXCEL_NAME.get(sku, nombre_largo)
+                if nombre_excel in consolidado:
+                    consolidado[nombre_excel]['cantidad'] += cantidad
+                else:
+                    consolidado[nombre_excel] = {'sku': sku, 'cantidad': cantidad}
+            
+            productos_excel = [(name, data['sku'], data['cantidad']) for name, data in consolidado.items()]
+            # Ordenar por el SKU original o nombre para mantener consistencia
+            productos_excel.sort(key=lambda x: x[0])
             
             details_moviles = obtener_detalles_moviles()
             tecnicos = obtener_tecnicos(solo_activos=True)
@@ -272,6 +279,28 @@ def modo_lunes():
         return f"<h1>⚠️ Error Modo Lunes</h1><p>Status: {status}</p><p>Detail: {error_detail}</p><p>Template: {str(template_err)}</p>"
 
 
+@app.route('/asistente')
+def asistente():
+    """Página del Asistente IA para auditorías y consultas"""
+    status = "OK"
+    return render_template('asistente.html', db_status=status)
+
+@app.route('/api/ask_ai', methods=['POST'])
+def api_ask_ai():
+    """Endpoint para procesar preguntas con Gemini"""
+    data = request.json
+    if not data or 'pregunta' not in data:
+        return jsonify({"error": True, "mensaje": "No se recibió ninguna pregunta."})
+        
+    pregunta = data.get('pregunta')
+    
+    # Importar el asistente bajo demanda para no romper si no está la librería al inicio
+    from utils.ai_assistant import procesar_pregunta_ia
+    
+    # Asumimos contexto CHIRIQUI por defecto, en el futuro se podría pasar desde el frontend
+    resultado = procesar_pregunta_ia(pregunta, sucursal_context='CHIRIQUI')
+    return jsonify(resultado)
+
 @app.route('/registrar_lunes', methods=['POST'])
 def registrar_lunes_post():
     """Procesa el consumo directo del Plan B (Lunes)"""
@@ -324,7 +353,16 @@ def registrar_lunes_post():
             if not exito:
                 raise Exception(f"Error en {sku}: {msg}")
             
+            # Prepare details for email
+            item['nombre'] = SKU_TO_EXCEL_NAME.get(sku, sku)
+            
             exitos += 1
+            
+        try:
+            from utils.email_sender import send_consumption_email_async
+            send_consumption_email_async(data, materiales)
+        except Exception as e_mail:
+            logger.error(f"Error al intentar enviar correo en registrar_lunes: {e_mail}")
             
         return jsonify({"exito": True, "mensaje": f"Reporte de Lunes procesado correctamente ({exitos} equipos)."})
 
@@ -383,7 +421,16 @@ def registrar_santiago_post():
             if not exito:
                 raise Exception(f"Error en {sku}: {msg}")
             
+            # Prepare details for email
+            item['nombre'] = SKU_TO_EXCEL_NAME.get(sku, sku)
+            
             exitos += 1
+            
+        try:
+            from utils.email_sender import send_consumption_email_async
+            send_consumption_email_async(data, materiales)
+        except Exception as e_mail:
+            logger.error(f"Error al intentar enviar correo en registrar_santiago: {e_mail}")
             
         return jsonify({"exito": True, "mensaje": f"Consumo registrado exitosamente ({exitos} items)."})
 
@@ -604,6 +651,8 @@ def get_inventario_movil(movil):
         run_query(cursor, "SELECT sku FROM productos_globales WHERE sucursal = ?", (sucursal_ctx,))
         skus_globales = [r[0] for r in cursor.fetchall()]
 
+        skus_en_inventario = [] # Inicializar lista para evitar NameError
+
         # Obtener TODAS las asignaciones del móvil (FILTRADO POR SUCURSAL)
         # HAVING > 0: No mostrar ítems con cantidad 0 (evita registros residuales)
         sql_asignacion = """
@@ -630,6 +679,7 @@ def get_inventario_movil(movil):
 
         # Construir inventario final
         inventario = []
+        skus_en_inventario = [] # Reset para recolectar SKUs reales
         
         for nombre, sku, cantidad, paquete in asignacion_rows:
             nombre_final = nombres_sku.get(sku, nombre or sku)
@@ -657,9 +707,10 @@ def get_inventario_movil(movil):
                 inventario.append({
                     "sku": sku, "nombre": nombre_final, "paquete": paquete,
                     "seriales": seriales, "cantidad_total": final_qty_s,
-                    "tiene_series": True, "compartido": (sku in MATERIALES_COMPARTIDOS or sku in skus_globales or paquete == 'PERSONALIZADO'),
+                    "tiene_series": True, "compartido": (sku in skus_globales or paquete == 'PERSONALIZADO'),
                     "es_global": sku in skus_globales
                 })
+                skus_en_inventario.append(sku)
             else:
                 # SI ES GLOBAL: Sobre-escribir cantidad con la de BODEGA
                 final_qty_ns = cantidad
@@ -671,32 +722,33 @@ def get_inventario_movil(movil):
                 inventario.append({
                     "sku": sku, "nombre": nombre_final, "paquete": paquete,
                     "cantidad_total": final_qty_ns, "tiene_series": False, 
-                    "compartido": (sku in MATERIALES_COMPARTIDOS or sku in skus_globales or paquete == 'PERSONALIZADO'),
+                    "compartido": (sku in skus_globales or paquete == 'PERSONALIZADO'),
                     "es_global": sku in skus_globales
                 })
+                skus_en_inventario.append(sku)
 
         # --- SECCION: INYECTAR PRODUCTOS GLOBALES FALTANTES (NUEVO) ---
-        # Si un producto es global pero no tiene NINGUNA asignación en el móvil, 
-        # lo agregamos manualmente desde la bodega para que el técnico lo vea.
-        skus_en_inventario = {item['sku'] for item in inventario}
+        # Normalizar skus para comparación
+        skus_en_inventario_norm = {s.strip().upper() for s in skus_en_inventario}
+        
         for g_sku in skus_globales:
-            if g_sku not in skus_en_inventario:
+            g_sku_norm = g_sku.strip().upper()
+            if g_sku_norm not in skus_en_inventario_norm:
                 # Obtener stock de bodega
                 run_query(cursor, "SELECT nombre, cantidad FROM productos WHERE sku = ? AND ubicacion = 'BODEGA' AND sucursal = ?", (g_sku, sucursal_ctx))
                 res_g = cursor.fetchone()
                 if res_g:
                     nombre_g, cant_g = res_g
-                    # Lo agregamos para ambos paquetes A y B
-                    for p_tag in ['PAQUETE A', 'PAQUETE B']:
-                        inventario.append({
-                            "sku": g_sku, 
-                            "nombre": SKU_TO_EXCEL_NAME.get(g_sku, nombre_g), 
-                            "paquete": p_tag,
-                            "cantidad_total": cant_g, 
-                            "tiene_series": False, 
-                            "compartido": True,
-                            "es_global": True
-                        })
+                    # Lo agregamos una sola vez con paquete 'PERSONALIZADO' para que sea visible en A y B
+                    inventario.append({
+                        "sku": g_sku_norm, 
+                        "nombre": SKU_TO_EXCEL_NAME.get(g_sku_norm, nombre_g), 
+                        "paquete": 'PERSONALIZADO',
+                        "cantidad_total": cant_g, 
+                        "tiene_series": False, 
+                        "compartido": True,
+                        "es_global": True
+                    })
         
         conn.close()
         return jsonify({
@@ -792,10 +844,11 @@ def registrar_bulk():
                     cantidad_afectada=cantidad,
                     movil_afectado=data['movil'],
                     fecha_evento=data['fecha'],
-                    paquete_asignado=None, # Modificado: Forzar auto-deducción inteligente de stock global del móvil
+                    paquete_asignado=data.get('paquete'), 
+                    seriales=seriales,
                     observaciones=obs,
                     documento_referencia=data.get('contrato'),
-                    existing_conn=conn, # Usar misma conexión
+                    existing_conn=conn, 
                     sucursal_context=sucursal_ctx
                 )
                 
@@ -827,19 +880,22 @@ def registrar_bulk():
                 sucursal_ctx
             ))
             
-            # 3. Actualizar ubicación de series a CONSUMIDO (Redundante si registrar_movimiento lo hace, pero seguro)
-            if seriales:
-                print(f"[WEB] Actualizando {len(seriales)} series a CONSUMIDO para {sku} en {sucursal_ctx}")
-                for serial in seriales:
-                    run_query(cursor, """
-                        UPDATE series_registradas
-                        SET ubicacion = 'CONSUMIDO'
-                        WHERE serial_number = ? AND sucursal = ?
-                    """, (serial, sucursal_ctx))
+            # El estado de las series ya se actualiza dentro de registrar_movimiento_gui
+            # ya que ahora pasamos el parámetro 'seriales=seriales' arriba.
+            
+            # Prepare details for email
+            item['nombre'] = SKU_TO_EXCEL_NAME.get(sku, sku)
             
             exitos += 1
         
         conn.commit()
+        
+        try:
+            from utils.email_sender import send_consumption_email_async
+            send_consumption_email_async(data, materiales)
+        except Exception as e_mail:
+            logger.error(f"Error al intentar enviar correo en registrar_bulk: {e_mail}")
+            
         return jsonify({"exito": True, "mensaje": f"Consumo procesado y descontado exitosamente ({exitos} items)"})
 
     except Exception as e:
