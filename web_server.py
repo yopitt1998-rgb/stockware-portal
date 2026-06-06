@@ -623,46 +623,106 @@ def debug_asignaciones():
     
     return html
 
+@app.route('/debug/email_config')
+def debug_email_config():
+    """Endpoint que SOLO muestra la configuración SMTP sin intentar enviar nada"""
+    import os
+    
+    smtp_user = os.environ.get('SMTP_USER', '')
+    smtp_password = os.environ.get('SMTP_PASSWORD', '')
+    smtp_host = os.environ.get('SMTP_HOST', 'smtp.gmail.com')
+    smtp_port = os.environ.get('SMTP_PORT', '587')
+    receiver_email = os.environ.get('NOTIFICATION_EMAIL', 'bodega.eesoluciones@gmail.com')
+    
+    html = "<h1>📧 Configuración SMTP en Render</h1>"
+    html += "<table border='1' cellpadding='8' style='border-collapse:collapse; font-family:monospace'>"
+    
+    def check(name, val, is_secret=False):
+        if not val:
+            status = "❌ NO CONFIGURADA"
+            color = "red"
+            display = "-"
+        else:
+            status = "✅ CONFIGURADA"
+            color = "green"
+            display = (val[:3] + "****") if is_secret else val
+        return f"<tr><td><b>{name}</b></td><td>{display}</td><td style='color:{color}'>{status}</td></tr>"
+    
+    html += check("SMTP_USER", smtp_user)
+    html += check("SMTP_PASSWORD", smtp_password, is_secret=True)
+    html += check("SMTP_HOST", smtp_host)
+    html += check("SMTP_PORT", smtp_port)
+    html += check("NOTIFICATION_EMAIL", receiver_email)
+    html += "</table>"
+    
+    # Resumen
+    todas_ok = all([smtp_user, smtp_password, smtp_host, smtp_port, receiver_email])
+    if todas_ok:
+        html += "<br><p style='color:green; font-size:18px'><b>✅ Todas las variables están configuradas.</b> Puedes probar el envío en <a href='/debug/test_email'>/debug/test_email</a></p>"
+    else:
+        html += "<br><p style='color:red; font-size:18px'><b>❌ Faltan variables.</b> Añádelas en Render → Settings → Environment y reinicia el servicio.</p>"
+    
+    return html
+
 @app.route('/debug/test_email')
 def debug_test_email():
-    """Endpoint de diagnóstico para verificar el envío de correos SMTP"""
+    """Endpoint de diagnóstico para verificar el envío de correos SMTP (con timeout)"""
     import os
     import smtplib
     from email.mime.text import MIMEText
     
-    smtp_user = os.environ.get('SMTP_USER', 'NO_CONFIGURADO')
-    smtp_password = os.environ.get('SMTP_PASSWORD', 'NO_CONFIGURADO')
+    smtp_user = os.environ.get('SMTP_USER', '')
+    smtp_password = os.environ.get('SMTP_PASSWORD', '')
     smtp_host = os.environ.get('SMTP_HOST', 'smtp.gmail.com')
     smtp_port = int(os.environ.get('SMTP_PORT', 587))
     receiver_email = os.environ.get('NOTIFICATION_EMAIL', 'bodega.eesoluciones@gmail.com')
     
-    html = "<h1>Prueba de Correo SMTP</h1>"
-    html += f"<p><b>Usuario SMTP:</b> {smtp_user}</p>"
+    html = "<h1>📧 Prueba de Correo SMTP</h1>"
+    html += f"<p><b>Usuario SMTP:</b> {smtp_user or 'NO CONFIGURADO'}</p>"
     html += f"<p><b>Host:</b> {smtp_host}:{smtp_port}</p>"
     html += f"<p><b>Destino:</b> {receiver_email}</p>"
     html += "<hr>"
     
-    if smtp_user == 'NO_CONFIGURADO' or smtp_password == 'NO_CONFIGURADO':
-        return html + "<p style='color:red'>ERROR: Faltan las credenciales SMTP en Render.</p>"
+    if not smtp_user or not smtp_password:
+        html += "<p style='color:red'><b>ERROR:</b> Faltan las credenciales SMTP.</p>"
+        html += "<p>Configura las variables <code>SMTP_USER</code> y <code>SMTP_PASSWORD</code> en Render → Settings → Environment.</p>"
+        html += "<p>Revisa la configuración actual en <a href='/debug/email_config'>/debug/email_config</a></p>"
+        return html
         
     try:
-        msg = MIMEText("Este es un correo de prueba desde Render.")
-        msg["Subject"] = "Prueba StockWare SMTP"
+        html += "<p>⏳ Conectando a servidor SMTP (timeout 10s)...</p>"
+        
+        msg = MIMEText("Este es un correo de prueba desde StockWare en Render. Si lo recibes, la configuración SMTP es correcta.")
+        msg["Subject"] = "✅ Prueba StockWare SMTP"
         msg["From"] = smtp_user
         msg["To"] = receiver_email
         
-        server = smtplib.SMTP(smtp_host, smtp_port)
-        server.set_debuglevel(1)
+        # TIMEOUT de 10 segundos para no colgar el worker
+        server = smtplib.SMTP(smtp_host, smtp_port, timeout=10)
         server.starttls()
         server.login(smtp_user, smtp_password)
         server.sendmail(smtp_user, receiver_email, msg.as_string())
         server.quit()
         
-        html += "<p style='color:green'><b>¡ÉXITO!</b> El correo se envió correctamente.</p>"
-    except smtplib.SMTPAuthenticationError:
-        html += "<p style='color:red'><b>ERROR DE AUTENTICACIÓN:</b> Usuario o contraseña incorrectos. Si usas Gmail, asegúrate de generar una 'Contraseña de Aplicación' y NO usar tu contraseña normal.</p>"
+        html += "<p style='color:green; font-size:18px'><b>✅ ¡ÉXITO!</b> El correo se envió correctamente a " + receiver_email + "</p>"
+        html += "<p>Revisa tu bandeja de entrada (y la carpeta de spam).</p>"
+        
+    except smtplib.SMTPAuthenticationError as auth_err:
+        html += "<p style='color:red'><b>❌ ERROR DE AUTENTICACIÓN:</b></p>"
+        html += f"<p>Detalle: {str(auth_err)}</p>"
+        html += "<p><b>Solución:</b> Si usas Gmail, necesitas una <b>Contraseña de Aplicación</b> (16 caracteres), NO tu contraseña normal.</p>"
+        html += "<p>Crea una en: <a href='https://myaccount.google.com/apppasswords' target='_blank'>myaccount.google.com/apppasswords</a></p>"
+        
+    except smtplib.SMTPConnectError as conn_err:
+        html += f"<p style='color:red'><b>❌ ERROR DE CONEXIÓN:</b> No se pudo conectar a {smtp_host}:{smtp_port}</p>"
+        html += f"<p>Detalle: {str(conn_err)}</p>"
+        
+    except TimeoutError:
+        html += f"<p style='color:red'><b>❌ TIMEOUT:</b> No se pudo conectar a {smtp_host}:{smtp_port} en 10 segundos.</p>"
+        html += "<p>Verifica que el host y puerto sean correctos.</p>"
+        
     except Exception as e:
-        html += f"<p style='color:red'><b>ERROR:</b> {str(e)}</p>"
+        html += f"<p style='color:red'><b>❌ ERROR:</b> {str(e)}</p>"
         import traceback
         html += f"<pre>{traceback.format_exc()}</pre>"
         

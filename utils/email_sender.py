@@ -96,7 +96,7 @@ def send_consumption_email_async(data, materiales_detalles):
             part = MIMEText(html, "html")
             msg.attach(part)
 
-            with smtplib.SMTP(smtp_host, smtp_port) as server:
+            with smtplib.SMTP(smtp_host, smtp_port, timeout=10) as server:
                 server.starttls()
                 server.login(smtp_user, smtp_password)
                 server.sendmail(smtp_user, receiver_email, msg.as_string())

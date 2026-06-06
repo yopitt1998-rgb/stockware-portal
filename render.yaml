@@ -4,17 +4,27 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn wsgi_app:application --bind 0.0.0.0:$PORT --timeout 90 --log-level debug
+    startCommand: gunicorn wsgi_app:application --bind 0.0.0.0:$PORT --timeout 120 --log-level debug
     envVars:
       - key: DB_TYPE
         value: MYSQL
       - key: MYSQL_HOST
-        fromContext: parameter
+        sync: false
       - key: MYSQL_USER
-        fromContext: parameter
+        sync: false
       - key: MYSQL_PASSWORD
-        fromContext: parameter
+        sync: false
       - key: MYSQL_DATABASE
-        fromContext: parameter
+        sync: false
       - key: MYSQL_PORT
         value: "4000"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_HOST
+        value: "smtp.gmail.com"
+      - key: SMTP_PORT
+        value: "587"
+      - key: NOTIFICATION_EMAIL
+        value: "bodega.eesoluciones@gmail.com"
