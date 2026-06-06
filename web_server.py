@@ -623,6 +623,50 @@ def debug_asignaciones():
     
     return html
 
+@app.route('/debug/test_email')
+def debug_test_email():
+    """Endpoint de diagnóstico para verificar el envío de correos SMTP"""
+    import os
+    import smtplib
+    from email.mime.text import MIMEText
+    
+    smtp_user = os.environ.get('SMTP_USER', 'NO_CONFIGURADO')
+    smtp_password = os.environ.get('SMTP_PASSWORD', 'NO_CONFIGURADO')
+    smtp_host = os.environ.get('SMTP_HOST', 'smtp.gmail.com')
+    smtp_port = int(os.environ.get('SMTP_PORT', 587))
+    receiver_email = os.environ.get('NOTIFICATION_EMAIL', 'bodega.eesoluciones@gmail.com')
+    
+    html = "<h1>Prueba de Correo SMTP</h1>"
+    html += f"<p><b>Usuario SMTP:</b> {smtp_user}</p>"
+    html += f"<p><b>Host:</b> {smtp_host}:{smtp_port}</p>"
+    html += f"<p><b>Destino:</b> {receiver_email}</p>"
+    html += "<hr>"
+    
+    if smtp_user == 'NO_CONFIGURADO' or smtp_password == 'NO_CONFIGURADO':
+        return html + "<p style='color:red'>ERROR: Faltan las credenciales SMTP en Render.</p>"
+        
+    try:
+        msg = MIMEText("Este es un correo de prueba desde Render.")
+        msg["Subject"] = "Prueba StockWare SMTP"
+        msg["From"] = smtp_user
+        msg["To"] = receiver_email
+        
+        server = smtplib.SMTP(smtp_host, smtp_port)
+        server.set_debuglevel(1)
+        server.starttls()
+        server.login(smtp_user, smtp_password)
+        server.sendmail(smtp_user, receiver_email, msg.as_string())
+        server.quit()
+        
+        html += "<p style='color:green'><b>¡ÉXITO!</b> El correo se envió correctamente.</p>"
+    except smtplib.SMTPAuthenticationError:
+        html += "<p style='color:red'><b>ERROR DE AUTENTICACIÓN:</b> Usuario o contraseña incorrectos. Si usas Gmail, asegúrate de generar una 'Contraseña de Aplicación' y NO usar tu contraseña normal.</p>"
+    except Exception as e:
+        html += f"<p style='color:red'><b>ERROR:</b> {str(e)}</p>"
+        import traceback
+        html += f"<pre>{traceback.format_exc()}</pre>"
+        
+    return html
 
 @app.route('/api/inventario/<movil>')
 def get_inventario_movil(movil):
