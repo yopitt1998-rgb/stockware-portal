@@ -725,6 +725,13 @@ def debug_test_email():
     return html
 
 
+@app.route('/debug/email_status')
+def debug_email_status():
+    """Endpoint de diagnóstico para inspeccionar los últimos envíos de correo en memoria"""
+    from utils.email_sender import EMAIL_LOGS
+    return jsonify(EMAIL_LOGS)
+
+
 @app.route('/api/inventario/<movil>')
 def get_inventario_movil(movil):
     """
