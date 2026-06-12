@@ -28,7 +28,7 @@ def send_consumption_email_async(data, materiales_detalles):
         logger.warning("Credenciales SMTP no configuradas. No se enviará el correo de notificación.")
         return
 
-    def send_email_thread():
+    def send_email_logic():
         try:
             msg = MIMEMultipart("alternative")
             msg["Subject"] = f"NUEVO CONSUMO: Móvil {data.get('movil')} - Ticket: {data.get('contrato')}"
@@ -105,7 +105,7 @@ def send_consumption_email_async(data, materiales_detalles):
 
         except Exception as e:
             logger.error(f"Error al enviar correo de notificación: {e}")
+            raise  # Rethrow so the caller can log it too
 
-    # Iniciar hilo secundario
-    t = threading.Thread(target=send_email_thread, daemon=True)
-    t.start()
+    # Ejecutar de forma síncrona para evitar que el worker WSGI mate el hilo antes de enviar
+    send_email_logic()
