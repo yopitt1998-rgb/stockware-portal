@@ -625,16 +625,13 @@ def debug_asignaciones():
 
 @app.route('/debug/email_config')
 def debug_email_config():
-    """Endpoint que SOLO muestra la configuración SMTP sin intentar enviar nada"""
+    """Endpoint que muestra la configuración de Resend sin revelar claves completas"""
     import os
     
-    smtp_user = os.environ.get('SMTP_USER', '')
-    smtp_password = os.environ.get('SMTP_PASSWORD', '')
-    smtp_host = os.environ.get('SMTP_HOST', 'smtp.gmail.com')
-    smtp_port = os.environ.get('SMTP_PORT', '587')
+    resend_api_key = os.environ.get('RESEND_API_KEY', '')
     receiver_email = os.environ.get('NOTIFICATION_EMAIL', 'bodega.eesoluciones@gmail.com')
     
-    html = "<h1>📧 Configuración SMTP en Render</h1>"
+    html = "<h1>📧 Configuración de Resend en Render</h1>"
     html += "<table border='1' cellpadding='8' style='border-collapse:collapse; font-family:monospace'>"
     
     def check(name, val, is_secret=False):
@@ -645,88 +642,75 @@ def debug_email_config():
         else:
             status = "✅ CONFIGURADA"
             color = "green"
-            display = (val[:3] + "****") if is_secret else val
+            display = (val[:5] + "****") if is_secret else val
         return f"<tr><td><b>{name}</b></td><td>{display}</td><td style='color:{color}'>{status}</td></tr>"
     
-    html += check("SMTP_USER", smtp_user)
-    html += check("SMTP_PASSWORD", smtp_password, is_secret=True)
-    html += check("SMTP_HOST", smtp_host)
-    html += check("SMTP_PORT", smtp_port)
+    html += check("RESEND_API_KEY", resend_api_key, is_secret=True)
     html += check("NOTIFICATION_EMAIL", receiver_email)
     html += "</table>"
     
-    # Resumen
-    todas_ok = all([smtp_user, smtp_password, smtp_host, smtp_port, receiver_email])
-    if todas_ok:
-        html += "<br><p style='color:green; font-size:18px'><b>✅ Todas las variables están configuradas.</b> Puedes probar el envío en <a href='/debug/test_email'>/debug/test_email</a></p>"
+    if resend_api_key and receiver_email:
+        html += "<br><p style='color:green; font-size:18px'><b>✅ Resend está configurado.</b> Puedes probar el envío en <a href='/debug/test_email'>/debug/test_email</a></p>"
     else:
-        html += "<br><p style='color:red; font-size:18px'><b>❌ Faltan variables.</b> Añádelas en Render → Settings → Environment y reinicia el servicio.</p>"
+        html += "<br><p style='color:red; font-size:18px'><b>❌ Falta RESEND_API_KEY.</b> Agrégala en Render → Settings → Environment y reinicia el servicio.</p>"
     
     return html
 
 @app.route('/debug/test_email')
 def debug_test_email():
-    """Endpoint de diagnóstico para verificar el envío de correos SMTP (con timeout)"""
+    """Endpoint de diagnóstico para verificar el envío de correos con Resend API (HTTP)"""
     import os
-    import smtplib
-    from email.mime.text import MIMEText
+    import json
+    import urllib.request
     
-    smtp_user = os.environ.get('SMTP_USER', '')
-    smtp_password = os.environ.get('SMTP_PASSWORD', '')
-    smtp_host = os.environ.get('SMTP_HOST', 'smtp.gmail.com')
-    smtp_port = int(os.environ.get('SMTP_PORT', 587))
+    resend_api_key = os.environ.get('RESEND_API_KEY', '')
     receiver_email = os.environ.get('NOTIFICATION_EMAIL', 'bodega.eesoluciones@gmail.com')
     
-    html = "<h1>📧 Prueba de Correo SMTP</h1>"
-    html += f"<p><b>Usuario SMTP:</b> {smtp_user or 'NO CONFIGURADO'}</p>"
-    html += f"<p><b>Host:</b> {smtp_host}:{smtp_port}</p>"
-    html += f"<p><b>Destino:</b> {receiver_email}</p>"
+    html = "<h1>📧 Prueba de Correo (Resend API)</h1>"
+    html += f"<p><b>API Key:</b> {(resend_api_key[:5] + '****') if resend_api_key else 'NO CONFIGURADA'}</p>"
+    html += f"<p><b>Destino (To):</b> {receiver_email}</p>"
+    html += f"<p><b>Origen (From):</b> StockWare &lt;onboarding@resend.dev&gt;</p>"
     html += "<hr>"
     
-    if not smtp_user or not smtp_password:
-        html += "<p style='color:red'><b>ERROR:</b> Faltan las credenciales SMTP.</p>"
-        html += "<p>Configura las variables <code>SMTP_USER</code> y <code>SMTP_PASSWORD</code> en Render → Settings → Environment.</p>"
+    if not resend_api_key:
+        html += "<p style='color:red'><b>ERROR:</b> Falta la variable RESEND_API_KEY en el entorno.</p>"
+        html += "<p>Configura <code>RESEND_API_KEY</code> en Render → Settings → Environment.</p>"
         html += "<p>Revisa la configuración actual en <a href='/debug/email_config'>/debug/email_config</a></p>"
         return html
         
     try:
-        html += "<p>⏳ Conectando a servidor SMTP (timeout 10s)...</p>"
+        html += "<p>⏳ Enviando solicitud HTTP a Resend API (timeout 10s)...</p>"
         
-        msg = MIMEText("Este es un correo de prueba desde StockWare en Render. Si lo recibes, la configuración SMTP es correcta.")
-        msg["Subject"] = "✅ Prueba StockWare SMTP"
-        msg["From"] = smtp_user
-        msg["To"] = receiver_email
+        url = "https://api.resend.com/emails"
+        headers = {
+            "Authorization": f"Bearer {resend_api_key}",
+            "Content-Type": "application/json"
+        }
         
-        # TIMEOUT de 10 segundos para no colgar el worker
-        server = smtplib.SMTP(smtp_host, smtp_port, timeout=10)
-        server.starttls()
-        server.login(smtp_user, smtp_password)
-        server.sendmail(smtp_user, receiver_email, msg.as_string())
-        server.quit()
+        payload = {
+            "from": "StockWare <onboarding@resend.dev>",
+            "to": [receiver_email],
+            "subject": "✅ Prueba StockWare Resend HTTP",
+            "html": "<h3>¡Éxito!</h3><p>Este es un correo de prueba enviado mediante la API HTTP de Resend desde Render. Si recibiste esto, significa que el bloqueo de SMTP ha sido evitado exitosamente.</p>"
+        }
         
-        html += "<p style='color:green; font-size:18px'><b>✅ ¡ÉXITO!</b> El correo se envió correctamente a " + receiver_email + "</p>"
-        html += "<p>Revisa tu bandeja de entrada (y la carpeta de spam).</p>"
+        data_bytes = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(url, data=data_bytes, headers=headers, method="POST")
         
-    except smtplib.SMTPAuthenticationError as auth_err:
-        html += "<p style='color:red'><b>❌ ERROR DE AUTENTICACIÓN:</b></p>"
-        html += f"<p>Detalle: {str(auth_err)}</p>"
-        html += "<p><b>Solución:</b> Si usas Gmail, necesitas una <b>Contraseña de Aplicación</b> (16 caracteres), NO tu contraseña normal.</p>"
-        html += "<p>Crea una en: <a href='https://myaccount.google.com/apppasswords' target='_blank'>myaccount.google.com/apppasswords</a></p>"
-        
-    except smtplib.SMTPConnectError as conn_err:
-        html += f"<p style='color:red'><b>❌ ERROR DE CONEXIÓN:</b> No se pudo conectar a {smtp_host}:{smtp_port}</p>"
-        html += f"<p>Detalle: {str(conn_err)}</p>"
-        
-    except TimeoutError:
-        html += f"<p style='color:red'><b>❌ TIMEOUT:</b> No se pudo conectar a {smtp_host}:{smtp_port} en 10 segundos.</p>"
-        html += "<p>Verifica que el host y puerto sean correctos.</p>"
-        
+        with urllib.request.urlopen(req, timeout=10) as response:
+            res_data = json.loads(response.read().decode("utf-8"))
+            html += f"<p style='color:green; font-size:18px'><b>✅ ¡ÉXITO!</b> Correo enviado correctamente.</p>"
+            html += f"<p><b>ID del correo (Resend):</b> {res_data.get('id')}</p>"
+            html += "<p>Revisa tu bandeja de entrada (y la carpeta de spam o correo no deseado).</p>"
+            
     except Exception as e:
-        html += f"<p style='color:red'><b>❌ ERROR:</b> {str(e)}</p>"
+        html += f"<p style='color:red'><b>❌ ERROR DE ENVÍO:</b> No se pudo completar la solicitud HTTP.</p>"
+        html += f"<p>Detalle: {str(e)}</p>"
         import traceback
         html += f"<pre>{traceback.format_exc()}</pre>"
         
     return html
+
 
 @app.route('/api/inventario/<movil>')
 def get_inventario_movil(movil):
