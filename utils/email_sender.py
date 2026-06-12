@@ -87,7 +87,8 @@ def send_consumption_email_async(data, materiales_detalles):
         url = "https://api.resend.com/emails"
         headers = {
             "Authorization": f"Bearer {resend_api_key}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "User-Agent": "StockWare-App/1.0"
         }
         
         # Resend requiere enviar desde un dominio verificado, o desde onboarding@resend.dev (para pruebas al mismo correo del owner)
@@ -108,6 +109,11 @@ def send_consumption_email_async(data, materiales_detalles):
             response_data = json.loads(response.read().decode("utf-8"))
             logger.info(f"Correo enviado exitosamente vía Resend. ID: {response_data.get('id')} para {receiver_email}")
 
+    except urllib.error.HTTPError as http_err:
+        import urllib.error
+        error_body = http_err.read().decode("utf-8")
+        logger.error(f"Error HTTP de Resend API ({http_err.code}): {error_body}")
+        raise
     except Exception as e:
         logger.error(f"Error al enviar correo de notificación mediante Resend API: {e}")
         raise

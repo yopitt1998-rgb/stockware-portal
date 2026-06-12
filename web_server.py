@@ -684,7 +684,8 @@ def debug_test_email():
         url = "https://api.resend.com/emails"
         headers = {
             "Authorization": f"Bearer {resend_api_key}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "User-Agent": "StockWare-App/1.0"
         }
         
         payload = {
@@ -703,6 +704,17 @@ def debug_test_email():
             html += f"<p><b>ID del correo (Resend):</b> {res_data.get('id')}</p>"
             html += "<p>Revisa tu bandeja de entrada (y la carpeta de spam o correo no deseado).</p>"
             
+    except urllib.error.HTTPError as http_err:
+        import urllib.error
+        error_body = http_err.read().decode("utf-8")
+        html += f"<p style='color:red'><b>❌ ERROR DE ENVÍO (Resend API):</b> {str(http_err)}</p>"
+        html += f"<p><b>Respuesta detallada de Resend:</b></p>"
+        html += f"<pre style='background:#fee2e2; border:1px solid #fca5a5; padding:10px; color:#991b1b; overflow:auto;'>{error_body}</pre>"
+        html += "<p><b>Posibles causas:</b></p>"
+        html += "<ul>"
+        html += "<li>Si usas <i>onboarding@resend.dev</i>, el destino (To) DEBE ser el mismo correo con el que te registraste en Resend.</li>"
+        html += "<li>Si envías a otro correo, debes verificar tu propio dominio en el panel de Resend.</li>"
+        html += "</ul>"
     except Exception as e:
         html += f"<p style='color:red'><b>❌ ERROR DE ENVÍO:</b> No se pudo completar la solicitud HTTP.</p>"
         html += f"<p>Detalle: {str(e)}</p>"
