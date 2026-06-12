@@ -340,6 +340,7 @@
             <a href="/" class="nav-link active">Reporte Diario</a>
             <a href="/modo_lunes" class="nav-link">Plan B (Lunes)</a>
             <a href="/auditoria" class="nav-link">Auditoría</a>
+            <a href="/asistente" class="nav-link">✨ Asistente IA</a>
         </div>
     </nav>
 
@@ -541,54 +542,53 @@
                 const inventario = window.INVENTARIO_MOVIL || [];
                 const compartidosCheck = (typeof MATERIALES_COMPARTIDOS !== 'undefined') ? MATERIALES_COMPARTIDOS : [];
 
-                // --- LÓGICA DE AGREGACIÓN Y PUENTE (PERSONALIZADO/NINGUNO) ---
-
-                // 1. Items específicos del paquete seleccionado (que NO sean compartidos globales)
-                const itemsEspecificos = inventario.filter(item => {
-                    const pq = (item.paquete || 'NINGUNO').trim().toUpperCase();
-                    return pq === paqueteSeleccionado && !compartidosCheck.includes(item.sku);
-                });
-
-                // 2. Items Puente (PERSONALIZADO o NINGUNO) que se ven en A y B
-                const itemsPuente = inventario.filter(item => {
-                    const pq = (item.paquete || 'NINGUNO').trim().toUpperCase();
-                    return (pq === 'PERSONALIZADO' || pq === 'NINGUNO') &&
-                        pq !== paqueteSeleccionado &&
-                        !compartidosCheck.includes(item.sku);
-                });
-
-                // 3. Agregados (Compartidos Globales)
-                const mapCompartidos = {};
+                // --- LÓGICA DE CONSOLIDACIÓN POR SKU ---
+                const consolidatedMap = {};
                 inventario.forEach(item => {
-                    const esGlobal = item.es_global || compartidosCheck.includes(item.sku);
-                    if (esGlobal) {
-                        if (!mapCompartidos[item.sku]) {
-                            mapCompartidos[item.sku] = JSON.parse(JSON.stringify(item));
-                            mapCompartidos[item.sku].paquete = 'COMPARTIDO';
-                            mapCompartidos[item.sku].cantidad_total = 0;
-                            mapCompartidos[item.sku].seriales = [];
-                        }
-                        // En materiales globales/compartidos, sumamos o tomamos el mayor
-                        // (En el caso de es_global el server ya envía el stock total de bodega)
-                        if (item.es_global) {
-                            mapCompartidos[item.sku].cantidad_total = item.cantidad_total;
-                        } else {
-                            mapCompartidos[item.sku].cantidad_total += (parseFloat(item.cantidad_total) || 0);
-                        }
-                        
-                        if (item.seriales && Array.isArray(item.seriales)) {
-                            item.seriales.forEach(s => {
-                                if (!mapCompartidos[item.sku].seriales.includes(s)) {
-                                    mapCompartidos[item.sku].seriales.push(s);
-                                }
-                            });
-                        }
+                    if (!item || !item.sku) return;
+                    
+                    const skuNorm = item.sku.toString().trim().toUpperCase();
+                    // Solo es global si el backend lo marcó así (desde la tabla productos_globales)
+                    const esGlobal = item.es_global === true; 
+                    const pq = (item.paquete || 'NINGUNO').toString().trim().toUpperCase();
+                    
+                    // Filtro de visibilidad: 
+                    // 1. Si es global, siempre visible.
+                    // 2. Si es normal, debe coincidir estrictamente con el paquete seleccionado.
+                    // 3. Los paquetes puente (PERSONALIZADO/NINGUNO) se muestran en todas las vistas A/B/CARRO.
+                    const isVisible = esGlobal ||
+                                    (pq === paqueteSeleccionado) || 
+                                    (pq === 'PERSONALIZADO' || pq === 'NINGUNO');
+                    
+                    if (!isVisible) return;
+
+                    if (!consolidatedMap[skuNorm]) {
+                        consolidatedMap[skuNorm] = JSON.parse(JSON.stringify(item));
+                        consolidatedMap[skuNorm].sku = skuNorm;
+                        consolidatedMap[skuNorm].cantidad_total = 0;
+                        consolidatedMap[skuNorm].seriales = [];
+                    }
+
+                    // Sumar cantidades
+                    if (item.es_global) {
+                         // Los globales ya traen el stock real de bodega; tomamos el más reciente/alto
+                         consolidatedMap[skuNorm].cantidad_total = Math.max(consolidatedMap[skuNorm].cantidad_total, parseFloat(item.cantidad_total) || 0);
+                    } else {
+                         // Sumar stock asignado específicamente para este paquete/móvil
+                         consolidatedMap[skuNorm].cantidad_total += (parseFloat(item.cantidad_total) || 0);
+                    }
+
+                    // Consolidar seriales
+                    if (item.seriales && Array.isArray(item.seriales)) {
+                        item.seriales.forEach(s => {
+                            if (!consolidatedMap[skuNorm].seriales.includes(s)) {
+                                consolidatedMap[skuNorm].seriales.push(s);
+                            }
+                        });
                     }
                 });
-                const itemsCompartidos = Object.values(mapCompartidos);
 
-                // Combinación: Propios del paquete + Compartidos Globales + Puente (PERSONALIZADO/NINGUNO)
-                const items = itemsEspecificos.concat(itemsPuente).concat(itemsCompartidos);
+                const items = Object.values(consolidatedMap);
 
                 if (items.length === 0) {
                     container.style.display = 'none';

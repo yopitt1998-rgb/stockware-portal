@@ -662,6 +662,7 @@ def debug_test_email():
     import os
     import json
     import urllib.request
+    import urllib.error
     
     resend_api_key = os.environ.get('RESEND_API_KEY', '')
     receiver_email = os.environ.get('NOTIFICATION_EMAIL', 'bodega.eesoluciones@gmail.com')

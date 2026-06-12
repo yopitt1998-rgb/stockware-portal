@@ -457,17 +457,21 @@ class MobileOutputScannerWindow:
                     self.entry_scanner.focus_set()
                     return
 
+                requires_serial = sku in PRODUCTOS_CON_CODIGO_BARRA
                 nombre = self.productos_cache[sku]['nombre']
                 stock_disponible = self.productos_cache[sku].get('stock', 0)
 
                 if stock_disponible <= 0:
-                    messagebox.showerror("Sin Stock",
-                        f"No hay stock disponible de {nombre} en BODEGA.\n(Stock: {stock_disponible})",
-                        parent=self.window)
-                    self.entry_scanner.focus()
-                    return
+                    # RESILIENCIA: Si es un equipo con serial y lo encontramos físicamente en BODEGA, dejar pasar.
+                    if requires_serial and origen_serial:
+                        logger.info(f"⚡ Resiliencia activa: Permitiendo salida de serial {codigo} para SKU {sku} pese a stock 0 en ledger.")
+                    else:
+                        messagebox.showerror("Sin Stock",
+                            f"No hay stock disponible de {nombre} en BODEGA.\n(Stock: {stock_disponible})",
+                            parent=self.window)
+                        self.entry_scanner.focus()
+                        return
 
-                requires_serial = sku in PRODUCTOS_CON_CODIGO_BARRA
                 seriales = []
                 cant = 1
 
@@ -884,7 +888,8 @@ class MobileOutputScannerWindow:
                             fecha_evento=fecha,
                             paquete_asignado=paquete_sel,
                             sucursal_context=branch,
-                            existing_conn=shared_conn
+                            existing_conn=shared_conn,
+                            seriales=seriales
                         )
                         
                         if not ok:

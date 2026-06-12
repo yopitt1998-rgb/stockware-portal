@@ -64,21 +64,34 @@ def crear_tablas_auditoria():
         """)
         
         # MIGRACIÓN: Asegurar que las columnas nuevas existan en auditoria_bodega_abastos
-        # (Esto es necesario porque CREATE TABLE IF NOT EXISTS no añade columnas si la tabla ya existe)
+        from config import DB_TYPE
+        
+        # Obtener columnas existentes para evitar errores de duplicado
+        existing_cols = []
         try:
-            run_query(cursor, "ALTER TABLE auditoria_bodega_abastos ADD COLUMN numero_factura VARCHAR(255) AFTER imagen_path")
-        except Exception:
-            pass # Ya existe
-            
-        try:
-            run_query(cursor, "ALTER TABLE auditoria_bodega_abastos ADD COLUMN fecha_documento DATE AFTER numero_factura")
-        except Exception:
-            pass # Ya existe
+            if DB_TYPE == 'MYSQL':
+                cursor.execute("SHOW COLUMNS FROM auditoria_bodega_abastos")
+                existing_cols = [r[0] for r in cursor.fetchall()]
+            else:
+                cursor.execute("PRAGMA table_info(auditoria_bodega_abastos)")
+                existing_cols = [r[1] for r in cursor.fetchall()]
+        except Exception as e:
+            logger.warning(f"Error verificando columnas de auditoria_bodega_abastos: {e}")
 
-        try:
-            run_query(cursor, "ALTER TABLE auditoria_bodega_abastos ADD COLUMN documento_referencia VARCHAR(255) AFTER fecha_documento")
-        except Exception:
-            pass # Ya existe
+        def safe_add_col(col_name, col_type, after_col=None):
+            if col_name not in existing_cols:
+                sql = f"ALTER TABLE auditoria_bodega_abastos ADD COLUMN {col_name} {col_type}"
+                if after_col and DB_TYPE == 'MYSQL':
+                    sql += f" AFTER {after_col}"
+                try:
+                    run_query(cursor, sql)
+                    logger.info(f"Columna '{col_name}' añadida a 'auditoria_bodega_abastos'")
+                except Exception as e:
+                    logger.warning(f"Error añadiendo columna {col_name}: {e}")
+
+        safe_add_col("numero_factura", "VARCHAR(255)", "imagen_path")
+        safe_add_col("fecha_documento", "DATE", "numero_factura")
+        safe_add_col("documento_referencia", "VARCHAR(255)", "fecha_documento")
             
     logger.info("Tablas de Auditoría de Bodega verificadas y migradas correctamente.")
 

@@ -17,7 +17,7 @@ from config import DATABASE_NAME, DB_TYPE, MYSQL_HOST, MYSQL_USER, MYSQL_PASS, M
 from utils.db_connector import get_db_connection, close_connection, db_session
 
 from data_layer.core import run_query, safe_messagebox
-from data_layer.movements import sincronizar_stock_bodega_serializado
+
 
 def limpiar_productos_duplicados():
     """Elimina productos duplicados manteniendo el registro más reciente"""
@@ -723,6 +723,26 @@ def verificar_serie_existe(serial, sku=None, ubicacion_requerida=None, estado_re
             sku_existente, estado, ubicacion, s_found, m_found = result
             tipo = "Serial" if s_found == serial else "MAC"
             
+            # --- RECUPERACIÓN AUTOMÁTICA DE FALTANTES ---
+            if ubicacion == 'FALTANTE':
+                try:
+                    logger.info(f"✨ Recuperando automáticamente {tipo} {serial} de FALTANTE por verificación.")
+                    run_query(cursor, "SELECT faltante_id FROM seriales_faltantes_detalle WHERE serial = ? OR serial = ?", (serial, serial))
+                    for f_row in cursor.fetchall():
+                        id_f = f_row[0]
+                        run_query(cursor, "DELETE FROM seriales_faltantes_detalle WHERE serial = ? OR serial = ?", (serial, serial))
+                        run_query(cursor, "UPDATE faltantes_registrados SET cantidad = cantidad - 1 WHERE id = ?", (id_f,))
+                        run_query(cursor, "DELETE FROM faltantes_registrados WHERE id = ? AND cantidad <= 0", (id_f,))
+                    run_query(cursor, "UPDATE series_registradas SET ubicacion = 'BODEGA', estado = 'DISPONIBLE' WHERE UPPER(serial_number) = ? OR UPPER(mac_number) = ?", (serial, serial))
+                    conn.commit()
+                    ubicacion = 'BODEGA'
+                    estado = 'DISPONIBLE'
+                    # Retornamos False para que el sistema permita procesarlo de nuevo (o si prefieren, True con mensaje de BODEGA)
+                    # Dado que si lo escanean en Abasto, no queremos duplicarlo, devolvemos que YA EXISTE en BODEGA.
+                except Exception as e_rec:
+                    logger.warning(f"Error auto-recuperando faltante {serial}: {e_rec}")
+                    conn.rollback()
+            
             # Validaciones adicionales para Salida
             if estado_requerido and estado != estado_requerido:
                 return True, f"La {tipo} '{serial}' no está DISPONIBLE (Estado actual: {estado})"
@@ -794,6 +814,7 @@ def registrar_series_bulk(series_data, fecha_ingreso=None, paquete=None, existin
         try:
             # Identificar que sucursales se vieron afectadas
             sucursales_afectadas = list(set([d[-1] for d in data_to_insert]))
+            from data_layer.movements import sincronizar_stock_bodega_serializado
             for suc in sucursales_afectadas:
                 sincronizar_stock_bodega_serializado(sucursal_context=suc)
         except Exception as e_sync:
@@ -912,13 +933,24 @@ def actualizar_ubicacion_serial(serial_number, nueva_ubicacion, paquete=None, ex
         # Normalizar paquete para persistencia y filtros
         pq_norm = paquete if paquete else 'NINGUNO'
 
+        # Determinar estado según destino
+        if nueva_ubicacion == 'BODEGA':
+            nuevo_estado = 'DISPONIBLE'
+        elif nueva_ubicacion == 'CONSUMIDO':
+            nuevo_estado = 'CONSUMIDO'
+        elif nueva_ubicacion == 'FALTANTE':
+            nuevo_estado = 'FALTANTE'
+        else:
+            # Asignado a una móvil
+            nuevo_estado = 'ASIGNADO'
+
         sql = """
             UPDATE series_registradas
-            SET ubicacion = ?, paquete = ?
+            SET ubicacion = ?, paquete = ?, estado = ?
             WHERE (serial_number = ? OR mac_number = ?) AND sucursal = ?
         """
         
-        run_query(cursor, sql, (nueva_ubicacion, pq_norm, serial_number, serial_number, sucursal))
+        run_query(cursor, sql, (nueva_ubicacion, pq_norm, nuevo_estado, serial_number, serial_number, sucursal))
         
         if should_close:
             conn.commit()
@@ -946,13 +978,15 @@ def obtener_series_por_sku_y_ubicacion(sku, ubicacion, paquete=None):
         else:
             cursor = conn.cursor()
         
-        # Permitir seleccionar seriales que estén en la ubicación pedida O que sean FALTANTE si se pide BODEGA
+        # CORRECCIÓN: Incluir estado 'ASIGNADO' además de 'DISPONIBLE'.
+        # Los equipos en un móvil tienen estado='ASIGNADO', los de BODEGA tienen 'DISPONIBLE'.
+        # También incluir FALTANTE si se solicita BODEGA (para recuperación).
         sql = """
             SELECT serial_number, mac_number 
             FROM series_registradas 
             WHERE sku = ? 
             AND (
-                (UPPER(TRIM(ubicacion)) = UPPER(TRIM(?)) AND estado = 'DISPONIBLE')
+                (UPPER(TRIM(ubicacion)) = UPPER(TRIM(?)) AND estado IN ('DISPONIBLE', 'ASIGNADO'))
                 OR 
                 (UPPER(TRIM(ubicacion)) = 'FALTANTE' AND UPPER(TRIM(?)) = 'BODEGA')
             )
@@ -960,8 +994,12 @@ def obtener_series_por_sku_y_ubicacion(sku, ubicacion, paquete=None):
         params = [sku, ubicacion, ubicacion]
         
         if paquete and paquete != "TODOS":
-            # Permitir NULL o NINGUNO como fallback
-            sql += " AND (UPPER(TRIM(paquete)) = UPPER(TRIM(?)) OR paquete IS NULL OR paquete = '' OR UPPER(TRIM(paquete)) = 'NINGUNO')"
+            if paquete in ['PAQUETE A', 'PAQUETE B']:
+                # REGLA ESTRICTA: Solo ese paquete
+                sql += " AND UPPER(TRIM(paquete)) = UPPER(TRIM(?))"
+            else:
+                # Permitir NULL o NINGUNO como fallback para otros casos
+                sql += " AND (UPPER(TRIM(paquete)) = UPPER(TRIM(?)) OR paquete IS NULL OR paquete = '' OR UPPER(TRIM(paquete)) = 'NINGUNO')"
             params.append(paquete)
             
         run_query(cursor, sql, params)
@@ -989,11 +1027,19 @@ def obtener_todas_las_series_de_ubicacion(ubicacion, paquete=None):
         else:
             cursor = conn.cursor()
         
-        sql = "SELECT sku, serial_number, mac_number, paquete FROM series_registradas WHERE UPPER(TRIM(ubicacion)) = UPPER(TRIM(?)) AND estado = 'DISPONIBLE'"
+        # CORRECCIÓN: Incluir estado 'ASIGNADO' además de 'DISPONIBLE'.
+        # Cuando un serial se asigna a un técnico/móvil, su estado pasa a 'ASIGNADO'.
+        # El filtro anterior (solo 'DISPONIBLE') hacía que los equipos del técnico
+        # no aparecieran en la pantalla de retorno (auditoría física).
+        sql = "SELECT sku, serial_number, mac_number, paquete FROM series_registradas WHERE UPPER(TRIM(ubicacion)) = UPPER(TRIM(?)) AND estado IN ('ASIGNADO', 'DISPONIBLE')"
         params = [ubicacion]
         
         if paquete and paquete != "TODOS":
-            sql += " AND (UPPER(TRIM(paquete)) = UPPER(TRIM(?)) OR paquete IS NULL OR paquete = '' OR UPPER(TRIM(paquete)) = 'NINGUNO')"
+            if paquete in ['PAQUETE A', 'PAQUETE B']:
+                # REGLA ESTRICTA: Solo ese paquete
+                sql += " AND UPPER(TRIM(paquete)) = UPPER(TRIM(?))"
+            else:
+                sql += " AND (UPPER(TRIM(paquete)) = UPPER(TRIM(?)) OR paquete IS NULL OR paquete = '' OR UPPER(TRIM(paquete)) = 'NINGUNO')"
             params.append(paquete)
             
         run_query(cursor, sql, params)
@@ -1002,7 +1048,9 @@ def obtener_todas_las_series_de_ubicacion(ubicacion, paquete=None):
         result = {}
         for sku, sn, mac, pq in rows:
             if sku not in result: result[sku] = []
+            # Devolvemos la tupla completa (Serial, MAC, Paquete) para máxima precisión en la UI
             result[sku].append((sn, mac, pq))
+        
         return result
         
     except Exception as e:
@@ -1122,7 +1170,30 @@ def identificar_codigo_escaneado_gui(codigo):
         
         if result:
             # Result: (sku, ubicacion, priority, is_serial, paquete)
-            return result[0], bool(result[3]), result[1], result[4]
+            sku_res = result[0]
+            ubicacion_res = result[1]
+            is_serial_res = bool(result[3])
+            paquete_res = result[4]
+            
+            # --- RECUPERACIÓN AUTOMÁTICA DE FALTANTES ---
+            if is_serial_res and ubicacion_res == 'FALTANTE':
+                try:
+                    logger.info(f"✨ Recuperando automáticamente serial {raw_code} de FALTANTE por escaneo general.")
+                    run_query(cursor, "SELECT faltante_id FROM seriales_faltantes_detalle WHERE serial = ? OR serial = ?", (raw_code, raw_code))
+                    for f_row in cursor.fetchall():
+                        id_f = f_row[0]
+                        run_query(cursor, "DELETE FROM seriales_faltantes_detalle WHERE serial = ? OR serial = ?", (raw_code, raw_code))
+                        run_query(cursor, "UPDATE faltantes_registrados SET cantidad = cantidad - 1 WHERE id = ?", (id_f,))
+                        run_query(cursor, "DELETE FROM faltantes_registrados WHERE id = ? AND cantidad <= 0", (id_f,))
+                    
+                    run_query(cursor, "UPDATE series_registradas SET ubicacion = 'BODEGA', estado = 'DISPONIBLE' WHERE UPPER(serial_number) = ? OR UPPER(mac_number) = ?", (raw_code, raw_code))
+                    conn.commit()
+                    ubicacion_res = 'BODEGA'
+                except Exception as e_rec:
+                    logger.warning(f"Error auto-recuperando faltante {raw_code}: {e_rec}")
+                    conn.rollback()
+
+            return sku_res, is_serial_res, ubicacion_res, paquete_res
             
         return None, False, None, None
         

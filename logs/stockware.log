@@ -22365,3 +22365,1343 @@ AttributeError: 'ModernInventarioApp' object has no attribute 'switch_to_tab'
 2026-04-11 08:33:56 | INFO     | data_layer.reminders | Bootstrap Start
 2026-04-11 08:33:56 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
 2026-04-11 08:33:56 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-04-11 10:55:48 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-11 10:56:39 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-11 10:57:33 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:22:41 | INFO     | __main__             | Inicializando app_inventario...
+2026-04-13 13:22:42 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-04-13 13:22:45 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:22:45 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:22:45 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:22:45 | ERROR    | data_layer.core      | Error critico en inicializar_bd: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:13 | INFO     | data_layer.reminders | Bootstrap Start
+2026-04-13 13:25:13 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-04-13 13:25:13 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error en obtener_estadisticas_reales: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error en obtener_estadisticas_reales: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener todos los SKUs para movimiento: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:20 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:21 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:22 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:22 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:22 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:22 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:22 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:22 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:22 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:22 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:22 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:22 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:22 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:22 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:22 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:22 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:22 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:22 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | data_layer.reminders | Error al obtener recordatorios: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:22 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:22 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:22 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:22 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:22 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | ERROR    | data_layer.inventory | Error al obtener móviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:25:22 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:27 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:25:34 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 13:26:05 | INFO     | __main__             | Inicializando app_inventario...
+2026-04-13 13:26:06 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-04-13 13:26:09 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 13:26:30 | INFO     | data_layer.core      | Etapa 1 completada: tablas verificadas/creadas.
+2026-04-13 13:26:31 | ERROR    | utils.db_connector   | Error SQL ejecución: 1060 (42S21): Duplicate column name 'numero_factura'
+2026-04-13 13:26:31 | ERROR    | utils.db_connector   |    Query: ALTER TABLE auditoria_bodega_abastos ADD COLUMN numero_factura VARCHAR(255) AFTER imagen_path
+2026-04-13 13:26:31 | ERROR    | utils.db_connector   |    Params: None
+2026-04-13 13:26:31 | ERROR    | utils.db_connector   | Error SQL ejecución: 1060 (42S21): Duplicate column name 'fecha_documento'
+2026-04-13 13:26:31 | ERROR    | utils.db_connector   |    Query: ALTER TABLE auditoria_bodega_abastos ADD COLUMN fecha_documento DATE AFTER numero_factura
+2026-04-13 13:26:31 | ERROR    | utils.db_connector   |    Params: None
+2026-04-13 13:26:31 | ERROR    | utils.db_connector   | Error SQL ejecución: 1060 (42S21): Duplicate column name 'documento_referencia'
+2026-04-13 13:26:31 | ERROR    | utils.db_connector   |    Query: ALTER TABLE auditoria_bodega_abastos ADD COLUMN documento_referencia VARCHAR(255) AFTER fecha_documento
+2026-04-13 13:26:31 | ERROR    | utils.db_connector   |    Params: None
+2026-04-13 13:26:32 | INFO     | data_layer.warehouse_audit | Tablas de Auditoría de Bodega verificadas y migradas correctamente.
+2026-04-13 13:26:35 | INFO     | data_layer.core      | Etapa 2 completada: migraciones de columnas aplicadas.
+2026-04-13 13:26:37 | INFO     | data_layer.core      | Etapa 3 completada: indices de rendimiento verificados.
+2026-04-13 13:26:37 | INFO     | data_layer.core      | Etapa 4 completada: moviles verificados.
+2026-04-13 13:26:37 | INFO     | data_layer.core      | Base de datos inicializada correctamente.
+2026-04-13 13:26:38 | INFO     | data_layer.reminders | Bootstrap Start
+2026-04-13 13:26:38 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-04-13 13:26:38 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-04-13 13:29:05 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-13 13:29:13 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-13 13:29:23 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-13 13:29:27 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-13 13:29:31 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-644 -> Qty: 1 (Serial)
+2026-04-13 13:29:40 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-644 -> Qty: 1 (Serial)
+2026-04-13 13:29:48 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-647 -> Qty: 1 (Serial)
+2026-04-13 13:30:05 | WARNING  | gui.inventory.movements | ❌ Código '9848740BAA33' no reconocido en este móvil
+2026-04-13 13:30:10 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-647 -> Qty: 1 (Serial)
+2026-04-13 13:30:30 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-903 -> Qty: 1 (Serial)
+2026-04-13 13:30:31 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-903 -> Qty: 1 (Serial)
+2026-04-13 13:30:37 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-646 -> Qty: 1 (Serial)
+2026-04-13 13:30:45 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-902 -> Qty: 1 (Serial)
+2026-04-13 13:30:54 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-902 -> Qty: 1 (Serial)
+2026-04-13 13:31:07 | INFO     | gui.inventory.movements | ✅ Auditado: U4-4-633 -> Qty: 1 (Serial)
+2026-04-13 13:31:15 | INFO     | gui.inventory.movements | ✅ Auditado: 4-3-42 -> Qty: 41 (Material)
+2026-04-13 13:31:20 | INFO     | gui.inventory.movements | ✅ Auditado: 2-5-02 -> Qty: 25 (Material)
+2026-04-13 13:31:27 | INFO     | gui.inventory.movements | ✅ Auditado: 2-7-07 -> Qty: 17 (Material)
+2026-04-13 13:31:32 | INFO     | gui.inventory.movements | ✅ Auditado: 1-4-61 -> Qty: 4 (Material)
+2026-04-13 13:31:37 | INFO     | gui.inventory.movements | ✅ Auditado: 4-3-18 -> Qty: 7 (Material)
+2026-04-13 13:31:42 | INFO     | gui.inventory.movements | ✅ Auditado: 4-2-41 -> Qty: 3 (Material)
+2026-04-13 13:31:54 | INFO     | gui.inventory.movements | ✅ Auditado: 1-8-40 -> Qty: 49 (Material)
+2026-04-13 13:31:57 | INFO     | gui.inventory.movements | ✅ Auditado: 2-7-11 -> Qty: 3 (Material)
+2026-04-13 13:32:04 | INFO     | data_layer.inventory | 🚩 Faltante registrado: Movil 205 - 2-5-02 x5 (CHIRIQUI)
+2026-04-13 13:32:12 | INFO     | data_layer.inventory | 🚩 Faltante registrado: Movil 205 - 2-7-11 x1 (CHIRIQUI)
+2026-04-13 13:32:32 | INFO     | data_layer.inventory | 🚩 Faltante registrado: Movil 205 - 8-1-904 x4 (CHIRIQUI)
+2026-04-13 13:32:35 | INFO     | data_layer.inventory | Sincronizando stock serializado para sucursal: CHIRIQUI
+2026-04-13 13:32:36 | INFO     | data_layer.inventory | Stock sincronizado para 4-4-644 en CHIRIQUI: 723 -> 727
+2026-04-13 13:32:36 | INFO     | data_layer.inventory | Stock sincronizado para 4-4-656 en CHIRIQUI: 436 -> 437
+2026-04-13 13:32:36 | INFO     | data_layer.inventory | Stock sincronizado para 4-4-646 en CHIRIQUI: 172 -> 173
+2026-04-13 13:32:37 | INFO     | data_layer.inventory | Stock sincronizado para 8-1-904 en CHIRIQUI: 572 -> 578
+2026-04-13 13:32:38 | INFO     | data_layer.inventory | 🧹 Móvil Movil 205 (PAQUETE B) limpiado: 0 registros eliminados.
+2026-04-13 13:32:40 | INFO     | gui.inventory.movements | Refill: Saltando equipo 8-1-904 por falta de MACs escaneadas.
+2026-04-13 13:32:42 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-8-40 (Equipos individuales o Material agrupado)
+2026-04-13 13:32:42 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-13 13:32:42 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-13 13:32:42 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-903 (Equipos individuales o Material agrupado)
+2026-04-13 13:32:42 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-4-61 (Equipos individuales o Material agrupado)
+2026-04-13 13:32:42 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-5-02 (Equipos individuales o Material agrupado)
+2026-04-13 13:32:42 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-11 (Equipos individuales o Material agrupado)
+2026-04-13 13:32:42 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-2-41 (Equipos individuales o Material agrupado)
+2026-04-13 13:32:43 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-13 13:32:43 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-18 (Equipos individuales o Material agrupado)
+2026-04-13 13:32:43 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-13 13:32:43 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): U4-4-633 (Equipos individuales o Material agrupado)
+2026-04-13 13:32:43 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-07 (Equipos individuales o Material agrupado)
+2026-04-13 13:32:43 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-42 (Equipos individuales o Material agrupado)
+2026-04-13 13:32:43 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-902 (Equipos individuales o Material agrupado)
+2026-04-13 13:32:43 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-04-13 13:35:43 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-13 13:35:48 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-13 13:35:53 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-13 13:35:56 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-13 13:36:01 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-13 13:36:15 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-13 13:39:57 | ERROR    | utils.db_connector   | Error SQL ejecución: 2013: Lost connection to MySQL server during query
+2026-04-13 13:39:57 | ERROR    | utils.db_connector   |    Query: UPDATE productos SET cantidad = cantidad - %s WHERE sku = %s AND ubicacion = 'BODEGA' AND sucursal = %s AND cantidad >= %s
+2026-04-13 13:39:57 | ERROR    | utils.db_connector   |    Params: (1.0, '4-4-644', 'CHIRIQUI', 1.0)
+2026-04-13 13:39:57 | ERROR    | data_layer.inventory | Error en registrar_movimiento_gui para SKU 4-4-644: 2013: Lost connection to MySQL server during query
+2026-04-13 13:39:57 | ERROR    | data_layer.inventory | Error en registrar_movimiento_gui para SKU 4-4-644: MySQL Connection not available
+2026-04-13 13:39:57 | ERROR    | data_layer.inventory | Error en registrar_movimiento_gui para SKU 4-3-18: MySQL Connection not available
+2026-04-13 13:39:57 | ERROR    | data_layer.inventory | Error en registrar_movimiento_gui para SKU 4-4-656: MySQL Connection not available
+2026-04-13 13:39:57 | ERROR    | data_layer.inventory | Error en registrar_movimiento_gui para SKU 4-4-656: MySQL Connection not available
+2026-04-13 13:39:57 | ERROR    | data_layer.inventory | Error en registrar_movimiento_gui para SKU 4-4-656: MySQL Connection not available
+2026-04-13 13:39:57 | ERROR    | data_layer.inventory | Error en registrar_movimiento_gui para SKU 4-4-656: MySQL Connection not available
+2026-04-13 13:39:57 | ERROR    | data_layer.inventory | Error en registrar_movimiento_gui para SKU U4-4-633: MySQL Connection not available
+2026-04-13 13:39:57 | ERROR    | data_layer.inventory | Error en registrar_movimiento_gui para SKU 2-7-07: MySQL Connection not available
+2026-04-13 13:39:57 | ERROR    | data_layer.inventory | Error en registrar_movimiento_gui para SKU 4-3-42: MySQL Connection not available
+2026-04-13 13:39:57 | ERROR    | data_layer.inventory | Error en registrar_movimiento_gui para SKU 8-1-902: MySQL Connection not available
+2026-04-13 13:39:57 | ERROR    | data_layer.inventory | Error en registrar_movimiento_gui para SKU 8-1-902: MySQL Connection not available
+2026-04-13 13:39:57 | ERROR    | data_layer.inventory | Error en registrar_movimiento_gui para SKU 4-4-656: MySQL Connection not available
+2026-04-13 13:39:57 | ERROR    | data_layer.inventory | Error en registrar_movimiento_gui para SKU 4-4-644: MySQL Connection not available
+2026-04-13 13:39:57 | ERROR    | data_layer.inventory | Error en registrar_movimiento_gui para SKU 4-4-644: MySQL Connection not available
+2026-04-13 13:39:57 | ERROR    | data_layer.inventory | Error en registrar_movimiento_gui para SKU 4-4-644: MySQL Connection not available
+2026-04-13 13:39:57 | ERROR    | data_layer.inventory | Error en registrar_movimiento_gui para SKU 4-4-644: MySQL Connection not available
+2026-04-13 13:39:57 | ERROR    | data_layer.inventory | Error en registrar_movimiento_gui para SKU 4-4-646: MySQL Connection not available
+2026-04-13 13:39:57 | ERROR    | gui.mobile_output_scanner | Error en commit final: 2055: Lost connection to MySQL server at 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000', system error: Errno 8: EOF occurred in violation of protocol (_ssl.c:2406)
+2026-04-13 13:40:05 | WARNING  | utils.db_connector   | Error cerrando conexión: MySQL Connection not available.
+2026-04-13 13:40:55 | ERROR    | utils.db_connector   | Error SQL ejecución: 2013: Lost connection to MySQL server during query
+2026-04-13 13:40:55 | ERROR    | utils.db_connector   |    Query: SELECT COUNT(*) FROM prestamos_activos WHERE estado = 'ACTIVO'
+2026-04-13 13:40:55 | ERROR    | utils.db_connector   |    Params: None
+2026-04-13 13:40:55 | ERROR    | data_layer.inventory | Error en obtener_estadisticas_reales: 2013: Lost connection to MySQL server during query
+2026-04-13 13:40:55 | WARNING  | utils.db_connector   | Error cerrando conexión: MySQL Connection not available.
+2026-04-13 14:37:20 | ERROR    | data_layer.reminders | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\warehouse_audit.py", line 1026, in <lambda>
+    self.window.after(0, lambda: self._poblar_historial_ui(abastos, billing))
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\warehouse_audit.py", line 1037, in _poblar_historial_ui
+    for i in self.tree_master.get_children(): self.tree_master.delete(i)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\ttk.py", line 1198, in get_children
+    self.tk.call(self._w, "children", item or '') or ())
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: invalid command name ".!frame2.!notebook.!frame3.!frame.!toplevel6.!frame.!panedwindow.!frame.!treeview"
+
+2026-04-13 14:39:00 | WARNING  | utils.db_connector   | Error cerrando conexión: 2013: Lost connection to MySQL server during query
+2026-04-13 14:39:01 | WARNING  | utils.db_connector   | [POOL] Error de conexión para test, reintentando una vez: Can not reconnect to MySQL after 1 attempt(s): 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 14:39:01 | ERROR    | utils.db_connector   | [DB] Error fatal conectando a test: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 14:39:01 | ERROR    | data_layer.inventory | ❌ Error en obtener_stock_actual_y_moviles: 2003: Can't connect to MySQL server on 'gateway01.us-east-1.prod.aws.tidbcloud.com:4000' (Errno 11001: getaddrinfo failed)
+2026-04-13 14:39:18 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 15:44:23 | INFO     | __main__             | Inicializando app_inventario...
+2026-04-13 15:44:24 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-04-13 15:44:25 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-13 15:44:45 | INFO     | data_layer.core      | Etapa 1 completada: tablas verificadas/creadas.
+2026-04-13 15:44:47 | ERROR    | utils.db_connector   | Error SQL ejecución: 1060 (42S21): Duplicate column name 'numero_factura'
+2026-04-13 15:44:47 | ERROR    | utils.db_connector   |    Query: ALTER TABLE auditoria_bodega_abastos ADD COLUMN numero_factura VARCHAR(255) AFTER imagen_path
+2026-04-13 15:44:47 | ERROR    | utils.db_connector   |    Params: None
+2026-04-13 15:44:47 | ERROR    | utils.db_connector   | Error SQL ejecución: 1060 (42S21): Duplicate column name 'fecha_documento'
+2026-04-13 15:44:47 | ERROR    | utils.db_connector   |    Query: ALTER TABLE auditoria_bodega_abastos ADD COLUMN fecha_documento DATE AFTER numero_factura
+2026-04-13 15:44:47 | ERROR    | utils.db_connector   |    Params: None
+2026-04-13 15:44:47 | ERROR    | utils.db_connector   | Error SQL ejecución: 1060 (42S21): Duplicate column name 'documento_referencia'
+2026-04-13 15:44:47 | ERROR    | utils.db_connector   |    Query: ALTER TABLE auditoria_bodega_abastos ADD COLUMN documento_referencia VARCHAR(255) AFTER fecha_documento
+2026-04-13 15:44:47 | ERROR    | utils.db_connector   |    Params: None
+2026-04-13 15:44:48 | INFO     | data_layer.warehouse_audit | Tablas de Auditoría de Bodega verificadas y migradas correctamente.
+2026-04-13 15:44:53 | INFO     | data_layer.core      | Etapa 2 completada: migraciones de columnas aplicadas.
+2026-04-13 15:44:56 | INFO     | data_layer.core      | Etapa 3 completada: indices de rendimiento verificados.
+2026-04-13 15:44:56 | INFO     | data_layer.core      | Etapa 4 completada: moviles verificados.
+2026-04-13 15:44:57 | INFO     | data_layer.core      | Base de datos inicializada correctamente.
+2026-04-13 15:44:58 | INFO     | data_layer.reminders | Bootstrap Start
+2026-04-13 15:44:58 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-04-13 15:44:58 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-04-13 15:45:54 | INFO     | data_layer.inventory | Buscando equipo global: '4857544301A50FAF' en sucursal: 'CHIRIQUI'
+2026-04-13 15:45:54 | INFO     | data_layer.inventory | Resultado encontrado: 4-4-644 (FALTANTE)
+2026-04-13 15:45:55 | INFO     | data_layer.inventory |    [PLAN C] Heurística aplicada: Movil=Movil 205, Contrato=None, Fecha=2026-04-13
+2026-04-13 15:46:29 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-13 15:46:34 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-04-13 15:46:41 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-13 15:49:58 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-13 15:50:01 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-04-13 15:50:45 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-14 11:45:47 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-14 11:46:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-14 14:15:19 | INFO     | __main__             | Inicializando app_inventario...
+2026-04-14 14:15:21 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-04-14 14:15:25 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-14 14:15:47 | INFO     | data_layer.core      | Etapa 1 completada: tablas verificadas/creadas.
+2026-04-14 14:15:49 | ERROR    | utils.db_connector   | Error SQL ejecución: 1060 (42S21): Duplicate column name 'numero_factura'
+2026-04-14 14:15:49 | ERROR    | utils.db_connector   |    Query: ALTER TABLE auditoria_bodega_abastos ADD COLUMN numero_factura VARCHAR(255) AFTER imagen_path
+2026-04-14 14:15:49 | ERROR    | utils.db_connector   |    Params: None
+2026-04-14 14:15:50 | ERROR    | utils.db_connector   | Error SQL ejecución: 1060 (42S21): Duplicate column name 'fecha_documento'
+2026-04-14 14:15:50 | ERROR    | utils.db_connector   |    Query: ALTER TABLE auditoria_bodega_abastos ADD COLUMN fecha_documento DATE AFTER numero_factura
+2026-04-14 14:15:50 | ERROR    | utils.db_connector   |    Params: None
+2026-04-14 14:15:50 | ERROR    | utils.db_connector   | Error SQL ejecución: 1060 (42S21): Duplicate column name 'documento_referencia'
+2026-04-14 14:15:50 | ERROR    | utils.db_connector   |    Query: ALTER TABLE auditoria_bodega_abastos ADD COLUMN documento_referencia VARCHAR(255) AFTER fecha_documento
+2026-04-14 14:15:50 | ERROR    | utils.db_connector   |    Params: None
+2026-04-14 14:15:51 | INFO     | data_layer.warehouse_audit | Tablas de Auditoría de Bodega verificadas y migradas correctamente.
+2026-04-14 14:15:56 | INFO     | data_layer.core      | Etapa 2 completada: migraciones de columnas aplicadas.
+2026-04-14 14:16:00 | INFO     | data_layer.core      | Etapa 3 completada: indices de rendimiento verificados.
+2026-04-14 14:16:01 | INFO     | data_layer.core      | Etapa 4 completada: moviles verificados.
+2026-04-14 14:16:01 | INFO     | data_layer.core      | Base de datos inicializada correctamente.
+2026-04-14 14:16:03 | INFO     | data_layer.reminders | Bootstrap Start
+2026-04-14 14:16:03 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-04-14 14:16:03 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-04-14 15:12:16 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-15 15:03:51 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-16 12:47:04 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-16 12:47:42 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-16 12:47:48 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-16 12:50:05 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-16 12:51:00 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-16 12:51:28 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-16 12:51:55 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-16 13:30:29 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-16 13:31:02 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-16 13:36:19 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-16 13:36:32 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-16 13:40:37 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-16 13:47:33 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-16 13:50:25 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-16 14:02:30 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-16 15:09:31 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-16 15:10:33 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-16 15:32:17 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-16 15:34:06 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-16 15:49:07 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-17 08:36:18 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-17 08:37:33 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-17 08:38:05 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-17 08:45:57 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-17 08:55:14 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-17 08:56:15 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-17 11:18:10 | INFO     | __main__             | Inicializando app_inventario...
+2026-04-17 11:18:10 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-04-17 11:18:13 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-17 11:18:34 | INFO     | data_layer.core      | Etapa 1 completada: tablas verificadas/creadas.
+2026-04-17 11:18:35 | ERROR    | utils.db_connector   | Error SQL ejecución: 1060 (42S21): Duplicate column name 'numero_factura'
+2026-04-17 11:18:35 | ERROR    | utils.db_connector   |    Query: ALTER TABLE auditoria_bodega_abastos ADD COLUMN numero_factura VARCHAR(255) AFTER imagen_path
+2026-04-17 11:18:35 | ERROR    | utils.db_connector   |    Params: None
+2026-04-17 11:18:35 | ERROR    | utils.db_connector   | Error SQL ejecución: 1060 (42S21): Duplicate column name 'fecha_documento'
+2026-04-17 11:18:35 | ERROR    | utils.db_connector   |    Query: ALTER TABLE auditoria_bodega_abastos ADD COLUMN fecha_documento DATE AFTER numero_factura
+2026-04-17 11:18:35 | ERROR    | utils.db_connector   |    Params: None
+2026-04-17 11:18:35 | ERROR    | utils.db_connector   | Error SQL ejecución: 1060 (42S21): Duplicate column name 'documento_referencia'
+2026-04-17 11:18:35 | ERROR    | utils.db_connector   |    Query: ALTER TABLE auditoria_bodega_abastos ADD COLUMN documento_referencia VARCHAR(255) AFTER fecha_documento
+2026-04-17 11:18:35 | ERROR    | utils.db_connector   |    Params: None
+2026-04-17 11:18:37 | INFO     | data_layer.warehouse_audit | Tablas de Auditoría de Bodega verificadas y migradas correctamente.
+2026-04-17 11:18:40 | INFO     | data_layer.core      | Etapa 2 completada: migraciones de columnas aplicadas.
+2026-04-17 11:18:43 | INFO     | data_layer.core      | Etapa 3 completada: indices de rendimiento verificados.
+2026-04-17 11:18:44 | INFO     | data_layer.core      | Etapa 4 completada: moviles verificados.
+2026-04-17 11:18:44 | INFO     | data_layer.core      | Base de datos inicializada correctamente.
+2026-04-17 11:18:45 | INFO     | data_layer.reminders | Bootstrap Start
+2026-04-17 11:18:45 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-04-17 11:18:45 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-04-17 12:37:05 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-17 12:37:36 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-17 12:38:14 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-17 12:38:43 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-17 12:38:59 | ERROR    | utils.db_connector   | Error SQL ejecución: 1054 (42S22): Unknown column 'sku' in 'where clause'
+2026-04-17 12:38:59 | ERROR    | utils.db_connector   |    Query: SELECT id, sku, tipo_movimiento, cantidad, fecha_evento, movil_destino, sucursal FROM movimientos WHERE sku = '8-1-903' ORDER BY fecha_evento DESC LIMIT 20
+2026-04-17 12:38:59 | ERROR    | utils.db_connector   |    Params: None
+2026-04-17 12:40:42 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-17 13:34:09 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-17 13:38:02 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-17 13:44:51 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-17 15:09:41 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-17 15:12:56 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-17 15:27:23 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-17 15:34:01 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-17 15:34:20 | ERROR    | utils.db_connector   | Error SQL ejecución: 1048 (23000): Column 'movil' cannot be null
+2026-04-17 15:34:20 | ERROR    | utils.db_connector   |    Query: INSERT INTO asignacion_moviles (sku_producto, movil, cantidad, sucursal, paquete) VALUES (%s, %s, %s, %s, 'NINGUNO')
+2026-04-17 15:34:20 | ERROR    | utils.db_connector   |    Params: ('8-1-903', None, 28, 'CHIRIQUI')
+2026-04-17 15:34:37 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-17 15:35:16 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-18 10:45:54 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-18 10:56:01 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-18 10:58:09 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-18 11:00:41 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-18 11:34:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-18 11:35:49 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-18 11:36:39 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-18 11:47:59 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-18 11:49:05 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-18 11:50:56 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-18 11:54:43 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-18 11:55:12 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-18 11:57:31 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-18 11:59:10 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-18 12:23:51 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-18 12:25:14 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-20 07:02:16 | INFO     | __main__             | Inicializando app_inventario...
+2026-04-20 07:02:18 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-04-20 07:02:21 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-20 07:02:49 | INFO     | data_layer.core      | Etapa 1 completada: tablas verificadas/creadas.
+2026-04-20 07:02:50 | ERROR    | utils.db_connector   | Error SQL ejecución: 1060 (42S21): Duplicate column name 'numero_factura'
+2026-04-20 07:02:50 | ERROR    | utils.db_connector   |    Query: ALTER TABLE auditoria_bodega_abastos ADD COLUMN numero_factura VARCHAR(255) AFTER imagen_path
+2026-04-20 07:02:50 | ERROR    | utils.db_connector   |    Params: None
+2026-04-20 07:02:51 | ERROR    | utils.db_connector   | Error SQL ejecución: 1060 (42S21): Duplicate column name 'fecha_documento'
+2026-04-20 07:02:51 | ERROR    | utils.db_connector   |    Query: ALTER TABLE auditoria_bodega_abastos ADD COLUMN fecha_documento DATE AFTER numero_factura
+2026-04-20 07:02:51 | ERROR    | utils.db_connector   |    Params: None
+2026-04-20 07:02:51 | ERROR    | utils.db_connector   | Error SQL ejecución: 1060 (42S21): Duplicate column name 'documento_referencia'
+2026-04-20 07:02:51 | ERROR    | utils.db_connector   |    Query: ALTER TABLE auditoria_bodega_abastos ADD COLUMN documento_referencia VARCHAR(255) AFTER fecha_documento
+2026-04-20 07:02:51 | ERROR    | utils.db_connector   |    Params: None
+2026-04-20 07:02:52 | INFO     | data_layer.warehouse_audit | Tablas de Auditoría de Bodega verificadas y migradas correctamente.
+2026-04-20 07:02:56 | INFO     | data_layer.core      | Etapa 2 completada: migraciones de columnas aplicadas.
+2026-04-20 07:03:00 | INFO     | data_layer.core      | Etapa 3 completada: indices de rendimiento verificados.
+2026-04-20 07:03:01 | INFO     | data_layer.core      | Etapa 4 completada: moviles verificados.
+2026-04-20 07:03:01 | INFO     | data_layer.core      | Base de datos inicializada correctamente.
+2026-04-20 07:03:07 | INFO     | data_layer.reminders | Bootstrap Start
+2026-04-20 07:03:07 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-04-20 07:03:07 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-04-20 07:06:43 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-20 07:06:44 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-20 07:06:50 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-644 -> Qty: 1 (Serial)
+2026-04-20 07:07:11 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-647 -> Qty: 1 (Serial)
+2026-04-20 07:07:19 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-903 -> Qty: 1 (Serial)
+2026-04-20 07:07:24 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-903 -> Qty: 1 (Serial)
+2026-04-20 07:07:31 | INFO     | gui.inventory.movements | ✅ Auditado: U4-4-633 -> Qty: 1 (Serial)
+2026-04-20 07:07:37 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-646 -> Qty: 1 (Serial)
+2026-04-20 07:07:50 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-20 07:07:51 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-20 07:07:51 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-20 07:07:52 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-20 07:08:23 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 203 - 4-3-42 x120 (CHIRIQUI)
+2026-04-20 07:08:24 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 203 - 2-5-02 x60 (CHIRIQUI)
+2026-04-20 07:08:25 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 203 - 2-7-07 x60 (CHIRIQUI)
+2026-04-20 07:08:25 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 203 - 1-4-61 x10 (CHIRIQUI)
+2026-04-20 07:08:26 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 203 - 4-3-18 x32 (CHIRIQUI)
+2026-04-20 07:08:27 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 203 - 1-8-40 x120 (CHIRIQUI)
+2026-04-20 07:08:27 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 203 - 4-2-41 x14 (CHIRIQUI)
+2026-04-20 07:08:28 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 203 - 2-7-11 x14 (CHIRIQUI)
+2026-04-20 07:08:32 | ERROR    | gui.inventory.movements | Error en _procesar_async de retorno: too many values to unpack (expected 2)
+2026-04-20 07:08:42 | INFO     | gui.inventory.movements | Refill: Saltando equipo 8-1-902 por falta de MACs escaneadas.
+2026-04-20 07:08:43 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-4-61 (Equipos individuales o Material agrupado)
+2026-04-20 07:08:43 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-20 07:08:43 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-20 07:08:43 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 07:08:43 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-07 (Equipos individuales o Material agrupado)
+2026-04-20 07:08:43 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-11 (Equipos individuales o Material agrupado)
+2026-04-20 07:08:43 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-20 07:08:43 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): U4-4-633 (Equipos individuales o Material agrupado)
+2026-04-20 07:08:43 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-8-40 (Equipos individuales o Material agrupado)
+2026-04-20 07:08:43 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-903 (Equipos individuales o Material agrupado)
+2026-04-20 07:08:43 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-2-41 (Equipos individuales o Material agrupado)
+2026-04-20 07:08:44 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 07:08:44 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-5-02 (Equipos individuales o Material agrupado)
+2026-04-20 07:08:44 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-42 (Equipos individuales o Material agrupado)
+2026-04-20 07:08:44 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-18 (Equipos individuales o Material agrupado)
+2026-04-20 07:08:44 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-20 07:09:00 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-20 07:09:02 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-20 07:09:26 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-20 07:09:35 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 07:09:39 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 07:09:45 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 07:09:51 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 07:09:55 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 07:10:06 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-20 07:10:23 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 07:10:23 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 07:10:24 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 07:10:24 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 07:10:40 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-20 07:10:59 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-902 (Equipos individuales o Material agrupado)
+2026-04-20 07:11:03 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-902 (Equipos individuales o Material agrupado)
+2026-04-20 07:15:26 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-20 07:15:27 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-20 07:15:32 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-644 -> Qty: 1 (Serial)
+2026-04-20 07:15:40 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-647 -> Qty: 1 (Serial)
+2026-04-20 07:15:54 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-20 07:15:54 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-20 07:16:00 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-646 -> Qty: 1 (Serial)
+2026-04-20 07:16:05 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-646 -> Qty: 1 (Serial)
+2026-04-20 07:16:12 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-20 07:16:17 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-647 -> Qty: 1 (Serial)
+2026-04-20 07:16:25 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-902 -> Qty: 1 (Serial)
+2026-04-20 07:16:34 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-902 -> Qty: 1 (Serial)
+2026-04-20 07:16:40 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-903 -> Qty: 1 (Serial)
+2026-04-20 07:16:41 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-903 -> Qty: 1 (Serial)
+2026-04-20 07:16:51 | INFO     | gui.inventory.movements | ✅ Auditado: U4-4-633 -> Qty: 1 (Serial)
+2026-04-20 07:17:10 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 206 - 4-3-42 x102 (CHIRIQUI)
+2026-04-20 07:17:10 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 206 - 2-5-02 x58 (CHIRIQUI)
+2026-04-20 07:17:11 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 206 - 2-7-07 x47 (CHIRIQUI)
+2026-04-20 07:17:12 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 206 - 1-4-61 x7 (CHIRIQUI)
+2026-04-20 07:17:12 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 206 - 4-3-18 x26 (CHIRIQUI)
+2026-04-20 07:17:13 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 206 - 1-8-40 x102 (CHIRIQUI)
+2026-04-20 07:17:13 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 206 - 4-2-41 x11 (CHIRIQUI)
+2026-04-20 07:17:14 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 206 - 2-7-11 x11 (CHIRIQUI)
+2026-04-20 07:17:18 | ERROR    | gui.inventory.movements | Error en _procesar_async de retorno: too many values to unpack (expected 2)
+2026-04-20 07:17:38 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-4-61 (Equipos individuales o Material agrupado)
+2026-04-20 07:17:38 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-20 07:17:38 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-20 07:17:38 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 07:17:38 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-07 (Equipos individuales o Material agrupado)
+2026-04-20 07:17:38 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-11 (Equipos individuales o Material agrupado)
+2026-04-20 07:17:38 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-20 07:17:38 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): U4-4-633 (Equipos individuales o Material agrupado)
+2026-04-20 07:17:38 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-902 (Equipos individuales o Material agrupado)
+2026-04-20 07:17:38 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-8-40 (Equipos individuales o Material agrupado)
+2026-04-20 07:17:38 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-903 (Equipos individuales o Material agrupado)
+2026-04-20 07:17:38 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-2-41 (Equipos individuales o Material agrupado)
+2026-04-20 07:17:38 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 07:17:38 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-5-02 (Equipos individuales o Material agrupado)
+2026-04-20 07:17:39 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-42 (Equipos individuales o Material agrupado)
+2026-04-20 07:17:39 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-18 (Equipos individuales o Material agrupado)
+2026-04-20 07:17:39 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-20 07:17:51 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-20 07:17:51 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-20 07:17:52 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-20 07:18:11 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 07:18:14 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 07:18:19 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 07:18:24 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 07:18:28 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 07:18:37 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 07:18:37 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 07:18:38 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 07:18:38 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 07:18:39 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 11:39:20 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-20 11:39:21 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-20 11:39:23 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-20 11:39:24 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-20 11:39:26 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-20 11:39:48 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-647 -> Qty: 1 (Serial)
+2026-04-20 11:40:00 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-647 -> Qty: 1 (Serial)
+2026-04-20 11:40:12 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-902 -> Qty: 1 (Serial)
+2026-04-20 11:40:15 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-902 -> Qty: 1 (Serial)
+2026-04-20 11:40:26 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-903 -> Qty: 1 (Serial)
+2026-04-20 11:40:34 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-903 -> Qty: 1 (Serial)
+2026-04-20 11:40:42 | INFO     | gui.inventory.movements | ✅ Auditado: U4-4-633 -> Qty: 1 (Serial)
+2026-04-20 11:41:09 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-646 -> Qty: 1 (Serial)
+2026-04-20 11:41:16 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-646 -> Qty: 1 (Serial)
+2026-04-20 11:41:36 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-20 11:41:37 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-20 11:41:38 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-20 11:41:39 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-20 11:41:40 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-20 11:41:51 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 202 - 4-3-42 x104 (CHIRIQUI)
+2026-04-20 11:41:52 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 202 - 2-5-02 x59 (CHIRIQUI)
+2026-04-20 11:41:53 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 202 - 2-7-07 x48 (CHIRIQUI)
+2026-04-20 11:41:53 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 202 - 1-4-61 x9 (CHIRIQUI)
+2026-04-20 11:41:54 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 202 - 4-3-18 x24 (CHIRIQUI)
+2026-04-20 11:41:54 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 202 - 1-8-40 x106 (CHIRIQUI)
+2026-04-20 11:41:55 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 202 - 4-2-41 x10 (CHIRIQUI)
+2026-04-20 11:41:56 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 202 - 2-7-11 x10 (CHIRIQUI)
+2026-04-20 11:41:56 | ERROR    | gui.inventory.movements | Error en _procesar_async de retorno: too many values to unpack (expected 2)
+2026-04-20 11:42:04 | INFO     | gui.inventory.movements | Refill: Saltando equipo 4-4-644 por falta de MACs escaneadas.
+2026-04-20 11:42:04 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-4-61 (Equipos individuales o Material agrupado)
+2026-04-20 11:42:05 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-20 11:42:05 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-20 11:42:05 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 11:42:05 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-07 (Equipos individuales o Material agrupado)
+2026-04-20 11:42:05 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-11 (Equipos individuales o Material agrupado)
+2026-04-20 11:42:05 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-20 11:42:05 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): U4-4-633 (Equipos individuales o Material agrupado)
+2026-04-20 11:42:05 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-902 (Equipos individuales o Material agrupado)
+2026-04-20 11:42:05 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-8-40 (Equipos individuales o Material agrupado)
+2026-04-20 11:42:05 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-903 (Equipos individuales o Material agrupado)
+2026-04-20 11:42:05 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-2-41 (Equipos individuales o Material agrupado)
+2026-04-20 11:42:05 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-5-02 (Equipos individuales o Material agrupado)
+2026-04-20 11:42:05 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-42 (Equipos individuales o Material agrupado)
+2026-04-20 11:42:05 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-18 (Equipos individuales o Material agrupado)
+2026-04-20 11:42:06 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-20 11:43:23 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-20 11:44:48 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 11:44:53 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 11:45:05 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 11:45:11 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 11:45:17 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 11:45:23 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 11:45:28 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 11:45:34 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 11:45:47 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 11:45:48 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 11:45:48 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 12:12:02 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-20 12:30:44 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-20 12:30:45 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-20 12:30:46 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-20 12:31:08 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-20 12:31:09 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-20 12:31:10 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-20 12:31:17 | INFO     | gui.inventory.movements | ✅ Auditado: U4-4-633 -> Qty: 1 (Serial)
+2026-04-20 12:31:22 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-646 -> Qty: 1 (Serial)
+2026-04-20 12:31:31 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-903 -> Qty: 1 (Serial)
+2026-04-20 12:31:32 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-903 -> Qty: 1 (Serial)
+2026-04-20 12:31:38 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-647 -> Qty: 1 (Serial)
+2026-04-20 12:31:50 | WARNING  | gui.inventory.movements | ❌ Código 'F0A95161CE65' no reconocido en este móvil
+2026-04-20 12:31:56 | WARNING  | gui.inventory.movements | ❌ Código 'F0A95161CE65' no reconocido en este móvil
+2026-04-20 12:31:59 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-646 -> Qty: 1 (Serial)
+2026-04-20 12:32:09 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-902 -> Qty: 1 (Serial)
+2026-04-20 12:32:14 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-902 -> Qty: 1 (Serial)
+2026-04-20 12:32:26 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-647 -> Qty: 1 (Serial)
+2026-04-20 12:33:13 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 206 - 4-3-42 x164 (CHIRIQUI)
+2026-04-20 12:33:14 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 206 - 2-5-02 x86 (CHIRIQUI)
+2026-04-20 12:33:14 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 206 - 2-7-07 x79 (CHIRIQUI)
+2026-04-20 12:33:15 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 206 - 1-4-61 x13 (CHIRIQUI)
+2026-04-20 12:33:16 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 206 - 4-3-18 x42 (CHIRIQUI)
+2026-04-20 12:33:17 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 206 - 1-8-40 x156 (CHIRIQUI)
+2026-04-20 12:33:17 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 206 - 4-2-41 x18 (CHIRIQUI)
+2026-04-20 12:33:18 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 206 - 2-7-11 x18 (CHIRIQUI)
+2026-04-20 12:33:18 | ERROR    | gui.inventory.movements | Error en _procesar_async de retorno: too many values to unpack (expected 2)
+2026-04-20 12:33:22 | INFO     | gui.inventory.movements | Refill: Saltando equipo 4-4-644 por falta de MACs escaneadas.
+2026-04-20 12:33:24 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-4-61 (Equipos individuales o Material agrupado)
+2026-04-20 12:33:24 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-20 12:33:24 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-20 12:33:24 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 12:33:25 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-07 (Equipos individuales o Material agrupado)
+2026-04-20 12:33:25 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-11 (Equipos individuales o Material agrupado)
+2026-04-20 12:33:25 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-20 12:33:25 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): U4-4-633 (Equipos individuales o Material agrupado)
+2026-04-20 12:33:25 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-902 (Equipos individuales o Material agrupado)
+2026-04-20 12:33:25 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-8-40 (Equipos individuales o Material agrupado)
+2026-04-20 12:33:25 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-903 (Equipos individuales o Material agrupado)
+2026-04-20 12:33:25 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-2-41 (Equipos individuales o Material agrupado)
+2026-04-20 12:33:25 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-5-02 (Equipos individuales o Material agrupado)
+2026-04-20 12:33:25 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-42 (Equipos individuales o Material agrupado)
+2026-04-20 12:33:25 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-18 (Equipos individuales o Material agrupado)
+2026-04-20 12:33:25 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-04-20 12:33:31 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-20 12:33:43 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-20 12:33:49 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 12:33:55 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 12:44:28 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 12:44:33 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 12:44:39 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 12:44:44 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 12:44:50 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 12:45:03 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 12:45:04 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 12:45:04 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 12:45:05 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 12:45:06 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 13:11:32 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-20 13:11:33 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-20 13:11:36 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-20 13:11:42 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-644 -> Qty: 1 (Serial)
+2026-04-20 13:11:49 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-644 -> Qty: 1 (Serial)
+2026-04-20 13:11:55 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-644 -> Qty: 1 (Serial)
+2026-04-20 13:12:05 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-20 13:12:06 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-20 13:12:07 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-20 13:12:08 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-20 13:12:09 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-20 13:12:16 | INFO     | gui.inventory.movements | ✅ Auditado: U4-4-633 -> Qty: 1 (Serial)
+2026-04-20 13:12:22 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-646 -> Qty: 1 (Serial)
+2026-04-20 13:12:31 | WARNING  | gui.inventory.movements | ⚠️ Serial 'HTTPSÑ--SUPPORT.HUAWEI.COM-CARRIER-DOCVIEW_NID¿DOC1100480869' registrado en CONSUMIDO, pero se está retornando desde Movil 203
+2026-04-20 13:12:36 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-647 -> Qty: 1 (Serial)
+2026-04-20 13:12:41 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-903 -> Qty: 1 (Serial)
+2026-04-20 13:12:43 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-903 -> Qty: 1 (Serial)
+2026-04-20 13:12:58 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-902 -> Qty: 1 (Serial)
+2026-04-20 13:13:03 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-902 -> Qty: 1 (Serial)
+2026-04-20 13:21:12 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 203 - 4-3-42 x180 (CHIRIQUI)
+2026-04-20 13:21:13 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 203 - 2-5-02 x90 (CHIRIQUI)
+2026-04-20 13:21:14 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 203 - 2-7-07 x90 (CHIRIQUI)
+2026-04-20 13:21:14 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 203 - 1-4-61 x15 (CHIRIQUI)
+2026-04-20 13:21:15 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 203 - 4-3-18 x48 (CHIRIQUI)
+2026-04-20 13:21:15 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 203 - 1-8-40 x180 (CHIRIQUI)
+2026-04-20 13:21:16 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 203 - 4-2-41 x21 (CHIRIQUI)
+2026-04-20 13:21:17 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 203 - 2-7-11 x21 (CHIRIQUI)
+2026-04-20 13:21:21 | ERROR    | gui.inventory.movements | Error en _procesar_async de retorno: too many values to unpack (expected 2)
+2026-04-20 13:21:29 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-4-61 (Equipos individuales o Material agrupado)
+2026-04-20 13:21:29 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-20 13:21:29 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-20 13:21:29 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 13:21:29 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-07 (Equipos individuales o Material agrupado)
+2026-04-20 13:21:29 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-11 (Equipos individuales o Material agrupado)
+2026-04-20 13:21:29 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-20 13:21:29 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): U4-4-633 (Equipos individuales o Material agrupado)
+2026-04-20 13:21:29 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-902 (Equipos individuales o Material agrupado)
+2026-04-20 13:21:29 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-8-40 (Equipos individuales o Material agrupado)
+2026-04-20 13:21:30 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-903 (Equipos individuales o Material agrupado)
+2026-04-20 13:21:30 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-2-41 (Equipos individuales o Material agrupado)
+2026-04-20 13:21:30 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 13:21:30 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-5-02 (Equipos individuales o Material agrupado)
+2026-04-20 13:21:30 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-42 (Equipos individuales o Material agrupado)
+2026-04-20 13:21:30 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-18 (Equipos individuales o Material agrupado)
+2026-04-20 13:21:30 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-04-20 13:30:55 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-20 13:30:56 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-20 13:31:39 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 13:31:45 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 13:31:50 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 13:31:56 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 13:32:06 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 13:32:07 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 13:32:07 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 13:32:21 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-20 13:32:31 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-20 15:10:09 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-20 15:10:10 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-20 15:10:12 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-04-20 15:10:15 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-903 -> Qty: 1 (Serial)
+2026-04-20 15:10:16 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-903 -> Qty: 1 (Serial)
+2026-04-20 15:10:20 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-646 -> Qty: 1 (Serial)
+2026-04-20 15:10:33 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-646 -> Qty: 1 (Serial)
+2026-04-20 15:10:40 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-647 -> Qty: 1 (Serial)
+2026-04-20 15:10:46 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-902 -> Qty: 1 (Serial)
+2026-04-20 15:10:51 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-902 -> Qty: 1 (Serial)
+2026-04-20 15:11:15 | INFO     | gui.inventory.movements | ✅ Auditado: U4-4-633 -> Qty: 1 (Serial)
+2026-04-20 15:11:23 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-20 15:11:24 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-20 15:11:24 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-20 15:11:24 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-04-20 15:11:41 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 201 - 4-3-42 x106 (CHIRIQUI)
+2026-04-20 15:11:42 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 201 - 2-5-02 x60 (CHIRIQUI)
+2026-04-20 15:11:43 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 201 - 2-7-07 x50 (CHIRIQUI)
+2026-04-20 15:11:44 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 201 - 1-4-61 x10 (CHIRIQUI)
+2026-04-20 15:11:45 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 201 - 4-3-18 x26 (CHIRIQUI)
+2026-04-20 15:11:45 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 201 - 1-8-40 x112 (CHIRIQUI)
+2026-04-20 15:11:46 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 201 - 4-2-41 x11 (CHIRIQUI)
+2026-04-20 15:11:47 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 201 - 2-7-11 x12 (CHIRIQUI)
+2026-04-20 15:11:47 | ERROR    | gui.inventory.movements | Error en _procesar_async de retorno: too many values to unpack (expected 2)
+2026-04-20 15:12:16 | INFO     | gui.inventory.movements | Refill: Saltando equipo 4-4-644 por falta de MACs escaneadas.
+2026-04-20 15:12:17 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-4-61 (Equipos individuales o Material agrupado)
+2026-04-20 15:12:17 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-04-20 15:12:17 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-20 15:12:17 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 15:12:17 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-07 (Equipos individuales o Material agrupado)
+2026-04-20 15:12:17 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-11 (Equipos individuales o Material agrupado)
+2026-04-20 15:12:17 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-20 15:12:17 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): U4-4-633 (Equipos individuales o Material agrupado)
+2026-04-20 15:12:17 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-902 (Equipos individuales o Material agrupado)
+2026-04-20 15:12:18 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-8-40 (Equipos individuales o Material agrupado)
+2026-04-20 15:12:18 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-903 (Equipos individuales o Material agrupado)
+2026-04-20 15:12:18 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-2-41 (Equipos individuales o Material agrupado)
+2026-04-20 15:12:18 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-5-02 (Equipos individuales o Material agrupado)
+2026-04-20 15:12:18 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-42 (Equipos individuales o Material agrupado)
+2026-04-20 15:12:18 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-18 (Equipos individuales o Material agrupado)
+2026-04-20 15:12:18 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE A
+2026-04-20 15:12:24 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-20 15:12:39 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-20 15:12:40 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-04-20 15:12:48 | INFO     | data_layer.movements | Sincronizando stock serializado para sucursal: CHIRIQUI
+2026-04-20 15:12:50 | INFO     | data_layer.movements | Stock sincronizado para U4-4-633 en CHIRIQUI: 0 -> 10
+2026-04-20 15:12:50 | INFO     | data_layer.movements | Stock sincronizado para 4-4-644 en CHIRIQUI: 654 -> 668
+2026-04-20 15:12:51 | INFO     | data_layer.movements | Stock sincronizado para 4-4-656 en CHIRIQUI: 423 -> 459
+2026-04-20 15:12:51 | INFO     | data_layer.movements | Stock sincronizado para 4-4-646 en CHIRIQUI: 164 -> 183
+2026-04-20 15:12:52 | INFO     | data_layer.movements | Stock sincronizado para 4-4-647 en CHIRIQUI: 62 -> 82
+2026-04-20 15:12:52 | INFO     | data_layer.movements | Stock sincronizado para 8-1-902 en CHIRIQUI: 54 -> 76
+2026-04-20 15:12:53 | INFO     | data_layer.movements | Stock sincronizado para 8-1-903 en CHIRIQUI: 0 -> 1
+2026-04-20 15:12:53 | INFO     | data_layer.movements | Stock sincronizado para 8-1-904 en CHIRIQUI: 597 -> 642
+2026-04-20 15:12:56 | INFO     | data_layer.movements | Sincronizando stock serializado para sucursal: SANTIAGO
+2026-04-20 15:12:58 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 15:13:07 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 15:13:15 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 15:13:24 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 15:13:31 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 15:13:37 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 15:13:42 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-04-20 15:13:59 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 15:13:59 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 15:13:59 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 15:14:03 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-04-20 15:14:19 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-04-20 15:20:42 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-20 15:21:22 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-20 15:24:44 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-20 15:25:02 | INFO     | data_layer.movements | Sincronizando stock serializado para sucursal: CHIRIQUI
+2026-04-20 15:25:03 | INFO     | data_layer.movements | Stock sincronizado para U4-4-633 en CHIRIQUI: 9 -> 10
+2026-04-20 15:25:03 | INFO     | data_layer.movements | Stock sincronizado para 4-4-656 en CHIRIQUI: 454 -> 457
+2026-04-20 15:25:04 | INFO     | data_layer.movements | Stock sincronizado para 4-4-646 en CHIRIQUI: 181 -> 183
+2026-04-20 15:25:04 | INFO     | data_layer.movements | Stock sincronizado para 4-4-647 en CHIRIQUI: 80 -> 81
+2026-04-20 15:25:05 | INFO     | data_layer.movements | Stock sincronizado para 8-1-902 en CHIRIQUI: 74 -> 76
+2026-04-20 15:25:05 | INFO     | data_layer.movements | Stock sincronizado para 8-1-903 en CHIRIQUI: 0 -> 1
+2026-04-20 15:25:05 | INFO     | data_layer.movements | Stock sincronizado para 8-1-904 en CHIRIQUI: 634 -> 638
+2026-04-20 15:25:08 | INFO     | data_layer.movements | Sincronizando stock serializado para sucursal: SANTIAGO
+2026-04-20 15:25:24 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-20 15:28:11 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-20 15:41:17 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-20 15:42:46 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-20 16:42:15 | INFO     | __main__             | Inicializando app_inventario...
+2026-04-20 16:42:17 | INFO     | __main__             | Inicializando app_inventario...
+2026-04-20 16:42:20 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-20 16:45:49 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-20 16:52:07 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-20 16:55:52 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-21 09:15:00 | INFO     | __main__             | Inicializando app_inventario...
+2026-04-21 10:32:59 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-21 10:33:24 | INFO     | data_layer.core      | Etapa 1 completada: tablas verificadas/creadas.
+2026-04-21 10:33:27 | INFO     | data_layer.warehouse_audit | Tablas de Auditoría de Bodega verificadas y migradas correctamente.
+2026-04-21 10:33:30 | INFO     | data_layer.core      | Etapa 2 completada: migraciones de columnas aplicadas.
+2026-04-21 10:33:33 | INFO     | data_layer.core      | Etapa 3 completada: indices de rendimiento verificados.
+2026-04-21 10:33:34 | INFO     | data_layer.core      | Etapa 4 completada: moviles verificados.
+2026-04-21 10:33:34 | INFO     | data_layer.core      | Base de datos inicializada correctamente.
+2026-04-21 11:40:07 | INFO     | __main__             | Inicializando app_inventario...
+2026-04-21 11:44:59 | INFO     | __main__             | Inicializando app_inventario...
+2026-04-21 11:44:59 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-04-21 11:45:01 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-04-21 11:45:30 | INFO     | data_layer.core      | Etapa 1 completada: tablas verificadas/creadas.
+2026-04-21 11:45:32 | INFO     | data_layer.warehouse_audit | Tablas de Auditoría de Bodega verificadas y migradas correctamente.
+2026-04-21 11:45:36 | INFO     | data_layer.core      | Etapa 2 completada: migraciones de columnas aplicadas.
+2026-04-21 11:45:39 | INFO     | data_layer.core      | Etapa 3 completada: indices de rendimiento verificados.
+2026-04-21 11:45:39 | INFO     | data_layer.core      | Etapa 4 completada: moviles verificados.
+2026-04-21 11:45:40 | INFO     | data_layer.core      | Base de datos inicializada correctamente.
+2026-04-21 11:45:41 | INFO     | data_layer.reminders | Bootstrap Start
+2026-04-21 11:45:41 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-04-21 11:45:41 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-04-24 11:05:05 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-05-06 08:07:17 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-05-06 08:08:28 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-05-06 08:08:54 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-05-06 08:09:41 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-05-06 08:14:15 | INFO     | __main__             | Inicializando app_inventario...
+2026-05-06 08:14:16 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-05-06 08:14:19 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-05-06 08:14:29 | INFO     | data_layer.core      | Etapa 1 completada: tablas verificadas/creadas.
+2026-05-06 08:14:30 | INFO     | data_layer.warehouse_audit | Tablas de Auditoría de Bodega verificadas y migradas correctamente.
+2026-05-06 08:14:31 | INFO     | data_layer.core      | Etapa 2 completada: migraciones de columnas aplicadas.
+2026-05-06 08:14:32 | INFO     | data_layer.core      | Etapa 3 completada: indices de rendimiento verificados.
+2026-05-06 08:14:32 | INFO     | data_layer.core      | Etapa 4 completada: moviles verificados.
+2026-05-06 08:14:32 | INFO     | data_layer.core      | Base de datos inicializada correctamente.
+2026-05-06 08:14:33 | INFO     | data_layer.reminders | Bootstrap Start
+2026-05-06 08:14:33 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-05-06 08:14:33 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-05-06 08:17:02 | INFO     | __main__             | Inicializando app_inventario...
+2026-05-06 08:17:03 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-05-06 08:17:04 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-05-06 08:17:14 | INFO     | data_layer.core      | Etapa 1 completada: tablas verificadas/creadas.
+2026-05-06 08:17:15 | INFO     | data_layer.warehouse_audit | Tablas de Auditoría de Bodega verificadas y migradas correctamente.
+2026-05-06 08:17:16 | INFO     | data_layer.core      | Etapa 2 completada: migraciones de columnas aplicadas.
+2026-05-06 08:17:17 | INFO     | data_layer.core      | Etapa 3 completada: indices de rendimiento verificados.
+2026-05-06 08:17:18 | INFO     | data_layer.core      | Etapa 4 completada: moviles verificados.
+2026-05-06 08:17:18 | INFO     | data_layer.core      | Base de datos inicializada correctamente.
+2026-05-06 08:17:18 | INFO     | data_layer.reminders | Bootstrap Start
+2026-05-06 08:17:18 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-05-06 08:17:18 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-05-06 08:21:52 | INFO     | __main__             | Inicializando app_inventario...
+2026-05-06 08:21:53 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-05-06 08:21:55 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-05-06 08:22:06 | INFO     | data_layer.core      | Etapa 1 completada: tablas verificadas/creadas.
+2026-05-06 08:22:07 | INFO     | data_layer.warehouse_audit | Tablas de Auditoría de Bodega verificadas y migradas correctamente.
+2026-05-06 08:22:08 | INFO     | data_layer.core      | Etapa 2 completada: migraciones de columnas aplicadas.
+2026-05-06 08:22:10 | INFO     | data_layer.core      | Etapa 3 completada: indices de rendimiento verificados.
+2026-05-06 08:22:10 | INFO     | data_layer.core      | Etapa 4 completada: moviles verificados.
+2026-05-06 08:22:10 | INFO     | data_layer.core      | Base de datos inicializada correctamente.
+2026-05-06 08:22:11 | INFO     | data_layer.reminders | Bootstrap Start
+2026-05-06 08:22:11 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-05-06 08:22:11 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-05-06 08:34:39 | INFO     | __main__             | Inicializando app_inventario...
+2026-05-06 08:34:40 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-05-06 08:34:41 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-05-06 08:34:51 | INFO     | data_layer.core      | Etapa 1 completada: tablas verificadas/creadas.
+2026-05-06 08:34:52 | INFO     | data_layer.warehouse_audit | Tablas de Auditoría de Bodega verificadas y migradas correctamente.
+2026-05-06 08:34:53 | INFO     | data_layer.core      | Etapa 2 completada: migraciones de columnas aplicadas.
+2026-05-06 08:34:54 | INFO     | data_layer.core      | Etapa 3 completada: indices de rendimiento verificados.
+2026-05-06 08:34:55 | INFO     | data_layer.core      | Etapa 4 completada: moviles verificados.
+2026-05-06 08:34:55 | INFO     | data_layer.core      | Base de datos inicializada correctamente.
+2026-05-06 08:34:55 | INFO     | data_layer.reminders | Bootstrap Start
+2026-05-06 08:34:55 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-05-06 08:34:55 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-05-06 08:40:30 | INFO     | __main__             | Inicializando app_inventario...
+2026-05-06 08:40:31 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-05-06 08:40:32 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-05-06 08:40:42 | INFO     | data_layer.core      | Etapa 1 completada: tablas verificadas/creadas.
+2026-05-06 08:40:43 | INFO     | data_layer.warehouse_audit | Tablas de Auditoría de Bodega verificadas y migradas correctamente.
+2026-05-06 08:40:45 | INFO     | data_layer.core      | Etapa 2 completada: migraciones de columnas aplicadas.
+2026-05-06 08:40:46 | INFO     | data_layer.core      | Etapa 3 completada: indices de rendimiento verificados.
+2026-05-06 08:40:46 | INFO     | data_layer.core      | Etapa 4 completada: moviles verificados.
+2026-05-06 08:40:46 | INFO     | data_layer.core      | Base de datos inicializada correctamente.
+2026-05-06 08:40:47 | INFO     | data_layer.reminders | Bootstrap Start
+2026-05-06 08:40:47 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-05-06 08:40:47 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-05-06 08:44:38 | INFO     | __main__             | Inicializando app_inventario...
+2026-05-06 08:44:38 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-05-06 08:44:40 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-05-06 08:44:50 | INFO     | data_layer.core      | Etapa 1 completada: tablas verificadas/creadas.
+2026-05-06 08:44:51 | INFO     | data_layer.warehouse_audit | Tablas de Auditoría de Bodega verificadas y migradas correctamente.
+2026-05-06 08:44:52 | INFO     | data_layer.core      | Etapa 2 completada: migraciones de columnas aplicadas.
+2026-05-06 08:44:53 | INFO     | data_layer.core      | Etapa 3 completada: indices de rendimiento verificados.
+2026-05-06 08:44:53 | INFO     | data_layer.core      | Etapa 4 completada: moviles verificados.
+2026-05-06 08:44:53 | INFO     | data_layer.core      | Base de datos inicializada correctamente.
+2026-05-06 08:44:54 | INFO     | data_layer.reminders | Bootstrap Start
+2026-05-06 08:44:54 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-05-06 08:44:54 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-05-06 08:46:16 | ERROR    | data_layer.reminders | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\ai_assistant_tab.py", line 179, in <lambda>
+    self.parent.after(0, lambda: self.handle_ia_result({"error": True, "mensaje": f"Error: {str(e)}"}))
+                                                                                                ^
+NameError: cannot access free variable 'e' where it is not associated with a value in enclosing scope
+
+2026-05-06 08:51:08 | INFO     | __main__             | Inicializando app_inventario...
+2026-05-06 08:51:08 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-05-06 08:51:10 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-05-06 08:51:21 | INFO     | data_layer.core      | Etapa 1 completada: tablas verificadas/creadas.
+2026-05-06 08:51:22 | INFO     | data_layer.warehouse_audit | Tablas de Auditoría de Bodega verificadas y migradas correctamente.
+2026-05-06 08:51:24 | INFO     | data_layer.core      | Etapa 2 completada: migraciones de columnas aplicadas.
+2026-05-06 08:51:26 | INFO     | data_layer.core      | Etapa 3 completada: indices de rendimiento verificados.
+2026-05-06 08:51:26 | INFO     | data_layer.core      | Etapa 4 completada: moviles verificados.
+2026-05-06 08:51:27 | INFO     | data_layer.core      | Base de datos inicializada correctamente.
+2026-05-06 08:51:27 | INFO     | data_layer.reminders | Bootstrap Start
+2026-05-06 08:51:27 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-05-06 08:51:27 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-05-06 08:52:11 | ERROR    | data_layer.reminders | UNHANDLED GUI EXCEPTION:
+Traceback (most recent call last):
+  File "C:\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\tkinter\__init__.py", line 862, in callit
+    func(*args)
+  File "c:\Users\johni\Documents\GestorInventario_MySQL\gui\ai_assistant_tab.py", line 179, in <lambda>
+    self.parent.after(0, lambda: self.handle_ia_result({"error": True, "mensaje": f"Error: {str(e)}"}))
+                                                                                                ^
+NameError: cannot access free variable 'e' where it is not associated with a value in enclosing scope
+
+2026-05-06 08:55:05 | INFO     | __main__             | Inicializando app_inventario...
+2026-05-06 08:55:05 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-05-06 08:55:07 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-05-06 08:55:22 | INFO     | data_layer.core      | Etapa 1 completada: tablas verificadas/creadas.
+2026-05-06 08:55:24 | INFO     | data_layer.warehouse_audit | Tablas de Auditoría de Bodega verificadas y migradas correctamente.
+2026-05-06 08:55:26 | INFO     | data_layer.core      | Etapa 2 completada: migraciones de columnas aplicadas.
+2026-05-06 08:55:28 | INFO     | data_layer.core      | Etapa 3 completada: indices de rendimiento verificados.
+2026-05-06 08:55:28 | INFO     | data_layer.core      | Etapa 4 completada: moviles verificados.
+2026-05-06 08:55:28 | INFO     | data_layer.core      | Base de datos inicializada correctamente.
+2026-05-06 08:55:29 | INFO     | data_layer.reminders | Bootstrap Start
+2026-05-06 08:55:29 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-05-06 08:55:29 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-05-06 09:00:58 | INFO     | __main__             | Inicializando app_inventario...
+2026-05-06 09:00:59 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-05-06 09:01:00 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-05-06 09:01:11 | INFO     | data_layer.core      | Etapa 1 completada: tablas verificadas/creadas.
+2026-05-06 09:01:12 | INFO     | data_layer.warehouse_audit | Tablas de Auditoría de Bodega verificadas y migradas correctamente.
+2026-05-06 09:01:13 | INFO     | data_layer.core      | Etapa 2 completada: migraciones de columnas aplicadas.
+2026-05-06 09:01:14 | INFO     | data_layer.core      | Etapa 3 completada: indices de rendimiento verificados.
+2026-05-06 09:01:14 | INFO     | data_layer.core      | Etapa 4 completada: moviles verificados.
+2026-05-06 09:01:14 | INFO     | data_layer.core      | Base de datos inicializada correctamente.
+2026-05-06 09:01:15 | INFO     | data_layer.reminders | Bootstrap Start
+2026-05-06 09:01:15 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-05-06 09:01:15 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-05-06 09:59:16 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-05-06 09:59:17 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-05-06 09:59:18 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-05-06 09:59:22 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-656 -> Qty: 1 (Serial)
+2026-05-06 09:59:30 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-644 -> Qty: 1 (Serial)
+2026-05-06 09:59:43 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-644 -> Qty: 1 (Serial)
+2026-05-06 10:00:12 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-903 -> Qty: 1 (Serial)
+2026-05-06 10:00:15 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-903 -> Qty: 1 (Serial)
+2026-05-06 10:00:31 | INFO     | gui.inventory.movements | ✅ Auditado: 4-4-647 -> Qty: 1 (Serial)
+2026-05-06 10:00:46 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-902 -> Qty: 1 (Serial)
+2026-05-06 10:00:57 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-902 -> Qty: 1 (Serial)
+2026-05-06 10:01:11 | INFO     | gui.inventory.movements | ✅ Auditado: U4-4-633 -> Qty: 1 (Serial)
+2026-05-06 10:01:22 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-05-06 10:01:23 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-05-06 10:01:25 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-05-06 10:01:26 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-05-06 10:01:27 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-05-06 10:01:29 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-05-06 10:01:29 | INFO     | gui.inventory.movements | ✅ Auditado: 8-1-904 -> Qty: 1 (Serial)
+2026-05-06 10:01:44 | INFO     | gui.inventory.movements | ✅ Auditado: 4-3-42 -> Qty: 36 (Material)
+2026-05-06 10:01:49 | INFO     | gui.inventory.movements | ✅ Auditado: 2-5-02 -> Qty: 9 (Material)
+2026-05-06 10:01:53 | INFO     | gui.inventory.movements | ✅ Auditado: 2-7-07 -> Qty: 19 (Material)
+2026-05-06 10:01:58 | INFO     | gui.inventory.movements | ✅ Auditado: 1-4-61 -> Qty: 4 (Material)
+2026-05-06 10:02:02 | INFO     | gui.inventory.movements | ✅ Auditado: 4-3-18 -> Qty: 10 (Material)
+2026-05-06 10:02:08 | INFO     | gui.inventory.movements | ✅ Auditado: 1-8-40 -> Qty: 61 (Material)
+2026-05-06 10:02:13 | INFO     | gui.inventory.movements | ✅ Auditado: 4-2-41 -> Qty: 7 (Material)
+2026-05-06 10:02:17 | INFO     | gui.inventory.movements | ✅ Auditado: 2-7-11 -> Qty: 5 (Material)
+2026-05-06 10:02:22 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 202 - 4-3-42 x24 (CHIRIQUI)
+2026-05-06 10:02:24 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 202 - 2-5-02 x21 (CHIRIQUI)
+2026-05-06 10:02:25 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 202 - 2-7-07 x10 (CHIRIQUI)
+2026-05-06 10:02:27 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 202 - 1-4-61 x1 (CHIRIQUI)
+2026-05-06 10:02:29 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 202 - 4-3-18 x4 (CHIRIQUI)
+2026-05-06 10:02:35 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 202 - 2-7-11 x1 (CHIRIQUI)
+2026-05-06 10:02:39 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 202 - 4-4-656 x2 (CHIRIQUI)
+2026-05-06 10:02:41 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 202 - 4-4-647 x1 (CHIRIQUI)
+2026-05-06 10:02:42 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 202 - 4-4-646 x6 (CHIRIQUI)
+2026-05-06 10:02:50 | INFO     | data_layer.mobile    | 🚩 Faltante registrado: Movil 202 - 8-1-904 x6 (CHIRIQUI)
+2026-05-06 10:02:52 | INFO     | data_layer.movements | Sincronizando stock serializado para sucursal: CHIRIQUI
+2026-05-06 10:02:52 | INFO     | data_layer.movements | Stock sincronizado para 4-4-656 en CHIRIQUI: 805 -> 807
+2026-05-06 10:02:53 | INFO     | data_layer.movements | Stock sincronizado para 4-4-646 en CHIRIQUI: 225 -> 227
+2026-05-06 10:02:53 | INFO     | data_layer.movements | Stock sincronizado para 4-4-647 en CHIRIQUI: 126 -> 127
+2026-05-06 10:02:53 | INFO     | data_layer.movements | Stock sincronizado para 8-1-904 en CHIRIQUI: 961 -> 967
+2026-05-06 10:02:54 | INFO     | data_layer.mobile    | 🧹 Móvil Movil 202 (PAQUETE B) limpiado: 4 registros eliminados.
+2026-05-06 10:02:55 | INFO     | gui.inventory.movements | Refill: Saltando equipo 4-4-646 por falta de MACs escaneadas.
+2026-05-06 10:03:00 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-903 (Equipos individuales o Material agrupado)
+2026-05-06 10:03:00 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-05-06 10:03:00 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-07 (Equipos individuales o Material agrupado)
+2026-05-06 10:03:00 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-8-40 (Equipos individuales o Material agrupado)
+2026-05-06 10:03:00 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-5-02 (Equipos individuales o Material agrupado)
+2026-05-06 10:03:00 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-2-41 (Equipos individuales o Material agrupado)
+2026-05-06 10:03:01 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 1-4-61 (Equipos individuales o Material agrupado)
+2026-05-06 10:03:01 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-644 (Equipos individuales o Material agrupado)
+2026-05-06 10:03:01 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 2-7-11 (Equipos individuales o Material agrupado)
+2026-05-06 10:03:01 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-902 (Equipos individuales o Material agrupado)
+2026-05-06 10:03:01 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-18 (Equipos individuales o Material agrupado)
+2026-05-06 10:03:01 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-05-06 10:03:01 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-05-06 10:03:01 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-3-42 (Equipos individuales o Material agrupado)
+2026-05-06 10:03:01 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): U4-4-633 (Equipos individuales o Material agrupado)
+2026-05-06 10:03:02 | INFO     | gui.mobile_output_scanner | Paquete cambiado a: PAQUETE B
+2026-05-06 10:05:18 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-05-06 10:05:24 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-05-06 10:05:31 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-656 (Equipos individuales o Material agrupado)
+2026-05-06 10:06:01 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-05-06 10:06:10 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-646 (Equipos individuales o Material agrupado)
+2026-05-06 10:22:32 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 4-4-647 (Equipos individuales o Material agrupado)
+2026-05-06 10:22:44 | INFO     | gui.mobile_output_scanner | Item(s) procesado(s): 8-1-904 (Equipos individuales o Material agrupado)
+2026-05-09 12:47:01 | INFO     | __main__             | Inicializando app_inventario...
+2026-05-09 12:47:02 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-05-09 12:47:06 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-05-09 12:47:24 | INFO     | data_layer.core      | Etapa 1 completada: tablas verificadas/creadas.
+2026-05-09 12:47:27 | INFO     | data_layer.warehouse_audit | Tablas de Auditoría de Bodega verificadas y migradas correctamente.
+2026-05-09 12:47:31 | INFO     | data_layer.core      | Etapa 2 completada: migraciones de columnas aplicadas.
+2026-05-09 12:47:33 | INFO     | data_layer.core      | Etapa 3 completada: indices de rendimiento verificados.
+2026-05-09 12:47:33 | INFO     | data_layer.core      | Etapa 4 completada: moviles verificados.
+2026-05-09 12:47:34 | INFO     | data_layer.core      | Base de datos inicializada correctamente.
+2026-05-09 12:47:35 | INFO     | data_layer.reminders | Bootstrap Start
+2026-05-09 12:47:35 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-05-09 12:47:35 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-05-09 13:39:30 | INFO     | __main__             | Inicializando app_inventario...
+2026-05-09 13:39:31 | INFO     | data_layer.reminders | Iniciando app principal. Forzando contexto predeterminado a: CHIRIQUI
+2026-05-09 13:39:33 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-05-09 13:39:45 | INFO     | data_layer.core      | Etapa 1 completada: tablas verificadas/creadas.
+2026-05-09 13:39:46 | INFO     | data_layer.warehouse_audit | Tablas de Auditoría de Bodega verificadas y migradas correctamente.
+2026-05-09 13:39:47 | INFO     | data_layer.core      | Etapa 2 completada: migraciones de columnas aplicadas.
+2026-05-09 13:39:49 | INFO     | data_layer.core      | Etapa 3 completada: indices de rendimiento verificados.
+2026-05-09 13:39:50 | INFO     | data_layer.core      | Etapa 4 completada: moviles verificados.
+2026-05-09 13:39:50 | INFO     | data_layer.core      | Base de datos inicializada correctamente.
+2026-05-09 13:39:51 | INFO     | data_layer.reminders | Bootstrap Start
+2026-05-09 13:39:51 | INFO     | data_layer.reminders | [INIT] Iniciando aplicación principal
+2026-05-09 13:39:51 | INFO     | data_layer.reminders | Ícono cargado: logo-StockWare.ico
+2026-05-18 09:32:36 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-05-18 10:00:58 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-05-18 11:02:00 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-06-12 07:19:11 | ERROR    | cleanup              | Error limpiando logs antiguos: [WinError 32] El proceso no tiene acceso al archivo porque está siendo utilizado por otro proceso: 'C:\\Users\\johni\\Documents\\GestorInventario_MySQL\\logs\\errors.log'
+2026-06-12 07:19:11 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-06-12 08:12:54 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-06-12 08:16:43 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-06-12 08:24:56 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test
+2026-06-12 08:27:56 | INFO     | utils.db_connector   | [POOL] Creando pool de conexiones para MySQL -> DB: test

@@ -76,8 +76,8 @@ class GlobalProductManagerDialog:
         tk.Button(btn_frame, text="🗑️ Quitar Asignación Global", command=self.quitar_global,
                   bg=Styles.ACCENT_COLOR, fg='white', relief='flat', padx=20, pady=8).pack(side='left')
         
-        tk.Button(btn_frame, text="Cerrar", command=self.dialog.destroy,
-                  bg='#95a5a6', fg='white', relief='flat', padx=20, pady=8).pack(side='right')
+        tk.Button(btn_frame, text="✅ Aceptar", command=self.dialog.destroy,
+                  bg='#27ae60', fg='white', relief='flat', font=('Segoe UI', 10, 'bold'), padx=20, pady=8).pack(side='right')
 
     def actualizar_lista(self):
         # Clear

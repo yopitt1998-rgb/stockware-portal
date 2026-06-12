@@ -189,13 +189,13 @@ class SettingsTab(tk.Frame):
                  relief='flat', padx=20, pady=8, cursor='hand2').pack(side='right')
 
         # --- SECCIÓN DE CONFIGURACIÓN DE PAQUETES (NUEVO) ---
-        tk.Label(inner_content, text="📦 PROGRESO DE PAQUETES (SALIDA)", 
+        tk.Label(inner_content, text="📦 CONFIGURAR PROGRESO Y CONTENIDO DE PAQUETES (SALIDA Y RETORNO)", 
                 font=('Segoe UI', 13, 'bold'), bg='#f8f9fa', fg='#2980b9').pack(pady=(30, 10), anchor='w')
         
         paquetes_frame = tk.Frame(inner_content, bg='#E8F8F5', padx=20, pady=20, highlightthickness=1, highlightbackground='#A3E4D7')
         paquetes_frame.pack(fill='x')
         
-        tk.Label(paquetes_frame, text="Modifica las cantidades objetivo (el progreso 100%) para los paquetes predefinidos (PAQUETE A, B, etc).", 
+        tk.Label(paquetes_frame, text="Modifica el contenido, cantidades objetivo y añade o quita equipos y materiales de los paquetes predefinidos (PAQUETE A, B, etc).\nEsto afecta el cálculo de progreso en Salidas y los filtros/auditorías en Retornos.", 
                 font=('Segoe UI', 9), bg='#E8F8F5', justify='left').pack(side='left', fill='x', expand=True)
         
         tk.Button(paquetes_frame, text="⚙️ Configurar Paquetes", command=lambda: PackageEditorDialog(self),

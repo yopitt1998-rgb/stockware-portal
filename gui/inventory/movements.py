@@ -1053,8 +1053,14 @@ class MobileReturnWindow:
             qty = int(p[IDX_QTY])
             paq_p = p[IDX_PAQUETE] if (len(p) > IDX_PAQUETE and p[IDX_PAQUETE]) else 'NINGUNO'
             
-            if sku not in consumo_reportado: consumo_reportado[sku] = {}
-            consumo_reportado[sku][paq_p] = consumo_reportado[sku].get(paq_p, 0) + qty
+            # FILTRADO ESTRICTO: Solo incluir consumos del paquete objetivo (o NINGUNO si no hay filtro)
+            # Esto evita que consumos del Paquete B resten del stock esperado del Paquete A.
+            pq_p_norm = str(paq_p).strip().upper()
+            pq_obj_norm = str(self.paquete_filtro).strip().upper() if self.paquete_filtro else None
+            
+            if not pq_obj_norm or pq_p_norm == pq_obj_norm or pq_p_norm == 'NINGUNO' or pq_p_norm == 'SIN_PAQUETE':
+                if sku not in consumo_reportado: consumo_reportado[sku] = {}
+                consumo_reportado[sku][paq_p] = consumo_reportado[sku].get(paq_p, 0) + qty
         
         # OBTENIDAS TODAS LAS SERIES DE UNA VEZ (Punto de Optimización)
         series_cache = obtener_todas_las_series_de_ubicacion(movil)
@@ -1077,8 +1083,8 @@ class MobileReturnWindow:
                 s_info = stock_actual[sku_s]
                 counts = {"PAQUETE A": 0, "PAQUETE B": 0, "CARRO": 0, "PERSONALIZADO": 0, "NINGUNO": 0}
                 for item_tup in items_s:
-                    # serie, mac, paquete
-                    pq_val = item_tup[2] if len(item_tup) > 2 else "NINGUNO"
+                    # Estructura corregida: (serial, mac, paquete)
+                    pq_val = item_tup[2] if len(item_tup) > 2 else (item_tup[1] if len(item_tup) > 1 else "NINGUNO")
                     pq_norm = str(pq_val).strip().upper() if pq_val else "NINGUNO"
                     if pq_norm in counts: counts[pq_norm] += 1
                     else: counts["PERSONALIZADO"] += 1
@@ -1582,7 +1588,11 @@ class MobileReturnWindow:
                 # FIX BUGS: Respetar que si retornamos PAQUETE A, no se borren/autoprocesen los del PAQUETE B.
                 if paquete_objetivo == "TODOS":
                     run_query(c, "UPDATE consumos_pendientes SET estado = 'PROCESADO' WHERE movil = ? AND estado IN ('PENDIENTE', 'AUTO_APROBADO', 'APROBADO')", (movil,))
+                elif paquete_objetivo in ['PAQUETE A', 'PAQUETE B']:
+                    # REGLA ESTRICTA: Solo lo que pertenece al paquete seleccionado
+                    run_query(c, "UPDATE consumos_pendientes SET estado = 'PROCESADO' WHERE movil = ? AND estado IN ('PENDIENTE', 'AUTO_APROBADO', 'APROBADO') AND paquete = ?", (movil, paquete_objetivo))
                 else:
+                    # Otros casos (NINGUNO, CARRO, etc.)
                     run_query(c, "UPDATE consumos_pendientes SET estado = 'PROCESADO' WHERE movil = ? AND estado IN ('PENDIENTE', 'AUTO_APROBADO', 'APROBADO') AND (paquete = ? OR paquete = 'NINGUNO' OR paquete = 'SIN_PAQUETE' OR paquete IS NULL)", (movil, paquete_objetivo))
                 c.close()
                 # Para efectos del resumen visual, contamos los ítems con consumo reportado
@@ -1644,8 +1654,20 @@ class MobileReturnWindow:
                     if sku_p in PRODUCTOS_CON_CODIGO_BARRA:
                         # Extraer solo los números de serial/mac del caché
                         ids_teoricos = []
-                        for s, m in series_teoricas_full:
-                            ids_teoricos.append(s)
+                        for item_tup in series_teoricas_full:
+                            # Estructura corregida: (serial, mac, paquete)
+                            s = item_tup[0]
+                            m = item_tup[1] if len(item_tup) > 1 else None
+                            pq = item_tup[2] if len(item_tup) > 2 else (item_tup[1] if len(item_tup) == 2 else 'NINGUNO')
+                            
+                            # FILTRADO ESTRICTO DE SERIALES POR PAQUETE (FIX CONTAMINACIÓN)
+                            if paquete_objetivo != "TODOS":
+                                pq_norm = str(pq).strip().upper() if pq else "NINGUNO"
+                                pq_obj_norm = str(paquete_objetivo).strip().upper()
+                                if pq_norm != pq_obj_norm:
+                                    continue
+                            
+                            if s: ids_teoricos.append(s)
                             if m and m != s: ids_teoricos.append(m)
                         
                         # Los que están en el sistema pero no se escanearon

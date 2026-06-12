@@ -119,6 +119,7 @@ PAQUETES_MATERIALES = {
 # No se dividen, sino que muestran el total disponible en el móvil en todos los paquetes.
 MATERIALES_COMPARTIDOS = [
     "1-2-16",   # FIBRA OPTICA SM 1 HILOS (Flat Drop)
+    "1-2-3",    # BOLSO TELCA (NUEVO)
     "7-1-171",  # CABLE COBRE UTP CM CATEGORIA 6 (Azul)
     "2-5-03",   # G_C_PARED6 (Clip de pared)
     "5-2-443",  # MOLDU (Moldura)
@@ -296,3 +297,9 @@ load_custom_packages()
 # Modificar para cargar preferencia si no se pasa argumento explícito (no cambios aqui, logica en app)
 
 
+
+# ==== AI AUDIT CONFIGURATION ====
+# Habilita o deshabilita la auditoría automática en segundo plano
+AI_AUDIT_ENABLED = os.getenv('AI_AUDIT_ENABLED', 'true').lower() == 'true'
+# Intervalo en segundos entre auditorías automáticas (default 600 = 10 minutes)
+AI_AUDIT_INTERVAL = int(os.getenv('AI_AUDIT_INTERVAL', '600'))

@@ -331,6 +331,8 @@
         <div class="nav-links">
             <a href="/" class="nav-link">Reporte Diario</a>
             <a href="/modo_lunes" class="nav-link active">Plan B (Lunes)</a>
+            <a href="/auditoria" class="nav-link">Auditoría</a>
+            <a href="/asistente" class="nav-link">✨ Asistente IA</a>
         </div>
     </nav>
 
@@ -392,9 +394,21 @@
                 <button id="btnValidate" class="btn-add" onclick="validateManualInput()">VALIDAR ✅</button>
             </div>
 
-            <p style="font-size: 11px; color: #999; margin-top: 10px;">
+            <p style="font-size: 11px; color: #999; margin-top: 10px; margin-bottom: 20px;">
                 Válido para ONTs, Decos y equipos serializados.
             </p>
+
+            <div class="section-title" style="margin-top: 20px; padding-top: 15px; border-top: 2px dashed #ffe58f; text-align: left;">📦 Equipos Disponibles</div>
+            <div style="text-align: left;">
+                {% for e in equipos %}
+                <div class="scanned-item" style="border-left: 5px solid #f39c12; margin-bottom: 8px;">
+                    <div class="item-info">
+                        <span class="item-name">{{ e.nombre }}</span>
+                        <span class="item-meta">{{ e.sku }} | Stock: {{ e.stock_bodega }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
         </div>
 
         <!-- Materiales Section -->

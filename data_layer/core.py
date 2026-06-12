@@ -390,17 +390,7 @@ def _ejecutar_migraciones(cursor, T, add_col):
         except Exception: pass
 
     # faltantes_registrados — columna paquete
-    try:
-        if DB_TYPE == 'MYSQL':
-            cursor.execute("SELECT COUNT(*) FROM information_schema.columns WHERE table_name = 'faltantes_registrados' AND column_name = 'paquete'")
-            if cursor.fetchone()[0] == 0:
-                cursor.execute("ALTER TABLE faltantes_registrados ADD COLUMN paquete VARCHAR(100) DEFAULT 'NINGUNO'")
-        else:
-            cursor.execute("PRAGMA table_info(faltantes_registrados)")
-            if 'paquete' not in [c[1] for c in cursor.fetchall()]:
-                cursor.execute("ALTER TABLE faltantes_registrados ADD COLUMN paquete TEXT DEFAULT 'NINGUNO'")
-    except Exception as e:
-        logger.warning(f"Migracion faltantes_registrados.paquete: {e}")
+    add_col('faltantes_registrados', 'paquete', 'VARCHAR(100)', "'NINGUNO'")
 
     logger.info("Etapa 2 completada: migraciones de columnas aplicadas.")
 

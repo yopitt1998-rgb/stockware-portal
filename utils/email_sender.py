@@ -1,6 +1,7 @@
 import os
 import json
 import urllib.request
+import urllib.error
 from utils.logger import get_logger
 
 logger = get_logger('email_sender')

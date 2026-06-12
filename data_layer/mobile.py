@@ -11,8 +11,8 @@ from config import DATABASE_NAME, DB_TYPE, MYSQL_HOST, MYSQL_USER, MYSQL_PASS, M
 from utils.db_connector import get_db_connection, close_connection, db_session
 
 from data_layer.core import run_query, safe_messagebox
-from data_layer.inventory import sincronizar_stock_bodega_serializado, obtener_skus_globales
-from data_layer.movements import registrar_movimiento_gui
+from data_layer.inventory import obtener_skus_globales
+from data_layer.movements import registrar_movimiento_gui, sincronizar_stock_bodega_serializado
 
 def diagnosticar_duplicados_movil(movil):
     """Diagnóstico: Identifica duplicados exactos en asignacion_moviles"""
@@ -65,21 +65,21 @@ def limpiar_duplicados_asignacion_moviles():
         
         logger.info(f"Encontrados {len(duplicados)} SKUs duplicados en asignación móviles")
         
-        # Crear tabla temporal con datos consolidados
+        # Crear tabla temporal con datos consolidados preservando sucursal y paquete
         run_query(cursor, """
             CREATE TEMPORARY TABLE temp_asignacion AS
-            SELECT movil, sku_producto, SUM(cantidad) as cantidad_total
+            SELECT movil, sku_producto, sucursal, COALESCE(paquete, 'NINGUNO') as paquete, SUM(cantidad) as cantidad_total
             FROM asignacion_moviles 
-            GROUP BY movil, sku_producto
+            GROUP BY movil, sku_producto, sucursal, paquete
         """)
         
         # Eliminar todos los registros originales
         run_query(cursor, "DELETE FROM asignacion_moviles")
         
-        # Reinsertar datos consolidados
+        # Reinsertar datos consolidados incluyendo todas las columnas necesarias
         run_query(cursor, """
-            INSERT INTO asignacion_moviles (movil, sku_producto, cantidad)
-            SELECT movil, sku_producto, cantidad_total 
+            INSERT INTO asignacion_moviles (movil, sku_producto, sucursal, paquete, cantidad)
+            SELECT movil, sku_producto, sucursal, paquete, cantidad_total 
             FROM temp_asignacion 
             WHERE cantidad_total > 0
         """)
@@ -1244,26 +1244,45 @@ def resetear_stock_movil(movil, paquete):
         
         # Caso 2: Resetear un paquete específico
         else:
-            # 1. Contar items
-            sql_check = f"SELECT SUM(cantidad) FROM asignacion_moviles WHERE UPPER(TRIM(movil)) = {ph} AND (COALESCE(UPPER(TRIM(paquete)), 'NINGUNO') = {ph} OR COALESCE(UPPER(TRIM(paquete)), 'NINGUNO') IN ('NINGUNO', 'SIN_PAQUETE')) AND sucursal = {ph}"
-            cursor.execute(sql_check, (movil_norm, paquete_norm, sucursal_active))
-            res = cursor.fetchone()
-            total_items = res[0] if res and res[0] else 0
-            
-            # 2. Eliminar asignaciones del paquete y huérfanos que fueron integrados en la auditoría
-            sql_del = f"DELETE FROM asignacion_moviles WHERE UPPER(TRIM(movil)) = {ph} AND (COALESCE(UPPER(TRIM(paquete)), 'NINGUNO') = {ph} OR COALESCE(UPPER(TRIM(paquete)), 'NINGUNO') IN ('NINGUNO', 'SIN_PAQUETE')) AND sucursal = {ph}"
-            cursor.execute(sql_del, (movil_norm, paquete_norm, sucursal_active))
+                        # Resetear un paquete específico: aplicar lógica estricta por paquete
+            if paquete_norm in ['PAQUETE A', 'PAQUETE B']:
+                # Contar ítems del paquete específico
+                sql_check = "SELECT SUM(cantidad) FROM asignacion_moviles WHERE UPPER(TRIM(movil)) = ? AND paquete = ? AND sucursal = ?"
+                cursor.execute(sql_check, (movil_norm, paquete_norm, sucursal_active))
+                res = cursor.fetchone()
+                total_items = res[0] if res and res[0] else 0
 
-            # 3. Resetear Series correspondientes al paquete -> Volver a BODEGA y paquete NINGUNO
-            sql_reset_series = f"UPDATE series_registradas SET ubicacion = 'BODEGA', estado = 'DISPONIBLE', paquete = 'NINGUNO' WHERE UPPER(TRIM(ubicacion)) = {ph} AND (COALESCE(UPPER(TRIM(paquete)), 'NINGUNO') = {ph} OR COALESCE(UPPER(TRIM(paquete)), 'NINGUNO') IN ('NINGUNO', 'SIN_PAQUETE')) AND sucursal = {ph}"
-            cursor.execute(sql_reset_series, (movil_norm, paquete_norm, sucursal_active))
-            
-            # --- NUEVO: Limpiar Consumos Pendientes del paquete y huerfanos ---
-            sql_del_cons = f"DELETE FROM consumos_pendientes WHERE UPPER(TRIM(movil)) = {ph} AND (COALESCE(UPPER(TRIM(paquete)), 'NINGUNO') = {ph} OR COALESCE(UPPER(TRIM(paquete)), 'NINGUNO') IN ('NINGUNO', 'SIN_PAQUETE')) AND sucursal = {ph}"
-            cursor.execute(sql_del_cons, (movil_norm, paquete_norm, sucursal_active))
-            
+                # Eliminar asignaciones del paquete
+                sql_del = "DELETE FROM asignacion_moviles WHERE UPPER(TRIM(movil)) = ? AND paquete = ? AND sucursal = ?"
+                cursor.execute(sql_del, (movil_norm, paquete_norm, sucursal_active))
+
+                # Resetear series del paquete a BODEGA y NINGUNO
+                sql_reset_series = "UPDATE series_registradas SET ubicacion = 'BODEGA', estado = 'DISPONIBLE', paquete = 'NINGUNO' WHERE UPPER(TRIM(ubicacion)) = ? AND paquete = ? AND sucursal = ?"
+                cursor.execute(sql_reset_series, (movil_norm, paquete_norm, sucursal_active))
+
+                # Limpiar consumos pendientes del paquete (COMENTADO: Preservar historial para el portal)
+                # sql_del_cons = "DELETE FROM consumos_pendientes WHERE UPPER(TRIM(movil)) = ? AND paquete = ? AND sucursal = ?"
+                # cursor.execute(sql_del_cons, (movil_norm, paquete_norm, sucursal_active))
+            else:
+                # Legacy comportamiento para paquetes personalizados o NINGUNO
+                condition = "COALESCE(UPPER(TRIM(paquete)), 'NINGUNO') = ?"
+                params = (movil_norm, paquete_norm, sucursal_active)
+                # Contar ítems
+                sql_check = f"SELECT SUM(cantidad) FROM asignacion_moviles WHERE UPPER(TRIM(movil)) = ? AND {condition} AND sucursal = ?"
+                cursor.execute(sql_check, params)
+                res = cursor.fetchone()
+                total_items = res[0] if res and res[0] else 0
+                # Eliminar asignaciones
+                sql_del = f"DELETE FROM asignacion_moviles WHERE UPPER(TRIM(movil)) = ? AND {condition} AND sucursal = ?"
+                cursor.execute(sql_del, params)
+                # Resetear series
+                sql_reset_series = f"UPDATE series_registradas SET ubicacion = 'BODEGA', estado = 'DISPONIBLE', paquete = 'NINGUNO' WHERE UPPER(TRIM(ubicacion)) = ? AND {condition} AND sucursal = ?"
+                cursor.execute(sql_reset_series, params)
+                # Limpiar consumos pendientes (COMENTADO: Preservar historial para el portal)
+                # sql_del_cons = f"DELETE FROM consumos_pendientes WHERE UPPER(TRIM(movil)) = ? AND {condition} AND sucursal = ?"
+                # cursor.execute(sql_del_cons, params)
+
             observacion = f"Limpieza de {paquete_norm} en móvil {movil_norm} (PIN 0440)"
-        
         # Registrar movimiento de 'LIMPIEZA'
         sql_mov = """
             INSERT INTO movimientos (sku_producto, tipo_movimiento, cantidad_afectada, movil_afectado, 
@@ -1526,13 +1545,30 @@ def registrar_faltante_audit(movil, sku, cantidad, seriales=None, sucursal=None,
                 # 1. Registrar detalle
                 run_query(cursor, "INSERT INTO seriales_faltantes_detalle (faltante_id, serial) VALUES (?, ?)", (faltante_id, s))
                 
-                # 2. Marcar serial como FALTANTE en series_registradas para que no aparezca en Bodega ni móvil
-                # Usamos COALESCE para intentar con serial_number o mac_number
+                # 2. Marcar serial como FALTANTE en series_registradas
+                # REGLA ESTRICTA: Primero intentar con el paquete específico, si falla (porque el equipo está en NINGUNO), intentar sin filtro de paquete.
+                pq_norm_s = str(paquete).strip().upper() if paquete else "NINGUNO"
+                
+                # Intentar actualización con paquete específico
                 run_query(cursor, """
                     UPDATE series_registradas 
                     SET ubicacion = 'FALTANTE', estado = 'FALTANTE'
-                    WHERE (serial_number = ? OR mac_number = ?) AND sucursal = ?
-                """, (s, s, sucursal))
+                    WHERE (serial_number = ? OR mac_number = ?) 
+                    AND UPPER(TRIM(ubicacion)) = UPPER(TRIM(?))
+                    AND COALESCE(UPPER(TRIM(paquete)), 'NINGUNO') = ?
+                    AND sucursal = ?
+                """, (s, s, movil, pq_norm_s, sucursal))
+                
+                # Si no se actualizó ninguna fila (rc=0), intentar sin el filtro de paquete
+                # Esto sucede si el equipo está en el móvil pero asignado a 'NINGUNO' mientras se audita 'PAQUETE A'
+                if cursor.rowcount == 0:
+                    run_query(cursor, """
+                        UPDATE series_registradas 
+                        SET ubicacion = 'FALTANTE', estado = 'FALTANTE'
+                        WHERE (serial_number = ? OR mac_number = ?) 
+                        AND UPPER(TRIM(ubicacion)) = UPPER(TRIM(?))
+                        AND sucursal = ?
+                    """, (s, s, movil, sucursal))
         
         # 3. Restar de asignacion_moviles para mantener sincronía
         if cantidad > 0:
@@ -1546,7 +1582,8 @@ def registrar_faltante_audit(movil, sku, cantidad, seriales=None, sucursal=None,
             """, (cantidad, sku, movil, pq_update, sucursal, cantidad))
             
             # Si no encontró en ese paquete (o cantidad insuficiente), intentar restar de CUALQUIER paquete del móvil
-            if rc_asig == 0:
+            # SOLO si no tenemos un paquete estricto (A o B)
+            if rc_asig == 0 and pq_update not in ['PAQUETE A', 'PAQUETE B']:
                 # Obtener filas con stock para este SKU/móvil
                 run_query(cursor, "SELECT id, cantidad FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND sucursal = ? AND cantidad > 0 ORDER BY cantidad DESC", (sku, movil, sucursal))
                 filas = cursor.fetchall()
@@ -1622,8 +1659,8 @@ def registrar_faltante_manual(movil, sku, cantidad, seriales=None, paquete=None,
                     WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ? AND cantidad >= ?
                 """, (cant_a_descontar, sku, movil, pq_norm, sucursal, cant_a_descontar))
                 
-                if rc == 0:
-                    # Fallback a cualquier paquete
+                if rc == 0 and pq_norm not in ['PAQUETE A', 'PAQUETE B']:
+                    # Fallback a cualquier paquete (solo para no-estrictos)
                     run_query(cursor, "SELECT id, cantidad FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND sucursal = ? AND cantidad > 0", (sku, movil, sucursal))
                     filas_asig = cursor.fetchall()
                     for f_id, f_qty in filas_asig:

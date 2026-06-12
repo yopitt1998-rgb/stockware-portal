@@ -56,6 +56,11 @@ SettingsTab = None
 AuditTab = None
 ProductsTab = None
 
+# Ayuda a PyInstaller a detectar módulos cargados dinámicamente
+if False:
+    from gui import ai_assistant_tab, dashboard, inventory, products, audit, settings, warehouse_audit, santiago_danados
+    from utils import ai_assistant
+
 # =================================================================
 # 3. FUNCIONES DE EXPORTACIÓN
 # =================================================================
@@ -373,6 +378,14 @@ class ModernInventarioApp:
                 "btn_text": "Configuración"
             }
         
+        self.tabs_data["Asistente IA"] = {
+            "loaded": False,
+            "module": "gui.ai_assistant_tab",
+            "class": "AIAssistantTab",
+            "icon": "✨",
+            "btn_text": "Asistente IA"
+        }
+
         # CREAR PLACEHOLDERS (Omitir los marcados como 'hidden')
         for name, data in self.tabs_data.items():
             frame = ttk.Frame(self.main_notebook)
@@ -598,9 +611,22 @@ def iniciar_aplicacion_principal():
         logger.info("Bootstrap Start")
         try:
             logger.info("[INIT] Iniciando aplicación principal")
-            logger.debug("Instantiating ModernInventarioApp...")
+            from utils.background_audit import AuditWorker
+            
+            # Instanciar la aplicación principal
             app = ModernInventarioApp(root)
-            logger.debug("App Instantiated. Deiconifying root.")
+
+            # Initialize AI audit worker if enabled
+            try:
+                import config
+                if getattr(config, 'AI_AUDIT_ENABLED', True):
+                    interval = getattr(config, 'AI_AUDIT_INTERVAL', 600)
+                    audit_worker = AuditWorker(interval_seconds=interval, enabled=True)
+                    audit_worker.start()
+                    logger.info(f"AuditWorker iniciado con intervalo {interval} segundos.")
+            except Exception as e:
+                logger.error(f"Error al iniciar AuditWorker: {e}")
+                
         except Exception as e:
             msg = f"FATAL BOOTSTRAP ERROR: {e}"
             logger.critical(msg)
