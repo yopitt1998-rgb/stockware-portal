@@ -91,6 +91,245 @@
             font-size: 16px;
         }
 
+        /* ── Equipos Adicionales ── */
+        .equipos-adicionales-section {
+            display: none;
+            background: linear-gradient(135deg, #fff8e1 0%, #fff3cd 100%);
+            border: 2px solid #f39c12;
+            border-radius: 12px;
+            padding: 18px;
+            margin: 20px 0 10px;
+            box-shadow: 0 4px 12px rgba(243, 156, 18, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .equipos-adicionales-section .ea-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: #d35400;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .ea-badge-ambos {
+            display: inline-block;
+            background: #e67e22;
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 20px;
+            letter-spacing: 0;
+            text-transform: none;
+            vertical-align: middle;
+        }
+
+        .ea-subtitle {
+            font-size: 12px;
+            color: #7f6003;
+            margin: 0 0 12px 0;
+        }
+
+        .ea-input-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .ea-input-row input {
+            flex: 1;
+            font-family: monospace;
+            font-size: 15px;
+            border: 2px solid #f39c12;
+            background: white;
+            height: 48px;
+            padding: 0 12px;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .ea-input-row input:focus {
+            border-color: #e67e22;
+            box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.15);
+        }
+
+        .btn-ea-validate {
+            height: 48px;
+            padding: 0 16px;
+            background: #e67e22;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .btn-ea-validate:hover { background: #d35400; transform: scale(1.02); }
+        .btn-ea-validate:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+
+        .btn-ea-cam {
+            height: 48px;
+            width: 48px;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .btn-ea-cam:hover { background: #1a252f; }
+
+        .ea-hint {
+            font-size: 11px;
+            color: #999;
+            margin-top: 6px;
+        }
+
+        .ea-lista {
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .ea-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            border: 1px solid #f0c040;
+            border-left: 4px solid #e67e22;
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 13px;
+            animation: slideIn 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes eaPulse {
+            0%   { box-shadow: 0 4px 12px rgba(243,156,18,0.15); }
+            40%  { box-shadow: 0 0 0 8px rgba(243,156,18,0.25); }
+            100% { box-shadow: 0 4px 12px rgba(243,156,18,0.15); }
+        }
+
+        .ea-item-info { flex: 1; }
+        .ea-item-name { font-weight: 700; display: block; }
+        .ea-item-serial { font-family: monospace; font-size: 11px; color: #888; }
+
+        .btn-ea-remove {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 2px 6px;
+        }
+
+        /* ── Camera Modal (EA) ── */
+        .ea-cam-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.92);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .ea-cam-modal.active { display: flex; }
+        .ea-cam-content {
+            background: #1a252f;
+            width: 100%;
+            max-width: 460px;
+            border-radius: 18px;
+            overflow: hidden;
+            position: relative;
+        }
+        .ea-cam-header {
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-weight: 800;
+            font-size: 15px;
+        }
+        .ea-cam-body {
+            position: relative;
+            background: black;
+            aspect-ratio: 1;
+            overflow: hidden;
+        }
+        #eaScanVideo { width: 100%; height: 100%; object-fit: cover; }
+        .ea-scan-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+        .ea-scan-frame {
+            width: 85%;
+            height: 22%;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            box-shadow: 0 0 0 2000px rgba(0,0,0,0.65);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ea-scan-frame::before, .ea-scan-frame::after {
+            content: '';
+            position: absolute;
+            width: 24px; height: 24px;
+            border: 4px solid #f39c12;
+        }
+        .ea-scan-frame::before { top: -4px; left: -4px; border-width: 4px 0 0 4px; border-radius: 10px 0 0 0; }
+        .ea-scan-frame::after  { bottom: -4px; right: -4px; border-width: 0 4px 4px 0; border-radius: 0 0 10px 0; }
+        .ea-scan-line {
+            position: absolute;
+            left: 10%; right: 10%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #f39c12, transparent);
+            box-shadow: 0 0 12px #f39c12;
+            animation: eaScanAnim 2s infinite ease-in-out;
+        }
+        @keyframes eaScanAnim {
+            0%, 100% { top: 15%; opacity: 0.3; }
+            50% { top: 85%; opacity: 1; }
+        }
+        .ea-cam-footer {
+            padding: 12px 15px;
+            display: flex;
+            gap: 10px;
+        }
+        .ea-cam-footer button {
+            flex: 1; padding: 12px; border-radius: 10px; border: none;
+            font-weight: 700; cursor: pointer; font-size: 14px;
+        }
+        .ea-btn-close-cam { background: #e74c3c; color: white; }
+        .ea-btn-switch-cam { background: #3498db; color: white; }
+
         .material-list {
             margin-top: 10px;
         }
@@ -439,6 +678,46 @@
                 <p style="font-size:13px; margin-top:5px;">Este móvil no tiene materiales en inventario</p>
             </div>
 
+            <!-- ══ EQUIPOS ADICIONALES ══ -->
+            <div class="equipos-adicionales-section" id="seccion_ea">
+                <div class="ea-title">
+                    📦 Equipo Adicional Entregado
+                    <span class="ea-badge-ambos">Paquete A y B</span>
+                </div>
+                <p class="ea-subtitle">Registra aquí cualquier equipo que te entregaron <b>después</b> del paquete asignado (aplica para ambos paquetes).</p>
+                <div class="ea-input-row">
+                    <input type="text" id="ea_serial_input" placeholder="Serial / MAC del equipo adicional..." autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+                    <button type="button" class="btn-ea-cam" id="btn_ea_cam" onclick="abrirCamaraEA()" title="Escanear con cámara">📷</button>
+                    <button type="button" class="btn-ea-validate" id="btn_ea_validate" onclick="validarEquipoAdicional()">✅ Agregar</button>
+                </div>
+                <p class="ea-hint">Escanee o escriba el serial/MAC y presione <b>Agregar</b>. También puede usar la cámara 📷.</p>
+                <div class="ea-lista" id="ea_lista">
+                    <!-- Items adicionales se insertan aquí -->
+                </div>
+            </div>
+
+            <!-- ══ MODAL CÁMARA EQUIPOS ADICIONALES ══ -->
+            <div class="ea-cam-modal" id="eaCamModal">
+                <div class="ea-cam-content">
+                    <div class="ea-cam-header">
+                        <span>📷 Escanear Equipo Adicional</span>
+                        <button onclick="cerrarCamaraEA()" style="background:none;border:none;color:white;font-size:22px;cursor:pointer;">×</button>
+                    </div>
+                    <div class="ea-cam-body">
+                        <video id="eaScanVideo" playsinline></video>
+                        <div class="ea-scan-overlay">
+                            <div class="ea-scan-frame">
+                                <div class="ea-scan-line"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ea-cam-footer">
+                        <button class="ea-btn-switch-cam" onclick="cambiarCamaraEA()">🔄 Cambiar Cámara</button>
+                        <button class="ea-btn-close-cam" onclick="cerrarCamaraEA()">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+
             <button type="submit" class="submit-btn" id="submit_btn">Enviar Reporte Final 📤</button>
         </form>
 
@@ -448,10 +727,137 @@
         </div>
     </div>
 
+    <script src="https://unpkg.com/@zxing/library@latest"></script>
     <script>
         const DETAILS_MOVILES = {{ details_moviles | safe }};
         const SKU_TO_EXCEL_NAME = {{ sku_to_excel_name | safe }};
         const MATERIALES_COMPARTIDOS = {{ materiales_compartidos | safe }};
+
+        // ── Equipos Adicionales State ──
+        window.EQUIPOS_ADICIONALES = []; // [{sku, serial, nombre}]
+
+        // ── Validar y agregar equipo adicional ──
+        async function validarEquipoAdicional() {
+            const input = document.getElementById('ea_serial_input');
+            const btn = document.getElementById('btn_ea_validate');
+            const serial = input.value.trim().toUpperCase();
+
+            if (!serial) {
+                input.style.borderColor = 'red';
+                setTimeout(() => input.style.borderColor = '#f39c12', 1000);
+                return;
+            }
+
+            // Verificar duplicado
+            if (window.EQUIPOS_ADICIONALES.some(e => e.serial === serial)) {
+                alert(`⚠️ El serial ${serial} ya está en la lista.`);
+                return;
+            }
+
+            const movil = document.getElementById('movil_select').value;
+            btn.disabled = true;
+            btn.textContent = '⏳...';
+
+            try {
+                const params = new URLSearchParams({ serial, movil });
+                const res = await fetch(`/api/validar_serial?${params}`);
+                const data = await res.json();
+
+                if (!data.exito) {
+                    alert('❌ ' + data.mensaje);
+                    return;
+                }
+
+                // Agregar a la lista
+                window.EQUIPOS_ADICIONALES.push({ sku: data.sku, serial, nombre: data.nombre });
+                renderizarEquiposAdicionales();
+                input.value = '';
+                input.focus();
+
+            } catch (e) {
+                alert('❌ Error de red: ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '✅ Agregar';
+            }
+        }
+
+        // ── Renderizar lista de equipos adicionales ──
+        function renderizarEquiposAdicionales() {
+            const lista = document.getElementById('ea_lista');
+            lista.innerHTML = '';
+            window.EQUIPOS_ADICIONALES.forEach((ea, idx) => {
+                const item = document.createElement('div');
+                item.className = 'ea-item';
+                item.innerHTML = `
+                    <div class="ea-item-info">
+                        <span class="ea-item-name">${ea.nombre}</span>
+                        <span class="ea-item-serial">Serial: ${ea.serial} | SKU: ${ea.sku}</span>
+                    </div>
+                    <button class="btn-ea-remove" onclick="removerEquipoAdicional(${idx})" title="Eliminar">🗑️</button>
+                `;
+                lista.appendChild(item);
+            });
+        }
+
+        function removerEquipoAdicional(idx) {
+            window.EQUIPOS_ADICIONALES.splice(idx, 1);
+            renderizarEquiposAdicionales();
+        }
+
+        // Activar Enter en el campo de serial adicional
+        document.getElementById('ea_serial_input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); validarEquipoAdicional(); }
+        });
+
+        // ── Lógica de Cámara para Equipos Adicionales ──
+        let eaCodeReader = null;
+        let eaSelectedDeviceId = null;
+        let eaVideoDevices = [];
+
+        async function abrirCamaraEA() {
+            document.getElementById('eaCamModal').classList.add('active');
+            try {
+                eaCodeReader = new ZXing.BrowserMultiFormatReader();
+                eaVideoDevices = await eaCodeReader.listVideoInputDevices();
+                if (eaVideoDevices.length > 0) {
+                    const backCamera = eaVideoDevices.find(d => /back|rear|trasera|environment/i.test(d.label));
+                    eaSelectedDeviceId = backCamera ? backCamera.deviceId : eaVideoDevices[0].deviceId;
+                    iniciarDecodificacionEA();
+                } else {
+                    alert('No se detectaron cámaras.');
+                    cerrarCamaraEA();
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error al acceder a la cámara.');
+                cerrarCamaraEA();
+            }
+        }
+
+        function iniciarDecodificacionEA() {
+            eaCodeReader.decodeFromVideoDevice(eaSelectedDeviceId, 'eaScanVideo', (result, err) => {
+                if (result) {
+                    const codigo = result.text.trim().toUpperCase();
+                    cerrarCamaraEA();
+                    document.getElementById('ea_serial_input').value = codigo;
+                    validarEquipoAdicional();
+                }
+            });
+        }
+
+        function cambiarCamaraEA() {
+            if (eaVideoDevices.length < 2) return;
+            const cur = eaVideoDevices.findIndex(d => d.deviceId === eaSelectedDeviceId);
+            eaSelectedDeviceId = eaVideoDevices[(cur + 1) % eaVideoDevices.length].deviceId;
+            eaCodeReader.reset();
+            iniciarDecodificacionEA();
+        }
+
+        function cerrarCamaraEA() {
+            if (eaCodeReader) { eaCodeReader.reset(); eaCodeReader = null; }
+            document.getElementById('eaCamModal').classList.remove('active');
+        }
 
         // Estado global
         window.INVENTARIO_MOVIL = [];   // Array de items del inventario de la móvil
@@ -495,8 +901,18 @@
                 document.getElementById('mensaje_seleccionar').style.display = 'block';
                 document.getElementById('mensaje_sin_stock').style.display = 'none';
                 document.getElementById('section_materiales').style.display = 'none';
+                document.getElementById('seccion_ea').style.display = 'none';
                 return;
             }
+
+            // Mostrar sección de equipos adicionales al seleccionar un móvil (siempre visible para ambos paquetes)
+            const seccionEA = document.getElementById('seccion_ea');
+            seccionEA.style.display = 'block';
+            window.EQUIPOS_ADICIONALES = [];
+            renderizarEquiposAdicionales();
+            // Pulso de atención para que el técnico la note
+            seccionEA.style.animation = 'none';
+            setTimeout(() => { seccionEA.style.animation = 'eaPulse 0.6s ease'; }, 10);
 
             // Mostrar loading
             document.getElementById('mensaje_seleccionar').style.display = 'none';
@@ -800,7 +1216,16 @@
                 }
             });
 
-            if (materiales.length === 0) { alert.style.display = 'block'; alert.className = 'alert alert-error'; alert.innerText = '❌ Ingrese al menos un material.'; return; }
+            // Incluir equipos adicionales (agrupados por SKU)
+            const eaAgrupados = {};
+            (window.EQUIPOS_ADICIONALES || []).forEach(ea => {
+                if (!eaAgrupados[ea.sku]) eaAgrupados[ea.sku] = { sku: ea.sku, cantidad: 0, seriales: [] };
+                eaAgrupados[ea.sku].cantidad += 1;
+                eaAgrupados[ea.sku].seriales.push(ea.serial);
+            });
+            Object.values(eaAgrupados).forEach(ea => materiales.push(ea));
+
+            if (materiales.length === 0) { alert.style.display = 'block'; alert.className = 'alert alert-error'; alert.innerText = '❌ Ingrese al menos un material o equipo adicional.'; return; }
 
             submitBtn.disabled = true;
             submitBtn.innerText = 'Enviando...';
