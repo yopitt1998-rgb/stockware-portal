@@ -96,6 +96,47 @@ def health_check():
     """Ruta de salud para Render"""
     return jsonify({"status": "ok", "service": "stockware-portal"}), 200
 
+@app.route('/debug_email')
+def debug_email():
+    """Diagnóstico de configuración de correo - Solo para administradores"""
+    resend_key = os.environ.get('RESEND_API_KEY', '')
+    notification_email = os.environ.get('NOTIFICATION_EMAIL', 'bodega.eesoluciones@gmail.com')
+    
+    config_status = {
+        "RESEND_API_KEY_configured": bool(resend_key),
+        "RESEND_API_KEY_preview": f"{resend_key[:8]}..." if resend_key else "NO CONFIGURADA",
+        "NOTIFICATION_EMAIL": notification_email,
+        "email_logs_count": 0,
+        "recent_email_logs": []
+    }
+    
+    try:
+        from utils.email_sender import EMAIL_LOGS
+        config_status["email_logs_count"] = len(EMAIL_LOGS)
+        config_status["recent_email_logs"] = EMAIL_LOGS[-5:] if EMAIL_LOGS else []
+    except Exception as e:
+        config_status["email_logs_error"] = str(e)
+    
+    return jsonify(config_status), 200
+
+@app.route('/test_email', methods=['POST'])
+def test_email():
+    """Envía un correo de prueba para validar configuración"""
+    try:
+        from utils.email_sender import send_consumption_email_async
+        test_data = {
+            "movil": "TEST",
+            "tecnico": "Administrador",
+            "contrato": "TEST-000",
+            "colilla": "-",
+            "fecha": "2026-01-01"
+        }
+        test_materiales = [{"sku": "TEST", "nombre": "Correo de Prueba", "cantidad": 1, "seriales": []}]
+        send_consumption_email_async(test_data, test_materiales)
+        return jsonify({"exito": True, "mensaje": "Correo de prueba enviado (verificar logs)"})
+    except Exception as e:
+        return jsonify({"exito": False, "mensaje": str(e)})
+
 @app.route('/')
 def index():
     status = "OK"

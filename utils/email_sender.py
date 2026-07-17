@@ -42,14 +42,19 @@ def send_consumption_email_async(data, materiales_detalles):
     def send_email_thread():
         # Leer API Key desde variables de entorno
         resend_api_key = os.environ.get('RESEND_API_KEY')
-        receiver_email = os.environ.get('NOTIFICATION_EMAIL', 'bodega.eesoluciones@gmail.com')
+        receiver_email_raw = os.environ.get('NOTIFICATION_EMAIL', 'bodega.eesoluciones@gmail.com')
+        
+        # Soportar múltiples destinatarios separados por coma
+        receiver_emails = [e.strip() for e in receiver_email_raw.split(',') if e.strip()]
         
         if not resend_api_key:
-            msg = "RESEND_API_KEY no configurada. No se enviará el correo."
+            msg = "RESEND_API_KEY no configurada en variables de entorno. No se enviará el correo de notificación."
             logger.warning(msg)
             log_entry["status"] = "skipped"
             log_entry["error"] = msg
             return
+        
+        logger.info(f"[EMAIL] Preparando envío a {receiver_emails} vía Resend...")
 
         try:
             subject = f"NUEVO CONSUMO: Móvil {data.get('movil')} - Ticket: {data.get('contrato')}"
@@ -118,7 +123,7 @@ def send_consumption_email_async(data, materiales_detalles):
             
             payload = {
                 "from": "StockWare <onboarding@resend.dev>",
-                "to": [receiver_email],
+                "to": receiver_emails,
                 "subject": subject,
                 "html": html
             }
@@ -128,7 +133,7 @@ def send_consumption_email_async(data, materiales_detalles):
 
             with urllib.request.urlopen(req, timeout=10) as response:
                 response_data = json.loads(response.read().decode("utf-8"))
-                logger.info(f"Correo enviado exitosamente vía Resend. ID: {response_data.get('id')} para {receiver_email}")
+                logger.info(f"[EMAIL] Correo enviado exitosamente vía Resend. ID: {response_data.get('id')} para {receiver_emails}")
                 log_entry["status"] = "success"
                 log_entry["response"] = response_data
 

@@ -28,3 +28,7 @@ services:
         value: "587"
       - key: NOTIFICATION_EMAIL
         value: "bodega.eesoluciones@gmail.com"
+      - key: RESEND_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
