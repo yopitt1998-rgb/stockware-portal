@@ -8,6 +8,7 @@ from datetime import datetime
 import os
 from gui.package_editor import PackageEditorDialog
 from gui.global_product_manager import GlobalProductManagerDialog
+from gui.equipo_permanente_movil import EquipoPermanenteMovilDialog
 
 class SettingsTab(tk.Frame):
     def __init__(self, master, main_app):
@@ -216,6 +217,30 @@ class SettingsTab(tk.Frame):
                  bg='#8e44ad', fg='white', font=('Segoe UI', 10, 'bold'),
                  relief='flat', padx=20, pady=8, cursor='hand2').pack(side='right')
 
+        # --- SECCIÓN DE EQUIPO PERMANENTE POR MÓVIL (NUEVO) ---
+        tk.Label(inner_content, text="🔧 EQUIPO / MATERIAL PERMANENTE POR MÓVIL",
+                font=('Segoe UI', 13, 'bold'), bg='#f8f9fa', fg='#00695C').pack(pady=(30, 10), anchor='w')
+
+        permanente_frame = tk.Frame(inner_content, bg='#E0F2F1', padx=20, pady=20,
+                                    highlightthickness=1, highlightbackground='#80CBC4')
+        permanente_frame.pack(fill='x')
+
+        tk.Label(permanente_frame,
+                 text="Asigna equipos o materiales de forma PERMANENTE a una móvil.\n"
+                      "Aparecen en Paquete A y B. No generan retorno. Se descuentan de bodega\n"
+                      "y se registran en el consumo del portal Render automáticamente.",
+                 font=('Segoe UI', 9), bg='#E0F2F1', justify='left').pack(side='left', fill='x', expand=True)
+
+        tk.Button(permanente_frame, text="🔧 Gestionar Equipo Permanente",
+                  command=self.abrir_equipo_permanente,
+                  bg='#00695C', fg='white', font=('Segoe UI', 10, 'bold'),
+                  relief='flat', padx=20, pady=8, cursor='hand2').pack(side='right')
+
+
+
+    def abrir_equipo_permanente(self):
+        """Abre el diálogo de gestión de equipo/material permanente por móvil."""
+        EquipoPermanenteMovilDialog(self)
 
     def seleccionar_logo(self):
         filename = filedialog.askopenfilename(
@@ -362,7 +387,7 @@ class SettingsTab(tk.Frame):
         tk.Label(selection_win, text="Seleccione el Paquete:", bg='#f8f9fa').pack(anchor='w', padx=40, pady=(10, 0))
         paquete_var = tk.StringVar(value="TODOS")
         combo_paquete = ttk.Combobox(selection_win, textvariable=paquete_var, 
-                                     values=["PAQUETE A", "PAQUETE B", "PERSONALIZADO", "CARRO", "NINGUNO", "TODOS"], 
+                                     values=["PAQUETE A", "PAQUETE B", "PAQUETE DOMINGO", "PERSONALIZADO", "CARRO", "NINGUNO", "TODOS"], 
                                      state='readonly', width=35)
         combo_paquete.pack(pady=5, padx=40)
         

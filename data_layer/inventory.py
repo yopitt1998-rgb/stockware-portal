@@ -45,17 +45,32 @@ def limpiar_productos_duplicados():
         
         eliminados = 0
         for sku, count in duplicados:
-            # Mantener el registro más reciente y eliminar los demás
-            run_query(cursor, """
-                DELETE FROM productos 
-                WHERE sku = ? AND ubicacion = 'BODEGA'
-                AND id NOT IN (
-                    SELECT id FROM productos 
-                    WHERE sku = ? AND ubicacion = 'BODEGA' 
-                    ORDER BY fecha_creacion DESC 
-                    LIMIT 1
-                )
-            """, (sku, sku))
+            # FIX #7: MySQL Error 1093 — usar subconsulta con alias para evitar
+            # la restricción de MySQL que impide DELETE+SELECT en la misma tabla.
+            if DB_TYPE == 'MYSQL':
+                run_query(cursor, """
+                    DELETE FROM productos 
+                    WHERE sku = ? AND ubicacion = 'BODEGA'
+                    AND id NOT IN (
+                        SELECT id FROM (
+                            SELECT id FROM productos 
+                            WHERE sku = ? AND ubicacion = 'BODEGA' 
+                            ORDER BY fecha_creacion DESC 
+                            LIMIT 1
+                        ) AS _keep
+                    )
+                """, (sku, sku))
+            else:
+                run_query(cursor, """
+                    DELETE FROM productos 
+                    WHERE sku = ? AND ubicacion = 'BODEGA'
+                    AND id NOT IN (
+                        SELECT id FROM productos 
+                        WHERE sku = ? AND ubicacion = 'BODEGA' 
+                        ORDER BY fecha_creacion DESC 
+                        LIMIT 1
+                    )
+                """, (sku, sku))
             eliminados += cursor.rowcount
         
         conn.commit()
@@ -124,8 +139,10 @@ def eliminar_producto_global(sku, sucursal=None):
     finally:
         if conn: close_connection(conn)
 
-def anadir_producto(nombre, sku, cantidad, ubicacion, secuencia_vista, minimo_stock=10, categoria='General', marca='N/A', fecha_evento=None):
-    """Inserta un nuevo producto con datos enriquecidos."""
+def anadir_producto(nombre, sku, cantidad, ubicacion, secuencia_vista, minimo_stock=10, categoria='General', marca='N/A', fecha_evento=None, requiere_serial=0, sucursal=None):
+    """Inserta un nuevo producto con datos enriquecidos.
+    FIX #23: ahora acepta parámetro sucursal para respetar el contexto activo.
+    """
     conn = None
     try:
         # Validación
@@ -137,6 +154,14 @@ def anadir_producto(nombre, sku, cantidad, ubicacion, secuencia_vista, minimo_st
         except ValidationError as ve:
              return False, f"Datos inválidos: {ve}"
 
+        # FIX #23: Determinar sucursal del contexto activo si no se provee
+        if not sucursal:
+            try:
+                from config import CURRENT_CONTEXT
+                sucursal = CURRENT_CONTEXT.get('BRANCH', 'CHIRIQUI')
+            except Exception:
+                sucursal = 'CHIRIQUI'
+
         conn = get_db_connection()
         if DB_TYPE == 'MYSQL':
             cursor = conn.cursor(buffered=True)
@@ -144,23 +169,65 @@ def anadir_producto(nombre, sku, cantidad, ubicacion, secuencia_vista, minimo_st
             cursor = conn.cursor()
         
         if not fecha_evento: fecha_evento = date.today().isoformat()
+        requiere_serial_int = 1 if requiere_serial else 0
         
         sql = """
-            INSERT INTO productos (nombre, sku, cantidad, ubicacion, secuencia_vista, minimo_stock, categoria, marca) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO productos (nombre, sku, cantidad, ubicacion, secuencia_vista, minimo_stock, categoria, marca, requiere_serial, sucursal) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
-        run_query(cursor, sql, (nombre, sku, cantidad, ubicacion, secuencia_vista, minimo_stock, categoria, marca))
+        run_query(cursor, sql, (nombre, sku, cantidad, ubicacion, secuencia_vista, minimo_stock, categoria, marca, requiere_serial_int, sucursal))
         
-        sql_mov = "INSERT INTO movimientos (sku_producto, tipo_movimiento, cantidad_afectada, movil_afectado, fecha_evento, paquete_asignado) VALUES (?, ?, ?, ?, ?, ?)"
-        run_query(cursor, sql_mov, (sku, 'ENTRADA (Inicial)', cantidad, None, fecha_evento, None))
+        sql_mov = "INSERT INTO movimientos (sku_producto, tipo_movimiento, cantidad_afectada, movil_afectado, fecha_evento, paquete_asignado, sucursal) VALUES (?, ?, ?, ?, ?, ?, ?)"
+        run_query(cursor, sql_mov, (sku, 'ENTRADA (Inicial)', cantidad, None, fecha_evento, None, sucursal))
         
         conn.commit()
-        return True, f"Producto '{nombre}' (SKU: {sku}) añadido exitosamente en {ubicacion}."
+
+        # Si el nuevo producto requiere serial, actualizar la lista en memoria de config
+        if requiere_serial_int:
+            try:
+                import config as _cfg
+                if sku not in _cfg.PRODUCTOS_CON_CODIGO_BARRA:
+                    _cfg.PRODUCTOS_CON_CODIGO_BARRA.append(sku)
+                    logger.info(f"SKU '{sku}' agregado a PRODUCTOS_CON_CODIGO_BARRA en memoria.")
+            except Exception as em:
+                logger.warning(f"No se pudo actualizar lista en memoria: {em}")
+
+        return True, f"Producto '{nombre}' (SKU: {sku}) añadido exitosamente en {ubicacion} (Sucursal: {sucursal})."
         
     except sqlite3.IntegrityError:
         return False, f"Error: El SKU '{sku}' ya existe en la ubicación '{ubicacion}'. Verifique la ubicación y la Secuencia de Vista."
     except Exception as e:
         return False, f"Ocurrió un error al insertar: {e}"
+    finally:
+        if conn: close_connection(conn)
+
+
+def obtener_skus_con_serial_db(sucursal=None):
+    """
+    Retorna la lista de SKUs que requieren serial/MAC, leyéndola desde la BD.
+    Combina los datos de la BD con la lista estática de config como fallback.
+    """
+    conn = None
+    try:
+        from config import CURRENT_CONTEXT, PRODUCTOS_CON_CODIGO_BARRA as _static_list
+        if not sucursal:
+            sucursal = CURRENT_CONTEXT.get('BRANCH', 'CHIRIQUI')
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        run_query(cursor, "SELECT DISTINCT sku FROM productos WHERE requiere_serial = 1 AND sucursal = ?", (sucursal,))
+        db_skus = [r[0] for r in cursor.fetchall()]
+
+        # Combinar con la lista estática para no romper compatibilidad
+        combined = list(set(_static_list + db_skus))
+        return combined
+    except Exception as e:
+        logger.warning(f"obtener_skus_con_serial_db: {e} — usando lista estática.")
+        try:
+            from config import PRODUCTOS_CON_CODIGO_BARRA as _static_list
+            return list(_static_list)
+        except Exception:
+            return []
     finally:
         if conn: close_connection(conn)
 
@@ -299,6 +366,19 @@ def eliminar_producto(sku):
         run_query(cursor, "DELETE FROM movimientos WHERE sku_producto = ?", (sku,))
         run_query(cursor, "DELETE FROM asignacion_moviles WHERE sku_producto = ?", (sku,))
         run_query(cursor, "DELETE FROM prestamos_activos WHERE sku = ?", (sku,))
+        # FIX #22: Limpiar datos huérfanos en tablas relacionadas
+        run_query(cursor, "DELETE FROM series_registradas WHERE sku = ?", (sku,))
+        run_query(cursor, "DELETE FROM consumos_pendientes WHERE sku = ?", (sku,))
+        try:
+            # Obtener IDs de faltantes de este SKU para eliminar el detalle primero
+            run_query(cursor, "SELECT id FROM faltantes_registrados WHERE sku = ?", (sku,))
+            ids_faltantes = [r[0] for r in cursor.fetchall()]
+            if ids_faltantes:
+                for id_f in ids_faltantes:
+                    run_query(cursor, "DELETE FROM seriales_faltantes_detalle WHERE faltante_id = ?", (id_f,))
+                run_query(cursor, "DELETE FROM faltantes_registrados WHERE sku = ?", (sku,))
+        except Exception as e_f:
+            logger.warning(f"Error limpiando faltantes para SKU {sku}: {e_f}")
 
         conn.commit()
         
@@ -479,7 +559,9 @@ def obtener_reporte_abasto(fecha_inicio, fecha_fin):
                 m.sku_producto, 
                 SUM(m.cantidad_afectada) AS Abasto_Total
             FROM movimientos m
-            JOIN productos p ON m.sku_producto = p.sku AND p.ubicacion = 'BODEGA'
+            JOIN productos p ON m.sku_producto = p.sku 
+                AND p.ubicacion = 'BODEGA'
+                AND p.sucursal = m.sucursal
             WHERE 
                 m.tipo_movimiento IN ({', '.join(['?' for _ in TIPOS_ABASTO])}) AND
                 m.fecha_evento BETWEEN ? AND ?
@@ -613,6 +695,7 @@ def buscar_equipo_global(termino, sucursal_context=None):
             FROM series_registradas s
             WHERE (UPPER(s.serial_number) = ? OR UPPER(s.mac_number) = ?)
               AND (UPPER(s.sucursal) = UPPER(?) OR (s.sucursal IS NULL AND UPPER(?) = 'CHIRIQUI'))
+            LIMIT 1
         """
         
         run_query(cursor, sql, (termino_clean, termino_clean, sucursal_target, sucursal_target))
@@ -994,7 +1077,7 @@ def obtener_series_por_sku_y_ubicacion(sku, ubicacion, paquete=None):
         params = [sku, ubicacion, ubicacion]
         
         if paquete and paquete != "TODOS":
-            if paquete in ['PAQUETE A', 'PAQUETE B']:
+            if paquete in ['PAQUETE A', 'PAQUETE B', 'PAQUETE DOMINGO']:
                 # REGLA ESTRICTA: Solo ese paquete
                 sql += " AND UPPER(TRIM(paquete)) = UPPER(TRIM(?))"
             else:
@@ -1035,7 +1118,7 @@ def obtener_todas_las_series_de_ubicacion(ubicacion, paquete=None):
         params = [ubicacion]
         
         if paquete and paquete != "TODOS":
-            if paquete in ['PAQUETE A', 'PAQUETE B']:
+            if paquete in ['PAQUETE A', 'PAQUETE B', 'PAQUETE DOMINGO']:
                 # REGLA ESTRICTA: Solo ese paquete
                 sql += " AND UPPER(TRIM(paquete)) = UPPER(TRIM(?))"
             else:

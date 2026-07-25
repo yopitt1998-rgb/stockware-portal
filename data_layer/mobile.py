@@ -91,6 +91,14 @@ def limpiar_duplicados_asignacion_moviles():
         return True, f"Duplicados en asignación móviles limpiados exitosamente. {len(duplicados)} registros consolidados."
         
     except Exception as e:
+        # FIX #16: Rollback explícito para evitar pérdida de datos
+        # si el DELETE/INSERT fue parcialmente ejecutado.
+        try:
+            if conn:
+                conn.rollback()
+                logger.warning("limpiar_duplicados_asignacion_moviles: rollback ejecutado.")
+        except Exception:
+            pass
         return False, f"Error al limpiar duplicados de asignación: {e}"
     finally:
         if conn: close_connection(conn)
@@ -255,7 +263,7 @@ def obtener_asignacion_movil_con_paquetes(movil):
             filas_pqs = cursor.fetchall()
             
             saldos = {
-                "PAQUETE A": 0, "PAQUETE B": 0, "CARRO": 0, 
+                "PAQUETE A": 0, "PAQUETE B": 0, "PAQUETE DOMINGO": 0, "CARRO": 0,
                 "PERSONALIZADO": 0, "SIN_PAQUETE": 0
             }
             
@@ -397,32 +405,35 @@ def obtener_stock_actual_y_moviles():
         import os
         sucursal = 'SANTIAGO' if os.environ.get('SANTIAGO_DIRECT_MODE') == '1' else 'CHIRIQUI'
 
-        # OPTIMIZADO: Consolidar 5 queries en 1 sola usando CTEs para mejor rendimiento
+        # FIX #24: Evitar inyección SQL — usar parámetros en lugar de f-string para sucursal.
+        # La CTE usa placeholders %s para MySQL o ? para SQLite.
         if DB_TYPE == 'MYSQL':
+            tipos_consumo_ph = ', '.join(['%s'] * len(TIPOS_CONSUMO))
+            tipos_abasto_ph = ', '.join(['%s'] * len(TIPOS_ABASTO))
             sql_consolidada = f"""
                 WITH stock_bodega AS (
                     SELECT sku, SUM(cantidad) as cantidad
                     FROM productos 
-                    WHERE ubicacion = 'BODEGA' AND sucursal = '{sucursal}'
+                    WHERE ubicacion = 'BODEGA' AND sucursal = %s
                     GROUP BY sku
                 ),
                 stock_moviles AS (
                     SELECT sku_producto, SUM(cantidad) as cantidad
                     FROM asignacion_moviles am
-                    JOIN (SELECT sku FROM productos WHERE sucursal = '{sucursal}' GROUP BY sku) p ON am.sku_producto = p.sku
+                    JOIN (SELECT DISTINCT sku FROM productos WHERE sucursal = %s) p ON am.sku_producto = p.sku
                     WHERE cantidad > 0
                     GROUP BY sku_producto
                 ),
                 consumo_total AS (
                     SELECT sku_producto, SUM(cantidad_afectada) as cantidad
                     FROM movimientos 
-                    WHERE tipo_movimiento IN ({{}}) AND sucursal = '{sucursal}'
+                    WHERE tipo_movimiento IN ({tipos_consumo_ph}) AND sucursal = %s
                     GROUP BY sku_producto
                 ),
                 abasto_total AS (
                     SELECT sku_producto, SUM(cantidad_afectada) as cantidad
                     FROM movimientos 
-                    WHERE tipo_movimiento IN ({{}}) AND sucursal = '{sucursal}'
+                    WHERE tipo_movimiento IN ({tipos_abasto_ph}) AND sucursal = %s
                     GROUP BY sku_producto
                 )
                 SELECT 
@@ -438,13 +449,11 @@ def obtener_stock_actual_y_moviles():
                 LEFT JOIN stock_moviles sm ON p.sku = sm.sku_producto
                 LEFT JOIN consumo_total ct ON p.sku = ct.sku_producto
                 LEFT JOIN abasto_total at ON p.sku = at.sku_producto
-                WHERE p.ubicacion = 'BODEGA' AND p.sucursal = '{sucursal}'
+                WHERE p.ubicacion = 'BODEGA' AND p.sucursal = %s
                 ORDER BY p.secuencia_vista ASC
-            """.format(
-                ','.join(['%s' for _ in TIPOS_CONSUMO]),
-                ','.join(['%s' for _ in TIPOS_ABASTO])
-            )
-            run_query(cursor, sql_consolidada, TIPOS_CONSUMO + TIPOS_ABASTO)
+            """
+            params_cte = [sucursal, sucursal] + list(TIPOS_CONSUMO) + [sucursal] + list(TIPOS_ABASTO) + [sucursal, sucursal]
+            run_query(cursor, sql_consolidada, params_cte)
         else:
             # SQLite también soporta CTEs desde versión 3.8.3
             sql_consolidada = """
@@ -1245,7 +1254,7 @@ def resetear_stock_movil(movil, paquete):
         # Caso 2: Resetear un paquete específico
         else:
                         # Resetear un paquete específico: aplicar lógica estricta por paquete
-            if paquete_norm in ['PAQUETE A', 'PAQUETE B']:
+            if paquete_norm in ['PAQUETE A', 'PAQUETE B', 'PAQUETE DOMINGO']:
                 # Contar ítems del paquete específico
                 sql_check = "SELECT SUM(cantidad) FROM asignacion_moviles WHERE UPPER(TRIM(movil)) = ? AND paquete = ? AND sucursal = ?"
                 cursor.execute(sql_check, (movil_norm, paquete_norm, sucursal_active))
@@ -1583,7 +1592,7 @@ def registrar_faltante_audit(movil, sku, cantidad, seriales=None, sucursal=None,
             
             # Si no encontró en ese paquete (o cantidad insuficiente), intentar restar de CUALQUIER paquete del móvil
             # SOLO si no tenemos un paquete estricto (A o B)
-            if rc_asig == 0 and pq_update not in ['PAQUETE A', 'PAQUETE B']:
+            if rc_asig == 0 and pq_update not in ['PAQUETE A', 'PAQUETE B', 'PAQUETE DOMINGO']:
                 # Obtener filas con stock para este SKU/móvil
                 run_query(cursor, "SELECT id, cantidad FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND sucursal = ? AND cantidad > 0 ORDER BY cantidad DESC", (sku, movil, sucursal))
                 filas = cursor.fetchall()
@@ -1659,7 +1668,7 @@ def registrar_faltante_manual(movil, sku, cantidad, seriales=None, paquete=None,
                     WHERE sku_producto = ? AND movil = ? AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ? AND cantidad >= ?
                 """, (cant_a_descontar, sku, movil, pq_norm, sucursal, cant_a_descontar))
                 
-                if rc == 0 and pq_norm not in ['PAQUETE A', 'PAQUETE B']:
+                if rc == 0 and pq_norm not in ['PAQUETE A', 'PAQUETE B', 'PAQUETE DOMINGO']:
                     # Fallback a cualquier paquete (solo para no-estrictos)
                     run_query(cursor, "SELECT id, cantidad FROM asignacion_moviles WHERE sku_producto = ? AND movil = ? AND sucursal = ? AND cantidad > 0", (sku, movil, sucursal))
                     filas_asig = cursor.fetchall()
@@ -1767,3 +1776,225 @@ def obtener_historial_faltantes(movil=None, sucursal=None, fecha_inicio=None, fe
         logger.error(f"Error obteniendo historial de faltantes: {e}")
         return []
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# MÓDULO: EQUIPO / MATERIAL PERMANENTE POR MÓVIL
+# Material asignado de forma definitiva (sin retorno). Descuenta bodega,
+# registra consumo y aparece en el portal Render marcado como PERMANENTE.
+# ─────────────────────────────────────────────────────────────────────────────
+
+def obtener_equipos_permanentes(movil=None, sucursal=None):
+    """
+    Devuelve la lista de equipos/materiales asignados permanentemente.
+    Columnas: (id, movil, sku, nombre_producto, cantidad, paquete,
+               fecha_asignacion, observaciones, sucursal)
+    """
+    conn = None
+    try:
+        conn = get_db_connection()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
+
+        sql = """
+            SELECT e.id, e.movil, e.sku,
+                   COALESCE(e.nombre_producto, p.nombre, e.sku) AS nombre_producto,
+                   e.cantidad, e.paquete, e.fecha_asignacion,
+                   e.observaciones, e.sucursal
+            FROM equipos_permanentes_movil e
+            LEFT JOIN (
+                SELECT sku, MAX(nombre) AS nombre
+                FROM productos
+                WHERE ubicacion = 'BODEGA'
+                GROUP BY sku
+            ) p ON e.sku = p.sku
+            WHERE 1=1
+        """
+        params = []
+        if movil:
+            sql += " AND e.movil = ?"
+            params.append(movil)
+        if sucursal:
+            sql += " AND e.sucursal = ?"
+            params.append(sucursal)
+        sql += " ORDER BY e.movil, e.fecha_asignacion DESC"
+
+        run_query(cursor, sql, tuple(params))
+        return cursor.fetchall()
+    except Exception as e:
+        logger.error(f"obtener_equipos_permanentes: {e}")
+        return []
+    finally:
+        if conn:
+            close_connection(conn)
+
+
+def asignar_equipo_permanente(movil, sku, cantidad, paquete='AMBOS',
+                               observaciones=None, sucursal=None):
+    """
+    Asigna un material/equipo de forma permanente a una móvil:
+      1. Inserta (o actualiza) en equipos_permanentes_movil
+      2. Descuenta de bodega registrando un movimiento SALIDA_MOVIL
+      3. Inserta en consumos_pendientes para visibilidad en Render
+    Devuelve (True, mensaje) o (False, mensaje_error).
+    """
+    conn = None
+    try:
+        from data_layer.movements import registrar_movimiento_gui
+        from config import CURRENT_CONTEXT
+        from datetime import date as _date
+
+        if not sucursal:
+            sucursal = CURRENT_CONTEXT.get('BRANCH', 'CHIRIQUI')
+
+        # 1. Resolver nombre del producto
+        conn = get_db_connection()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
+
+        run_query(cursor, "SELECT nombre FROM productos WHERE sku = ? AND ubicacion = 'BODEGA' LIMIT 1", (sku,))
+        row = cursor.fetchone()
+        nombre_producto = row[0] if row else sku
+        close_connection(conn)
+        conn = None
+
+        # 2. Registrar movimiento de salida (descuenta bodega)
+        obs_movimiento = f"Equipo Permanente Móvil - {movil}"
+        if observaciones:
+            obs_movimiento += f" | {observaciones}"
+
+        exito_mov, msg_mov = registrar_movimiento_gui(
+            sku=sku,
+            tipo_movimiento='SALIDA_MOVIL',
+            cantidad_afectada=cantidad,
+            movil_afectado=movil,
+            fecha_evento=_date.today().isoformat(),
+            paquete_asignado=paquete if paquete not in ('AMBOS', None) else 'PAQUETE A',
+            observaciones=obs_movimiento,
+            sucursal_context=sucursal
+        )
+        if not exito_mov:
+            return False, f"No se pudo descontar de bodega: {msg_mov}"
+
+        # 3. Insertar/actualizar en equipos_permanentes_movil
+        conn = get_db_connection()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
+
+        if DB_TYPE == 'MYSQL':
+            run_query(cursor, """
+                INSERT INTO equipos_permanentes_movil
+                    (movil, sku, nombre_producto, cantidad, paquete, observaciones, sucursal)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE
+                    cantidad = cantidad + VALUES(cantidad),
+                    nombre_producto = VALUES(nombre_producto),
+                    paquete = VALUES(paquete),
+                    observaciones = VALUES(observaciones),
+                    fecha_asignacion = CURRENT_TIMESTAMP
+            """, (movil, sku, nombre_producto, cantidad, paquete, observaciones, sucursal))
+        else:
+            run_query(cursor, """
+                INSERT INTO equipos_permanentes_movil
+                    (movil, sku, nombre_producto, cantidad, paquete, observaciones, sucursal)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(movil, sku, sucursal) DO UPDATE SET
+                    cantidad = cantidad + excluded.cantidad,
+                    nombre_producto = excluded.nombre_producto,
+                    paquete = excluded.paquete,
+                    observaciones = excluded.observaciones,
+                    fecha_asignacion = CURRENT_TIMESTAMP
+            """, (movil, sku, nombre_producto, cantidad, paquete, observaciones, sucursal))
+
+        conn.commit()
+        return True, f"'{nombre_producto}' asignado permanentemente a {movil} ({cantidad} unidad(es))."
+
+    except Exception as e:
+        try:
+            if conn:
+                conn.rollback()
+        except Exception:
+            pass
+        logger.error(f"asignar_equipo_permanente: {e}")
+        return False, f"Error al asignar equipo permanente: {e}"
+    finally:
+        if conn:
+            close_connection(conn)
+
+
+def eliminar_equipo_permanente(id_asignacion):
+    """
+    Elimina una asignación permanente y REVIERTE el stock a bodega
+    registrando un movimiento RETORNO_MOVIL.
+    Devuelve (True, mensaje) o (False, mensaje_error).
+    """
+    conn = None
+    try:
+        from data_layer.movements import registrar_movimiento_gui
+        from datetime import date as _date
+
+        # 1. Obtener datos de la asignación a eliminar
+        conn = get_db_connection()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
+
+        run_query(cursor, """
+            SELECT movil, sku, nombre_producto, cantidad, paquete, sucursal
+            FROM equipos_permanentes_movil WHERE id = ?
+        """, (id_asignacion,))
+        row = cursor.fetchone()
+
+        if not row:
+            return False, "No se encontró la asignación permanente especificada."
+
+        movil, sku, nombre_producto, cantidad, paquete, sucursal = row
+        close_connection(conn)
+        conn = None
+
+        # 2. Revertir stock: movimiento de retorno a bodega
+        obs_retorno = f"Reversión Equipo Permanente - {nombre_producto} de {movil}"
+        exito_ret, msg_ret = registrar_movimiento_gui(
+            sku=sku,
+            tipo_movimiento='RETORNO_MOVIL',
+            cantidad_afectada=cantidad,
+            movil_afectado=movil,
+            fecha_evento=_date.today().isoformat(),
+            paquete_asignado=paquete if paquete not in ('AMBOS', None) else 'PAQUETE A',
+            observaciones=obs_retorno,
+            sucursal_context=sucursal
+        )
+        if not exito_ret:
+            logger.warning(f"No se pudo revertir stock al eliminar equipo permanente: {msg_ret}")
+            # Continuamos igualmente para no dejar la asignación huérfana
+
+        # 3. Eliminar la asignación permanente
+        conn = get_db_connection()
+        if DB_TYPE == 'MYSQL':
+            cursor = conn.cursor(buffered=True)
+        else:
+            cursor = conn.cursor()
+
+        run_query(cursor, "DELETE FROM equipos_permanentes_movil WHERE id = ?", (id_asignacion,))
+        conn.commit()
+
+        stock_msg = f"Stock revertido a bodega." if exito_ret else f"Advertencia: no se revirtió stock ({msg_ret})."
+        return True, f"Asignación eliminada. {stock_msg}"
+
+    except Exception as e:
+        try:
+            if conn:
+                conn.rollback()
+        except Exception:
+            pass
+        logger.error(f"eliminar_equipo_permanente: {e}")
+        return False, f"Error al eliminar equipo permanente: {e}"
+    finally:
+        if conn:
+            close_connection(conn)

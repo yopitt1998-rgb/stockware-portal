@@ -4,10 +4,10 @@ from datetime import date, datetime, timedelta
 import threading
 import pandas as pd
 
-from ..styles import Styles
-from ..utils import mostrar_mensaje_emergente, mostrar_cargando_async
+from gui.styles import Styles
+from gui.utils import mostrar_mensaje_emergente, mostrar_cargando_async
 from utils.logger import get_logger
-from ..pdf_generator import generar_vale_despacho
+from gui.pdf_generator import generar_vale_despacho
 
 from database import (
     obtener_todos_los_skus_para_movimiento,
@@ -319,7 +319,7 @@ class MobileOutputWindow:
         
         # Botón de Procesar (FIJO ABAJO)
         btn_procesar_salida = tk.Button(self.ventana, text="✅ Procesar Salida a Móvil", 
-                  command=self.procesar_salida,
+                  command=self.confirmar_y_procesar,
                   bg=Styles.SECONDARY_COLOR, fg='white', font=('Segoe UI', 12, 'bold'))
         btn_procesar_salida.pack(side='bottom', fill='x', padx=20, pady=10)
 
@@ -379,7 +379,7 @@ class MobileOutputWindow:
         self.fecha_entry.pack(side=tk.LEFT)
 
         tk.Label(frame_selector, text="Paquete:", font=('Segoe UI', 10, 'bold'), bg='#F8BBD0').pack(side=tk.LEFT, padx=(10, 5))
-        self.paquete_combo = ttk.Combobox(frame_selector, values=["NINGUNO", "PAQUETE A", "PAQUETE B", "CARRO", "PERSONALIZADO"], state="readonly", width=15)
+        self.paquete_combo = ttk.Combobox(frame_selector, values=["NINGUNO", "PAQUETE A", "PAQUETE B", "PAQUETE DOMINGO", "CARRO", "PERSONALIZADO"], state="readonly", width=18)
         self.paquete_combo.set("NINGUNO")
         self.paquete_combo.pack(side=tk.LEFT, padx=5)
         
@@ -633,6 +633,8 @@ class MobileOutputWindow:
         self.ventana.after(200, lambda: self.entry_scan.config(bg='white'))
         self.entry_scan.focus_set()
 
+    def confirmar_y_procesar(self):
+        """Handler del botón 'Procesar Salida'. Valida y despacha al modo correcto."""
         movil_seleccionado = self.movil_combo.get()
         fecha_evento = self.fecha_entry.get().strip()
         paquete = self.paquete_combo.get()
@@ -641,7 +643,6 @@ class MobileOutputWindow:
         if movil_seleccionado == "--- Seleccionar Móvil ---":
             mostrar_mensaje_emergente(self.ventana, "Error", "Debe seleccionar un Móvil.", "error")
             return
-            
         if not fecha_evento:
             mostrar_mensaje_emergente(self.ventana, "Error", "La fecha del evento es obligatoria.", "error")
             return
@@ -913,7 +914,7 @@ class MobileReturnWindow:
 
         tk.Label(top_panel, text="Filtrar por Paquete:", bg='white').pack(side='left', padx=(20, 10))
         # REGLA ESTRICTA: Solo A, B y PERSONALIZADO (Como en Salida)
-        self.paquete_combo = ttk.Combobox(top_panel, values=["PAQUETE A", "PAQUETE B", "PERSONALIZADO"], state='readonly', width=15)
+        self.paquete_combo = ttk.Combobox(top_panel, values=["PAQUETE A", "PAQUETE B", "PAQUETE DOMINGO", "PERSONALIZADO"], state='readonly', width=18)
         self.paquete_combo.set("PAQUETE A")
         self.paquete_combo.pack(side='left', padx=5)
         self.paquete_combo.bind("<<ComboboxSelected>>", lambda e: self.update_consumo_ui())
@@ -1056,7 +1057,8 @@ class MobileReturnWindow:
             # FILTRADO ESTRICTO: Solo incluir consumos del paquete objetivo (o NINGUNO si no hay filtro)
             # Esto evita que consumos del Paquete B resten del stock esperado del Paquete A.
             pq_p_norm = str(paq_p).strip().upper()
-            pq_obj_norm = str(self.paquete_filtro).strip().upper() if self.paquete_filtro else None
+            paquete_seleccionado = self.paquete_combo.get() if hasattr(self, 'paquete_combo') else None
+            pq_obj_norm = str(paquete_seleccionado).strip().upper() if paquete_seleccionado and paquete_seleccionado != "TODOS" else None
             
             if not pq_obj_norm or pq_p_norm == pq_obj_norm or pq_p_norm == 'NINGUNO' or pq_p_norm == 'SIN_PAQUETE':
                 if sku not in consumo_reportado: consumo_reportado[sku] = {}
@@ -1247,15 +1249,15 @@ class MobileReturnWindow:
 
             scanned = self.session_data['stock_fisico_escaneado'].get(sku, 0)
             
+            # REGLA 2: Si no se espera nada Y no se ha escaneado nada, ocultamos la fila en cualquier caso.
+            # Esto limpia "de todo" y evita equipos fantasmas que fueron consumidos vía Rende.
+            if expected == 0 and scanned == 0:
+                continue
+
             # LÓGICA DE FILTRADO ESTRICTO (SOLO MOSTRAR RELEVANTE)
             if paquete_filtro != "TODOS":
                 # REGLA 1: Solo mostrar si pertenece al paquete seleccionado (ESTRICTO)
                 has_base_stock = (info.get(paquete_filtro, 0) if info else 0) > 0
-                
-                # REGLA 2: Si no se espera nada Y no se ha escaneado nada, ocultamos la fila.
-                # Esto limpia "de todo" y solo deja lo que el técnico tiene pendiente de devolver.
-                if expected == 0 and scanned == 0:
-                    continue
 
                 # REGLA 3: Si no es del paquete y no tiene stock base (y no fue capturado por R2), ocultar
                 if not is_in_package and not has_base_stock:
@@ -1264,14 +1266,14 @@ class MobileReturnWindow:
 
             if scanned == expected:
                 state = "✅ OK"; tag = 'found'
-                # Si fue recuperado de FALTANTE, mostrarlo
+                # Si fue recuperado de FALTANTE o CONSUMIDO, mostrarlo
                 if sku in self.session_data.get('_recuperados', set()):
                     state = "✨ Recuperado"; tag = 'recovered'
             elif scanned < expected:
                 state = f"❌ Faltan {expected - scanned}"; tag = 'missing'
             else:
                 state = f"⚠️ Sobran {scanned - expected}"; tag = 'extra'
-                # Si fue recuperado de FALTANTE y ahora sobra, es especial
+                # Si fue recuperado y ahora sobra, es especial
                 if sku in self.session_data.get('_recuperados', set()):
                     state = "✨ Recup. Extra"; tag = 'recovered'
             
@@ -1452,7 +1454,7 @@ class MobileReturnWindow:
                         self.entry_scan.focus_set()
                         return
 
-                if ubicacion != movil and ubicacion != 'FALTANTE':
+                if ubicacion != movil and ubicacion != 'FALTANTE' and ubicacion != 'CONSUMIDO':
                     logger.warning(f"⚠️ Serial '{code}' registrado en {ubicacion}, pero se está retornando desde {movil}")
                     messagebox.showerror(
                         "Ubicación Incorrecta",
@@ -1464,8 +1466,8 @@ class MobileReturnWindow:
                     self.entry_scan.focus_set()
                     return
                 
-                if ubicacion == 'FALTANTE':
-                    logger.info(f"✨ Equipo {code} recuperado de estado FALTANTE.")
+                if ubicacion == 'FALTANTE' or ubicacion == 'CONSUMIDO':
+                    logger.info(f"✨ Equipo {code} recuperado de estado {ubicacion}.")
                     # Marcar este SKU como que tiene items recuperados para el UI
                     if '_recuperados' not in self.session_data: self.session_data['_recuperados'] = set()
                     self.session_data['_recuperados'].add(sku_found)
@@ -1819,7 +1821,7 @@ class MobileReturnWindow:
                     
                     if messagebox.askyesno("Confirmar Salida", resumen_msg, parent=self.ventana):
                         # FIX: Abrir el Scanner ANTES de destruir la ventana de Retorno
-                        from ..mobile_output_scanner import MobileOutputScannerWindow
+                        from gui.mobile_output_scanner import MobileOutputScannerWindow
                         MobileOutputScannerWindow(
                             self.master_app, mode='SALIDA_MOVIL',
                             prefill_items=faltantes_para_rellenar,
@@ -1895,7 +1897,7 @@ class ConciliacionPaquetesWindow:
         self.movil_combo.pack(side=tk.LEFT, padx=10)
         
         tk.Label(frame_selector, text="Paquete Asignado:", font=('Segoe UI', 10, 'bold'), bg='#E1BEE7').pack(side=tk.LEFT, padx=(20, 5))
-        self.paquete_combo = ttk.Combobox(frame_selector, values=["NINGUNO", "PAQUETE A", "PAQUETE B", "CARRO", "PERSONALIZADO"], state="readonly", width=15)
+        self.paquete_combo = ttk.Combobox(frame_selector, values=["NINGUNO", "PAQUETE A", "PAQUETE B", "PAQUETE DOMINGO", "CARRO", "PERSONALIZADO"], state="readonly", width=18)
         self.paquete_combo.set("NINGUNO")
         self.paquete_combo.pack(side=tk.LEFT, padx=10)
         

@@ -94,6 +94,24 @@ PAQUETES_MATERIALES = {
         ("8-1-903", 2),     # A_W541_5.8 (con serial)
         ("8-1-904", 8)      # A_W531_WIFI (con serial)
     ],
+    "PAQUETE DOMINGO": [
+        ("1-4-61", 5),      # PLACAS_F_O
+        ("1-8-40", 60),     # FAJILLA_8
+        ("2-5-02", 10),     # GRAPAS
+        ("2-7-07", 30),     # Sticker
+        ("2-7-11", 7),      # COLILLA
+        ("4-2-41", 7),      # TOALLAS
+        ("4-3-18", 14),     # CONEC_MECA
+        ("4-3-42", 60),     # TENSOR_FO
+        ("U4-4-633", 1),    # HG8247W5 (con serial)
+        ("4-4-644", 6),     # ONT HUAWEI EchoLife EG8145V5 (con serial)
+        ("4-4-656", 5),     # O_EG8041X6 WIFI 6 (Unificado)
+        ("4-4-646", 2),     # R_K562E_10 (con serial)
+        ("4-4-647", 2),     # R_AS5113 (con serial)
+        ("8-1-902", 2),     # A_W541_2.4 (con serial)
+        ("8-1-903", 2),     # A_W541_5.8 (con serial)
+        ("8-1-904", 8)      # A_W531_WIFI (con serial)
+    ],
     "PAQUETE B": [
         ("1-4-61", 5),      # PLACAS_F_O
         ("1-8-40", 60),     # FAJILLA_8

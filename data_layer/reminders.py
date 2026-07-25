@@ -11,26 +11,41 @@ from utils.db_connector import get_db_connection, close_connection, db_session
 
 from data_layer.core import run_query, safe_messagebox
 
-def crear_recordatorio(movil, paquete, tipo_recordatorio, fecha_recordatorio):
+def crear_recordatorio(movil, paquete, tipo_recordatorio, fecha_recordatorio, cursor=None, sucursal=None):
     """
     Crea un nuevo recordatorio.
+    FIX #36: Permite recibir un cursor para reusar conexión.
+    FIX #25: Soporta parámetro sucursal.
     """
-    try:
-        with db_session() as (conn, cursor):
-            # Verificar si ya existe un recordatorio no completado para esta combinación
-            run_query(cursor, """
-                SELECT COUNT(*) FROM recordatorios_pendientes 
-                WHERE movil = ? AND paquete = ? AND tipo_recordatorio = ? 
-                AND fecha_recordatorio = ? AND completado = 0
-            """, (movil, paquete, tipo_recordatorio, fecha_recordatorio))
-            
-            if cursor.fetchone()[0] == 0:
-                run_query(cursor, """
-                    INSERT INTO recordatorios_pendientes (movil, paquete, tipo_recordatorio, fecha_recordatorio)
-                    VALUES (?, ?, ?, ?)
-                """, (movil, paquete, tipo_recordatorio, fecha_recordatorio))
-                return True
+    if not sucursal:
+        try:
+            from config import CURRENT_CONTEXT
+            sucursal = CURRENT_CONTEXT.get('BRANCH', 'CHIRIQUI')
+        except Exception:
+            sucursal = 'CHIRIQUI'
+
+    def _ejecutar(cur):
+        # Verificar si ya existe un recordatorio no completado para esta combinación
+        run_query(cur, """
+            SELECT COUNT(*) FROM recordatorios_pendientes 
+            WHERE movil = ? AND paquete = ? AND tipo_recordatorio = ? 
+            AND fecha_recordatorio = ? AND completado = 0 AND sucursal = ?
+        """, (movil, paquete, tipo_recordatorio, fecha_recordatorio, sucursal))
+        
+        if cur.fetchone()[0] == 0:
+            run_query(cur, """
+                INSERT INTO recordatorios_pendientes (movil, paquete, tipo_recordatorio, fecha_recordatorio, sucursal)
+                VALUES (?, ?, ?, ?, ?)
+            """, (movil, paquete, tipo_recordatorio, fecha_recordatorio, sucursal))
+            return True
         return False
+
+    try:
+        if cursor:
+            return _ejecutar(cursor)
+        else:
+            with db_session() as (conn, cur):
+                return _ejecutar(cur)
     except Exception as e:
         logger.error(f"Error al crear recordatorio: {e}")
         return False
@@ -49,13 +64,19 @@ def obtener_recordatorios_pendientes(fecha=None):
         
         if fecha is None:
             fecha = date.today().isoformat()
+            
+        try:
+            from config import CURRENT_CONTEXT
+            sucursal = CURRENT_CONTEXT.get('BRANCH', 'CHIRIQUI')
+        except Exception:
+            sucursal = 'CHIRIQUI'
         
         run_query(cursor, """
             SELECT id, movil, paquete, tipo_recordatorio, fecha_recordatorio
             FROM recordatorios_pendientes 
-            WHERE fecha_recordatorio = ? AND completado = 0
+            WHERE fecha_recordatorio = ? AND completado = 0 AND sucursal = ?
             ORDER BY movil, tipo_recordatorio
-        """, (fecha,))
+        """, (fecha, sucursal))
         
         return cursor.fetchall()
     except Exception as e:
@@ -73,12 +94,18 @@ def obtener_recordatorios_todos(fecha=None):
             if fecha is None:
                 fecha = date.today().isoformat()
             
+            try:
+                from config import CURRENT_CONTEXT
+                sucursal = CURRENT_CONTEXT.get('BRANCH', 'CHIRIQUI')
+            except Exception:
+                sucursal = 'CHIRIQUI'
+            
             run_query(cursor, """
                 SELECT id, movil, paquete, tipo_recordatorio, fecha_recordatorio, completado
                 FROM recordatorios_pendientes 
-                WHERE fecha_recordatorio = ?
+                WHERE fecha_recordatorio = ? AND sucursal = ?
                 ORDER BY movil, tipo_recordatorio
-            """, (fecha,))
+            """, (fecha, sucursal))
             
             return cursor.fetchall()
     except Exception as e:
@@ -112,8 +139,13 @@ def eliminar_recordatorios_completados():
             cursor = conn.cursor(buffered=True)
         else:
             cursor = conn.cursor()
+        try:
+            from config import CURRENT_CONTEXT
+            sucursal = CURRENT_CONTEXT.get('BRANCH', 'CHIRIQUI')
+        except Exception:
+            sucursal = 'CHIRIQUI'
         
-        run_query(cursor, "DELETE FROM recordatorios_pendientes WHERE completado = 1")
+        run_query(cursor, "DELETE FROM recordatorios_pendientes WHERE completado = 1 AND sucursal = ?", (sucursal,))
         conn.commit()
         return True
     except Exception as e:
@@ -134,15 +166,22 @@ def verificar_y_crear_recordatorios_salida(fecha_salida):
         else:
             cursor = conn.cursor()
         
+        try:
+            from config import CURRENT_CONTEXT
+            sucursal = CURRENT_CONTEXT.get('BRANCH', 'CHIRIQUI')
+        except Exception:
+            sucursal = 'CHIRIQUI'
+        
         # Obtener todas las salidas del día para paquetes A y B
         run_query(cursor, """
             SELECT DISTINCT movil_afectado, paquete_asignado
             FROM movimientos 
             WHERE tipo_movimiento = 'SALIDA_MOVIL' 
             AND fecha_evento = ?
-            AND paquete_asignado IN ('PAQUETE A', 'PAQUETE B')
+            AND paquete_asignado IN ('PAQUETE A', 'PAQUETE B', 'PAQUETE DOMINGO')
             AND movil_afectado IS NOT NULL
-        """, (fecha_salida,))
+            AND sucursal = ?
+        """, (fecha_salida, sucursal))
         
         salidas = cursor.fetchall()
         
@@ -162,14 +201,15 @@ def verificar_y_crear_recordatorios_salida(fecha_salida):
         
         for movil, paquete in salidas:
             if movil and paquete:
-                # Crear recordatorio de retorno
-                if crear_recordatorio(movil, paquete, 'RETORNO', fecha_retorno.isoformat()):
+                # Crear recordatorio de retorno (reusando el cursor actual)
+                if crear_recordatorio(movil, paquete, 'RETORNO', fecha_retorno.isoformat(), cursor=cursor, sucursal=sucursal):
                     recordatorios_creados += 1
                 
-                # Crear recordatorio de conciliación
-                if crear_recordatorio(movil, paquete, 'CONCILIACION', fecha_conciliacion.isoformat()):
+                # Crear recordatorio de conciliación (reusando el cursor actual)
+                if crear_recordatorio(movil, paquete, 'CONCILIACION', fecha_conciliacion.isoformat(), cursor=cursor, sucursal=sucursal):
                     recordatorios_creados += 1
         
+        conn.commit()
         return True, f"Se crearon {recordatorios_creados} recordatorios automáticamente"
         
     except Exception as e:

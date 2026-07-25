@@ -629,6 +629,7 @@
                 <select name="paquete" id="paquete_select">
                     <option value="PAQUETE A">PAQUETE A</option>
                     <option value="PAQUETE B">PAQUETE B</option>
+                    <option value="PAQUETE DOMINGO">PAQUETE DOMINGO</option>
                     <option value="PERSONALIZADO">PERSONALIZADO</option>
                     <option value="NINGUNO">NINGUNO</option>
                     <option value="CARRO">CARRO</option>
@@ -732,6 +733,7 @@
         const DETAILS_MOVILES = {{ details_moviles | safe }};
         const SKU_TO_EXCEL_NAME = {{ sku_to_excel_name | safe }};
         const MATERIALES_COMPARTIDOS = {{ materiales_compartidos | safe }};
+        const PERMANENTES_POR_MOVIL = {{ permanentes_por_movil | safe }};
 
         // ── Equipos Adicionales State ──
         window.EQUIPOS_ADICIONALES = []; // [{sku, serial, nombre}]
@@ -1004,6 +1006,29 @@
                     }
                 });
 
+                // --- INYECTAR EQUIPOS PERMANENTES ---
+                const movilSeleccionado = document.getElementById('movil_select').value;
+                const permanentes = PERMANENTES_POR_MOVIL[movilSeleccionado] || [];
+                permanentes.forEach(p => {
+                    const pq = (p.paquete || 'AMBOS').toUpperCase();
+                    if (pq === 'AMBOS' || pq === paqueteSeleccionado || paqueteSeleccionado === 'PERSONALIZADO' || paqueteSeleccionado === 'NINGUNO') {
+                        const skuNorm = p.sku.toUpperCase();
+                        const key = skuNorm + '_PERM';
+                        if (!consolidatedMap[key]) {
+                            consolidatedMap[key] = {
+                                sku: p.sku,
+                                nombre: p.nombre,
+                                cantidad_total: p.cantidad,
+                                es_permanente: true,
+                                seriales: []
+                            };
+                        } else {
+                            consolidatedMap[key].cantidad_total += p.cantidad;
+                        }
+                    }
+                });
+                // ------------------------------------
+
                 const items = Object.values(consolidatedMap);
 
                 if (items.length === 0) {
@@ -1029,16 +1054,38 @@
 
                     const row = document.createElement('div');
                     row.className = 'material-item';
-                    row.id = `row_${item.sku}`;
+                    
+                    if (item.es_permanente) {
+                        row.id = `row_${item.sku}_perm`;
+                        row.style.background = '#F5EEF8';
+                        row.style.borderColor = '#D7BDE2';
+                    } else {
+                        row.id = `row_${item.sku}`;
+                    }
+                    
                     if (disponibles === 0) row.classList.add('disabled');
+
+                    let badgeHTML = '';
+                    if (item.es_permanente) {
+                        badgeHTML = `
+                            <span class="badge-disponible" style="background:#8e44ad; color:white; padding:3px 8px; border-radius:10px; font-size:11px; margin-left:8px; display:inline-block;">
+                                📌 PERMANENTE (${disponibles})
+                            </span>
+                            <div style="font-size:11px; color:#888; font-style:italic; margin-top:2px;">Consumible (sin retorno)</div>
+                        `;
+                    } else {
+                        badgeHTML = `
+                            <span class="badge-disponible" style="background:${disponibles > 0 ? '#3498db' : '#e74c3c'}; color:white; padding:3px 8px; border-radius:10px; font-size:11px; margin-left:8px; display:inline-block;">
+                                🚚 ${disponibles} en móvil
+                            </span>
+                        `;
+                    }
 
                     row.innerHTML = `
                         <div class="material-info">
                             <span class="material-name">${nombreCorto}</span>
                             <span class="material-sku">SKU: ${item.sku}</span>
-                            <span class="badge-disponible" style="background:${disponibles > 0 ? '#3498db' : '#e74c3c'}; color:white; padding:3px 8px; border-radius:10px; font-size:11px; margin-left:8px; display:inline-block;">
-                                🚚 ${disponibles} en móvil
-                            </span>
+                            ${badgeHTML}
                         </div>
                     `;
 

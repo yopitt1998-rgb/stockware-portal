@@ -58,8 +58,10 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
         with db_session(target_db=target_db_name, existing_conn=existing_conn) as (conn, cursor):
             run_query(cursor, "SELECT cantidad, nombre, secuencia_vista FROM productos WHERE sku = ? AND ubicacion = 'BODEGA' AND sucursal = ?", (sku, sucursal))
             resultado_bodega = cursor.fetchone()
+            _tiene_registro_local = resultado_bodega is not None  # ← flag: row exists in THIS sucursal
             
             if not resultado_bodega:
+                # Fallback: get product metadata from any sucursal (stock=0 since row doesn't exist here)
                 run_query(cursor, "SELECT 0, nombre, secuencia_vista FROM productos WHERE sku = ? AND ubicacion = 'BODEGA' LIMIT 1", (sku,))
                 resultado_bodega = cursor.fetchone()
 
@@ -78,6 +80,16 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
             skus_globales = obtener_skus_globales(sucursal=sucursal)
             es_global = sku in skus_globales
 
+            # DETERMINAR SI ES PERMANENTE
+            es_permanente = False
+            stock_permanente = 0
+            if movil_afectado:
+                run_query(cursor, "SELECT cantidad FROM equipos_permanentes_movil WHERE movil = ? AND sku = ? AND sucursal = ?", (movil_afectado, sku, sucursal))
+                perm_row = cursor.fetchone()
+                if perm_row:
+                    es_permanente = True
+                    stock_permanente = perm_row[0]
+
             stock_asignado = 0
             if movil_afectado and tipo_movimiento in ('SALIDA_MOVIL', 'RETORNO_MOVIL', 'CONSUMO_MOVIL'):
                  is_shared = sku in MATERIALES_COMPARTIDOS or es_global
@@ -85,6 +97,8 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
                  if es_global:
                      # Si es global, su "asignación" es el stock de bodega
                      stock_asignado = stock_bodega_actual
+                 elif es_permanente:
+                     stock_asignado = stock_permanente
                  elif (tipo_movimiento in ('CONSUMO_MOVIL', 'RETORNO_MOVIL') and not paquete_asignado) or is_shared:
                      sql_asig = "SELECT COALESCE(SUM(cantidad), 0) FROM asignacion_moviles WHERE sku_producto = ? AND UPPER(TRIM(movil)) = UPPER(TRIM(?)) AND sucursal = ?"
                      run_query(cursor, sql_asig, (sku, movil_afectado, sucursal))
@@ -102,7 +116,8 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
             cantidad_descarte_cambio = 0 
             
             if tipo_movimiento in ('ENTRADA', 'ABASTO'):
-                if not resultado_bodega:
+                if not _tiene_registro_local:
+                    # No existe fila para esta sucursal → INSERT
                     run_query(cursor, "INSERT INTO productos (nombre, sku, cantidad, ubicacion, secuencia_vista, sucursal) VALUES (?, ?, ?, ?, ?, ?)",
                                    (nombre_producto, sku, cantidad_afectada, "BODEGA", secuencia_vista, sucursal))
                 else:
@@ -133,6 +148,13 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
                     if stock_bodega_actual < cantidad_afectada:
                         return False, f"Error: Stock GLOBAL insuficiente en BODEGA. Solo hay {stock_bodega_actual} unidades de '{nombre_producto}'."
                     cantidad_bodega_cambio = -cantidad_afectada
+                elif es_permanente:
+                    if stock_permanente < cantidad_afectada:
+                        return False, f"Error: El {movil_afectado} solo tiene {stock_permanente} unidades PERMANENTES de '{nombre_producto}'."
+                    # Deducir de equipos_permanentes_movil directamente aquí
+                    run_query(cursor, "UPDATE equipos_permanentes_movil SET cantidad = cantidad - ? WHERE movil = ? AND sku = ? AND sucursal = ?", (cantidad_afectada, movil_afectado, sku, sucursal))
+                    # Evitar que descuente de asignacion_moviles más abajo
+                    cantidad_asignacion_cambio = 0
                 else:
                     if movil_afectado and stock_asignado < cantidad_afectada:
                          return False, f"Error: El {movil_afectado} solo tiene {stock_asignado} unidades asignadas de '{nombre_producto}'."
@@ -217,7 +239,7 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
                      # Si el retorno/consumo es del PAQUETE A → SOLO drenar del PAQUETE A.
                      # Si es del PAQUETE B → SOLO drenar del PAQUETE B.
                      # NUNCA mezclar con NINGUNO/PERSONALIZADO cuando hay un paquete específico.
-                     if paquete_para_stock in ['PAQUETE A', 'PAQUETE B']:
+                     if paquete_para_stock in ['PAQUETE A', 'PAQUETE B', 'PAQUETE DOMINGO']:
                          sql_rows = "SELECT COALESCE(paquete, 'NINGUNO'), cantidad FROM asignacion_moviles WHERE sku_producto = ? AND UPPER(TRIM(movil)) = UPPER(TRIM(?)) AND sucursal = ? AND cantidad > 0 AND COALESCE(paquete, 'NINGUNO') = ? ORDER BY cantidad DESC"
                          run_query(cursor, sql_rows, (sku, movil_afectado, sucursal, paquete_para_stock))
                      else:
@@ -252,11 +274,15 @@ def registrar_movimiento_gui(sku, tipo_movimiento, cantidad_afectada, movil_afec
                          run_query(cursor, "UPDATE asignacion_moviles SET cantidad = 0 WHERE sku_producto = ? AND UPPER(TRIM(movil)) = UPPER(TRIM(?)) AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?", (sku, movil_afectado, pq_actual, sucursal))
                          if nueva_cantidad_asignacion > 0:
                              run_query(cursor, "UPDATE asignacion_moviles SET cantidad = ? WHERE sku_producto = ? AND UPPER(TRIM(movil)) = UPPER(TRIM(?)) AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?", (nueva_cantidad_asignacion, sku, movil_afectado, pq_actual, sucursal))
+                             # FIX #10: Si el UPDATE no afectó filas, la fila no existe — INSERT
+                             run_query(cursor, "SELECT COUNT(*) FROM asignacion_moviles WHERE sku_producto = ? AND UPPER(TRIM(movil)) = UPPER(TRIM(?)) AND COALESCE(paquete, 'NINGUNO') = ? AND sucursal = ?", (sku, movil_afectado, pq_actual, sucursal))
+                             if cursor.fetchone()[0] == 0:
+                                 run_query(cursor, "INSERT INTO asignacion_moviles (sku_producto, movil, paquete, cantidad, sucursal) VALUES (?, ?, ?, ?, ?)", (sku, movil_afectado, pq_actual, nueva_cantidad_asignacion, sucursal))
 
             sql_mov = "INSERT INTO movimientos (sku_producto, tipo_movimiento, cantidad_afectada, movil_afectado, fecha_evento, paquete_asignado, observaciones, documento_referencia, sucursal) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
             run_query(cursor, sql_mov, (sku, tipo_movimiento, cantidad_afectada, movil_afectado, fecha_evento, paquete_asignado, observaciones, documento_referencia, sucursal))
 
-            if tipo_movimiento in ['RETORNO_MOVIL', 'CONSUMO_MOVIL'] and movil_afectado and paquete_asignado in ['PAQUETE A', 'PAQUETE B']:
+            if tipo_movimiento in ['RETORNO_MOVIL', 'CONSUMO_MOVIL'] and movil_afectado and paquete_asignado in ['PAQUETE A', 'PAQUETE B', 'PAQUETE DOMINGO']:
                 tipo_recordatorio = 'RETORNO' if tipo_movimiento == 'RETORNO_MOVIL' else 'CONCILIACION'
                 run_query(cursor, "UPDATE recordatorios_pendientes SET completado = 1, fecha_completado = CURRENT_TIMESTAMP WHERE movil = ? AND paquete = ? AND tipo_recordatorio = ? AND fecha_recordatorio = ? AND completado = 0", (movil_afectado, paquete_asignado, tipo_recordatorio, fecha_evento))
         
@@ -369,14 +395,27 @@ def obtener_prestamos_activos():
         else:
             cursor = conn.cursor()
         
-        run_query(cursor, """
-            SELECT sku, nombre_producto, SUM(cantidad_prestada) as total_prestado, 
-                   MIN(fecha_prestamo) as primera_fecha, GROUP_CONCAT(observaciones, '; ') as observaciones
-            FROM prestamos_activos 
-            WHERE estado = 'ACTIVO'
-            GROUP BY sku, nombre_producto
-            ORDER BY primera_fecha DESC
-        """)
+        # FIX #9: GROUP_CONCAT sintaxis MySQL vs SQLite
+        if DB_TYPE == 'MYSQL':
+            run_query(cursor, """
+                SELECT sku, nombre_producto, SUM(cantidad_prestada) as total_prestado, 
+                       MIN(fecha_prestamo) as primera_fecha, 
+                       GROUP_CONCAT(observaciones SEPARATOR '; ') as observaciones
+                FROM prestamos_activos 
+                WHERE estado = 'ACTIVO'
+                GROUP BY sku, nombre_producto
+                ORDER BY primera_fecha DESC
+            """)
+        else:
+            run_query(cursor, """
+                SELECT sku, nombre_producto, SUM(cantidad_prestada) as total_prestado, 
+                       MIN(fecha_prestamo) as primera_fecha, 
+                       GROUP_CONCAT(observaciones, '; ') as observaciones
+                FROM prestamos_activos 
+                WHERE estado = 'ACTIVO'
+                GROUP BY sku, nombre_producto
+                ORDER BY primera_fecha DESC
+            """)
         return cursor.fetchall()
     except Exception:
         return []
@@ -425,6 +464,11 @@ def sincronizar_stock_bodega_serializado(sucursal_context=None, target_db=None):
             cursor = conn.cursor()
 
         logger.info(f"Sincronizando stock serializado para sucursal: {sucursal}")
+        
+        # FIX #21: Guard contra lista vacía que genera SQL inválido AND sku IN ()
+        if not PRODUCTOS_CON_CODIGO_BARRA:
+            logger.info("sincronizar_stock: PRODUCTOS_CON_CODIGO_BARRA vacío, no hay nada que sincronizar.")
+            return
         
         # 1. Obtener conteo real desde series_registradas (Considerando registros sin sucursal como 'locales' si están en BODEGA)
         sql_counts = """
