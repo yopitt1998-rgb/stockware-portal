@@ -137,11 +137,31 @@ PRESTAMOS_SANTIAGO = []
 # LISTA CORREGIDA - NOMBRES DESDE EXCEL
 # LISTA CORREGIDA - NOMBRES EXACTOS SEGÚN REPORT EXCEL
 
-# List of SKUs that have physical barcodes on the device
-PRODUCTOS_CON_CODIGO_BARRA = [
-    "U4-4-633", "4-4-644", "4-4-656", 
-    "4-4-646", "4-4-647", "8-1-902", "8-1-903", "8-1-904"
-]
+# List of SKUs that have physical barcodes / serial numbers on the device.
+# This is the static fallback. It is extended at runtime from the DB
+# via sincronizar_productos_con_serial() called after DB initialization.
+PRODUCTOS_CON_CODIGO_BARRA = []
+
+def sincronizar_productos_con_serial():
+    """
+    Lee desde la BD los SKUs marcados como requiere_serial=1 y los agrega
+    a PRODUCTOS_CON_CODIGO_BARRA en memoria (sin duplicados).
+    Debe llamarse DESPUES de inicializar_bd().
+    """
+    global PRODUCTOS_CON_CODIGO_BARRA
+    try:
+        from utils.db_connector import get_db_connection, close_connection
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT DISTINCT sku FROM productos WHERE requiere_serial = 1")
+        db_skus = [r[0] for r in cursor.fetchall()]
+        close_connection(conn)
+        for sku in db_skus:
+            if sku not in PRODUCTOS_CON_CODIGO_BARRA:
+                PRODUCTOS_CON_CODIGO_BARRA.append(sku)
+    except Exception:
+        # No es critico; el fallback estatico sigue funcionando
+        pass
 
 PRODUCTOS_INICIALES = [
     # (Nombre Excel/Formulario, SKU, Secuencia)
@@ -167,6 +187,7 @@ PRODUCTOS_INICIALES = [
     ("T_PLAYPRO", "8-1-902", "024"),         # STB OTT RETAIL Z11B
     ("T_PLAY", "8-1-903", "025"),            # STBs OTT AOSP DUAL BAND Z4
     ("E_T_PLAY", "8-1-904", "023"),          # Dongle OTT Retail Z11D
+    ("EERO 6+", "9-1-01", "026"),            # EERO 6+
 ]
 
 # UI Colors
