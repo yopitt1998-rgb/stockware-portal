@@ -180,6 +180,24 @@ def index():
             
             details_moviles = obtener_detalles_moviles()
             tecnicos = obtener_tecnicos(solo_activos=True)
+
+            # Cargar equipos permanentes agrupados por móvil
+            try:
+                from database import obtener_equipos_permanentes
+                _perm_rows = obtener_equipos_permanentes()
+                permanentes_por_movil = {}
+                for row in _perm_rows:
+                    rid, mov, sku, nombre, cant, paquete, fecha, obs, suc = row
+                    if mov not in permanentes_por_movil:
+                        permanentes_por_movil[mov] = []
+                    permanentes_por_movil[mov].append({
+                        "sku": sku, "nombre": nombre or sku,
+                        "cantidad": cant, "paquete": paquete or "AMBOS",
+                        "es_permanente": True
+                    })
+            except Exception as _e:
+                logger.warning(f"No se pudo cargar equipos permanentes: {_e}")
+                permanentes_por_movil = {}
             
             count_m = len(moviles)
             count_p = len(productos_excel)
@@ -206,6 +224,7 @@ def index():
                                  paquetes=json.dumps(PAQUETES_MATERIALES),
                                  materiales_compartidos=json.dumps(MATERIALES_COMPARTIDOS),
                                  tecnicos=tecnicos if 'tecnicos' in locals() else [],
+                                 permanentes_por_movil=json.dumps(permanentes_por_movil if 'permanentes_por_movil' in locals() else {}),
                                  db_status=status,
                                  db_engine=engine,
                                  error_detail=error_detail,
@@ -899,7 +918,8 @@ def get_inventario_movil(movil):
                         "es_global": True
                     })
         
-        conn.close()
+        if conn:
+            conn.close()
         return jsonify({
             "movil": movil,
             "inventario": inventario,
@@ -907,6 +927,8 @@ def get_inventario_movil(movil):
         })
         
     except Exception as e:
+        if 'conn' in locals() and conn:
+            conn.close()
         return jsonify({
             "error": str(e),
             "movil": movil,
@@ -1258,6 +1280,55 @@ def start_server_thread():
     thread.start()
     
     return local_ip
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# API: EQUIPO / MATERIAL PERMANENTE POR MÓVIL
+# ─────────────────────────────────────────────────────────────────────────────
+
+@app.route('/api/equipos_permanentes')
+def api_equipos_permanentes():
+    """
+    Devuelve la lista de equipos/materiales asignados permanentemente a móviles.
+    Query params opcionales:
+      - movil: filtra por nombre de móvil
+    Formato de respuesta:
+      {
+        "equipos": [
+          { "id": 1, "movil": "M-01", "sku": "7-1-171", "nombre": "Cable UTP",
+            "cantidad": 1, "paquete": "AMBOS", "fecha": "2026-07-24 09:00",
+            "observaciones": "" }
+        ]
+      }
+    """
+    try:
+        movil = request.args.get('movil', None)
+        from database import obtener_equipos_permanentes
+        rows = obtener_equipos_permanentes(movil=movil)
+
+        equipos = []
+        for row in rows:
+            rid, mov, sku, nombre, cant, paquete, fecha, obs, suc = row
+            equipos.append({
+                "id":           rid,
+                "movil":        mov,
+                "sku":          sku,
+                "nombre":       nombre or sku,
+                "cantidad":     cant,
+                "paquete":      paquete or "AMBOS",
+                "fecha":        str(fecha)[:16] if fecha else "",
+                "observaciones": obs or "",
+                "sucursal":     suc or "CHIRIQUI",
+                "es_permanente": True
+            })
+
+        return jsonify({"equipos": equipos, "total": len(equipos)})
+
+    except Exception as e:
+        import traceback
+        logger.error(f"[api_equipos_permanentes] Error: {e}\n{traceback.format_exc()}")
+        return jsonify({"equipos": [], "total": 0, "error": str(e)}), 500
+
 
 if __name__ == "__main__":
     start_server()

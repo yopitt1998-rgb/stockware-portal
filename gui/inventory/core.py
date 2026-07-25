@@ -5,8 +5,8 @@ import os
 import threading
 
 
-from ..styles import Styles
-from ..utils import darken_color, mostrar_mensaje_emergente
+from gui.styles import Styles
+from gui.utils import darken_color, mostrar_mensaje_emergente
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -29,13 +29,13 @@ import pandas as pd
 from tkinter import filedialog
 # Note: Some imports might be missing, I'll add them as I discover needs during implementation (e.g. exportar_a_csv)
 
-from ..reconciliation import abrir_ventana_conciliacion_excel
-from ..abasto import AbastoWindow
-from ..abasto_scanner import AbastoScannerWindow  # NUEVO: Sistema de escaneo universal
-from ..mobile_output_scanner import MobileOutputScannerWindow  # NUEVO: Salida móvil por escaneo
-from ..mobiles import MobilesManager
-from ..consumption import ConsumoTecnicoWindow
-from ..pdf_generator import generar_vale_despacho
+from gui.reconciliation import abrir_ventana_conciliacion_excel
+from gui.abasto import AbastoWindow
+from gui.abasto_scanner import AbastoScannerWindow  # NUEVO: Sistema de escaneo universal
+from gui.mobile_output_scanner import MobileOutputScannerWindow  # NUEVO: Salida móvil por escaneo
+from gui.mobiles import MobilesManager
+from gui.consumption import ConsumoTecnicoWindow
+from gui.pdf_generator import generar_vale_despacho
 from database import obtener_configuracion
 from config import PRODUCTOS_INICIALES
 from .movements import (
@@ -44,7 +44,7 @@ from .movements import (
     ConciliacionPaquetesWindow
 )
 from .faltantes_dashboard import FaltantesDashboardWindow
-from ..utils import mostrar_cargando_async
+from gui.utils import mostrar_cargando_async
 
 class InventoryTab:
     def __init__(self, notebook, main_app):
@@ -409,7 +409,7 @@ class InventoryTab:
         """Abre ventana para añadir producto"""
         ventana = tk.Toplevel(self.master)
         ventana.title("➕ Añadir Nuevo Producto")
-        ventana.geometry("600x650")
+        ventana.geometry("620x760")
         ventana.configure(bg='#f8f9fa')
         ventana.grab_set()
         
@@ -447,7 +447,44 @@ class InventoryTab:
             canvas.itemconfig(1, width=event.width) # Adjust inner frame width
         canvas.bind("<Configure>", on_configure)
         
-        # Campos del formulario
+        # ── TIPO DE PRODUCTO ──────────────────────────────────────────────
+        tipo_frame = tk.Frame(frame_principal, bg='#e8f4fd', relief='ridge', bd=1, padx=15, pady=10)
+        tipo_frame.pack(fill='x', pady=(0, 15))
+
+        tk.Label(tipo_frame, text="Tipo de Producto:", font=('Segoe UI', 10, 'bold'),
+                 bg='#e8f4fd', fg=Styles.PRIMARY_COLOR).pack(anchor='w')
+
+        tipo_var = tk.StringVar(value="MATERIAL")
+
+        # Nota informativa que cambia según la selección
+        nota_serial_var = tk.StringVar()
+        nota_label = tk.Label(tipo_frame, textvariable=nota_serial_var,
+                              font=('Segoe UI', 9, 'italic'), bg='#e8f4fd', fg='#555', justify='left')
+
+        def on_tipo_change(*_):
+            if tipo_var.get() == "EQUIPO":
+                nota_serial_var.set("✅ Al registrar entradas de este producto se\n   pedirá escanear el Serial / MAC de cada unidad.")
+                nota_label.config(fg='#1a7a1a')
+            else:
+                nota_serial_var.set("📦 Producto de consumo masivo. Solo se registra cantidad.")
+                nota_label.config(fg='#555')
+
+        tipo_var.trace_add("write", on_tipo_change)
+
+        rb_frame = tk.Frame(tipo_frame, bg='#e8f4fd')
+        rb_frame.pack(anchor='w', pady=(5, 0))
+
+        tk.Radiobutton(rb_frame, text="📦 Material / Consumible", variable=tipo_var, value="MATERIAL",
+                       bg='#e8f4fd', font=('Segoe UI', 10), activebackground='#e8f4fd',
+                       fg='#333').pack(side='left', padx=(0, 20))
+        tk.Radiobutton(rb_frame, text="🖥️ Equipo (requiere Serial / MAC)", variable=tipo_var, value="EQUIPO",
+                       bg='#e8f4fd', font=('Segoe UI', 10), activebackground='#e8f4fd',
+                       fg='#0056b3').pack(side='left')
+
+        nota_label.pack(anchor='w', pady=(6, 0))
+        on_tipo_change()  # Inicializar nota
+
+        # ── CAMPOS DEL FORMULARIO ─────────────────────────────────────────
         tk.Label(frame_principal, text="Nombre del Producto:", font=('Segoe UI', 10, 'bold'), bg='#f8f9fa').pack(anchor='w', pady=(0, 5))
         nombre_entry = tk.Entry(frame_principal, width=50, font=('Segoe UI', 10))
         nombre_entry.pack(fill='x', pady=(0, 15))
@@ -479,12 +516,28 @@ class InventoryTab:
         minimo_entry = tk.Entry(frame_principal, width=10, font=('Segoe UI', 10))
         minimo_entry.insert(0, "10")
         minimo_entry.pack(fill='x', pady=(0, 15))
+
+        # Sincronizar categoria con tipo (EQUIPOS auto-selecciona cuando se elige EQUIPO)
+        def on_tipo_change_categoria(*_):
+            if tipo_var.get() == "EQUIPO" and categoria_entry.get() == "General":
+                categoria_entry.set("EQUIPOS")
+            on_tipo_change()
+        tipo_var.trace_add("write", on_tipo_change_categoria)
+
+        def on_categoria_selected(event):
+            if categoria_entry.get().upper() == "EQUIPOS":
+                tipo_var.set("EQUIPO")
+            else:
+                tipo_var.set("MATERIAL")
+        categoria_entry.bind("<<ComboboxSelected>>", on_categoria_selected)
+        categoria_entry.bind("<KeyRelease>", on_categoria_selected)
         
         def guardar_producto():
             nombre = nombre_entry.get().strip()
             sku = sku_entry.get().strip()
             cantidad_text = cantidad_entry.get().strip()
             secuencia = secuencia_entry.get().strip()
+            requiere_serial = (tipo_var.get() == "EQUIPO")
             
             if not nombre:
                 mostrar_mensaje_emergente(ventana, "Error", "El nombre del producto es obligatorio.", "error")
@@ -516,11 +569,13 @@ class InventoryTab:
             categoria = categoria_entry.get().strip() or "General"
             marca = marca_entry.get().strip() or "N/A"
 
-            # Guardar el producto
-            exito, mensaje = anadir_producto(nombre, sku, cantidad, "BODEGA", secuencia, minimo_stock, categoria, marca)
+            # Guardar el producto con el flag requiere_serial
+            exito, mensaje = anadir_producto(nombre, sku, cantidad, "BODEGA", secuencia, minimo_stock, categoria, marca,
+                                             requiere_serial=requiere_serial)
             
             if exito:
-                mostrar_mensaje_emergente(self.master, "Éxito", mensaje, "success")
+                tipo_str = "Equipo (con Serial/MAC)" if requiere_serial else "Material"
+                mostrar_mensaje_emergente(self.master, "Éxito", f"{mensaje}\nTipo: {tipo_str}", "success")
                 self.cargar_datos_tabla()
                 if hasattr(self.main_app, 'dashboard_tab'):
                     self.main_app.dashboard_tab.actualizar_metricas()
@@ -539,6 +594,7 @@ class InventoryTab:
         tk.Button(frame_botones, text="Cancelar", command=ventana.destroy,
                 bg=Styles.ACCENT_COLOR, fg='white', font=('Segoe UI', 12, 'bold'),
                 relief='flat', bd=0, padx=20, pady=10).pack(side=tk.RIGHT, padx=10)
+
 
     def abrir_ventana_salida_individual(self):
         """Abre ventana para salida individual desde bodega (Refactored)"""

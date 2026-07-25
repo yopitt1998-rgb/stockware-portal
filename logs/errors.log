@@ -7155,3 +7155,4 @@ Traceback (most recent call last):
 NameError: cannot access free variable 'e' where it is not associated with a value in enclosing scope
 
 2026-06-12 07:19:11 | ERROR    | cleanup              | Error limpiando logs antiguos: [WinError 32] El proceso no tiene acceso al archivo porque está siendo utilizado por otro proceso: 'C:\\Users\\johni\\Documents\\GestorInventario_MySQL\\logs\\errors.log'
+2026-07-17 08:53:40 | ERROR    | cleanup              | Error limpiando logs antiguos: [WinError 32] El proceso no tiene acceso al archivo porque está siendo utilizado por otro proceso: 'C:\\Users\\johni\\Documents\\GestorInventario_MySQL\\logs\\errors.log'

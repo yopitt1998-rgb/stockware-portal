@@ -248,7 +248,8 @@ class WarehouseAuditTab:
                 pass
                 
         entry.bind("<Return>", save_edit)
-        entry.bind("<FocusOut>", lambda e: entry.destroy())
+        # FIX #18: Guardar cambios al perder el foco en lugar de solo destruir
+        entry.bind("<FocusOut>", save_edit)
 
     def abrir_abastos_ocr(self):
         AbastoOCRDialog(self.main_frame, self.id_sesion, self.cargar_datos)
@@ -833,6 +834,11 @@ class BillingExcelDialog:
         numeric_df = self.df.select_dtypes(include=['number']).fillna(0)
         resumen_sumas = numeric_df.sum()
 
+        # Columnas no-materiales que deben ignorarse en el mapeo de billing
+        ignore_cols = ['CONTRATO', 'TICKET', 'COLILLA', 'CODIGO', 'ID', 'NUM',
+                       'TOTAL', 'SUBTOTAL', 'SUMA', 'COUNT', 'CANTIDAD_TOTAL',
+                       'TECNICO', 'MOVIL', 'AYUDANTE', 'PLACA', 'CONDUCTOR']
+
         for col in self.df.columns:
             col_str = str(col).strip()
             col_upper = col_str.upper().replace("  ", " ").strip()
@@ -885,7 +891,11 @@ class BillingExcelDialog:
         
         def save_edit(e=None):
             new_val = entry.get().strip()
-            self.tree.item(item_id, values=(values[0], values[1], new_val))
+            # FIX #19: Actualizar el valor en la columna que realmente se estaba editando, 
+            # no sobrescribir siempre el SKU.
+            new_values = list(values)
+            new_values[col_idx] = new_val
+            self.tree.item(item_id, values=tuple(new_values))
             entry.destroy()
             
         entry.bind("<Return>", save_edit)

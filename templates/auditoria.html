@@ -668,7 +668,7 @@
                     container.innerHTML = `
                     <div class="empty-state">
                         <div class="icon">📭</div>
-                        <p>No hay consumos registrados para ${movil || 'ninguna móvil'} el ${fecha}</p>
+                        <p>No hay consumos registrados para <b>${movil || 'todas las móviles'}</b> entre <b>${desde}</b> y <b>${hasta}</b></p>
                     </div>`;
                     return;
                 }

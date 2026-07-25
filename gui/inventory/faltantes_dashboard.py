@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from datetime import date, timedelta
-from ..styles import Styles
+from gui.styles import Styles
 from database import obtener_nombres_moviles, obtener_historial_faltantes, obtener_configuracion
 
 class FaltantesDashboardWindow:

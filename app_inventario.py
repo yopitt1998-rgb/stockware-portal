@@ -651,6 +651,12 @@ def iniciar_aplicacion_principal():
         try:
             root.after(0, lambda: splash_status.config(text="🔌 Conectando a MySQL..."))
             inicializar_bd()
+            # Cargar desde la BD los SKUs que requieren serial/MAC
+            try:
+                import config as _cfg
+                _cfg.sincronizar_productos_con_serial()
+            except Exception:
+                pass
             db_ok = True
         except Exception as e:
             error_msg = str(e)

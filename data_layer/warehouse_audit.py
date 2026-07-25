@@ -1,99 +1,103 @@
 from datetime import datetime
-from utils.db_connector import db_session, run_query
+from utils.db_connector import db_session, run_query, get_db_connection
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
 
 def crear_tablas_auditoria():
-    """Crea las tablas necesarias para el módulo de Auditoría de Bodega."""
-    with db_session() as (conn, cursor):
-        # 1. Sesiones de Auditoría
-        run_query(cursor, """
-            CREATE TABLE IF NOT EXISTS auditoria_bodega_sesiones (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                fecha DATE NOT NULL,
-                sucursal VARCHAR(50) NOT NULL,
-                responsable VARCHAR(255),
-                completada TINYINT DEFAULT 0,
-                fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE(fecha, sucursal)
-            )
-        """)
-        
-        # 2. Items de Auditoría (Resultados por SKU)
-        run_query(cursor, """
-            CREATE TABLE IF NOT EXISTS auditoria_bodega_items (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                id_sesion INT NOT NULL,
-                sku VARCHAR(50) NOT NULL,
-                cantidad_inicio INT DEFAULT 0,
-                cantidad_manual INT DEFAULT 0,
-                observaciones TEXT,
-                FOREIGN KEY (id_sesion) REFERENCES auditoria_bodega_sesiones(id),
-                UNIQUE(id_sesion, sku)
-            )
-        """)
-        
-        # 3. Registro de Abastos (Detalle de imágenes/OCR)
-        run_query(cursor, """
-            CREATE TABLE IF NOT EXISTS auditoria_bodega_abastos (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                id_sesion INT NOT NULL,
-                sku VARCHAR(50) NOT NULL,
-                cantidad INT DEFAULT 0,
-                imagen_path TEXT,
-                numero_factura VARCHAR(255),
-                fecha_documento DATE,
-                documento_referencia VARCHAR(255),
-                fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (id_sesion) REFERENCES auditoria_bodega_sesiones(id)
-            )
-        """)
-        
-        # 4. Registro de Billing (Detalle de Excel)
-        run_query(cursor, """
-            CREATE TABLE IF NOT EXISTS auditoria_bodega_billing (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                id_sesion INT NOT NULL,
-                sku VARCHAR(50) NOT NULL,
-                cantidad INT DEFAULT 0,
-                fuente_archivo TEXT,
-                fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (id_sesion) REFERENCES auditoria_bodega_sesiones(id)
-            )
-        """)
-        
-        # MIGRACIÓN: Asegurar que las columnas nuevas existan en auditoria_bodega_abastos
+    """Crea las tablas necesarias para las auditorías de bodega."""
+    try:
         from config import DB_TYPE
+        autoinc = "AUTO_INCREMENT" if DB_TYPE == 'MYSQL' else "AUTOINCREMENT"
+        tiny_int = "TINYINT" if DB_TYPE == 'MYSQL' else "INTEGER"
         
-        # Obtener columnas existentes para evitar errores de duplicado
-        existing_cols = []
-        try:
-            if DB_TYPE == 'MYSQL':
-                cursor.execute("SHOW COLUMNS FROM auditoria_bodega_abastos")
-                existing_cols = [r[0] for r in cursor.fetchall()]
-            else:
-                cursor.execute("PRAGMA table_info(auditoria_bodega_abastos)")
-                existing_cols = [r[1] for r in cursor.fetchall()]
-        except Exception as e:
-            logger.warning(f"Error verificando columnas de auditoria_bodega_abastos: {e}")
-
-        def safe_add_col(col_name, col_type, after_col=None):
-            if col_name not in existing_cols:
-                sql = f"ALTER TABLE auditoria_bodega_abastos ADD COLUMN {col_name} {col_type}"
-                if after_col and DB_TYPE == 'MYSQL':
-                    sql += f" AFTER {after_col}"
-                try:
-                    run_query(cursor, sql)
-                    logger.info(f"Columna '{col_name}' añadida a 'auditoria_bodega_abastos'")
-                except Exception as e:
-                    logger.warning(f"Error añadiendo columna {col_name}: {e}")
-
-        safe_add_col("numero_factura", "VARCHAR(255)", "imagen_path")
-        safe_add_col("fecha_documento", "DATE", "numero_factura")
-        safe_add_col("documento_referencia", "VARCHAR(255)", "fecha_documento")
+        with db_session() as (conn, cursor):
+            # 1. Sesiones de Auditoría
+            run_query(cursor, f"""
+                CREATE TABLE IF NOT EXISTS auditoria_bodega_sesiones (
+                    id INTEGER PRIMARY KEY {autoinc},
+                    fecha DATE NOT NULL,
+                    sucursal VARCHAR(50) NOT NULL,
+                    responsable VARCHAR(255),
+                    completada {tiny_int} DEFAULT 0,
+                    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE(fecha, sucursal)
+                )
+            """)
             
-    logger.info("Tablas de Auditoría de Bodega verificadas y migradas correctamente.")
+            # 2. Items de Auditoría (Resultados por SKU)
+            run_query(cursor, f"""
+                CREATE TABLE IF NOT EXISTS auditoria_bodega_items (
+                    id INTEGER PRIMARY KEY {autoinc},
+                    id_sesion INT NOT NULL,
+                    sku VARCHAR(50) NOT NULL,
+                    cantidad_inicio INT DEFAULT 0,
+                    cantidad_manual INT DEFAULT 0,
+                    observaciones TEXT,
+                    FOREIGN KEY (id_sesion) REFERENCES auditoria_bodega_sesiones(id),
+                    UNIQUE(id_sesion, sku)
+                )
+            """)
+            
+            # 3. Registro de Abastos (Detalle de imágenes/OCR)
+            run_query(cursor, f"""
+                CREATE TABLE IF NOT EXISTS auditoria_bodega_abastos (
+                    id INTEGER PRIMARY KEY {autoinc},
+                    id_sesion INT NOT NULL,
+                    sku VARCHAR(50) NOT NULL,
+                    cantidad INT DEFAULT 0,
+                    imagen_path TEXT,
+                    numero_factura VARCHAR(255),
+                    fecha_documento DATE,
+                    documento_referencia VARCHAR(255),
+                    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (id_sesion) REFERENCES auditoria_bodega_sesiones(id)
+                )
+            """)
+            
+            # 4. Registro de Billing (Detalle de Excel)
+            run_query(cursor, f"""
+                CREATE TABLE IF NOT EXISTS auditoria_bodega_billing (
+                    id INTEGER PRIMARY KEY {autoinc},
+                    id_sesion INT NOT NULL,
+                    sku VARCHAR(50) NOT NULL,
+                    cantidad INT DEFAULT 0,
+                    fuente_archivo TEXT,
+                    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (id_sesion) REFERENCES auditoria_bodega_sesiones(id)
+                )
+            """)
+            
+            # MIGRACIÓN: Asegurar que las columnas nuevas existan en auditoria_bodega_abastos
+            existing_cols = []
+            try:
+                if DB_TYPE == 'MYSQL':
+                    cursor.execute("SHOW COLUMNS FROM auditoria_bodega_abastos")
+                    existing_cols = [r[0] for r in cursor.fetchall()]
+                else:
+                    cursor.execute("PRAGMA table_info(auditoria_bodega_abastos)")
+                    existing_cols = [r[1] for r in cursor.fetchall()]
+            except Exception as e:
+                logger.warning(f"Error verificando columnas de auditoria_bodega_abastos: {e}")
+    
+            def safe_add_col(col_name, col_type, after_col=None):
+                if col_name not in existing_cols:
+                    sql = f"ALTER TABLE auditoria_bodega_abastos ADD COLUMN {col_name} {col_type}"
+                    if after_col and DB_TYPE == 'MYSQL':
+                        sql += f" AFTER {after_col}"
+                    try:
+                        run_query(cursor, sql)
+                        logger.info(f"Columna '{col_name}' añadida a 'auditoria_bodega_abastos'")
+                    except Exception as e:
+                        logger.warning(f"Error añadiendo columna {col_name}: {e}")
+    
+            safe_add_col("numero_factura", "VARCHAR(255)", "imagen_path")
+            safe_add_col("fecha_documento", "DATE", "numero_factura")
+            safe_add_col("documento_referencia", "VARCHAR(255)", "fecha_documento")
+                
+        logger.info("Tablas de Auditoría de Bodega verificadas y migradas correctamente.")
+    except Exception as e:
+        logger.error(f"Fallo al crear tablas de auditoria_bodega: {e}")
 
 def obtener_o_crear_sesion_auditoria(sucursal, fecha=None):
     """Obtiene la sesión activa para hoy o crea una nueva."""
@@ -123,7 +127,7 @@ def obtener_items_auditoria(id_sesion):
         run_query(cursor, """
             SELECT i.sku, p.nombre, i.cantidad_inicio, i.cantidad_manual, i.id
             FROM auditoria_bodega_items i
-            JOIN productos p ON i.sku = p.sku
+            JOIN productos p ON i.sku = p.sku AND p.ubicacion = 'BODEGA'
             WHERE i.id_sesion = ?
         """, (id_sesion,))
         items = {r[0]: {'nombre': r[1], 'inicio': r[2], 'manual': r[3], 'id': r[4]} for r in cursor.fetchall()}
@@ -132,7 +136,7 @@ def obtener_items_auditoria(id_sesion):
         run_query(cursor, """
             SELECT a.sku, p.nombre, SUM(a.cantidad) 
             FROM auditoria_bodega_abastos a
-            JOIN productos p ON a.sku = p.sku
+            JOIN productos p ON a.sku = p.sku AND p.ubicacion = 'BODEGA'
             WHERE a.id_sesion = ? 
             GROUP BY a.sku, p.nombre
         """, (id_sesion,))
@@ -146,7 +150,7 @@ def obtener_items_auditoria(id_sesion):
         run_query(cursor, """
             SELECT b.sku, p.nombre, SUM(b.cantidad) 
             FROM auditoria_bodega_billing b
-            JOIN productos p ON b.sku = p.sku
+            JOIN productos p ON b.sku = p.sku AND p.ubicacion = 'BODEGA'
             WHERE b.id_sesion = ? 
             GROUP BY b.sku, p.nombre
         """, (id_sesion,))
@@ -172,11 +176,13 @@ def guardar_cambio_item(id_sesion, sku, campo, valor):
         return False
     
     with db_session() as (conn, cursor):
-        run_query(cursor, f"""
-            INSERT INTO auditoria_bodega_items (id_sesion, sku, {campo})
-            VALUES (?, ?, ?)
-            ON DUPLICATE KEY UPDATE {campo} = VALUES({campo})
-        """, (id_sesion, sku, valor))
+        run_query(cursor, "SELECT id FROM auditoria_bodega_items WHERE id_sesion = ? AND sku = ?", (id_sesion, sku))
+        row = cursor.fetchone()
+        
+        if row:
+            run_query(cursor, f"UPDATE auditoria_bodega_items SET {campo} = ? WHERE id = ?", (valor, row[0]))
+        else:
+            run_query(cursor, f"INSERT INTO auditoria_bodega_items (id_sesion, sku, {campo}) VALUES (?, ?, ?)", (id_sesion, sku, valor))
     return True
 
 def finalizar_sesion_auditoria(id_sesion):

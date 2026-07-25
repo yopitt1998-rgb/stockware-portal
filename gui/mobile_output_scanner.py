@@ -330,7 +330,7 @@ class MobileOutputScannerWindow:
                 conn = get_db_connection()
                 if conn:
                     cursor = conn.cursor()
-                    cursor.execute("SELECT codigo_barra FROM productos WHERE sku = ? LIMIT 1", (sku,))
+                    run_query(cursor, "SELECT codigo_barra FROM productos WHERE sku = ? LIMIT 1", (sku,))
                     res = cursor.fetchone()
                     if res and res[0] and str(res[0]).lower() not in ['none', 'null', '']:
                          es_equipo = True
@@ -861,7 +861,12 @@ class MobileOutputScannerWindow:
                     sku = item['sku']
                     nombre = item['nombre']
                     cantidad = item['cantidad']
-                    seriales = [s.strip().upper() for s in item.get('seriales', [])]
+                    # Los seriales pueden ser strings o dicts {'serial': ..., 'mac': ...}
+                    # dependiendo de si vienen del scanner manual o de SerialCaptureDialog.
+                    seriales = [
+                        (s['serial'].strip().upper() if isinstance(s, dict) else str(s).strip().upper())
+                        for s in item.get('seriales', []) if s
+                    ]
                     
                     # Feedback de progreso en el botón
                     if self.window.winfo_exists():

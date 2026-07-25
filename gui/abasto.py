@@ -110,9 +110,14 @@ class SerialCaptureDialog:
         def cargar():
             try:
                 seriales = obtener_todos_los_seriales_sucursal()
-                self.existing_serials_cache = seriales
+                # FIX #14: Race condition - merge en lugar de sobrescribir para no perder
+                # capturas que el usuario haya hecho mientras el hilo cargaba.
+                if self.existing_serials_cache:
+                    self.existing_serials_cache.update(seriales)
+                else:
+                    self.existing_serials_cache = seriales
                 self.cache_listo = True
-                logger.info(f"🚀 Caché de seriales cargado: {len(seriales)} registros.")
+                logger.info(f"🚀 Caché de seriales cargado/mezclado: {len(seriales)} registros.")
                 # Feedback sutil en UI si sigue abierta
                 try:
                     self.lbl_help.config(text="✅ Escáner Optimizado (Instantáneo)", fg=Styles.SUCCESS_COLOR)
@@ -798,11 +803,16 @@ class AbastoDetailWindow:
         
         # Calcular ventana de búsqueda (mismo día +/- 2 días por seguridad)
         try:
-            from datetime import datetime, timedelta
+            from datetime import datetime, timedelta, date as date_type
+            # self.fecha puede ser datetime.date (del treeview) o string
+            if isinstance(self.fecha, date_type):
+                self.fecha = self.fecha.isoformat()
             fecha_dt = datetime.strptime(self.fecha, '%Y-%m-%d')
             fecha_inicio = (fecha_dt - timedelta(days=2)).strftime('%Y-%m-%d')
             fecha_fin = (fecha_dt + timedelta(days=2)).strftime('%Y-%m-%d')
         except:
+            if hasattr(self.fecha, 'isoformat'):
+                self.fecha = self.fecha.isoformat()
             fecha_inicio = self.fecha
             fecha_fin = self.fecha
 
@@ -819,7 +829,7 @@ class AbastoDetailWindow:
                 SELECT sku_producto 
                 FROM movimientos 
                 WHERE tipo_movimiento = 'ABASTO' 
-                AND fecha_evento = ? 
+                AND DATE(fecha_evento) = ? 
                 AND COALESCE(documento_referencia, 'Sin Referencia') = ?
             )
             AND DATE(sr.fecha_ingreso) BETWEEN ? AND ?
@@ -1146,7 +1156,8 @@ class AbastoDetailWindow:
                 
                 messagebox.showinfo("Éxito", "Cambios guardados correctamente", parent=self.top)
                 self.iniciar_carga_detalles()
-                self.callback_refresh()
+                if self.callback_refresh:
+                    self.callback_refresh()
                 edit_win.destroy()
                         
             except ValueError:

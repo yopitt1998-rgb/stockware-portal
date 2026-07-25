@@ -287,8 +287,11 @@ class SantiagoConsumoTab:
             vent.bind('<Return>', procesar_equipo)
             
             if autollenar_serial:
-                # Dispara el proceso automáticamente una vez cargada la UI temporal
-                self.master.after(100, procesar_equipo)
+                # FIX #27: Evitar auto-proceso oculto y requerir confirmación
+                def confirm_and_process():
+                    if messagebox.askyesno("Confirmación Automática", f"¿Desea registrar el consumo del equipo con serial {autollenar_serial}?", parent=vent):
+                        procesar_equipo()
+                self.master.after(100, confirm_and_process)
             
         else:
             tk.Label(main, text=" CANTIDAD A CONSUMIR: ", font=('Segoe UI', 11, 'bold'), 

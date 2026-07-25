@@ -150,6 +150,6 @@ def send_consumption_email_async(data, materiales_detalles):
             log_entry["error"] = str(e)
             log_entry["traceback"] = traceback.format_exc()
 
-    # Iniciar en un hilo de fondo
-    t = threading.Thread(target=send_email_thread, daemon=True)
-    t.start()
+    # Ejecutar de forma síncrona para asegurar que el entorno cloud (Render/Gunicorn)
+    # no mate el hilo en segundo plano antes de que termine la petición HTTP.
+    send_email_thread()

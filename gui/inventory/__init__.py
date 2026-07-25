@@ -1,1 +1,1 @@
-from .core import InventoryTab
+from gui.inventory.core import InventoryTab

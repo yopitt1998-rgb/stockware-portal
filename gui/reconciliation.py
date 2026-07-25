@@ -126,12 +126,15 @@ class ReconciliationWindow:
 
     def _get_lista_moviles(self):
         try:
-            # DIRECT CONNECTION TO FIX EMPTY LIST
-            conn = sqlite3.connect(DATABASE_NAME)
-            cursor = conn.cursor()
-            cursor.execute("SELECT DISTINCT movil FROM asignacion_moviles ORDER BY movil")
+            # FIX #12: Usar connection pool global en vez de sqlite3.connect directo
+            conn = get_db_connection()
+            if DB_TYPE == 'MYSQL':
+                cursor = conn.cursor(buffered=True)
+            else:
+                cursor = conn.cursor()
+            run_query(cursor, "SELECT DISTINCT movil FROM asignacion_moviles ORDER BY movil")
             moviles = [r[0] for r in cursor.fetchall()]
-            conn.close()
+            close_connection(conn)
             return moviles
         except Exception as e:
             print(f"Error fetching mobiles: {e}")
@@ -269,6 +272,13 @@ class ReconciliationWindow:
                 except Exception as e:
                     messagebox.showerror("Error de Formato", f"No se pudo interpretar el formato.\n{e}")
                     return
+
+            # FIX #20: Aplicar filtros de fecha visuales a los datos del Excel
+            if hasattr(self, 'date_start') and hasattr(self, 'date_end') and self.date_start and self.date_end:
+                d_start = self.date_start.get_date().strftime('%Y-%m-%d')
+                d_end = self.date_end.get_date().strftime('%Y-%m-%d')
+                if 'fecha' in df_procesado.columns:
+                    df_procesado = df_procesado[(df_procesado['fecha'] >= d_start) & (df_procesado['fecha'] <= d_end)]
 
             # --- FILTERING LOGIC ---
             # If User selected a specific mobile, FILTER Excel to only show that mobile.
@@ -479,8 +489,13 @@ class ReconciliationWindow:
             if c in df_cols_lower: col_movil_found = col_real_names[c]; break
             
         if not col_fecha_found or not col_movil_found:
-             if 'fecha' in col_map_std: col_fecha_found = df.columns[df.columns.str.lower() == col_map_std['fecha']].tolist()[0]
-             if 'movil' in col_map_std: col_movil_found = df.columns[df.columns.str.lower() == col_map_std['movil']].tolist()[0]
+             # FIX #11: Evitar IndexError normalizando el dict y comprobando si la lista está vacía
+             if 'fecha' in col_map_std:
+                 matches = df.columns[df.columns.str.lower() == str(col_map_std['fecha']).lower().strip()].tolist()
+                 if matches: col_fecha_found = matches[0]
+             if 'movil' in col_map_std:
+                 matches = df.columns[df.columns.str.lower() == str(col_map_std['movil']).lower().strip()].tolist()
+                 if matches: col_movil_found = matches[0]
              if not col_fecha_found or not col_movil_found: raise ValueError("Meta-data missing")
 
         # Detect Products

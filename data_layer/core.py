@@ -184,7 +184,8 @@ def _crear_tablas(cursor, T):
             fecha_recordatorio DATE NOT NULL,
             fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
             completado INTEGER DEFAULT 0,
-            fecha_completado DATETIME
+            fecha_completado DATETIME,
+            sucursal VARCHAR(50) DEFAULT 'CHIRIQUI'
         )
     """)
 
@@ -299,6 +300,40 @@ def _crear_tablas(cursor, T):
         )
     """)
 
+    # usuarios — FIX #6: tabla creada aquí para que auth functions funcionen en BD nueva
+    try:
+        cursor.execute(f"""
+            CREATE TABLE IF NOT EXISTS usuarios (
+                id {INT} PRIMARY KEY {AUTOINC},
+                usuario VARCHAR(100) NOT NULL UNIQUE,
+                password VARCHAR(255) NOT NULL,
+                rol VARCHAR(50) DEFAULT 'operador',
+                nombre VARCHAR(255),
+                fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+    except Exception as e:
+        logger.warning(f"No se pudo crear tabla usuarios: {e}")
+
+    # equipos_permanentes_movil — Material/equipo asignado permanentemente a una móvil
+    try:
+        cursor.execute(f"""
+            CREATE TABLE IF NOT EXISTS equipos_permanentes_movil (
+                id {INT} PRIMARY KEY {AUTOINC},
+                movil VARCHAR(100) NOT NULL,
+                sku VARCHAR(50) NOT NULL,
+                nombre_producto VARCHAR(255),
+                cantidad INTEGER NOT NULL DEFAULT 1,
+                paquete VARCHAR(50) DEFAULT 'AMBOS',
+                fecha_asignacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+                observaciones {LONGTEXT},
+                sucursal VARCHAR(50) DEFAULT 'CHIRIQUI',
+                UNIQUE (movil, sku, sucursal)
+            )
+        """)
+    except Exception as e:
+        logger.warning(f"No se pudo crear tabla equipos_permanentes_movil: {e}")
+
     logger.info("Etapa 1 completada: tablas verificadas/creadas.")
 
 
@@ -317,7 +352,15 @@ def _ejecutar_migraciones(cursor, T, add_col):
     add_col('productos', 'secuencia_vista',      'VARCHAR(20)')
     add_col('productos', 'codigo_barra',         'VARCHAR(100)')
     add_col('productos', 'codigo_barra_maestro', 'VARCHAR(100)')
+    add_col('productos', 'requiere_serial',      'INTEGER',      0)
     try: run_query(cursor, "UPDATE productos SET sucursal = 'CHIRIQUI' WHERE sucursal IS NULL")
+    except Exception: pass
+    # Marcar equipos existentes (basados en la lista config original) como requiere_serial=1
+    try:
+        from config import PRODUCTOS_CON_CODIGO_BARRA as _LIST_SERIALES
+        if _LIST_SERIALES:
+            ph = ','.join(['?' if DB_TYPE != 'MYSQL' else '%s'] * len(_LIST_SERIALES))
+            run_query(cursor, f"UPDATE productos SET requiere_serial = 1 WHERE sku IN ({ph}) AND (requiere_serial IS NULL OR requiere_serial = 0)", tuple(_LIST_SERIALES))
     except Exception: pass
 
     # Migrar índice único de productos (MySQL)
@@ -391,6 +434,14 @@ def _ejecutar_migraciones(cursor, T, add_col):
 
     # faltantes_registrados — columna paquete
     add_col('faltantes_registrados', 'paquete', 'VARCHAR(100)', "'NINGUNO'")
+
+    # recordatorios_pendientes — FIX #25: aislamiento por sucursal
+    add_col('recordatorios_pendientes', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'")
+
+    # equipos_permanentes_movil — migraciones de columnas opcionales
+    add_col('equipos_permanentes_movil', 'observaciones', LONGTEXT)
+    add_col('equipos_permanentes_movil', 'sucursal', 'VARCHAR(50)', "'CHIRIQUI'")
+    add_col('equipos_permanentes_movil', 'paquete',  'VARCHAR(50)', "'AMBOS'")
 
     logger.info("Etapa 2 completada: migraciones de columnas aplicadas.")
 
@@ -552,15 +603,29 @@ def poblar_datos_iniciales():
 def crear_respaldo_bd(dest_path):
     """
     Crea una copia de seguridad de la base de datos en la ruta especificada.
-    Punto final de seguridad.
+    FIX #28: En modo MySQL el archivo DB no existe en disco; se notifica al usuario.
+    En modo SQLite usa shutil como antes.
     """
     try:
-        # Asegurarse de que el origen existe
-        if not os.path.exists(DATABASE_NAME):
-            return False, "La base de datos original no existe."
-            
-        shutil.copy2(DATABASE_NAME, dest_path)
-        return True, f"Respaldo creado con éxito en:\n{dest_path}"
+        if DB_TYPE == 'MYSQL':
+            # MySQL no tiene un archivo local — el backup requiere mysqldump externo.
+            # Exportamos un mensaje explicativo en el archivo de destino.
+            host_info = f"{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB}"
+            msg = (
+                f"[StockWare — Respaldo MySQL]\n"
+                f"Servidor: {host_info}\n"
+                f"Fecha: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+                f"El respaldo de MySQL requiere mysqldump u otra herramienta externa.\n"
+                f"Ejecute: mysqldump -h {MYSQL_HOST} -P {MYSQL_PORT} -u {MYSQL_USER} -p {MYSQL_DB} > respaldo.sql"
+            )
+            with open(dest_path, 'w', encoding='utf-8') as f:
+                f.write(msg)
+            return True, f"Nota de respaldo MySQL guardada en:\n{dest_path}\n\n(El backup real requiere mysqldump externo)"
+        else:
+            if not os.path.exists(DATABASE_NAME):
+                return False, "La base de datos SQLite original no existe."
+            shutil.copy2(DATABASE_NAME, dest_path)
+            return True, f"Respaldo SQLite creado con éxito en:\n{dest_path}"
     except Exception as e:
         return False, f"Error al crear el respaldo: {str(e)}"
 
@@ -681,7 +746,7 @@ def autenticar_usuario(username, password):
         if conn: close_connection(conn)
 
 def crear_usuario(username, password, rol, nombre):
-    """Crea un nuevo usuario."""
+    """Crea un nuevo usuario. FIX #29: guarda el parámetro nombre en la BD."""
     conn = None
     try:
         conn = get_db_connection()
@@ -690,9 +755,9 @@ def crear_usuario(username, password, rol, nombre):
         else:
             cursor = conn.cursor()
         run_query(cursor, """
-            INSERT INTO usuarios (usuario, password, rol) 
-            VALUES (?, ?, ?)
-        """, (username, password, rol))
+            INSERT INTO usuarios (usuario, password, rol, nombre) 
+            VALUES (?, ?, ?, ?)
+        """, (username, password, rol, nombre))
         conn.commit()
         return True, f"Usuario '{username}' creado."
     except Exception as e:

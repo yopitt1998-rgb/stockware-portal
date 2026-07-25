@@ -254,8 +254,10 @@ class SantiagoDanadosTab:
                     qty = int(qty_str)
                     if qty <= 0: return
                     if (qty + qty_in_cart) > stock_disponible:
-                        messagebox.showerror("Stock Insuficiente", f"No puede reportar {qty + qty_in_cart} daños porque solo hay {stock_disponible} en BODEGA.")
-                        return
+                        # FIX #26: Permitir reportar con advertencia en vez de bloquear
+                        ans = messagebox.askyesno("Stock Insuficiente", f"Desea reportar {qty + qty_in_cart} daños, pero el sistema indica que solo hay {stock_disponible} en BODEGA.\n\n¿Desea continuar de todas formas y registrar el daño (pudiendo generar inventario negativo)?", parent=self.master)
+                        if not ans:
+                            return
                 except ValueError:
                     messagebox.showerror("Error", "Cantidad inválida.")
                     return
@@ -527,8 +529,13 @@ class SantiagoDanadosTab:
             def procesar():
                 try:
                     q = int(cnt.get())
-                    if q <= 0 or q > stock: raise ValueError()
-                except:
+                    if q <= 0:
+                        messagebox.showerror("Error", "Cantidad inválida.")
+                        return
+                    if q > stock:
+                        ans = messagebox.askyesno("Stock Insuficiente", f"Desea reportar {q}, pero solo hay {stock} en sistema.\n¿Continuar (puede generar inventario negativo)?", parent=vent)
+                        if not ans: return
+                except ValueError:
                     messagebox.showerror("Error", "Cantidad inválida.")
                     return
                 

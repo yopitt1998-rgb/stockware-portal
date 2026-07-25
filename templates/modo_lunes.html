@@ -322,6 +322,88 @@
             justify-content: center;
             gap: 10px;
         }
+
+        /* ── Equipos Adicionales ── */
+        .ea-card {
+            background: white;
+            border-radius: 12px;
+            border: 2px dashed #e67e22;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .ea-input-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .ea-input-row input {
+            flex: 1;
+            font-family: monospace;
+            font-size: 15px;
+            border: 2px solid #f39c12 !important;
+            background: white;
+            height: 50px;
+            padding: 0 12px;
+            border-radius: 8px;
+        }
+
+        .btn-ea-validate {
+            height: 50px;
+            padding: 0 18px;
+            background: #e67e22;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .btn-ea-validate:hover { background: #d35400; }
+        .btn-ea-validate:disabled { background: #bdc3c7; cursor: not-allowed; }
+
+        .ea-hint {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 6px;
+        }
+
+        .ea-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fef9e7;
+            border: 1px solid #f0c040;
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 13px;
+            margin-top: 8px;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .ea-item-info { flex: 1; }
+        .ea-item-name { font-weight: 700; display: block; font-size: 14px; }
+        .ea-item-serial { font-family: monospace; font-size: 11px; color: #888; }
+
+        .btn-ea-remove {
+            background: none;
+            border: none;
+            color: var(--danger);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 2px 8px;
+        }
     </style>
 </head>
 <body>
@@ -435,9 +517,23 @@
             </div>
         </div>
 
-        <div class="section-title" style="margin-top: 25px;">📝 Resumen de Carga Directa</div>
+        <div class="section-title" style="margin-top: 25px;">📋 Resumen de Carga Directa</div>
         <div id="empty-state">No hay items en la lista.</div>
         <div id="scanned-list" class="item-list"></div>
+    </div>
+
+    <!-- ══ EQUIPOS ADICIONALES ══ -->
+    <div class="container" style="padding-top: 0;">
+        <div class="ea-card">
+            <div class="section-title" style="margin-bottom: 8px;">➕ Equipos Adicionales Entregados</div>
+            <p style="font-size: 12px; color: #888; margin: 0 0 8px 0;">Equipos entregados <b>fuera del paquete</b> asignado al móvil. Aplica para ambos paquetes.</p>
+            <div class="ea-input-row">
+                <input type="text" id="ea_serial_input" placeholder="Serial / MAC del equipo adicional..." autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+                <button type="button" class="btn-ea-validate" id="btn_ea_validate" onclick="validarEquipoAdicional()">✅ Agregar</button>
+            </div>
+            <p class="ea-hint">Escanee o escriba el serial/MAC y presione <b>Agregar</b> para incluirlo en el reporte.</p>
+            <div id="ea_lista"></div>
+        </div>
     </div>
 
     <div class="footer-action">
@@ -470,6 +566,7 @@
         const SCANNED_ITEMS = []; // { sku, serial, nombre, cantidad, is_serialized }
         const SKU_NAMES = {};
         const CART_NON_SERIALIZED = {}; // { sku: cantidad }
+        const EQUIPOS_ADICIONALES_LUNES = []; // [{sku, serial, nombre}]
         
         // Cargar nombres de equipos de Jinja
         {% for e in equipos %}
@@ -681,6 +778,78 @@
             updateUI();
         }
 
+        // ── Lógica Equipos Adicionales (Plan B) ──
+        async function validarEquipoAdicional() {
+            const input = document.getElementById('ea_serial_input');
+            const btn = document.getElementById('btn_ea_validate');
+            const serial = input.value.trim().toUpperCase();
+
+            if (!serial) {
+                input.style.borderColor = 'red';
+                setTimeout(() => input.style.borderColor = '#f39c12', 1000);
+                return;
+            }
+
+            // Verificar duplicado en SCANNED_ITEMS y EQUIPOS_ADICIONALES_LUNES
+            if (SCANNED_ITEMS.some(i => i.serial === serial) || EQUIPOS_ADICIONALES_LUNES.some(e => e.serial === serial)) {
+                alert(`⚠️ El serial ${serial} ya está registrado.`);
+                return;
+            }
+
+            const movil = movilSelect.value || '';
+            btn.disabled = true;
+            btn.textContent = '⏳...';
+
+            try {
+                const params = new URLSearchParams({ serial, movil });
+                const res = await fetch(`/api/validar_serial?${params}`);
+                const data = await res.json();
+
+                if (!data.exito) {
+                    alert('❌ ' + data.mensaje);
+                    return;
+                }
+
+                EQUIPOS_ADICIONALES_LUNES.push({ sku: data.sku, serial, nombre: data.nombre });
+                renderizarEquiposAdicionalesLunes();
+                input.value = '';
+                input.focus();
+
+            } catch (e) {
+                alert('❌ Error de red: ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '✅ Agregar';
+            }
+        }
+
+        function renderizarEquiposAdicionalesLunes() {
+            const lista = document.getElementById('ea_lista');
+            lista.innerHTML = '';
+            EQUIPOS_ADICIONALES_LUNES.forEach((ea, idx) => {
+                const item = document.createElement('div');
+                item.className = 'ea-item';
+                item.innerHTML = `
+                    <div class="ea-item-info">
+                        <span class="ea-item-name">${ea.nombre}</span>
+                        <span class="ea-item-serial">Serial: ${ea.serial} | SKU: ${ea.sku}</span>
+                    </div>
+                    <button class="btn-ea-remove" onclick="removerEquipoAdicionalLunes(${idx})" title="Eliminar">✕</button>
+                `;
+                lista.appendChild(item);
+            });
+        }
+
+        function removerEquipoAdicionalLunes(idx) {
+            EQUIPOS_ADICIONALES_LUNES.splice(idx, 1);
+            renderizarEquiposAdicionalesLunes();
+        }
+
+        // Activar Enter en el campo de serial adicional de Plan B
+        document.getElementById('ea_serial_input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); validarEquipoAdicional(); }
+        });
+
         async function enviarReporte() {
             const movil = movilSelect.value;
             const tecnico = tecnicoSelect.value;
@@ -707,6 +876,15 @@
                     seriales: null 
                 });
             }
+
+            // 3. Equipos Adicionales (agrupados por SKU)
+            const eaAgrupados = {};
+            EQUIPOS_ADICIONALES_LUNES.forEach(ea => {
+                if (!eaAgrupados[ea.sku]) eaAgrupados[ea.sku] = { sku: ea.sku, cantidad: 0, seriales: [] };
+                eaAgrupados[ea.sku].cantidad += 1;
+                eaAgrupados[ea.sku].seriales.push(ea.serial);
+            });
+            Object.values(eaAgrupados).forEach(ea => materiales_final.push(ea));
 
             if (materiales_final.length === 0) {
                 alert('⚠️ No hay materiales ni equipos para enviar.');
